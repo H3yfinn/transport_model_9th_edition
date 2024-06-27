@@ -463,9 +463,15 @@ def copy_folder_structure(src, dest):
             pass
 
 # # Replace 'source_folder' and 'destination_folder' with your actual folder paths
-# source_folder = "../plotting_output"
-# destination_folder = "../plotting_output_copy"
+# source_folder = "./plotting_output"
+# destination_folder = "./plotting_output"
 
+# source_folder = "./output_data"
+# destination_folder = "./output_data"
+
+
+# source_folder = "./intermediate_data"
+# destination_folder = "./intermediate_data"
 # # Create the destination folder if it doesn't exist
 # if not os.path.exists(destination_folder):
 #     os.makedirs(destination_folder)
