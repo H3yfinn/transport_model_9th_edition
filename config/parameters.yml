@@ -1,0 +1,1190 @@
+
+#Use this file to keep and track different parameters used in the modelthat i havent botheered to put in spreadsheets.
+
+#loading method: 
+# DO_LOG_FITTING_ON_ONLY_PASSENGER_VEHICLES_DICT = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['DO_LOG_FITTING_ON_ONLY_PASSENGER_VEHICLES_ECONOMIES']
+
+#can edit these to adjust the amount of vehicles in the fleet. Main thing to watch is the age and turnover rate that the model will converge to for its majority of vehicles. It seems like most economys will converge to about 6% turnover rate, as this equals the rate of new vehicle sales. although this is not the case for all economies, especially where stocks per cpaita threshold is reached and pop is decreasing.
+#setting midpoint and average age to be the same value helps to redce complexity and seems to result in 0.06 turnover rate.
+turnover_rate_parameters_dict:
+  turnover_rate_steepness: 0.2 #0.6 #0.6 was used for the s curve
+  turnover_rate_max_value: 1
+  turnover_rate_midpoint: 30
+  turnover_rate_steepness_non_road: 0.1 #thinking non road is a bit flatter as high use of some vehicles results in them being turned over earlier
+  turnover_rate_max_value_non_road: 1
+  turnover_rate_midpoint_non_road: 50
+
+TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET: #this effetively decreases the midpoint for the turnover rate by the mutliplier so that the average age where half the vehicles are turned over is that new value. (i.e if the midpoint is 10 and the mult is 0.4, then the new midpoint is 6)
+  # '15_PHL': 0.4 #can be used to achieve 50% stock share of BEVs by 2040
+  '17_SGP': 0.4
+  '06_HKC': 0.5 #hkc will have some measures to encourage turnover of vehicles
+  '07_INA': 0.9 #not sure but i need to increase uptake of ev 2w as well as it seemed like perhaps indonesia might have a higher turnover rate than other economies because of weather/road conditions (maybe same for phillipines)
+  #make economies with newer vehicles turn their vehicles over more quickly, indicating that they are exported as used vehicles to other economies
+  '01_AUS': 0.9
+  '02_BD': 0.9
+  '03_CDA': 0.9
+  # '04_CHL': 0.9
+  '05_PRC': 0.9
+  '06_HKC': 0.9
+  # '07_INA': 0.9
+  '08_JPN': 0.9
+  '09_ROK': 0.9
+  # '10_MAS': 0.9
+  # '11_MEX': 0.9
+  # '12_NZ': 0.9
+  # '13_PNG': 0.9
+  # '14_PE': 0.9
+  # '15_PHL': 0.9
+  # '16_RUS': 0.9
+  # '17_SGP': 0.9
+  # '18_CT': 0.9
+  # '19_THA': 0.9
+  '20_USA': 0.9
+  # '21_VN': 0.9
+
+TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_REFERENCE:
+  '17_SGP': 0.9
+  '07_INA': 0.9
+  #make economies with newer vehicles turn their vehicles over more quickly, indicating that they are exported as used vehicles to other economies
+  '01_AUS': 0.9
+  '02_BD': 0.9
+  '03_CDA': 0.9
+  # '04_CHL': 0.9
+  '05_PRC': 0.9
+  '06_HKC': 0.9
+  # '07_INA': 0.9
+  '08_JPN': 0.9
+  '09_ROK': 0.9
+  # '10_MAS': 0.9
+  # '11_MEX': 0.9
+  # '12_NZ': 0.9
+  # '13_PNG': 0.9
+  # '14_PE': 0.9
+  # '15_PHL': 0.9
+  # '16_RUS': 0.9
+  # '17_SGP': 0.9
+  # '18_CT': 0.9
+  # '19_THA': 0.9
+  # '20_USA': 0.9
+  # '21_VN': 0.9
+TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_NON_ROAD_REFERENCE:
+  '06_HKC': 1
+  # '17_SGP': 0.4
+TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET:
+  '06_HKC': 0.4
+  '17_SGP': 0.4
+  
+#this is also the order the mdoel will run in!
+#but mostimportantly, it is what is assumed to be the year to run the projections from, so basically the latest date for what we are confident about our input data. Be careful not to confuse this with the OUTLOOK_BASE_YEAR in the config.py file... if OUTLOOK_BASE_YEAR > BASE_YEAR from ECONOMY_BASE_YEARS_DICT then the model will first run a projection up to the OUTLOOK_BASE_YEAR, then run a second projection from the OUTLOOK_BASE_YEAR to the OUTLOOK_FINAL_YEAR. This is to utilitse the data we have for the BASE_YEAR, to inform what the data in the OUTLOOK_BASE_YEAR will be.
+ECONOMY_BASE_YEARS_DICT:
+  '19_THA': 2020
+  '20_USA': 2020
+  '08_JPN': 2020
+  '03_CDA': 2020
+  '09_ROK': 2020
+  '18_CT': 2020
+  '01_AUS': 2020
+  '17_SGP': 2020
+  
+  '02_BD': 2020
+  '04_CHL': 2017 #no data yet for 2020
+  '05_PRC': 2020
+  '06_HKC': 2021
+  '07_INA': 2020
+  '10_MAS': 2020
+  '11_MEX': 2021 
+  '12_NZ': 2021
+  '14_PE': 2017 #no data yet for 2020
+  '15_PHL': 2021
+  '16_RUS': 2017 #no data yet for 2020
+  '21_VN': 2020 #no data yet for 2020
+  '13_PNG': 2020 #no data yet for 2020
+  
+TRANSPORT_DATA_SYSTEM_DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS:
+  '19_THA': 2020
+  '20_USA': 2020
+  '08_JPN': 2020
+  '03_CDA': 2020
+  '09_ROK': 2017
+  '18_CT': 2020
+  '01_AUS': 2020
+  '17_SGP': 2020
+  
+  '02_BD': 2020
+  '04_CHL': 2017 #no data yet for 2020
+  '05_PRC': 2020
+  '06_HKC': 2020
+  '07_INA': 2021
+  '10_MAS': 2020
+  '11_MEX': 2017 #no data yet for 2020
+  '12_NZ': 2017 #no data yet for 2020
+  '14_PE': 2017 #no data yet for 2020
+  '15_PHL': 2020
+  '16_RUS': 2017 #no data yet for 2020
+  '21_VN': 2017 #no data yet for 2020
+  '13_PNG': 2017 #no data yet for 2020
+  
+alternate_sales_share_files:
+  01_AUS: ['all_usa_ref_shares_Reference.csv']
+  02_BD: ['all_usa_ref_shares_Reference.csv']
+  03_CDA: ['all_usa_ref_shares_Reference.csv']
+  04_CHL: ['all_usa_ref_shares_Reference.csv']
+  # 05_PRC: ['all_usa_ref_shares_Reference.csv'] # Excluded
+  # 06_HKC: ['all_usa_ref_shares_Reference.csv']
+  07_INA: ['all_usa_ref_shares_Reference.csv']
+  08_JPN: ['all_usa_ref_shares_Reference.csv']
+  09_ROK: ['all_usa_ref_shares_Reference.csv']
+  10_MAS: ['all_usa_ref_shares_Reference.csv']
+  11_MEX: ['all_usa_ref_shares_Reference.csv']
+  12_NZ: ['all_usa_ref_shares_Reference.csv']
+  13_PNG: ['all_usa_ref_shares_Reference.csv']
+  14_PE: ['all_usa_ref_shares_Reference.csv']
+  15_PHL: ['DATE20240611_ev_stocks_share_of_vtype_REFERENCE.csv', 'DATE20240611_ev_stocks_share_of_vtype_TARGET.csv']
+  16_RUS: ['all_usa_ref_shares_Reference.csv']
+  # 17_SGP: ['all_usa_ref_shares_Reference.csv']
+  18_CT: ['all_usa_ref_shares_Reference.csv']
+  19_THA: ['all_usa_ref_shares_Reference.csv']
+  # 20_USA: ['all_usa_ref_shares_Reference.csv']
+  21_VN: ['all_usa_ref_shares_Reference.csv']
+
+# ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD:
+ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD:
+  '19_THA': True
+  '01_AUS': True
+  '02_BD': True
+  '03_CDA': True
+  '04_CHL': True
+  '05_PRC': True #we decrease road transport activity by too much to use it for non road
+  '06_HKC': True
+  '07_INA': True
+  '08_JPN': True
+  '09_ROK': True #any countries we apply vehicle ownership limits on may be better of unaffected by that limit
+  '10_MAS': True
+  '11_MEX': True
+  '12_NZ': True
+  '13_PNG': True
+  '14_PE': True
+  '15_PHL': True
+  '16_RUS': True
+  '17_SGP': True
+  '18_CT': True
+  '20_USA': True
+  '21_VN': True
+  
+ECONOMIES_WITH_MODELLING_COMPLETE:
+  '01_AUS': True #True
+  '02_BD': False
+  '03_CDA': True #True
+  '04_CHL': False
+  '05_PRC': True #True
+  '06_HKC': False
+  '07_INA': True
+  '08_JPN': True #True
+  '09_ROK': True #True
+  '10_MAS': True
+  '11_MEX': False
+  '12_NZ': False
+  '13_PNG': False
+  '14_PE': False
+  '15_PHL': True
+  '16_RUS': False
+  '17_SGP': True #True
+  '18_CT': True #True
+  '19_THA': True #True #theres a problem if we set to true in vehicle sales shares script. todo
+  '20_USA': True #True
+  '21_VN': True
+
+DO_LOG_FITTING_ON_ONLY_PASSENGER_VEHICLES_ECONOMIES:
+  '01_AUS': True
+  '02_BD': True
+  '03_CDA': True
+  '04_CHL': True
+  '05_PRC': True
+  '06_HKC': True
+  '07_INA': True
+  '08_JPN': True
+  '09_ROK': True
+  '10_MAS': True
+  '11_MEX': True
+  '12_NZ': True
+  '13_PNG': True
+  '14_PE': True
+  '15_PHL': True
+  '16_RUS': True
+  '17_SGP': True
+  '18_CT': True
+  '19_THA': True
+  '20_USA': True
+  '21_VN': True
+
+ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED:
+  '01_AUS': True
+  '02_BD': False
+  '03_CDA': True
+  '04_CHL': False
+  '05_PRC': False
+  '06_HKC': False
+  '07_INA': False
+  '08_JPN': True
+  '09_ROK': True
+  '10_MAS': False
+  '11_MEX': False
+  '12_NZ': True
+  '13_PNG': False
+  '14_PE': False
+  '15_PHL': False
+  '16_RUS': False
+  '17_SGP': True
+  '18_CT': True
+  '19_THA': False
+  '20_USA': True
+  '21_VN': False
+  
+MILEAGE_IS_BASED_OFF_YEAR_AFTER_COVID:
+  '01_AUS': False
+  '02_BD': False
+  '03_CDA': False
+  '04_CHL': False
+  '05_PRC': False
+  '06_HKC': False
+  '07_INA': False
+  '08_JPN': False
+  '09_ROK': False
+  '10_MAS': False
+  '11_MEX': False
+  '12_NZ': False
+  '13_PNG': False
+  '14_PE': False
+  '15_PHL': False
+  '16_RUS': False
+  '17_SGP': False
+  '18_CT': False
+  '19_THA': False
+  '20_USA': False
+  '21_VN': False
+
+NON_INDUSTRY_FREIGHT_ADDITION:
+  '01_AUS': 0.2
+  '02_BD': 0.2
+  '03_CDA': 0.2
+  '04_CHL': 0.2
+  '05_PRC': 0.2
+  '06_HKC': 0.2
+  '07_INA': 0.2
+  '08_JPN': 0.2
+  '09_ROK': 0.2
+  '10_MAS': 0.2
+  '11_MEX': 0.2
+  '12_NZ': 0.2
+  '13_PNG': 0.2
+  '14_PE': 0.2
+  '15_PHL': 0.2
+  '16_RUS': 0.2
+  '17_SGP': 0.2
+  '18_CT': 0.2
+  '19_THA': 0.2
+  '20_USA': 0.2
+  '21_VN': 0.2
+
+# SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT: #todo this needs to be by scenario probably
+#     passenger:
+#         road_to_rail:
+#             01_AUS: 0.001
+#         road_to_air:
+#             05_PRC: 0.002
+#         rail_to_air:
+#             05_PRC: 0.002
+#     freight:
+#         road_to_rail:
+#             05_PRC: 0.01
+#             16_RUS: 0.005
+#             10_MAS: 0.005
+
+  
+ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR:
+  '01_AUS': True #True
+  '02_BD': False
+  '03_CDA': True #True
+  '04_CHL': True
+  '05_PRC': False #True
+  '06_HKC': False
+  '07_INA': False
+  '08_JPN': False #True
+  '09_ROK': True #True
+  '10_MAS': False
+  '11_MEX': False
+  '12_NZ': True
+  '13_PNG': False
+  '14_PE': False
+  '15_PHL': True
+  '16_RUS': False
+  '17_SGP': True #True #only <5% of all vehicles are elctrici in singapore still, even buses are very few
+  '18_CT': False #True
+  '19_THA': True #True
+  '20_USA': True #True
+  '21_VN': False
+
+YEARLY_EFFICIENCY_DEGRADATION_RATE: # SET ALL TO 0 BECAUSE I FOUND THAT THE RESULTS SHOWED THAT AN ECONOMY SHOULD REMOVE VEHICLES BEFORE THEY GET TOO OLD, BUT IT SEEMED A BIT TOO COMPLEX A TOPIC TO MODEL, AND I THINK IT WOULD BE BETTER TO JUST USE THE TURNOVER RATE TO MODEL THIS AND NOT DEAL WITH DEGRADATION HAVING SURPRISING, NOTICABLE (ESPECIALLY WHEN DOING DECOMPOSITION) EFFECTS ON THE MODEL... BUT THEN CHANGED BECAUSE I REALSIED IT MIGHT BE OKAY
+  '01_AUS': 0.01
+  '02_BD': 0.01
+  '03_CDA': 0.0 #TESTING TO SEE EFFECT OF EFF IMPROVEMENTS
+  '04_CHL': 0.01
+  '05_PRC': 0.01
+  '06_HKC': 0.01
+  '07_INA': 0.0 #TESTING TO SEE EFFECT OF EFF IMPROVEMENTS
+  '08_JPN': 0.01
+  '09_ROK': 0.01
+  '10_MAS': 0.01 #testing 0 to find the efficeincy without degradation
+  '11_MEX': 0.01
+  '12_NZ': 0.01
+  '13_PNG': 0.01
+  '14_PE': 0.01
+  '15_PHL': 0.01
+  '16_RUS': 0.01
+  '17_SGP': 0.01
+  '18_CT': 0.01
+  '19_THA': 0.01
+  '20_USA': 0.01
+  '21_VN': 0.01
+
+
+ECONOMY_TO_ADJUST_CLEAN_NON_ROAD_ENERGY_INTENSITY_FOR: # so we can keep intensity as it is when it came from the transport dataa system./ this can be important if we want to keep activity the same as it was. mostly i expect this to be the case when economies energy data doesnt amtch what you'd expect it to be given wehat their activity is. e.g. indonesia rail
+  '01_AUS': True #True
+  '02_BD': True
+  '03_CDA': True #True
+  '04_CHL': True
+  '05_PRC': True #True
+  '06_HKC': True
+  '07_INA': True
+  '08_JPN': True #True
+  '09_ROK': True #True
+  '10_MAS': True
+  '11_MEX': True
+  '12_NZ': True
+  '13_PNG': True
+  '14_PE': True
+  '15_PHL': True
+  '16_RUS': True
+  '17_SGP': True #True #only <5% of all vehicles are elctrici in singapore still, even buses are very few
+  '18_CT': True #True
+  '19_THA': True #True
+  '20_USA': True #True
+  '21_VN': True
+
+################################################################
+
+################################
+# COVID PARAMETERS
+################################
+  
+################################################################
+
+LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_PASSENGER_ROAD:
+  '01_AUS': [2020, 2021]
+  '02_BD': [2020, 2021]
+  '03_CDA': [2020, 2021]
+  '04_CHL': [2020, 2021]
+  '05_PRC': [2020, 2021]
+  '06_HKC': [2020, 2021]
+  '07_INA': [2020, 2021]
+  '08_JPN': [2020, 2021]
+  '09_ROK': [2020, 2021]
+  '10_MAS': [2020, 2021]
+  '11_MEX': [2020, 2021]
+  '12_NZ': [2020, 2021]
+  '13_PNG': [2020, 2021]
+  '14_PE': [2020, 2021]
+  '15_PHL': [2020, 2021]
+  '16_RUS': [2020, 2021]
+  '17_SGP': [2020, 2021]
+  '18_CT': [2020, 2021]
+  '19_THA': [2020, 2021]
+  '20_USA': [2020, 2021]
+  '21_VN': [2020, 2021]
+
+LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_FREIGHT_ROAD:
+  '01_AUS': [2020, 2021]
+  '02_BD': [2020, 2021]
+  '03_CDA': [2020, 2021]
+  '04_CHL': [2020, 2021]
+  '05_PRC': [2020, 2021]
+  '06_HKC': [2020, 2021]
+  '07_INA': [2020, 2021]
+  '08_JPN': [2020, 2021]
+  '09_ROK': [2020, 2021]
+  '10_MAS': [2020, 2021]
+  '11_MEX': [2020, 2021]
+  '12_NZ': [2020, 2021]
+  '13_PNG': [2020, 2021]
+  '14_PE': [2020, 2021]
+  '15_PHL': [2020, 2021]
+  '16_RUS': [2020, 2021]
+  '17_SGP': [2020, 2021]
+  '18_CT': [2020, 2021]
+  '19_THA': [2020, 2021]
+  '20_USA': [2020, 2021]
+  '21_VN': [2020, 2021]
+
+EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER_ROAD: #Note that this is technically the decrease in teh final year compared to what it is expected to be. So if energy inreased by a bit in 2021 because of a slight return to normal, this value should be slightly less than what it was in 2020.
+  '01_AUS': 0.16 #aus returns to basically asame level by end of 2023
+  '02_BD': 0.15
+  '03_CDA': 0.075
+  '04_CHL': 0.1
+  '05_PRC': 0.1
+  '06_HKC': 0.1
+  '07_INA': 0.1
+  '08_JPN': 0.15
+  '09_ROK': 0.1
+  '10_MAS': 0.15 #MAS sees a pretty large decrease from covid but we will assume that half of that decrease was a kind of statistical discrepancy (because apparently in ?2017? there was a significant incraease in energy for bunkers which somehow got lost over covid too) and that the other half was due to covid.
+  '11_MEX': 0.25
+  '12_NZ': 0.1
+  '13_PNG': 0.1
+  '14_PE': 0.1
+  '15_PHL': 0.17
+  '16_RUS': 0
+  '17_SGP': 0.05
+  '18_CT': 0.05
+  '19_THA': 0.2
+  '20_USA': 0.2
+  '21_VN': 0.15
+
+EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT_ROAD:
+  '01_AUS': 0
+  '02_BD': 0.15
+  '03_CDA': 0.075
+  '04_CHL': 0
+  '05_PRC': 0.1
+  '06_HKC': 0.01
+  '07_INA': 0.1
+  '08_JPN': 0
+  '09_ROK': 0.1
+  '10_MAS': 0.15 #MAS sees a pretty large decrease from covid but we will assume that half of that decrease was a kind of statistical discrepancy (because apparently in ?2017? there was a significant incraease in energy for bunkers which somehow got lost over covid too) and that the other half was due to covid.
+  '11_MEX': 0.5
+  '12_NZ': 0.05
+  '13_PNG': 0.1
+  '14_PE': 0.1
+  '15_PHL': 0.3
+  '16_RUS': 0
+  '17_SGP': 0.05
+  '18_CT': 0.05
+  '19_THA': 0.2
+  '20_USA': 0.05
+  '21_VN':  0.3
+
+EXPECTED_YEARS_TO_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_PASSENGER_ROAD: #PLEASE NOTE THAT IF THE YEARS WHEN COVID AFFECTS APPLIED ONLY INCLUDES 2020, AND THE BASE YEAR IS 2021(MEANING WE USE ESTO 2021 DATA FOR ENERGY IN 2021, CHANGING ANYTHING IN 2021 WONT AFFECT ANYTHING. SO UNLESS COVID YEARS INCLUDES 2021, A EXPECTED YEAR TO RETURN TO NORMAL MILEAGE FROM COVID PASSENGER VALUE OF 1 WILL NOT AFFECT THE MODEL.
+  '01_AUS': 2
+  '02_BD': 2
+  '03_CDA': 3 #testing
+  '04_CHL': 2
+  '05_PRC': 2
+  '06_HKC': 2
+  '07_INA': 2
+  '08_JPN': 2
+  '09_ROK': 2
+  '10_MAS': 5
+  '11_MEX': 3
+  '12_NZ': 2
+  '13_PNG': 2
+  '14_PE': 2
+  '15_PHL': 2
+  '16_RUS': 2
+  '17_SGP': 2
+  '18_CT': 2
+  '19_THA': 2
+  '20_USA': 3
+  '21_VN': 2
+
+EXPECTED_YEARS_TO_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_FREIGHT_ROAD:
+  '01_AUS': 1
+  '02_BD': 1
+  '03_CDA': 1
+  '04_CHL': 1
+  '05_PRC': 1
+  '06_HKC': 1
+  '07_INA': 1
+  '08_JPN': 1
+  '09_ROK': 1
+  '10_MAS': 3
+  '11_MEX': 3
+  '12_NZ': 2
+  '13_PNG': 1
+  '14_PE': 1
+  '15_PHL': 1
+  '16_RUS': 1
+  '17_SGP': 1
+  '18_CT': 1
+  '19_THA': 1
+  '20_USA': 1
+  '21_VN': 1
+
+EXPECTED_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_PASSENGER_ROAD:
+  '01_AUS': 0.95 #aus returns to basically asame level by end of 2023
+  '02_BD': 0.75
+  '03_CDA': 0.75 #canada return is super weird. it goes higher than it was prevoouisly. so just dropping it to 0.5 compared to 0.75 for everyone else
+  '04_CHL': 0.75
+  '05_PRC': 0.75
+  '06_HKC': 0.75
+  '07_INA': 0.75
+  '08_JPN': 0.5 #testing whether this really has much of an effect. currently total demand increases to 2847 in 2023 at 0.75 - then 0.5 led to 2792 in 2023 and 2806 in 2024 )given the expected decrease was ~7.5% that means the return at 0.5 should be (2019 value=2892)>2892*0.075=216.9*0.5=108.45> 2892-108=2784.. so basically yeah this is working as expected (have to consider there is still some freight growth in 2023/2024 on top of the covid growth)
+  '09_ROK': 0.75
+  '10_MAS': 0.75
+  '11_MEX': 0.75
+  '12_NZ': 0.75
+  '13_PNG': 0.75
+  '14_PE': 0.75
+  '15_PHL': 0.9
+  '16_RUS': 0.75
+  '17_SGP': 0.75
+  '18_CT': 0.75
+  '19_THA': 0.75
+  '20_USA': 0.6 #3/15 testing since it seemed a bit like telework wasnt having an effect
+  '21_VN': 0.75
+  
+EXPECTED_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_FREIGHT_ROAD:
+  '01_AUS': 1
+  '02_BD': 1
+  '03_CDA': 1 #canada return is super weird. it goes higher than it was prevoouisly. so just dropping it to 0.5 compared to 1 for everyone else
+  '04_CHL': 1
+  '05_PRC': 1
+  '06_HKC': 1
+  '07_INA': 1
+  '08_JPN': 1
+  '09_ROK': 1
+  '10_MAS': 1
+  '11_MEX': 1
+  '12_NZ': 1
+  '13_PNG': 1
+  '14_PE': 1
+  '15_PHL': 1
+  '16_RUS': 1
+  '17_SGP': 1
+  '18_CT': 1
+  '19_THA': 1
+  '20_USA': 1
+  '21_VN': 1
+  
+################################################################
+
+LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_PASSENGER_AIR:
+  '01_AUS': [2020, 2021]
+  '02_BD': [2020, 2021]
+  '03_CDA': [2020, 2021]
+  '04_CHL': [2020, 2021]
+  '05_PRC': [2020, 2021]
+  '06_HKC': [2020, 2021]
+  '07_INA': [2020, 2021]
+  '08_JPN': [2020, 2021]
+  '09_ROK': [2020, 2021]
+  '10_MAS': [2020, 2021]
+  '11_MEX': [2020, 2021]
+  '12_NZ': [2020, 2021]
+  '13_PNG': [2020, 2021]
+  '14_PE': [2020, 2021]
+  '15_PHL': [2020, 2021]
+  '16_RUS': [2020, 2021]
+  '17_SGP': [2020, 2021]
+  '18_CT': [2020, 2021]
+  '19_THA': [2020, 2021]
+  '20_USA': [2020, 2021]
+  '21_VN': [2020, 2021]
+
+LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_FREIGHT_AIR:
+  '01_AUS': [2020, 2021]
+  '02_BD': [2020, 2021]
+  '03_CDA': [2020, 2021]
+  '04_CHL': [2020, 2021]
+  '05_PRC': [2020, 2021]
+  '06_HKC': [2020, 2021]
+  '07_INA': [2020, 2021]
+  '08_JPN': [2020, 2021]
+  '09_ROK': [2020, 2021]
+  '10_MAS': [2020, 2021]
+  '11_MEX': [2020, 2021]
+  '12_NZ': [2020, 2021]
+  '13_PNG': [2020, 2021]
+  '14_PE': [2020, 2021]
+  '15_PHL': [2020, 2021]
+  '16_RUS': [2020, 2021]
+  '17_SGP': [2020, 2021]
+  '18_CT': [2020, 2021]
+  '19_THA': [2020, 2021]
+  '20_USA': [2020, 2021]
+  '21_VN': [2020, 2021]
+
+EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER_AIR: #Note that this is technically the decrease in teh final year compared to what it is expected to be. So if energy inreased by a bit in 2021 because of a slight return to normal, this value should be slightly less than what it was in 2020.
+  '01_AUS': 0.5
+  '02_BD': 0.1
+  '03_CDA': 0.4
+  '04_CHL': 0.5
+  '05_PRC': 0.1
+  '06_HKC': 0.1
+  '07_INA': 0.4
+  '08_JPN': 0.5
+  '09_ROK': 0
+  '10_MAS': 0.7
+  '11_MEX': 0
+  '12_NZ': 0.25
+  '13_PNG': 0.1
+  '14_PE': 0.5
+  '15_PHL': 0.66
+  '16_RUS': 0
+  '17_SGP': 0.05
+  '18_CT': 0.4
+  '19_THA': 0
+  '20_USA': 0.25
+  '21_VN': 0.5
+
+EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT_AIR:
+  '01_AUS': 0.5
+  '02_BD': 0.1
+  '03_CDA': 0.4
+  '04_CHL': 0.5
+  '05_PRC': 0.1
+  '06_HKC': 0.1
+  '07_INA': 0.4
+  '08_JPN': 0.5
+  '09_ROK': 0
+  '10_MAS': 0.7
+  '11_MEX': 0
+  '12_NZ': 0.25
+  '13_PNG': 0.1
+  '14_PE': 0.5
+  '15_PHL': 0.66
+  '16_RUS': 0
+  '17_SGP': 0.05
+  '18_CT': 0.4
+  '19_THA': 0
+  '20_USA': 0.25
+  '21_VN': 0.5
+
+EXPECTED_YEARS_TO_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_PASSENGER_AIR: #PLEASE NOTE THAT IF THE YEARS WHEN COVID AFFECTS APPLIED ONLY INCLUDES 2020, AND THE BASE YEAR IS 2021(MEANING WE USE ESTO 2021 DATA FOR ENERGY IN 2021, CHANGING ANYTHING IN 2021 WONT AFFECT ANYTHING. SO UNLESS COVID YEARS INCLUDES 2021, A EXPECTED YEAR TO RETURN TO NORMAL MILEAGE FROM COVID PASSENGER VALUE OF 1 WILL NOT AFFECT THE MODEL.
+  '01_AUS': 3
+  '02_BD': 1
+  '03_CDA': 3 #testing
+  '04_CHL': 1
+  '05_PRC': 2
+  '06_HKC': 2
+  '07_INA': 1
+  '08_JPN': 2
+  '09_ROK': 2
+  '10_MAS': 3
+  '11_MEX': 3
+  '12_NZ': 3
+  '13_PNG': 1
+  '14_PE': 1
+  '15_PHL': 1
+  '16_RUS': 1
+  '17_SGP': 1
+  '18_CT': 1
+  '19_THA': 1
+  '20_USA': 3
+  '21_VN': 2
+
+EXPECTED_YEARS_TO_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_FREIGHT_AIR:
+  '01_AUS': 1
+  '02_BD': 1
+  '03_CDA': 1
+  '04_CHL': 1
+  '05_PRC': 1
+  '06_HKC': 1
+  '07_INA': 1
+  '08_JPN': 1
+  '09_ROK': 1
+  '10_MAS': 3
+  '11_MEX': 3
+  '12_NZ': 2
+  '13_PNG': 1
+  '14_PE': 1
+  '15_PHL': 1
+  '16_RUS': 1
+  '17_SGP': 1
+  '18_CT': 1
+  '19_THA': 1
+  '20_USA': 1
+  '21_VN': 1
+
+EXPECTED_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_PASSENGER_AIR:
+  '01_AUS': 0.75
+  '02_BD': 0.75
+  '03_CDA': 0.75 #canada return is super weird. it goes higher than it was prevoouisly. so just dropping it to 0.5 compared to 0.75 for everyone else
+  '04_CHL': 0.75
+  '05_PRC': 0.75
+  '06_HKC': 0.75
+  '07_INA': 0.75
+  '08_JPN': 0.5 #testing whether this really has much of an effect. currently total demand increases to 2847 in 2023 at 0.75 - then 0.5 led to 2792 in 2023 and 2806 in 2024 )given the expected decrease was ~7.5% that means the return at 0.5 should be (2019 value=2892)>2892*0.075=216.9*0.5=108.45> 2892-108=2784.. so basically yeah this is working as expected (have to consider there is still some freight growth in 2023/2024 on top of the covid growth)
+  '09_ROK': 0.75
+  '10_MAS': 0.75
+  '11_MEX': 0.75
+  '12_NZ': 0.75
+  '13_PNG': 0.75
+  '14_PE': 0.75
+  '15_PHL': 0.75
+  '16_RUS': 0.75
+  '17_SGP': 0.75
+  '18_CT': 0.75
+  '19_THA': 0.75
+  '20_USA': 0.6 #3/15 testing since it seemed a bit like telework wasnt having an effect
+  '21_VN': 0.75
+  
+EXPECTED_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_FREIGHT_AIR:
+  '01_AUS': 1
+  '02_BD': 1
+  '03_CDA': 1 #canada return is super weird. it goes higher than it was prevoouisly. so just dropping it to 0.5 compared to 1 for everyone else
+  '04_CHL': 1
+  '05_PRC': 1
+  '06_HKC': 1
+  '07_INA': 1
+  '08_JPN': 1
+  '09_ROK': 1
+  '10_MAS': 1
+  '11_MEX': 1
+  '12_NZ': 1
+  '13_PNG': 1
+  '14_PE': 1
+  '15_PHL': 1
+  '16_RUS': 1
+  '17_SGP': 1
+  '18_CT': 1
+  '19_THA': 1
+  '20_USA': 1
+  '21_VN': 1
+  
+################################################################
+
+LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_PASSENGER_SHIP:
+  '01_AUS': [2020, 2021]
+  '02_BD': [2020, 2021]
+  '03_CDA': [2020, 2021]
+  '04_CHL': [2020, 2021]
+  '05_PRC': [2020, 2021]
+  '06_HKC': [2020, 2021]
+  '07_INA': [2020, 2021]
+  '08_JPN': [2020, 2021]
+  '09_ROK': [2020, 2021]
+  '10_MAS': [2020, 2021]
+  '11_MEX': [2020, 2021]
+  '12_NZ': [2020, 2021]
+  '13_PNG': [2020, 2021]
+  '14_PE': [2020, 2021]
+  '15_PHL': [2020, 2021]
+  '16_RUS': [2020, 2021]
+  '17_SGP': [2020, 2021]
+  '18_CT': [2020, 2021]
+  '19_THA': [2020, 2021]
+  '20_USA': [2020, 2021]
+  '21_VN': [2020, 2021]
+
+LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_FREIGHT_SHIP:
+  '01_AUS': [2020, 2021]
+  '02_BD': [2020, 2021]
+  '03_CDA': [2020, 2021]
+  '04_CHL': [2020, 2021]
+  '05_PRC': [2020, 2021]
+  '06_HKC': [2020, 2021]
+  '07_INA': [2020, 2021]
+  '08_JPN': [2020, 2021]
+  '09_ROK': [2020, 2021]
+  '10_MAS': [2020, 2021]
+  '11_MEX': [2020, 2021]
+  '12_NZ': [2020, 2021]
+  '13_PNG': [2020, 2021]
+  '14_PE': [2020, 2021]
+  '15_PHL': [2020, 2021]
+  '16_RUS': [2020, 2021]
+  '17_SGP': [2020, 2021]
+  '18_CT': [2020, 2021]
+  '19_THA': [2020, 2021]
+  '20_USA': [2020, 2021]
+  '21_VN': [2020, 2021]
+
+EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER_SHIP: #Note that this is technically the decrease in teh final year compared to what it is expected to be. So if energy inreased by a bit in 2021 because of a slight return to normal, this value should be slightly less than what it was in 2020.
+  '01_AUS': 0.1
+  '02_BD': 0.1
+  '03_CDA': 0.075
+  '04_CHL': 0.1
+  '05_PRC': 0.1
+  '06_HKC': 0.1
+  '07_INA': 0.1
+  '08_JPN': 0.15
+  '09_ROK': 0.1
+  '10_MAS': 0.15 #MAS sees a pretty large decrease from covid but we will assume that half of that decrease was a kind of statistical discrepancy (because apparently in ?2017? there was a significant incraease in energy for bunkers which somehow got lost over covid too) and that the other half was due to covid.
+  '11_MEX': 0.8
+  '12_NZ': 0.1
+  '13_PNG': 0.1
+  '14_PE': 0.1
+  '15_PHL': 0.1
+  '16_RUS': 0
+  '17_SGP': 0.05
+  '18_CT': 0
+  '19_THA': 0
+  '20_USA': 0.2
+  '21_VN': 0.33
+
+EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT_SHIP:
+  '01_AUS': 0
+  '02_BD': 0.1
+  '03_CDA': 0.075
+  '04_CHL': 0.1
+  '05_PRC': 0.1
+  '06_HKC': 0.1
+  '07_INA': 0.1
+  '08_JPN': 0
+  '09_ROK': 0.1
+  '10_MAS': 0.15 #MAS sees a pretty large decrease from covid but we will assume that half of that decrease was a kind of statistical discrepancy (because apparently in ?2017? there was a significant incraease in energy for bunkers which somehow got lost over covid too) and that the other half was due to covid.
+  '11_MEX': 0.33
+  '12_NZ': 0.1
+  '13_PNG': 0.1
+  '14_PE': 0.1
+  '15_PHL': 0.1
+  '16_RUS': 0
+  '17_SGP': 0.05
+  '18_CT': 0
+  '19_THA': 0.0001
+  '20_USA': 0.05
+  '21_VN':  0.33
+
+EXPECTED_YEARS_TO_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_PASSENGER_SHIP: #PLEASE NOTE THAT IF THE YEARS WHEN COVID AFFECTS APPLIED ONLY INCLUDES 2020, AND THE BASE YEAR IS 2021(MEANING WE USE ESTO 2021 DATA FOR ENERGY IN 2021, CHANGING ANYTHING IN 2021 WONT AFFECT ANYTHING. SO UNLESS COVID YEARS INCLUDES 2021, A EXPECTED YEAR TO RETURN TO NORMAL ACTIVITY FROM COVID PASSENGER VALUE OF 1 WILL NOT AFFECT THE MODEL.
+  '01_AUS': 3
+  '02_BD': 1
+  '03_CDA': 3 #testing
+  '04_CHL': 1
+  '05_PRC': 2
+  '06_HKC': 2
+  '07_INA': 1
+  '08_JPN': 2
+  '09_ROK': 2
+  '10_MAS': 3
+  '11_MEX': 3
+  '12_NZ': 1
+  '13_PNG': 1
+  '14_PE': 1
+  '15_PHL': 1
+  '16_RUS': 1
+  '17_SGP': 1
+  '18_CT': 1
+  '19_THA': 1
+  '20_USA': 3
+  '21_VN': 2
+
+EXPECTED_YEARS_TO_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_FREIGHT_SHIP:
+  '01_AUS': 1
+  '02_BD': 1
+  '03_CDA': 1
+  '04_CHL': 1
+  '05_PRC': 1
+  '06_HKC': 1
+  '07_INA': 1
+  '08_JPN': 1
+  '09_ROK': 1
+  '10_MAS': 3
+  '11_MEX': 3
+  '12_NZ': 2
+  '13_PNG': 1
+  '14_PE': 1
+  '15_PHL': 1
+  '16_RUS': 1
+  '17_SGP': 1
+  '18_CT': 1
+  '19_THA': 1
+  '20_USA': 1
+  '21_VN': 1
+
+EXPECTED_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_PASSENGER_SHIP:
+  '01_AUS': 0.75
+  '02_BD': 0.75
+  '03_CDA': 0.75 #canada return is super weird. it goes higher than it was prevoouisly. so just dropping it to 0.5 compared to 0.75 for everyone else
+  '04_CHL': 0.75
+  '05_PRC': 0.75
+  '06_HKC': 0.75
+  '07_INA': 0.75
+  '08_JPN': 0.5 #testing whether this really has much of an effect. currently total demand increases to 2847 in 2023 at 0.75 - then 0.5 led to 2792 in 2023 and 2806 in 2024 )given the expected decrease was ~7.5% that means the return at 0.5 should be (2019 value=2892)>2892*0.075=216.9*0.5=108.45> 2892-108=2784.. so basically yeah this is working as expected (have to consider there is still some freight growth in 2023/2024 on top of the covid growth)
+  '09_ROK': 0.75
+  '10_MAS': 0.75
+  '11_MEX': 0.75
+  '12_NZ': 0.75
+  '13_PNG': 0.75
+  '14_PE': 0.75
+  '15_PHL': 0.75
+  '16_RUS': 0.75
+  '17_SGP': 0.75
+  '18_CT': 0.75
+  '19_THA': 0.75
+  '20_USA': 0.6 #3/15 testing since it seemed a bit like telework wasnt having an effect
+  '21_VN': 0.75
+  
+EXPECTED_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_FREIGHT_SHIP:
+  '01_AUS': 1
+  '02_BD': 1
+  '03_CDA': 1 #canada return is super weird. it goes higher than it was prevoouisly. so just dropping it to 0.5 compared to 1 for everyone else
+  '04_CHL': 1
+  '05_PRC': 1
+  '06_HKC': 1
+  '07_INA': 1
+  '08_JPN': 1
+  '09_ROK': 1
+  '10_MAS': 1
+  '11_MEX': 1
+  '12_NZ': 1
+  '13_PNG': 1
+  '14_PE': 1
+  '15_PHL': 1
+  '16_RUS': 1
+  '17_SGP': 1
+  '18_CT': 1
+  '19_THA': 1
+  '20_USA': 1
+  '21_VN': 1
+  
+################################################################
+
+LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_PASSENGER_RAIL:
+  '01_AUS': [2020, 2021]
+  '02_BD': [2020, 2021]
+  '03_CDA': [2020, 2021]
+  '04_CHL': [2020, 2021]
+  '05_PRC': [2020, 2021]
+  '06_HKC': [2020, 2021]
+  '07_INA': [2020, 2021]
+  '08_JPN': [2020, 2021]
+  '09_ROK': [2020, 2021]
+  '10_MAS': [2020, 2021]
+  '11_MEX': [2020, 2021]
+  '12_NZ': [2020, 2021]
+  '13_PNG': [2020, 2021]
+  '14_PE': [2020, 2021]
+  '15_PHL': [2020, 2021]
+  '16_RUS': [2020, 2021]
+  '17_SGP': [2020, 2021]
+  '18_CT': [2020, 2021]
+  '19_THA': [2020, 2021]
+  '20_USA': [2020, 2021]
+  '21_VN': [2020, 2021]
+
+LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_FREIGHT_RAIL:
+  '01_AUS': [2020, 2021]
+  '02_BD': [2020, 2021]
+  '03_CDA': [2020, 2021]
+  '04_CHL': [2020, 2021]
+  '05_PRC': [2020, 2021]
+  '06_HKC': [2020, 2021]
+  '07_INA': [2020, 2021]
+  '08_JPN': [2020, 2021]
+  '09_ROK': [2020, 2021]
+  '10_MAS': [2020, 2021]
+  '11_MEX': [2020, 2021]
+  '12_NZ': [2020, 2021]
+  '13_PNG': [2020, 2021]
+  '14_PE': [2020, 2021]
+  '15_PHL': [2020, 2021]
+  '16_RUS': [2020, 2021]
+  '17_SGP': [2020, 2021]
+  '18_CT': [2020, 2021]
+  '19_THA': [2020, 2021]
+  '20_USA': [2020, 2021]
+  '21_VN': [2020, 2021]
+
+EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER_RAIL: #Note that this is technically the decrease in teh final year compared to what it is expected to be. So if energy inreased by a bit in 2021 because of a slight return to normal, this value should be slightly less than what it was in 2020.
+  '01_AUS': 0.1
+  '02_BD': 0.1
+  '03_CDA': 0.075
+  '04_CHL': 0.1
+  '05_PRC': 0.1
+  '06_HKC': 0.1
+  '07_INA': 0.1
+  '08_JPN': 0.15
+  '09_ROK': 0.1
+  '10_MAS': 0.15 #MAS sees a pretty large decrease from covid but we will assume that half of that decrease was a kind of statistical discrepancy (because apparently in ?2017? there was a significant incraease in energy for bunkers which somehow got lost over covid too) and that the other half was due to covid.
+  '11_MEX': 0.25
+  '12_NZ': 0.1
+  '13_PNG': 0.1
+  '14_PE': 0.1
+  '15_PHL': 0.1
+  '16_RUS': 0.1
+  '17_SGP': 0.05
+  '18_CT': 0
+  '19_THA': 0
+  '20_USA': 0.2
+  '21_VN': 0.33
+
+EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT_RAIL:
+  '01_AUS': 0
+  '02_BD': 0.1
+  '03_CDA': 0.075
+  '04_CHL': 0.1
+  '05_PRC': 0.1
+  '06_HKC': 0.1
+  '07_INA': 0.1
+  '08_JPN': 0
+  '09_ROK': 0.1
+  '10_MAS': 0.15 #MAS sees a pretty large decrease from covid but we will assume that half of that decrease was a kind of statistical discrepancy (because apparently in ?2017? there was a significant incraease in energy for bunkers which somehow got lost over covid too) and that the other half was due to covid.
+  '11_MEX': 0.25
+  '12_NZ': 0.1
+  '13_PNG': 0.1
+  '14_PE': 0.1
+  '15_PHL': 0.1
+  '16_RUS': 0
+  '17_SGP': 0.05
+  '18_CT': 0
+  '19_THA': 0.0001
+  '20_USA': 0.05
+  '21_VN':  0.33
+
+EXPECTED_YEARS_TO_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_PASSENGER_RAIL: #PLEASE NOTE THAT IF THE YEARS WHEN COVID AFFECTS APPLIED ONLY INCLUDES 2020, AND THE BASE YEAR IS 2021(MEANING WE USE ESTO 2021 DATA FOR ENERGY IN 2021, CHANGING ANYTHING IN 2021 WONT AFFECT ANYTHING. SO UNLESS COVID YEARS INCLUDES 2021, A EXPECTED YEAR TO RETURN TO NORMAL ACTIVITY FROM COVID PASSENGER VALUE OF 1 WILL NOT AFFECT THE MODEL.
+  '01_AUS': 3
+  '02_BD': 1
+  '03_CDA': 3 #testing
+  '04_CHL': 1
+  '05_PRC': 2
+  '06_HKC': 2
+  '07_INA': 1
+  '08_JPN': 2
+  '09_ROK': 2
+  '10_MAS': 3
+  '11_MEX': 3
+  '12_NZ': 1
+  '13_PNG': 1
+  '14_PE': 1
+  '15_PHL': 1
+  '16_RUS': 1
+  '17_SGP': 1
+  '18_CT': 1
+  '19_THA': 1
+  '20_USA': 3
+  '21_VN': 2
+
+EXPECTED_YEARS_TO_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_FREIGHT_RAIL:
+  '01_AUS': 1
+  '02_BD': 1
+  '03_CDA': 1
+  '04_CHL': 1
+  '05_PRC': 1
+  '06_HKC': 1
+  '07_INA': 1
+  '08_JPN': 1
+  '09_ROK': 1
+  '10_MAS': 3
+  '11_MEX': 3
+  '12_NZ': 2
+  '13_PNG': 1
+  '14_PE': 1
+  '15_PHL': 1
+  '16_RUS': 1
+  '17_SGP': 1
+  '18_CT': 1
+  '19_THA': 1
+  '20_USA': 1
+  '21_VN': 1
+
+EXPECTED_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_PASSENGER_RAIL:
+  '01_AUS': 0.75
+  '02_BD': 0.75
+  '03_CDA': 0.75 #canada return is super weird. it goes higher than it was prevoouisly. so just dropping it to 0.5 compared to 0.75 for everyone else
+  '04_CHL': 0.75
+  '05_PRC': 0.75
+  '06_HKC': 0.75
+  '07_INA': 0.75
+  '08_JPN': 0.5 #testing whether this really has much of an effect. currently total demand increases to 2847 in 2023 at 0.75 - then 0.5 led to 2792 in 2023 and 2806 in 2024 )given the expected decrease was ~7.5% that means the return at 0.5 should be (2019 value=2892)>2892*0.075=216.9*0.5=108.45> 2892-108=2784.. so basically yeah this is working as expected (have to consider there is still some freight growth in 2023/2024 on top of the covid growth)
+  '09_ROK': 0.75
+  '10_MAS': 0.75
+  '11_MEX': 0.75
+  '12_NZ': 0.75
+  '13_PNG': 0.75
+  '14_PE': 0.75
+  '15_PHL': 0.75
+  '16_RUS': 0.75
+  '17_SGP': 0.75
+  '18_CT': 0.75
+  '19_THA': 0.75
+  '20_USA': 0.6 #3/15 testing since it seemed a bit like telework wasnt having an effect
+  '21_VN': 0.75
+  
+EXPECTED_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_FREIGHT_RAIL:
+  '01_AUS': 1
+  '02_BD': 1
+  '03_CDA': 1 #canada return is super weird. it goes higher than it was prevoouisly. so just dropping it to 0.5 compared to 1 for everyone else
+  '04_CHL': 1
+  '05_PRC': 1
+  '06_HKC': 1
+  '07_INA': 1
+  '08_JPN': 1
+  '09_ROK': 1
+  '10_MAS': 1
+  '11_MEX': 1
+  '12_NZ': 1
+  '13_PNG': 1
+  '14_PE': 1
+  '15_PHL': 1
+  '16_RUS': 1
+  '17_SGP': 1
+  '18_CT': 1
+  '19_THA': 1
+  '20_USA': 1
+  '21_VN': 1
+################################################################
+LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_BUNKERS:
+  '01_AUS': [2020, 2021]
+  '02_BD': [2020, 2021]
+  '03_CDA': [2020, 2021]
+  '04_CHL': [2020, 2021]
+  '05_PRC': [2020, 2021]
+  '06_HKC': [2020, 2021]
+  '07_INA': [2020, 2021]
+  '08_JPN': [2020, 2021]
+  '09_ROK': [2020, 2021]
+  '10_MAS': [2020, 2021]
+  '11_MEX': [2020, 2021]
+  '12_NZ': [2020, 2021]
+  '13_PNG': [2020, 2021]
+  '14_PE': [2020, 2021]
+  '15_PHL': [2020, 2021]
+  '16_RUS': [2020, 2021]
+  '17_SGP': [2020, 2021]
+  '18_CT': [2020, 2021]
+  '19_THA': [2020, 2021]
+  '20_USA': [2020, 2021]
+  '21_VN': [2020, 2021]
+
+INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH: #this should be the percent growth after covid impacted the sector. It is assumed that this is the growth during the year immediately after the 'LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_BUNKERS' year. So if the year when covid effects applied is 2020, then this is the growth in 2021. If this value is 0.6 then the growth factor in 2021 is 1.6.
+  '01_AUS': 0.05
+  '02_BD': 0.05
+  '03_CDA': 0.05
+  '04_CHL': 0.05
+  '05_PRC': 0.05
+  '06_HKC': 0.9
+  '07_INA': 0.05
+  '08_JPN': 0.05
+  '09_ROK': 0.05
+  '10_MAS': 0.05
+  '11_MEX': 0.05
+  '12_NZ': 2.2
+  '13_PNG': 0.05
+  '14_PE': 1
+  '15_PHL': 0.05
+  '16_RUS': 0.8
+  '17_SGP': 0.05
+  '18_CT': 0.05
+  '19_THA': 0.05
+  '20_USA': 0.05
+  '21_VN': 0.05
+INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH: #this should be the percent growth after covid impacted the sector. It is assumed that this is the growth during the year immediately after the 'LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_BUNKERS' year. So if the year when covid effects applied is 2020, then this is the growth in 2021. If this value is 0.6 then the growth factor in 2021 is 1.6.
+  '01_AUS': 2
+  '02_BD': 5.6
+  '03_CDA': 0.6
+  '04_CHL': 0.6
+  '05_PRC': 0.6
+  '06_HKC': 1.3
+  '07_INA': 0.6
+  '08_JPN': 0.6
+  '09_ROK': 0.6
+  '10_MAS': 0.6
+  '11_MEX': 0.8 #check that aviation gasoline isnt going wacky.
+  '12_NZ': 3.5
+  '13_PNG': 0.6
+  '14_PE': 1.2
+  '15_PHL': 2.05
+  '16_RUS': 0
+  '17_SGP': 3.2
+  '18_CT': 0.6
+  '19_THA': 0.6
+  '20_USA': 0.6
+  '21_VN': 0.6
