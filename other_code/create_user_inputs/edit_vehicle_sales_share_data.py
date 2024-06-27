@@ -7,10 +7,9 @@ import os
 import re
 import shutil
 from turtle import title
-os.chdir(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
+sys.path.append(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
 from runpy import run_path
 ###IMPORT GLOBAL VARIABLES FROM config.py
-import sys
 sys.path.append("./config")
 from config import *
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.

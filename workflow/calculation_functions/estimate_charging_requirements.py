@@ -5,9 +5,9 @@
 #%%
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
-import re
-os.chdir(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
 import sys
+import re
+sys.path.append(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
 sys.path.append("./config/")
 import config
 
@@ -26,7 +26,7 @@ import plotly.graph_objects as go
 import matplotlib
 import matplotlib.pyplot as plt
 ####usae this to load libraries and set variables. Feel free to edit that file as you need
-sys.path.append("./workflow/plotting_functions")
+sys.path.append(f"{root_dir}/workflow/plotting_functions")
 import plot_charging_graphs
 #%%
 
