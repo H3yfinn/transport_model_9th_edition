@@ -3,11 +3,19 @@
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
 import re
-os.chdir(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
 import sys
-sys.path.append("./config")
-import config
+# Construct the first path to check
+root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
+# Check if the first path is not already in sys.path, then append it
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
 
+# Construct the second path to check (relative to the current working directory)
+path_to_add_2 = os.path.abspath(f"{root_dir}/config")
+# Check if the second path is not already in sys.path, then append it
+if path_to_add_2 not in sys.path:
+    sys.path.append(path_to_add_2)
+import config
 import pandas as pd 
 import numpy as np
 import yaml
@@ -24,7 +32,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 ###
 #PREPARATION FUNCTIONS
-sys.path.append("./workflow/preparation_functions")
+sys.path.append(f"{root_dir}/workflow/preparation_functions")
 import concordance_scripts
 import import_macro_data
 import import_transport_system_data
@@ -32,11 +40,11 @@ import create_and_clean_user_input
 import aggregate_data_for_model
 import filter_for_modelling_years
 #UTILITY FUNCTIONS
-sys.path.append("./workflow/utility_functions")
+sys.path.append(f"{root_dir}/workflow/utility_functions")
 import archiving_scripts
 import utility_functions
 #CALCUALTION FUNCTIONS
-sys.path.append("./workflow/calculation_functions")
+sys.path.append(f"{root_dir}/workflow/calculation_functions")
 import calculate_inputs_for_model
 import run_road_model
 import run_non_road_model
@@ -45,13 +53,12 @@ import apply_fuel_mix_supply_side
 import estimate_charging_requirements
 import international_bunkers
 #FORMATTING FUNCTIONS
-sys.path.append("./workflow/formatting_functions")
+sys.path.append(f"{root_dir}/workflow/formatting_functions")
 import concatenate_model_output
 import clean_model_output
 import create_output_for_outlook_data_system
 #PLOTTING FUNCTIONS
-sys.path.append("./workflow/plotting_functions")
-import plot_all_graphs
+sys.path.append(f"{root_dir}/workflow/plotting_functions")
 import produce_LMDI_graphs
 import plot_charging_graphs
 import create_assumptions_dashboards
@@ -205,7 +212,7 @@ def main():
             #now concatenate all the model outputs together
             create_output_for_outlook_data_system.create_output_for_outlook_data_system(ECONOMY_ID)
 
-            # exec(open("./workflow/6_create_osemosys_output.py").read())
+            # exec(open(f"{root_dir}/workflow/6_create_osemosys_output.py").read())
             # import create_osemosys_output
             # create_osemosys_output.create_osemosys_output()
             # ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True
@@ -264,14 +271,6 @@ def main():
     #     archiving_folder = archiving_scripts.create_archiving_folder_for_FILE_DATE_ID()
     #     archiving_scripts.archive_lots_of_files(archiving_folder)
 
-    # #do this last because it takes so long, so make sure thaht everything else is working first
-    run_plot_all_graphs = False
-    if run_plot_all_graphs:
-        plot_all_graphs.plot_all_graphs(ECONOMY_ID='19_THA', PLOT=True, plot_comparisons=True)
-        # except:
-        #     plot_all_graphs.plot_all_graphs(PLOT=True, plot_comparisons=True)
-        # produce_LMDI_graphs.produce_lots_of_LMDI_charts(USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True)
-        # exec(open("./workflow/plotting/produce_LMDI_graphs.py").read())
     ARCHIVE_RESULTS=False
     if ARCHIVE_RESULTS:
         economies_to_archive = ['06_HKC', '11_MEX', '21_VN']#'11_MEX',
@@ -306,3 +305,5 @@ main()#python workflow/main.py > output.txt 2>&1
 
 #%%
 #%%   
+
+#%%

@@ -7,11 +7,11 @@
 # from datetime import datetime
 # import os
 # import re
-# os.chdir(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
+# sys.path.append(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
 # ###IMPORT GLOBAL VARIABLES FROM config.py
 # import os
 # import re
-# os.chdir(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
+# sys.path.append(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
 # import sys
 # sys.path.append("./config")
 # import config

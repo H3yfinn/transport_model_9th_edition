@@ -7,10 +7,19 @@
 #%%
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
-import re
-os.chdir(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
 import sys
-sys.path.append("./config")
+import re
+# Construct the first path to check
+root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
+# Check if the first path is not already in sys.path, then append it
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+
+# Construct the second path to check (relative to the current working directory)
+path_to_add_2 = os.path.abspath(f"{root_dir}/config")
+# Check if the second path is not already in sys.path, then append it
+if path_to_add_2 not in sys.path:
+    sys.path.append(path_to_add_2)
 import config
 
 import pandas as pd 
@@ -30,12 +39,12 @@ import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 sys.path.append("./workflow")
-sys.path.append("./workflow/plotting_functions")
+sys.path.append(f"{root_dir}/workflow/plotting_functions")
 import plot_user_input_data
 import adjust_data_to_match_esto
 import road_model_functions
 
-sys.path.append("./workflow/data_creation_functions")
+sys.path.append(f"{root_dir}/workflow/data_creation_functions")
 from create_vehicle_sales_share_data import vehicle_sales_share_creation_handler
 
 def calculate_inputs_for_model(road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=False, adjust_data_to_match_esto_TESTING=False, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=False, USE_SAVED_OPT_PARAMATERS=False):

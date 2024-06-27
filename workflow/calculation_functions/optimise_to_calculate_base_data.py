@@ -2,10 +2,19 @@
 
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
-import re
-os.chdir(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
 import sys
-sys.path.append("./config")
+import re
+# Construct the first path to check
+root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
+# Check if the first path is not already in sys.path, then append it
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+
+# Construct the second path to check (relative to the current working directory)
+path_to_add_2 = os.path.abspath(f"{root_dir}/config")
+# Check if the second path is not already in sys.path, then append it
+if path_to_add_2 not in sys.path:
+    sys.path.append(path_to_add_2)
 import config
 
 import pandas as pd 
@@ -1493,7 +1502,7 @@ for ECONOMY_ID in ['08_JPN']:#01_AUS, '03_CDA', '01_AUS']:
     REMOVE_NON_MAJOR_VARIABLES=False
     USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=True
     USE_SAVED_OPT_PARAMATERS=True
-    input_data_new_road = pd.read_pickle(f'intermediate_data/analysis_single_use/input_data_new_road_actual_run_08_JPN_20240611_DATE20240605.pkl')
+    # input_data_new_road = pd.read_pickle(f'intermediate_data/analysis_single_use/input_data_new_road_actual_run_08_JPN_20240611_DATE20240605.pkl')
     
     # input_data_new_road = pd.read_pickle(f'intermediate_data/analysis_single_use/input_data_new_road_actual_run_15_PHL_20240530.pkl')
     

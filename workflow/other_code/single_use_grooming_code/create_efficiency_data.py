@@ -5,14 +5,23 @@
 import os
 import re
 import pandas as pd
-os.chdir(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
+sys.path.append(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
 import plotly.express as px
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
-import re
-os.chdir(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
 import sys
-sys.path.append("./config")
+import re
+# Construct the first path to check
+root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
+# Check if the first path is not already in sys.path, then append it
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+
+# Construct the second path to check (relative to the current working directory)
+path_to_add_2 = os.path.abspath(f"{root_dir}/config")
+# Check if the second path is not already in sys.path, then append it
+if path_to_add_2 not in sys.path:
+    sys.path.append(path_to_add_2)
 import config
 
 import pandas as pd 

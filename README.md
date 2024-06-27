@@ -32,6 +32,9 @@ It's really messy and im sorry. Trying to keep up with schedule means ive had to
 ## Integration with transport data system:
 This repo makes use of a repo i also designed which is a data system for transport data. It is called transport_data_system and is available on my own Github page. I havent added it to APERC account because of it's use of the Large File System (LFS) which is not supported by APERC, yet. 
 
+Useful code:
+git rm --cached -r .
+
 ## Public vs master branch:
 Because this is an APERC project, there is a chance that some data should be kept relatively confidential, so I have created a public branch and repo which is a stripped down version of the private branch. Note that the private branch and repo is private to all except me, it really just acts as a backup. The public branch and repo does not contain any data besides what is needed to run it, and is for the purpose of sharing the code with the public and potentially running a lightweight webapp. Therefore the scenarios presented dont represent the scenarios in production on the private branch and repo as the private branch and repo is the one that is used for development and contains all the data/charts/outputs etc from our modelling work.
 
