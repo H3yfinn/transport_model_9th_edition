@@ -477,4 +477,13 @@ def copy_folder_structure(src, dest):
 #     os.makedirs(destination_folder)
 
 # copy_folder_structure(source_folder, destination_folder)
+def remove_gitkeep_files(src):
+    for dirpath, dirnames, filenames in os.walk(src):
+        gitkeep_path = os.path.join(dirpath, ".gitkeep")
+        if os.path.isfile(gitkeep_path):
+            os.remove(gitkeep_path)
+            
+# # Replace 'folder' with your actual folder path
+# folder = "./env_transport_model"
+# remove_gitkeep_files(folder)
 #%%

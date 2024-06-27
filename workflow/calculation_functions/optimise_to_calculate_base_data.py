@@ -1493,7 +1493,7 @@ for ECONOMY_ID in ['08_JPN']:#01_AUS, '03_CDA', '01_AUS']:
     REMOVE_NON_MAJOR_VARIABLES=False
     USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=True
     USE_SAVED_OPT_PARAMATERS=True
-    input_data_new_road = pd.read_pickle(f'intermediate_data/analysis_single_use/input_data_new_road_actual_run_08_JPN_20240611_DATE20240605.pkl')
+    # input_data_new_road = pd.read_pickle(f'intermediate_data/analysis_single_use/input_data_new_road_actual_run_08_JPN_20240611_DATE20240605.pkl')
     
     # input_data_new_road = pd.read_pickle(f'intermediate_data/analysis_single_use/input_data_new_road_actual_run_15_PHL_20240530.pkl')
     
