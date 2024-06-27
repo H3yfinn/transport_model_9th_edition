@@ -51,7 +51,6 @@ import clean_model_output
 import create_output_for_outlook_data_system
 #PLOTTING FUNCTIONS
 sys.path.append("./workflow/plotting_functions")
-import plot_all_graphs
 import produce_LMDI_graphs
 import plot_charging_graphs
 import create_assumptions_dashboards
@@ -264,14 +263,6 @@ def main():
     #     archiving_folder = archiving_scripts.create_archiving_folder_for_FILE_DATE_ID()
     #     archiving_scripts.archive_lots_of_files(archiving_folder)
 
-    # #do this last because it takes so long, so make sure thaht everything else is working first
-    run_plot_all_graphs = False
-    if run_plot_all_graphs:
-        plot_all_graphs.plot_all_graphs(ECONOMY_ID='19_THA', PLOT=True, plot_comparisons=True)
-        # except:
-        #     plot_all_graphs.plot_all_graphs(PLOT=True, plot_comparisons=True)
-        # produce_LMDI_graphs.produce_lots_of_LMDI_charts(USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True)
-        # exec(open("./workflow/plotting/produce_LMDI_graphs.py").read())
     ARCHIVE_RESULTS=False
     if ARCHIVE_RESULTS:
         economies_to_archive = ['06_HKC', '11_MEX', '21_VN']#'11_MEX',
