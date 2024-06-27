@@ -1,0 +1,29 @@
+Unit,Measure,Magnitude_adjustment,Magnitude_adjusted_unit
+Pj,Energy,1,Pj
+Stocks,Stocks,0.000001,Million_stocks
+Km_per_pj,New_vehicle_efficiency,0.000000001,Billion_km_per_pj
+Km_per_pj,Efficiency,0.000000001,Billion_km_per_pj
+%,Turnover_rate,1,%
+%,Supply_side_fuel_share ,1,%
+%,Demand_side_fuel_share ,1,%
+Passengers_or_tonnes,Occupancy_or_load,1,Passengers_or_tonnes
+Passenger_km_or_freight_tonne_km,Activity,1.00E-09,Billion_passenger_km_or_freight_tonne_km
+Km_per_stock,Mileage,1.00E-03,Thousand_km_per_stock
+%,Non_road_efficiency_growth,1,%
+%,Vehicle_sales_share,1,%
+%,New_vehicle_efficiency_growth,1,%
+%,Turnover_rate_growth,1,%
+%,Occupancy_or_load_growth,1,%
+%,Activity_growth,1,%
+Km,Travel_km,1.00E-09,Billion_km
+Pj_per_passenger_or_freight_tonne_km,Intensity,1.00E+09,Pj_per_billion_passenger_or_freight_tonne_km
+Real_gdp,Gdp,0.000001,Real_gdp_millions
+Population,Population,0.001,Population_thousands
+Gdp_per_capita,Gdp_per_capita,1.00E-03,Thousand_Gdp_per_capita
+Stocks_per_thousand_capita,Stocks_per_thousand_capita,1,Stocks_per_thousand_capita
+Passengers,Load,1,Passengers
+Tonnes,Occpancy,1,Tonnes
+Passenger_km,Passenger_km,1.00E-09,Billion_passenger_km
+Tonne_km,Freight_tonne_km,1.00E-09,Billion_tonne_km
+Stocks_per_thousand_capita,Gompertz_gamma,1,Stocks_per_thousand_capita
+Age,Average_age,1,Age

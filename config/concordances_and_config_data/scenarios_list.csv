@@ -1,0 +1,5 @@
+Scenario_id,Scenario,Description,Use
+8th_ref,Reference,,TRUE
+8th_cn,Carbon Neutral,Actually officially called carbon neautrality,FALSE
+9th_dummy,9th_dummy,Used to test for 9th edition modelling,FALSE
+9th_tgt,Target,New 9th edition scenario.,TRUE
