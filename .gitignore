@@ -32,7 +32,7 @@ env_transport_model/*
 !config/**
 
 #also to reduce optimisation time dont ignore the files that start with optimised_data_ in intermediate_data/input_data_optimisations as they take a long time to generate
-!intermediate_data/input_data_optimisations/optimised_data_*
+!intermediate_data/input_data_optimisations/*
 #but ignore the input_data/previous_run_archive folder and archive folders
 input_data/previous_run_archive/**
 **/archive 
