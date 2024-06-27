@@ -17,12 +17,11 @@
 
 # Absolutely ignore any really large folders that we don't want to track in LFS:
 plotting_output/**
-intermediate_data/LMDI/**
-intermediate_data/analysis_single_use/**
+intermediate_data/**
 output_data/**
 
-# But keep the dashboards in plotting_output since they are super useful:
-# !plotting_output/dashboards/**
+#ignore any documentation files
+documentation/**
 
 # Env folders don't need to be tracked:
 env_transport_model/*
