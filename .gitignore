@@ -23,11 +23,11 @@ env_transport_model/*
 
 # Make sure to track anything in input_data and config folders.
 # As long as these folders don't create new files, they should be tracked.
-# !input_data/**
+!input_data/**
 !config/**
 
 #also to reduce optimisation time dont ignore the files that start with optimised_data_ in intermediate_data/input_data_optimisations as they take a long time to generate
-# !intermediate_data/input_data_optimisations/*
+!intermediate_data/input_data_optimisations/*
 
 #but ignore the input_data/previous_run_archive folder and archive folders
 input_data/previous_run_archive/**

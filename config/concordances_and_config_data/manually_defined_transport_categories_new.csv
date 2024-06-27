@@ -1,24 +1,3 @@
-Medium,Transport Type,Vehicle Type,Drive
-air,freight,all,all
-air,passenger,all,all
-rail,freight,all,all
-rail,passenger,all,all
-road,freight,ht,bev
-road,freight,ht,fcev
-road,freight,ht,ice
-road,passenger,2w,bev
-road,passenger,2w,ice
-road,passenger,bus,bev
-road,passenger,bus,ice
-road,passenger,bus,fcev
-road,passenger,ldv,bev
-road,passenger,ldv,ice
-road,passenger,ldv,fcev
-road,passenger,ldv,phev
-ship,freight,all,all
-ship,passenger,all,all
-road,freight,ht,phev
-road,passenger,bus,phev
-road,freight,lcv,bev
-road,freight,lcv,fcev
-road,freight,lcv,ice
+version https://git-lfs.github.com/spec/v1
+oid sha256:213c7390a01970021138a6d6d71b13d1754f7a492e9f2630975a17285b90d5b1
+size 573

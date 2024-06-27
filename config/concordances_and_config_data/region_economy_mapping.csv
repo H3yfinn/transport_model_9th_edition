@@ -1,22 +1,3 @@
-Economy,Region,Region_growth_analysis,Region_growth_regression,Region_growth_regression2
-01_AUS,Oceania,Australasia,Developed_low_density,Low_density
-02_BD,Southeast Asia,Southeast Asia,City,City
-03_CDA,Other Americas,North America,Developed_low_density,Low_density
-04_CHL,Other Americas,Latin America,Developing_high_density,Developing_high_density
-05_PRC,China,China,Developed_high_density,Developed_high_density
-06_HKC,Northeast Asia,Northeast Asia,City,City
-07_INA,Southeast Asia,Southeast Asia,Developing_high_density,Developing_high_density
-08_JPN,Northeast Asia,Northeast Asia,Developed_high_density,Developed_high_density
-09_ROK,Northeast Asia,Northeast Asia,Developed_high_density,Developed_high_density
-10_MAS,Southeast Asia,Southeast Asia,Developing_high_density,Developing_high_density
-11_MEX,Other Americas,Latin America,Developing_high_density,Developing_high_density
-12_NZ,Oceania,Australasia,Developed_low_density,Low_density
-13_PNG,Oceania,Papua New Guinea,PNG,Low_density
-14_PE,Other Americas,Latin America,Developing_high_density,Developing_high_density
-15_RP,Southeast Asia,Southeast Asia,Developing_high_density,Developing_high_density
-16_RUS,Russia,Russia,Developed_low_density,Low_density
-17_SIN,Southeast Asia,Northeast Asia,City,City
-18_CT,Northeast Asia,Northeast Asia,Developing_high_density,Developing_high_density
-19_THA,Southeast Asia,Southeast Asia,Developing_high_density,Developing_high_density
-20_USA,USA,North America,Developed_low_density,Low_density
-21_VN,Southeast Asia,Southeast Asia,Developing_high_density,Developing_high_density
+version https://git-lfs.github.com/spec/v1
+oid sha256:aa49edde4ecbb1226229c874dd807935e6f64e8073ce18a675d014293b6d92da
+size 1593
