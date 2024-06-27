@@ -517,7 +517,7 @@ def convert_stocks_to_stock_shares(stocks_df):
 model_output_file_name = 'model_output20240117.csv'
 FILE_DATE_ID = '20240117'
 ECONOMY_ID = '09_ROK'
-create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
+# create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
 
 # model_output_file_name = 'model_output20240612.csv'
 # FILE_DATE_ID = '20240612'
