@@ -1,0 +1,2 @@
+#also we are going to create some made up vlaues where we would expect to retrieve these vlaues through a research process but we havent done that yet. This is so that the model can run and we can test it. We will need to replace these values with offical ones later on.
+turnover_rate = 14.8#14.8 years is the average turnover rate for a car in the US accoreding to this https://energyfuse.org/americas-aging-vehicles-delay-rate-fleet-turnover/
