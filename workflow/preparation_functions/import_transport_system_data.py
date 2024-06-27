@@ -52,7 +52,10 @@ def import_transport_system_data():
     # FILE_DATE_ID2 = config.FILE_DATE_ID.replace('_','')
     
     # combined_data_DATE20230531
-    transport_data_system_folder = '../transport_data_system'
+    if config.IMPORT_FROM_TRANSPORT_DATA_SYSTEM:
+        transport_data_system_folder = '../transport_data_system'
+    else:
+        transport_data_system_folder = 'input_data/transport_data_system'
     transport_data_system_df = pd.read_csv('{}/output_data/combined_data_{}.csv'.format(transport_data_system_folder,config.transport_data_system_FILE_DATE_ID))
 
     
