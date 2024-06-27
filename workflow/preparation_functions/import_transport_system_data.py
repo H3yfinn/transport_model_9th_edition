@@ -53,10 +53,10 @@ def import_transport_system_data():
     
     # combined_data_DATE20230531
     if config.IMPORT_FROM_TRANSPORT_DATA_SYSTEM:
-        transport_data_system_folder = '../transport_data_system'
+        transport_data_system_folder = '../transport_data_system/output_data'
     else:
         transport_data_system_folder = 'input_data/transport_data_system'
-    transport_data_system_df = pd.read_csv('{}/output_data/combined_data_{}.csv'.format(transport_data_system_folder,config.transport_data_system_FILE_DATE_ID))
+    transport_data_system_df = pd.read_csv('{}/combined_data_{}.csv'.format(transport_data_system_folder,config.transport_data_system_FILE_DATE_ID))
 
     
     #if they are there, remove cols called index, level_0
