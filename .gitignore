@@ -15,12 +15,7 @@
 *.html
 *.txt
 
-# Absolutely ignore any really large folders that we don't want to track in LFS:
-plotting_output/**
-intermediate_data/**
-output_data/**
-
-#ignore any documentation files
+#ignore any documentation files no matter what their extension is
 documentation/**
 
 # Env folders don't need to be tracked:
@@ -33,9 +28,11 @@ env_transport_model/*
 
 #also to reduce optimisation time dont ignore the files that start with optimised_data_ in intermediate_data/input_data_optimisations as they take a long time to generate
 !intermediate_data/input_data_optimisations/*
+
 #but ignore the input_data/previous_run_archive folder and archive folders
 input_data/previous_run_archive/**
 **/archive 
+output_data/archived_runs/**
 
 ######################################
 #Following are defaults based on a file i found on github
