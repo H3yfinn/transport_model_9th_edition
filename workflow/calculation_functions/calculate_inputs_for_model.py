@@ -38,7 +38,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
-sys.path.append("./workflow")
+# sys.path.append(f"{root_dir}/workflow")
 sys.path.append(f"{root_dir}/workflow/plotting_functions")
 import plot_user_input_data
 import adjust_data_to_match_esto

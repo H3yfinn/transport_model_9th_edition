@@ -36,7 +36,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
-sys.path.append("../PyLMDI")
+sys.path.append(f"{root_dir}/../PyLMDI")
 #PyLMDI functions:
 import main_function
 import plot_output
