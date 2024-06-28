@@ -9,53 +9,86 @@ import re
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
-if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
-    # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
-    import config
-    import other_utility_functions
-        
-    #PREPARATION FUNCTIONS
-    sys.path.append(f"{root_dir}/code/preparation_functions")
-    import concordance_scripts
-    import import_macro_data
-    import import_transport_system_data
-    import create_and_clean_user_input
-    import aggregate_data_for_model
-    import filter_for_modelling_years
-    #UTILITY FUNCTIONS
-    import archiving_scripts
-    import other_utility_functions
-    #CALCUALTION FUNCTIONS
-    sys.path.append(f"{root_dir}/code/calculation_functions")
-    import calculate_inputs_for_model
-    import run_road_model
-    import run_non_road_model
-    import apply_fuel_mix_demand_side
-    import apply_fuel_mix_supply_side
-    import estimate_charging_requirements
-    import international_bunkers
-    #FORMATTING FUNCTIONS
-    sys.path.append(f"{root_dir}/code/formatting_functions")
-    import concatenate_model_output
-    import clean_model_output
-    import create_output_for_outlook_data_system
-    #PLOTTING FUNCTIONS
-    sys.path.append(f"{root_dir}/code/plotting_functions")
-    import produce_LMDI_graphs
-    import plot_charging_graphs
-    import create_assumptions_dashboards
-    import calculate_and_plot_oil_displacement
-    import compare_esto_energy_to_data
-else:
-    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
-    from code.utility_functions import *
-    from transport_model_9th_edition.code.config import *
-    from code.preparation_functions import *
-    from code.utility_functions import *
-    from code.calculation_functions import *
-    from code.formatting_functions import *
-    from code.plotting_functions import *
+# from model_code import config, preparation_functions, utility_functions, calculation_functions, formatting_functions, plotting_functions
+from model_code import config
+from model_code.preparation_functions.import_macro_data import import_macro_data
+from model_code.preparation_functions.import_transport_system_data import import_transport_system_data
+from model_code.preparation_functions.concordance_scripts import create_all_concordances
+from model_code.preparation_functions import (
+    create_and_clean_user_input,
+    aggregate_data_for_model,
+    filter_for_modelling_years
+)
+from model_code.calculation_functions import (
+    calculate_inputs_for_model,
+    run_road_model,
+    apply_fuel_mix_demand_side
+)
+from model_code.formatting_functions import concatenate_model_output
+from model_code.formatting_functions.concatenate_model_output import fill_missing_output_cols_with_nans
+from model_code.formatting_functions import clean_model_output
+from model_code.calculation_functions import run_non_road_model
+from model_code.formatting_functions import concatenate_model_output
+from model_code.calculation_functions import apply_fuel_mix_demand_side
+from model_code.calculation_functions import apply_fuel_mix_supply_side
+from model_code.formatting_functions import clean_model_output
+from model_code.preparation_functions import filter_for_modelling_years
+from model_code.calculation_functions import calculate_inputs_for_model
+from model_code.preparation_functions import aggregate_data_for_model
+from model_code.calculation_functions import run_road_model
+from model_code.calculation_functions import run_non_road_model
+from model_code.formatting_functions import create_output_for_outlook_data_system
+from model_code.calculation_functions import estimate_kw_of_required_chargers
+from model_code.plotting_functions import plot_required_chargers
+from model_code.plotting_functions import calculate_and_plot_oil_displacement
+from model_code.calculation_functions import international_bunker_share_calculation_handler
+
+from model_code.plotting_functions import produce_lots_of_LMDI_charts
+from model_code.plotting_functions import dashboard_creation_handler
+from model_code.utility_functions import copy_required_output_files_to_one_folder
+from model_code.formatting_functions import concatenate_outlook_data_system_outputs
+from model_code import utility_functions
+from model_code.formatting_functions import concatenate_output_data
+
+
+
+
+# preparation_functions.create_and_clean_user_input
+# preparation_functions.aggregate_data_for_model
+# preparation_functions.filter_for_modelling_years
+# calculation_functions.calculate_inputs_for_model
+# formatting_functions.concatenate_model_output.fill_missing_output_cols_with_nans
+# calculation_functions.run_road_model.run_road_model
+# concatenate_model_output.concatenate_model_output
+# calculation_functions.apply_fuel_mix_demand_side.apply_fuel_mix_demand_side
+#  clean_model_output.clean_model_output
+#  filter_for_modelling_years.filter_for_modelling_years
+#   calculate_inputs_for_model.calculate_inputs_for_model
+# aggregate_data_for_model.aggregate_data_for_model
+# run_road_model.run_road_model
+# run_non_road_model.run_non_road_model
+# concatenate_model_output.concatenate_model_output
+# apply_fuel_mix_demand_side.apply_fuel_mix_demand_side
+# apply_fuel_mix_supply_side
+# clean_model_output
+
+# filter_for_modelling_years
+# calculate_inputs_for_model
+# aggregate_data_for_model
+# create_output_for_outlook_data_system.create_output_for_outlook_data_system
+# estimate_charging_requirements.estimate_kw_of_required_chargers
+# plot_charging_graphs.plot_required_chargers
+# calculate_and_plot_oil_displacement.calculate_and_plot_oil_displacement
+# international_bunkers.international_bunker_share_calculation_handler
+# produce_LMDI_graphs.produce_lots_of_LMDI_charts
+# create_assumptions_dashboards.dashboard_creation_handler
+
+# utility_functions.copy_required_output_files_to_one_folder
+# create_output_for_outlook_data_system.concatenate_outlook_data_system_outputs()
+# clean_model_output.concatenate_output_data()
+# international_bunkers.international_bunker_share_calculation_handler()
+# utility_functions.copy_required_output_files_to_one_folder
+# archiving_scripts.save_economy_projections_and_all_inputs
 #################
 
 import pandas as pd 
@@ -78,6 +111,9 @@ USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=True
 USE_SAVED_OPT_PARAMATERS=True   
 #%%
 def main():
+    #make config global:
+    
+    
     # Prevent the system from going to sleep
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
     # To restore the original state, use:
@@ -88,12 +124,12 @@ def main():
         #Things to do once a day:
         do_these_once_a_day = True
         if do_these_once_a_day:
-            concordance_scripts.create_all_concordances()
+            create_all_concordances()
         
         PREPARE_DATA = True
         if PREPARE_DATA:
-            import_macro_data.import_macro_data(UPDATE_INDUSTRY_VALUES=False)
-            import_transport_system_data.import_transport_system_data()
+            import_macro_data(UPDATE_INDUSTRY_VALUES=False)
+            import_transport_system_data()
             
         #####################################################################
         #since we're going to find that some economies have better base years than 2017 to start with, lets start changing the Base year vlaue and run the model economy by economy:
@@ -173,8 +209,8 @@ def main():
             ECONOMY_ID = economy
             BASE_YEAR = ECONOMY_BASE_YEARS_DICT[economy]
             
-            create_and_clean_user_input.create_and_clean_user_input(ECONOMY_ID)
-            aggregate_data_for_model.aggregate_data_for_model(ECONOMY_ID)
+            create_and_clean_user_input(ECONOMY_ID)
+            aggregate_data_for_model(ECONOMY_ID)
             MODEL_RUN_1  = True
             if MODEL_RUN_1:   
                 print('\nDoing first model run for {}\n'.format(economy))   
@@ -184,18 +220,18 @@ def main():
                 ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR = False
                 
                 #perform final filtering of data (eg for one economy only)
-                supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years.filter_for_modelling_years(BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
-                calculate_inputs_for_model.calculate_inputs_for_model(road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False)
+                supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years(BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
+                calculate_inputs_for_model(road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False)
                 if BASE_YEAR == config.OUTLOOK_BASE_YEAR:
                     #since we wont run the model, just fill the input with requried output cols and put nans in them
-                    concatenate_model_output.fill_missing_output_cols_with_nans(ECONOMY_ID, road_model_input_wide, non_road_model_input_wide)
+                    fill_missing_output_cols_with_nans(ECONOMY_ID, road_model_input_wide, non_road_model_input_wide)
                 else:
-                    run_road_model_df = run_road_model.run_road_model(ECONOMY_ID)
-                    run_non_road_model.run_non_road_model(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD = ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict[ECONOMY_ID])
-                model_output_all = concatenate_model_output.concatenate_model_output(ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR)
-                model_output_with_fuel_mixing = apply_fuel_mix_demand_side.apply_fuel_mix_demand_side(model_output_all,ECONOMY_ID)
-                model_output_with_fuel_mixing = apply_fuel_mix_supply_side.apply_fuel_mix_supply_side(model_output_with_fuel_mixing,ECONOMY_ID)
-                clean_model_output.clean_model_output(ECONOMY_ID, model_output_with_fuel_mixing, model_output_all)
+                    run_road_model_df = run_road_model(ECONOMY_ID)
+                    run_non_road_model(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD = ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict[ECONOMY_ID])
+                model_output_all = concatenate_model_output(ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR)
+                model_output_with_fuel_mixing = apply_fuel_mix_demand_side(model_output_all,ECONOMY_ID)
+                model_output_with_fuel_mixing = apply_fuel_mix_supply_side(model_output_with_fuel_mixing,ECONOMY_ID)
+                clean_model_output(ECONOMY_ID, model_output_with_fuel_mixing, model_output_all)
                 
             MODEL_RUN_2  = True
             if MODEL_RUN_2:
@@ -204,21 +240,21 @@ def main():
                 PROJECT_TO_JUST_OUTLOOK_BASE_YEAR = False
                 ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR = True
                 #perform final filtering of data (eg for one economy only)
-                supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years.filter_for_modelling_years(BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
-                calculate_inputs_for_model.calculate_inputs_for_model(road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS)
-                aggregate_data_for_model.aggregate_data_for_model(ECONOMY_ID)
-                run_road_model_df = run_road_model.run_road_model(ECONOMY_ID)
+                supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years(BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
+                calculate_inputs_for_model(road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS)
+                aggregate_data_for_model(ECONOMY_ID)
+                run_road_model_df = run_road_model(ECONOMY_ID)
                 
-                run_non_road_model.run_non_road_model(ECONOMY_ID,USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD=ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict[ECONOMY_ID])
+                run_non_road_model(ECONOMY_ID,USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD=ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict[ECONOMY_ID])
                 
-                model_output_all = concatenate_model_output.concatenate_model_output(ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR)
-                model_output_with_fuel_mixing = apply_fuel_mix_demand_side.apply_fuel_mix_demand_side(model_output_all,ECONOMY_ID=ECONOMY_ID)
-                model_output_with_fuel_mixing = apply_fuel_mix_supply_side.apply_fuel_mix_supply_side(model_output_with_fuel_mixing,ECONOMY_ID=ECONOMY_ID)
+                model_output_all = concatenate_model_output(ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR)
+                model_output_with_fuel_mixing = apply_fuel_mix_demand_side(model_output_all,ECONOMY_ID=ECONOMY_ID)
+                model_output_with_fuel_mixing = apply_fuel_mix_supply_side(model_output_with_fuel_mixing,ECONOMY_ID=ECONOMY_ID)
                 
-                clean_model_output.clean_model_output(ECONOMY_ID, model_output_with_fuel_mixing, model_output_all)
+                clean_model_output(ECONOMY_ID, model_output_with_fuel_mixing, model_output_all)
                 
                 #now concatenate all the model outputs together
-                create_output_for_outlook_data_system.create_output_for_outlook_data_system(ECONOMY_ID)
+                create_output_for_outlook_data_system(ECONOMY_ID)
 
                 # exec(open(f"{root_dir}/code/6_create_osemosys_output.py").read())
                 # import create_osemosys_output
@@ -227,24 +263,24 @@ def main():
                 ANALYSE_OUTPUT = True
                 ARCHIVE_PREVIOUS_DASHBOARDS = False
                 if ANALYSE_OUTPUT: 
-                    estimate_charging_requirements.estimate_kw_of_required_chargers(ECONOMY_ID)
-                    plot_charging_graphs.plot_required_chargers(ECONOMY_ID)
-                    calculate_and_plot_oil_displacement.calculate_and_plot_oil_displacement(ECONOMY_ID)   
+                    estimate_kw_of_required_chargers(ECONOMY_ID)
+                    plot_required_chargers(ECONOMY_ID)
+                    calculate_and_plot_oil_displacement(ECONOMY_ID)   
                     # produce_LMDI_graphs.produce_lots_of_LMDI_charts(ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=False, END_DATE=2035)
                     # produce_LMDI_graphs.produce_lots_of_LMDI_charts(ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=False, END_DATE=2050)
                     ###################do bunkers calc for this economy###################
-                    international_bunkers.international_bunker_share_calculation_handler(ECONOMY_ID=ECONOMY_ID)
+                    international_bunker_share_calculation_handler(ECONOMY_ID=ECONOMY_ID)
                     ###################do bunkers calc for this economy###################
                     try:
-                        produce_LMDI_graphs.produce_lots_of_LMDI_charts(ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
+                        produce_lots_of_LMDI_charts(ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
                     except:
                         print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
                         breakpoint()
                         pass
-                    create_assumptions_dashboards.dashboard_creation_handler(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
+                    dashboard_creation_handler(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
                     # compare_esto_energy_to_data.compare_esto_energy_to_data()#UNDER DEVELOPMENT   
                     
-                transport_model_9th_edition.code.other_utility_functions.copy_required_output_files_to_one_folder(ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data/for_other_modellers')
+                copy_required_output_files_to_one_folder(ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data/for_other_modellers')
                     
                     
                     
@@ -261,15 +297,14 @@ def main():
                 
         # international_bunkers.international_bunker_share_calculation_handler()
         print('\nFinished running model for all economies, now doing final formatting\n')
+        concatenate_outlook_data_system_outputs()
         
-        create_output_for_outlook_data_system.concatenate_outlook_data_system_outputs()
-        
-        clean_model_output.concatenate_output_data()
+        concatenate_output_data()
         try:
-            international_bunkers.international_bunker_share_calculation_handler()
+            international_bunker_share_calculation_handler()
         except:
             pass#usually happens because the economies in ECONOMIES_WITH_MODELLING_COMPLETE_DICT havent been run for this file date id. check extract_non_road_modelled_data() in international_bunkers
-        transport_model_9th_edition.code.other_utility_functions.copy_required_output_files_to_one_folder(output_folder_path='output_data/for_other_modellers')
+        copy_required_output_files_to_one_folder(output_folder_path='output_data/for_other_modellers')
     
         # ARCHIVE_INPUT_DATA = False
         # if ARCHIVE_INPUT_DATA:
@@ -280,7 +315,7 @@ def main():
         if ARCHIVE_RESULTS:
             economies_to_archive = ['01_AUS', '21_VN', '07_INA']
             for economy in economies_to_archive:
-                folder_name = transport_model_9th_edition.code.archiving_scripts.save_economy_projections_and_all_inputs(economy, ARCHIVED_FILE_DATE_ID=config.FILE_DATE_ID)
+                folder_name = utility_functions.save_economy_projections_and_all_inputs(economy, ARCHIVED_FILE_DATE_ID=config.FILE_DATE_ID)
         UNARCHIVE_RESULTS=False
         if UNARCHIVE_RESULTS:
             folder_name =None# 'output_data/archived_runs/20_USA_20230902_2331'
@@ -293,7 +328,7 @@ def main():
 
 if __name__ == "__main__":
     main()  # python code/main.py > output.txt 2>&1
-#%%
+4#%%
 # ARCHIVE_RESULTS=True
 # if ARCHIVE_RESULTS:
 #     economies_to_archive = ['03_CDA']#['19_THA', '20_USA', '08_JPN']

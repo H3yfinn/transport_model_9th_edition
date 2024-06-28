@@ -9,52 +9,12 @@ import re
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
-if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
-    # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
-    import config
-    import other_utility_functions
-        
-    #PREPARATION FUNCTIONS
-    sys.path.append(f"{root_dir}/code/preparation_functions")
-    import concordance_scripts
-    import import_macro_data
-    import import_transport_system_data
-    import create_and_clean_user_input
-    import aggregate_data_for_model
-    import filter_for_modelling_years
-    #UTILITY FUNCTIONS
-    import archiving_scripts
-    import other_utility_functions
-    #CALCUALTION FUNCTIONS
-    sys.path.append(f"{root_dir}/code/calculation_functions")
-    import calculate_inputs_for_model
-    import run_road_model
-    import run_non_road_model
-    import apply_fuel_mix_demand_side
-    import apply_fuel_mix_supply_side
-    import estimate_charging_requirements
-    import international_bunkers
-    #FORMATTING FUNCTIONS
-    sys.path.append(f"{root_dir}/code/formatting_functions")
-    import concatenate_model_output
-    import clean_model_output
-    import create_output_for_outlook_data_system
-    #PLOTTING FUNCTIONS
-    sys.path.append(f"{root_dir}/code/plotting_functions")
-    import produce_LMDI_graphs
-    import plot_charging_graphs
-    import create_assumptions_dashboards
-    import calculate_and_plot_oil_displacement
-    import compare_esto_energy_to_data
-else:
-    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
-    from code.config import *
-    from code.preparation_functions import *
-    from code.utility_functions import *
-    from code.calculation_functions import *
-    from code.formatting_functions import *
-    from code.plotting_functions import *
+from model_code.config import *
+from model_code.preparation_functions import *
+from model_code.utility_functions import *
+from model_code.calculation_functions import *
+from model_code.formatting_functions import *
+from model_code.plotting_functions import *
 #################
 import pandas as pd 
 import numpy as np
