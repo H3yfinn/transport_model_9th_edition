@@ -49,46 +49,6 @@ from model_code.utility_functions import copy_required_output_files_to_one_folde
 from model_code.formatting_functions import concatenate_outlook_data_system_outputs
 from model_code import utility_functions
 from model_code.formatting_functions import concatenate_output_data
-
-
-
-
-# preparation_functions.create_and_clean_user_input
-# preparation_functions.aggregate_data_for_model
-# preparation_functions.filter_for_modelling_years
-# calculation_functions.calculate_inputs_for_model
-# formatting_functions.concatenate_model_output.fill_missing_output_cols_with_nans
-# calculation_functions.run_road_model.run_road_model
-# concatenate_model_output.concatenate_model_output
-# calculation_functions.apply_fuel_mix_demand_side.apply_fuel_mix_demand_side
-#  clean_model_output.clean_model_output
-#  filter_for_modelling_years.filter_for_modelling_years
-#   calculate_inputs_for_model.calculate_inputs_for_model
-# aggregate_data_for_model.aggregate_data_for_model
-# run_road_model.run_road_model
-# run_non_road_model.run_non_road_model
-# concatenate_model_output.concatenate_model_output
-# apply_fuel_mix_demand_side.apply_fuel_mix_demand_side
-# apply_fuel_mix_supply_side
-# clean_model_output
-
-# filter_for_modelling_years
-# calculate_inputs_for_model
-# aggregate_data_for_model
-# create_output_for_outlook_data_system.create_output_for_outlook_data_system
-# estimate_charging_requirements.estimate_kw_of_required_chargers
-# plot_charging_graphs.plot_required_chargers
-# calculate_and_plot_oil_displacement.calculate_and_plot_oil_displacement
-# international_bunkers.international_bunker_share_calculation_handler
-# produce_LMDI_graphs.produce_lots_of_LMDI_charts
-# create_assumptions_dashboards.dashboard_creation_handler
-
-# utility_functions.copy_required_output_files_to_one_folder
-# create_output_for_outlook_data_system.concatenate_outlook_data_system_outputs()
-# clean_model_output.concatenate_output_data()
-# international_bunkers.international_bunker_share_calculation_handler()
-# utility_functions.copy_required_output_files_to_one_folder
-# archiving_scripts.save_economy_projections_and_all_inputs
 #################
 
 import pandas as pd 
@@ -159,52 +119,6 @@ def main():
                 pass
             else:
                 continue
-            # doing = ['09_ROK', '10_MAS','05_PRC', '18_CT', '17_SGP', '01_AUS']#'08_JPN', '03_CDA', 
-            # if economy  '02_BD':
-            #     continue
-            # ['01_AUS', '10_MAS', '15_PHL', '07_INA', '21_VN','19_THA','20_USA','03_CDA','18_CT', '17_SGP','04_CHL', '06_HKC', '02_BD']
-            # if economy == '04_CHL':# ['10_MAS', '15_PHL', '01_AUS']:#, '07_INA', '21_VN']:
-            #     pass
-            # else:
-            #     continue
-            # elif economy in errors:# (economy in doing) or (economy in completed) or (economy in not_run_yet)or (economy in assumptions_not_completed_but_model_works) or (economy in errors): #(economy in doing):
-            #     continue
-            # if economy == '15_PHL' or economy == '21_VN':#economy == '01_AUS' or economy == '07_INA' or economy == '10_MAS' or
-            #     pass
-            # 
-            #     continue
-            #     # # pass
-            #     # if economy ==  '05_PRC':
-            #     #     pass
-            #     # else:
-            # if economy =='01_AUS':
-            #     pass
-            # else:
-            #     continue
-            # if economy not in ['13_PNG', '02_BD', '06_HKC']:
-            #     pass
-            # elif economy == '06_HKC':
-            #     FOUND = True
-            #     continue
-            # else:
-            #     continue
-            # if economy not in errors:# and FOUND:
-            #     pass
-            # if economy not in ['13_PNG', '02_BD']:, '01_AUS']:# =='01_AUS':
-            #     FOUND = True
-            #     pass#continue
-            # else:
-            #     continue
-            # elif economy == '01_AUS':
-            #     FOUND = True
-            #     continue
-            # else:
-            #     continue
-            # elif (economy in completed) or (economy in errors) or (economy in assumptions_not_completed_but_model_works):
-            #     continue
-            # elif (economy not in doing) and (economy not in not_run_yet):
-            #     raise ValueError('Economy {} not in doing or not_run_yet. Not expected'.format(economy))
-
             print('\nRunning model for {}\n'.format(economy))
             ECONOMY_ID = economy
             BASE_YEAR = ECONOMY_BASE_YEARS_DICT[economy]
@@ -329,26 +243,3 @@ def main():
 if __name__ == "__main__":
     main()  # python code/main.py > output.txt 2>&1
 4#%%
-# ARCHIVE_RESULTS=True
-# if ARCHIVE_RESULTS:
-#     economies_to_archive = ['03_CDA']#['19_THA', '20_USA', '08_JPN']
-#     for economy in economies_to_archive:
-#         folder_name = archiving_scripts.save_economy_projections_and_all_inputs(economy, ARCHIVED_FILE_DATE_ID='20240327', transport_data_system_FILE_DATE_ID_2='DATE20240312_DATE20240215')
-#%%
-
-# ARCHIVE_RESULTS=True
-# if ARCHIVE_RESULTS:
-#     economies_to_archive = ['09_ROK']#['19_THA', '20_USA', '08_JPN']
-#     for economy in economies_to_archive:
-#         folder_name = archiving_scripts.save_economy_projections_and_all_inputs(economy, ARCHIVED_FILE_DATE_ID='20231106', transport_data_system_FILE_DATE_ID_2='DATE20231106')
-        
-#%%
-# ARCHIVE_RESULTS=True
-# if ARCHIVE_RESULTS: 
-#     economies_to_archive = ['08_JPN', '20_USA', '19_THA', '03_CDA']#, '08_JPN']
-#     for economy in economies_to_archive:
-#         folder_name = archiving_scripts.save_economy_projections_and_all_inputs(economy, ARCHIVED_FILE_DATE_ID=config.FILE_DATE_ID)
-#%%
-
-#%%
-#%% 
