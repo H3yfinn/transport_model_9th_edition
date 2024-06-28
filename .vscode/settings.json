@@ -1,6 +1,6 @@
 {
     "python.analysis.extraPaths": [
-        "./workflow/grooming_code"
+        "./code/grooming_code"
     ],
     "git.ignoreLimitWarning": true
 }

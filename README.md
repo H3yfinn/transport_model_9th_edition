@@ -14,7 +14,7 @@ Note that installing those libraries in the yml files will result in a few other
 
 ## Run the model
 Simply put, if using the command line, just use:
-python workflow/main.py > output.txt 2>&1
+python code/main.py > output.txt 2>&1
 
 If using Jupyter with Visual Studio Code, you can run the .py files cell by cell as separated by the #%% characters. I'm not sure how the #%% thing works outside of Visual Studio Code.
 
@@ -22,7 +22,7 @@ If using Jupyter with Visual Studio Code, you can run the .py files cell by cell
 There are some documentation files in ./documentation/. They can be used in addition to the Wiki.
 
 ## Folder structure
-./workflow/ - inside here are the files you need to run the model. 
+./code/ - inside here are the files you need to run the model. 
 ./other_code/ - inside here is extra code that is useful to use for visualisation of the outputs, creation of input data and some kinds of analysis/exploration files. 
 ./config/ - general configurations you can set, other than those that are in the integrate.py file.
 
