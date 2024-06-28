@@ -19,7 +19,7 @@ from config import *
 #create fake user input for demand side fuel mixes using model concordances
 
 #load model concordances for filling in 
-model_concordances_fuels = pd.read_csv('config/concordances/{}'.format(model_concordances_file_name_fuels))
+model_concordances_fuels = pd.read_csv(root_dir + '/' + 'config/concordances/{}'.format(model_concordances_file_name_fuels))
 
 #%%
 #the process will run like:
@@ -125,6 +125,6 @@ model_concordances_all = pd.concat([model_concordances_PHEVG_melt, model_concord
 model_concordances_all = model_concordances_all[model_concordances_all['Demand_side_fuel_share'] != 0]
 #%%
 #save as user input csv
-model_concordances_all.to_csv('intermediate_data/model_inputs/{}/demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID), index=False)
+model_concordances_all.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID), index=False)
 #%%
 

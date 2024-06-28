@@ -23,19 +23,19 @@ pio.renderers.default = "browser"#allow plotting of graphs in the interactive no
 #%%
 #load data.
 #we will load the vehicle sales shares that were in the input data folder of 8th edition, whoch it seems hugh projected.
-# vehicle_sales_share = pd.read_excel('input_data/adjustments_spreadsheet.xlsx', sheet_name='Vehicle_sales_share')
-# vehicle_sales_share = pd.read_csv('intermediate_data/non_aggregated_input_data/vehicle_sales_share.csv')#this is jsut a formatted version of above
+# vehicle_sales_share = pd.read_excel(root_dir + '/' + 'input_data/adjustments_spreadsheet.xlsx', sheet_name='Vehicle_sales_share')
+# vehicle_sales_share = pd.read_csv(root_dir + '/' + 'intermediate_data/non_aggregated_input_data/vehicle_sales_share.csv')#this is jsut a formatted version of above
 #load data
-vehicle_sales_share_ref = pd.read_excel('input_data/from_8th/raw_data/vehicle_sales_share_model.xlsx', sheet_name='Reference')
+vehicle_sales_share_ref = pd.read_excel(root_dir + '/' + 'input_data/from_8th/raw_data/vehicle_sales_share_model.xlsx', sheet_name='Reference')
 
-vehicle_sales_share_netzero = pd.read_excel('input_data/from_8th/raw_data/vehicle_sales_share_model.xlsx', sheet_name='Net-zero')
+vehicle_sales_share_netzero = pd.read_excel(root_dir + '/' + 'input_data/from_8th/raw_data/vehicle_sales_share_model.xlsx', sheet_name='Net-zero')
 
 #we will merge a regions dataframe so that we can treat data wrt regions if need be
-# regions = pd.read_csv('intermediate_data/non_aggregated_input_data/regions.csv')
+# regions = pd.read_csv(root_dir + '/' + 'intermediate_data/non_aggregated_input_data/regions.csv')
 
 #we will also load the output stocks data from hughs model and calcualte a vehicle sales share for each year from that. This will be used to test the model works like the 8th edition. it might also be better than the vehicle sales shares that were in the input data folder of 8th edition 
 #load 8th edition data
-road_stocks= pd.read_csv('intermediate_data/non_aggregated_input_data/road_stocks.csv')
+road_stocks= pd.read_csv(root_dir + '/' + 'intermediate_data/non_aggregated_input_data/road_stocks.csv')
 
 ################################################################################################################################################################
 
@@ -147,7 +147,7 @@ if save_as_user_input:
               new_sales_shares_rolling_mean_normalised.to_excel(writer, sheet_name='Vehicle_sales_share',  index=False)
 
        #save to reformatted data folder
-       new_sales_shares_rolling_mean_normalised.to_csv('input_data/from_8th/reformatted/vehicle_stocks_change_share_normalised.csv', index=False)
+       new_sales_shares_rolling_mean_normalised.to_csv(root_dir + '/' + 'input_data/from_8th/reformatted/vehicle_stocks_change_share_normalised.csv', index=False)
 #%%
 ################################################################################################################################################################
 
@@ -203,7 +203,7 @@ if save_as_user_input:
               vehicle_sales_share_normalised2.to_excel(writer, sheet_name='Vehicle_sales_share',  index=False)
 
        #save to reformatted data folder
-       vehicle_sales_share_normalised.to_csv('input_data/from_8th/reformatted/vehicle_sales_share_normalised.csv', index=False)
+       vehicle_sales_share_normalised.to_csv(root_dir + '/' + 'input_data/from_8th/reformatted/vehicle_sales_share_normalised.csv', index=False)
 
 
 

@@ -22,8 +22,8 @@ font_size = 20
 AUTO_OPEN_PLOTLY_GRAPHS = True
 #%%
 #laod output from 8th edition
-model_output_8th = pd.read_csv('intermediate_data/activity_efficiency_energy_road_stocks.csv')
-model_8th_by_fuel = pd.read_csv('intermediate_data/cleaned_input_data/energy_with_fuel.csv')
+model_output_8th = pd.read_csv(root_dir + '/' + 'intermediate_data/activity_efficiency_energy_road_stocks.csv')
+model_8th_by_fuel = pd.read_csv(root_dir + '/' + 'intermediate_data/cleaned_input_data/energy_with_fuel.csv')
 config.SCENARIO_OF_INTEREST = 'Reference'
 #change 'Carbon Neutral' Scenario to Carbon Neutrality
 model_output_8th.loc[model_output_8th['Scenario']=='Carbon Neutral','Scenario'] = 'Carbon Neutrality'
@@ -342,7 +342,7 @@ model_8th_by_fuel_no_economy.loc[model_8th_by_fuel_no_economy['Fuel'].str.contai
  ################################################################################
 #%%
 #create region col by joining with region mapping and then summing by region
-region_mapping = pd.read_csv('./config/utilities/region_economy_mapping.csv')
+region_mapping = pd.read_csv(root_dir + '/' + './config/utilities/region_economy_mapping.csv')
 model_8th_regions = model_output_8th_sum.merge(region_mapping, how='left', on='Economy')
 #plot activity each region for each Date, by scenario by tranport type.
 title = 'Total activity for each region by transport type, scenario'
@@ -426,7 +426,7 @@ plotly.offline.plot(fig, filename='./plotting_output/8th_edition/' + title + '.h
 
 #now do the same as above buyt first import emissions factors, calc  emissions then do that:
 #import emissions factors
-emissions_factors = pd.read_csv('config/utilities/emission_factors_for_8th_edition_transport.csv')
+emissions_factors = pd.read_csv(root_dir + '/' + 'config/utilities/emission_factors_for_8th_edition_transport.csv')
 
 #filter for only APEC in emissions factors data:
 emissions_factors = emissions_factors.loc[emissions_factors['Economy']=='00_APEC']

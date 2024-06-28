@@ -11,18 +11,21 @@ from runpy import run_path
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 
 import pandas as pd 
 import numpy as np
@@ -42,9 +45,9 @@ from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 
 #grab the file D:\APERC\transport_model_9th_edition\input_data\macro\APEC_GDP_population.csv
-macro = pd.read_csv('D:/APERC/transport_model_9th_edition/input_data/macro/APEC_GDP_population.csv')
+macro = pd.read_csv(root_dir + '/' + 'D:/APERC/transport_model_9th_edition/input_data/macro/APEC_GDP_population.csv')
 #pull in activity_growth 
-activity_growth = pd.read_csv('intermediate_data/model_inputs/activity_growth.csv')
+activity_growth = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/activity_growth.csv')
 # macro.columns#Index(['economy_code', 'economy', 'date', 'variable', 'value'], dtype='object')
 #pivot so each measure in the vairable column is its own column.
 macro = macro.pivot_table(index=['economy_code', 'economy', 'year'], columns='variable', values='value').reset_index()
@@ -108,7 +111,7 @@ if plot_this:
     #name y axis as an indexed
     fig.update_yaxes(title_text='Index (base date = {}'.format(macro1['date'].min()))
     #save to plotting_output\input_analysis
-    fig.write_html('plotting_output/input_analysis/macro_data_growth_indexes2.html')
+    fig.write_html(root_dir + '/' + 'plotting_output/input_analysis/macro_data_growth_indexes2.html')
 
     macro1_melt = macro1_indexed_pct_growth.melt(id_vars=['economy', 'date'], value_vars=['GDP_index', 'Population_index', 'GDP_per_capita_index', 'Carbon Neutral_activity_growth_index', 'Reference_activity_growth_index'], var_name='variable', value_name='value')
     #then plot
@@ -117,7 +120,7 @@ if plot_this:
     #name y axis as an indexed
     fig.update_yaxes(title_text='Index (base date = {}'.format(macro1['date'].min()))
     #save to plotting_output\input_analysis
-    fig.write_html('plotting_output/input_analysis/macro_data_growth_indexes1.html')
+    fig.write_html(root_dir + '/' + 'plotting_output/input_analysis/macro_data_growth_indexes1.html')
 
 
 #if it is not similar then we should try and estiamte an average multiplicative diffeence. We could use this to times by growth in gdp per capita to find the activity growth rate. 
@@ -137,9 +140,9 @@ if plot_this:
 #%%
 #data
 #take in activity data from 8th edition up to 2050 (activity_from_OSEMOSYS-hughslast.csv)
-activity = pd.read_csv('input_data/from_8th/reformatted/activity_from_OSEMOSYS-hughslast.csv')
+activity = pd.read_csv(root_dir + '/' + 'input_data/from_8th/reformatted/activity_from_OSEMOSYS-hughslast.csv')
 
-region_economy_mapping = pd.read_csv('config/concordances_and_config_data/region_economy_mapping.csv')
+region_economy_mapping = pd.read_csv(root_dir + '/' + 'config/concordances_and_config_data/region_economy_mapping.csv')
 #make cols lower case
 region_economy_mapping.columns = [col.lower() for col in region_economy_mapping.columns]
 #drop Region col
@@ -228,7 +231,7 @@ if plot_this:
     #name y axis as activity
     fig.update_yaxes(title_text='Activity')
     #save to plotting_output\input_analysis
-    fig.write_html('plotting_output/input_analysis/macro_data_growth_analysis_no_china.html')
+    fig.write_html(root_dir + '/' + 'plotting_output/input_analysis/macro_data_growth_analysis_no_china.html')
 
 #for now save a dummy growth rate so we can continue with the model (this will be replaced with the real growth rates later)
 #we can gernally assume that gdp per capita is the best to use, and then the S curves for stocks will serve as a way of decreasing growth if stocks are too high.
@@ -267,10 +270,10 @@ if plot_this:
 #try taking in energy use for transport from these ecoinomys balance tables. We have this data form the ESTO team:
 #\transport_data_system\intermediate_data\EGEDA\EGEDA_transport_outputDATE20230215.csv
 #load it in
-energy_use = pd.read_csv('D:/APERC/transport_data_system/intermediate_data/EGEDA/EGEDA_transport_outputDATE20230215.csv')
+energy_use = pd.read_csv(root_dir + '/' + 'D:/APERC/transport_data_system/intermediate_data/EGEDA/EGEDA_transport_outputDATE20230215.csv')
 
 #take in egeda_industry_output from same place as egeda_transport
-egeda_industry_output = pd.read_csv('D:/APERC/transport_data_system/intermediate_data/EGEDA/egeda_industry_outputDATE20230522.csv')
+egeda_industry_output = pd.read_csv(root_dir + '/' + 'D:/APERC/transport_data_system/intermediate_data/EGEDA/egeda_industry_outputDATE20230522.csv')
 #now do the same cleaning process
 
 #cols: ['Economy', 'Fuel_Type', 'Date', 'Value', 'Transport Type', 'Frequency','Unit', 'Source', 'Dataset', 'Measure', 'Vehicle Type', 'Drive','Medium'],
@@ -362,7 +365,7 @@ energy_macro = energy_macro[energy_macro['date'] != energy_macro['date'].min()]
 
 #redo above plot but plot by region so we have bigger graphs.
 #import  reigonal mappigns from 'D:\APERC\transport_model_9th_edition\config\concordances_and_config_data\region_economy_mapping.csv'
-region_mappings = pd.read_csv('D:/APERC/transport_model_9th_edition/config/concordances_and_config_data/region_economy_mapping.csv')
+region_mappings = pd.read_csv(root_dir + '/' + 'D:/APERC/transport_model_9th_edition/config/concordances_and_config_data/region_economy_mapping.csv')
 # region_mappings 	Economy	Region	Region_growth_analysis
 #so join on region
 energy_macro_r_old = energy_macro.merge(region_mappings, left_on='economy', right_on='Economy', how='inner')
@@ -420,14 +423,14 @@ if plot_this:
         fig = px.line(energy_macro_melt, x='date', y='value', color='variable', facet_col='economy', line_dash='type', facet_col_wrap=3, title=title)
 
         #save to html
-        fig.write_html('plotting_output/input_analysis/regions/energy_use_cumulative_growth_vs_macro_growth_cumulative' + region + '.html')
+        fig.write_html(root_dir + '/' + 'plotting_output/input_analysis/regions/energy_use_cumulative_growth_vs_macro_growth_cumulative' + region + '.html')
 
         # #and plot correlation df
         # title = 'Correlation Between Energy Use Cumulative growth and Cumulative growth Rate for ' + region
         # fig2 = px.scatter(correlation_df_r[correlation_df_r['Region_growth_analysis'] == region], x='Medium', y='Macro', color='Correlation', facet_col='Economy', facet_col_wrap=3, title=title)
 
         # #save to html
-        # fig2.write_html('plotting_output/input_analysis/regions/correlation_between_energy_use_cumulative_growth_rate_and_macro_growth_cumulative_' + region + '.html')
+        # fig2.write_html(root_dir + '/' + 'plotting_output/input_analysis/regions/correlation_between_energy_use_cumulative_growth_rate_and_macro_growth_cumulative_' + region + '.html')
         
 
 #%%
@@ -519,7 +522,7 @@ if plot_this:
                         labels=dict(x="Medium", y="Macro", color="Correlation"),
                         title='Correlation Heatmap for ' + economy)
         #save to html   
-        fig.write_html('plotting_output/input_analysis/economies/correlation_heatmap_' + economy + '.html')
+        fig.write_html(root_dir + '/' + 'plotting_output/input_analysis/economies/correlation_heatmap_' + economy + '.html')
 # %%
 plot_this = False
 if plot_this:
@@ -538,4 +541,4 @@ if plot_this:
                         labels=dict(x="Medium", y="Macro", color="Correlation"),
                         title='Correlation Heatmap for ' + economy)
         #save to html   
-        fig.write_html('plotting_output/input_analysis/economies/correlation_heatmap_' + economy + '.html')
+        fig.write_html(root_dir + '/' + 'plotting_output/input_analysis/economies/correlation_heatmap_' + economy + '.html')

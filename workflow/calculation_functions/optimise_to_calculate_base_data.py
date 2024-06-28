@@ -4,18 +4,21 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 
 import pandas as pd 
 import numpy as np
@@ -395,7 +398,7 @@ def format_and_prepare_inputs_for_optimisation(ECONOMY_ID, input_data_new_road,R
 def calculate_and_format_stocks_per_capita_constants(input_data_new_road, ECONOMY_ID):
     #these constants will remain the same thorughout the opimisation iterations. Note that we will need to calcualte stocks per cpita 
     #constants: ['Population', 'Stocks_per_capita_targets', 'spc_factors']
-    stocks_per_capita_factors = pd.read_csv('intermediate_data/road_model/{}_vehicles_per_stock_parameters.csv'.format(ECONOMY_ID))    
+    stocks_per_capita_factors = pd.read_csv(root_dir + '/' + 'intermediate_data/road_model/{}_vehicles_per_stock_parameters.csv'.format(ECONOMY_ID))    
     stocks_per_capita_factors.rename(columns={'gompertz_vehicles_per_stock':'spc_factors'}, inplace=True)
     
     #grab stocks and population
@@ -461,7 +464,7 @@ def set_elec_vehicles_stocks_to_zero(ECONOMY_ID, input_data_new_road):
     return input_data_new_road
 
 def load_in_optimisation_parameters(ECONOMY_ID):
-    with open('config/optimisation_parameters.yml') as file:
+    with open(root_dir + '/' + 'config/optimisation_parameters.yml') as file:
         parameters_dict = yaml.load(file, Loader=yaml.FullLoader)
         #get the parameters for the economy
         if ECONOMY_ID=='ALL' or ECONOMY_ID=='ALL2':
@@ -536,7 +539,7 @@ def optimise_to_find_base_year_values(input_data_new_road,ECONOMY_ID, methods, a
             df_transport['Lower_Bound'] = lower_bounds
             df_transport['Upper_Bound'] = upper_bounds
             df_transport['Initial_Value'] = initial_values
-            df_transport.to_csv('intermediate_data/analysis_single_use/bounds.csv')
+            df_transport.to_csv(root_dir + '/' + 'intermediate_data/analysis_single_use/bounds.csv')
             df_transport.drop(['Lower_Bound', 'Upper_Bound', 'Initial_Value'], axis=1, inplace=True)
         
         #make it so taht we only have one value for mileage for each vehicle type (or at least where mielage starts off the same, it will end up the same - allows for different mileage for different drive types if we want)
@@ -583,7 +586,7 @@ def optimise_to_find_base_year_values(input_data_new_road,ECONOMY_ID, methods, a
             #         'stocks_per_capita_constants': stocks_per_capita_constants
             #     }, f)
 
-            # # with open('inputs_to_objective_function_handler.pkl', 'rb') as f:
+            # # with open(root_dir + '/' + 'inputs_to_objective_function_handler.pkl', 'rb') as f:
             # #     inputs = pickle.load(f)
 
             # # # Now you can access the inputs like this:
@@ -715,7 +718,7 @@ def format_and_check_optimisation_results_before_finalising(result, df_transport
 #         ValueError: _description_
 #     """
     
-#     parameters = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)
+#     parameters = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)
 #     for transport_type in ['passenger', 'freight']:
             
 #         if transport_type =='passenger':
@@ -1222,7 +1225,7 @@ def plot_optimisation_results(optimised_data, input_data_new_road_df, results_di
             fig = px.bar(df_all_pct_diff_eds, x='Vehicle Type', y='pct_diff', color='Drive', barmode='group', facet_col='Measure', facet_col_wrap=2, title=f'{method} in {round(time, 2)} seconds with {str(parameters_dict.values())}')
             #make the y axis independent for each facet
             fig.update_yaxes(matches=None)
-            fig.write_html(f'plotting_output/input_exploration/optimisation_reestimations/{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}.html')
+            fig.write_html(root_dir + '/' +f'plotting_output/input_exploration/optimisation_reestimations/{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}.html')
             
             #write the data to a csv so we can inspect it if it seems fishy 'plotting_output/input_exploration/optimisation_reestimations/{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["Scenario"]}_{param_id}.csv'
             df_all_pct_diff_eds.to_csv(f'plotting_output/input_exploration/optimisation_reestimations/{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}.csv')
@@ -1254,7 +1257,7 @@ def plot_optimisation_results(optimised_data, input_data_new_road_df, results_di
             return
     fig = px.bar(df_all_long_eds, x='Drive', y='Value', color='optimised', barmode='group', facet_col='Measure', hover_data=['Vehicle Type'], facet_col_wrap=2, title=f'{method} in {round(time, 2)} seconds with {str(parameters_dict.values())}')
     fig.update_yaxes(matches=None)
-    fig.write_html(f'plotting_output/input_exploration/optimisation_reestimations/{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}_energy_comparison.html')
+    fig.write_html(root_dir + '/' +f'plotting_output/input_exploration/optimisation_reestimations/{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}_energy_comparison.html')
     #write the data to a csv so we can inspect it if it seems fishy 
     df_all_long_eds.to_csv(f'plotting_output/input_exploration/optimisation_reestimations/{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}_energy_comparison.csv')
      
@@ -1431,7 +1434,7 @@ def save_and_overwrite_parameters_in_yaml(ECONOMY_ID, results_dict):
     #just in case, save the original yaml file with a date id to config/archive
     
     #load yaml
-    with open('config/optimisation_parameters.yml') as file:
+    with open(root_dir + '/' + 'config/optimisation_parameters.yml') as file:
         parameters_dict = yaml.load(file, Loader=yaml.FullLoader)
     
     if parameters_dict is not None:
@@ -1450,7 +1453,7 @@ def save_and_overwrite_parameters_in_yaml(ECONOMY_ID, results_dict):
     #add methid to parameters dict
     parameters_dict[ECONOMY_ID]['method'] = results_dict['method']
     #save
-    with open('config/optimisation_parameters.yml', 'w') as file:
+    with open(root_dir + '/' + 'config/optimisation_parameters.yml', 'w') as file:
         yaml.dump(parameters_dict, file)
 #%%
 def plot_data_from_saved_results(ECONOMY_ID,FILE_DATE_ID=None, FILE_DATE_ID_MIN_HOURS=None, BY_FILE_NAME=False, optimised_data_filename=None, input_data_new_road_filename=None, results_dict_filename=None):
@@ -1528,7 +1531,7 @@ for ECONOMY_ID in ['08_JPN']:#01_AUS, '03_CDA', '01_AUS']:
 
 
 # # #%%
-# with open('inputs_to_objective_function_handler.pkl', 'rb') as f:
+# with open(root_dir + '/' + 'inputs_to_objective_function_handler.pkl', 'rb') as f:
 #     inputs = pickle.load(f)
 
 # # Now you can access the inputs like this:

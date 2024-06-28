@@ -12,18 +12,21 @@ from runpy import run_path
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 
 import pandas as pd 
 import numpy as np
@@ -53,17 +56,17 @@ import plotly.io as pio
 # PLEASE NOTE THAT CURRENTLY THE DATAA IS NOT FORMATTED FOR USE WITH THE GRAPHS BELOW.\
 #load data.
 #we will load the vehicle sales shares that we INTEND  to use
-Vehicle_sales_share = pd.read_csv('intermediate_data/non_aggregated_input_data/Vehicle_sales_share.csv')
+Vehicle_sales_share = pd.read_csv(root_dir + '/' + 'intermediate_data/non_aggregated_input_data/Vehicle_sales_share.csv')
 
 # #we will load the vehicle sales shares in the input data folder of 8th edition, whoch it seems hugh projected.
-vehicle_sales_share_normalised = pd.read_csv('input_data/from_8th/reformatted/vehicle_sales_share_normalised.csv')
+vehicle_sales_share_normalised = pd.read_csv(root_dir + '/' + 'input_data/from_8th/reformatted/vehicle_sales_share_normalised.csv')
 
 #we will merge a regions dataframe so that we can treat data wrt regions if need be
-# regions = pd.read_csv('intermediate_data/non_aggregated_input_data/regions.csv')
+# regions = pd.read_csv(root_dir + '/' + 'intermediate_data/non_aggregated_input_data/regions.csv')
 
 #we will also load the output stocks data from hughs model and calcualte a vehicle sales share for each year from that. This will be used to test the model works like the 8th edition. it might also be better than the vehicle sales shares that were in the input data folder of 8th edition 
 #load 8th edition data
-road_stocks= pd.read_csv('intermediate_data/non_aggregated_input_data/road_stocks.csv')
+road_stocks= pd.read_csv(root_dir + '/' + 'intermediate_data/non_aggregated_input_data/road_stocks.csv')
 
 
 ################################################################################################################################################################

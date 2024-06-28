@@ -4,18 +4,21 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 
 import pandas as pd 
 import numpy as np
@@ -79,7 +82,7 @@ def run_road_model_for_year_y(year, previous_year_main_dataframe, main_dataframe
         #recalcualte activity using this new value for mileage, as if it was the previous year, when covid was having an effect on activity (specifically mileage). this is jsut to prevent comaprisons between growth*activity and calcaulkted activity form breaking
         change_dataframe['Activity'] = change_dataframe['Mileage'] * change_dataframe['Occupancy_or_load'] * change_dataframe['Stocks']
         
-    # LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED']
+    # LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED']
     # EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID_PASSENGER
 
     # year_after_covid = max(config.LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED[economy])+1
@@ -115,9 +118,9 @@ def run_road_model_for_year_y(year, previous_year_main_dataframe, main_dataframe
         scenario_df = change_dataframe.loc[change_dataframe['Scenario'] == scenario].copy()
     
         if scenario == 'Reference':
-            turnover_rate_midpoint_mult_adjustment_road = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_REFERENCE']
+            turnover_rate_midpoint_mult_adjustment_road = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_REFERENCE']
         elif scenario == 'Target':
-            turnover_rate_midpoint_mult_adjustment_road = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET']
+            turnover_rate_midpoint_mult_adjustment_road = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET']
         else:
             raise ValueError('Scenario not recognised')
         
@@ -254,7 +257,7 @@ def run_road_model_for_year_y(year, previous_year_main_dataframe, main_dataframe
             #CALCUALTE AVERAGE AGE OF STOCKS
             change_dataframe_t = recalculate_age_distribution(change_dataframe_t)
             #TODO adjust efficiency by x percent to simulate aging of all vehicles by 1 year (the result would be a log eff curve based on age of vehicles)
-            YEARLY_EFFICIENCY_DEGRADATION_RATE = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['YEARLY_EFFICIENCY_DEGRADATION_RATE'][economy]
+            YEARLY_EFFICIENCY_DEGRADATION_RATE = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['YEARLY_EFFICIENCY_DEGRADATION_RATE'][economy]
             
             change_dataframe_t['Efficiency'] = change_dataframe_t['Efficiency'] * (1-YEARLY_EFFICIENCY_DEGRADATION_RATE)
             #check for any types of stocks that have stopped being used
@@ -350,30 +353,30 @@ def run_road_model_for_year_y(year, previous_year_main_dataframe, main_dataframe
             
 #     if transport_type =='passenger':
             
-#         LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIEDPASSENGER']
+#         LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIEDPASSENGER']
 
-#         EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID_PASSENGER']
+#         EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID_PASSENGER']
 #         #There could be a number of years over which the decrease will be reverted, for which we will spread the increase over.
 #         N = EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID[economy]
         
 #         years_after_covid = [max(LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED[economy]) + i + 1 for i in range(N)]
         
 #         #load ECONOMIES_WITH_STOCKS_PER_CAPITA_REACHED from parameters.yml
-#         EXPECTED_ENERGY_DECREASE_FROM_COVID = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER']
+#         EXPECTED_ENERGY_DECREASE_FROM_COVID = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER']
 #         X = EXPECTED_ENERGY_DECREASE_FROM_COVID[economy]
         
 #     elif transport_type =='freight':
         
-#         LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIEDFREIGHT']
+#         LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIEDFREIGHT']
 
-#         EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID_FREIGHT']
+#         EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID_FREIGHT']
 #         #There could be a number of years over which the decrease will be reverted, for which we will spread the increase over.
 #         N = EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID[economy]
         
 #         years_after_covid = [max(LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED[economy]) + i + 1 for i in range(N)]
         
 #         #load ECONOMIES_WITH_STOCKS_PER_CAPITA_REACHED from parameters.yml
-#         EXPECTED_ENERGY_DECREASE_FROM_COVID = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT']
+#         EXPECTED_ENERGY_DECREASE_FROM_COVID = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT']
 #         X = EXPECTED_ENERGY_DECREASE_FROM_COVID[economy]
     
 #     if current_year in years_after_covid:
@@ -421,7 +424,7 @@ def run_road_model_for_year_y(year, previous_year_main_dataframe, main_dataframe
 #         ValueError: If the transport type is not recognized.
 #     """
 #     # Load configuration parameters
-#     parameters = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)
+#     parameters = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)
 #     if transport_type == 'passenger':
 #         LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = parameters['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_PASSENGER']
 #         EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID = parameters['EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID_PASSENGER']
@@ -488,7 +491,7 @@ def adjust_mileage_to_account_for_covid(economy, dataframe, transport_type, curr
     """
         
     # Load configuration parameters
-    parameters = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)
+    parameters = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)
     
     for medium in dataframe.Medium.unique():
         # Construct the suffix for parameter keys based on transport type and medium
@@ -569,7 +572,7 @@ def prepare_road_model_inputs(road_model_input, ECONOMY_ID, low_ram_computer=Tru
     
     #GOMPERTZ PARAMETERS ARE USED TO SET A LIMIT ON STOCKS PER CPITA. WE NEED TO LOAD THEM IN HERE AND MERGE THEM ONTO THE MAIN DATAFRAME.      
     # We also need to set them to be non nan for the base year, as the base year has its values for inputs set to nan.
-    gompertz_parameters = pd.read_csv('intermediate_data/model_inputs/{}/{}_stocks_per_capita_threshold.csv'.format(config.FILE_DATE_ID,ECONOMY_ID))
+    gompertz_parameters = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_stocks_per_capita_threshold.csv'.format(config.FILE_DATE_ID,ECONOMY_ID))
     #filter for economy id only:
     gompertz_parameters = gompertz_parameters[gompertz_parameters['Economy']==ECONOMY_ID].copy()
     base_year = road_model_input.Date.min()

@@ -44,7 +44,7 @@ import plotly.io as pio
 #%%
 
 #laod outputs
-model_output = pd.read_csv('output_data/model_output_detailed/{}'.format(config.model_output_file_name))
+model_output = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}'.format(config.model_output_file_name))
 
 behavioural_policy_df = model_output.loc[model_output['Year'] >= 2018] #filter for 2018 to 2025
 behavioural_policy_df = behavioural_policy_df.loc[behavioural_policy_df['Year'] <= 2025] #filter for 2018 to 2025
@@ -109,10 +109,10 @@ behavioural_policy_df_4 = behavioural_policy_df_4.groupby(['Year','Region']).sum
 #%%
 
 #save the data to csvs in \other_code\other_data\archive
-behavioural_policy_df_1.to_csv('other_code/other_data/archive/behavioural_policy_df_1.csv')
-behavioural_policy_df_2.to_csv('other_code/other_data/archive/behavioural_policy_df_2.csv')
-behavioural_policy_df_3.to_csv('other_code/other_data/archive/behavioural_policy_df_3.csv')
-behavioural_policy_df_4.to_csv('other_code/other_data/archive/behavioural_policy_df_4.csv')
+behavioural_policy_df_1.to_csv(root_dir + '/' + 'other_code/other_data/archive/behavioural_policy_df_1.csv')
+behavioural_policy_df_2.to_csv(root_dir + '/' + 'other_code/other_data/archive/behavioural_policy_df_2.csv')
+behavioural_policy_df_3.to_csv(root_dir + '/' + 'other_code/other_data/archive/behavioural_policy_df_3.csv')
+behavioural_policy_df_4.to_csv(root_dir + '/' + 'other_code/other_data/archive/behavioural_policy_df_4.csv')
 
 #%%
 #calculate average vehicle efficiency

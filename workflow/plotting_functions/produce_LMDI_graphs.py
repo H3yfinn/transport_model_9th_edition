@@ -7,18 +7,29 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+        
+    sys.path.append(f"{root_dir}/../PyLMDI")
+    #PyLMDI functions:
+    import main_function
+    import plot_output
+    import data_creation_functions
+    import LMDI_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+    from ....PyLMDI import main_function
+#################
 
 import pandas as pd 
 import numpy as np
@@ -36,24 +47,18 @@ import matplotlib
 import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
-sys.path.append(f"{root_dir}/../PyLMDI")
-#PyLMDI functions:
-import main_function
-import plot_output
-import data_creation_functions
-import LMDI_functions
 
 #%%
 def produce_lots_of_LMDI_charts(ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_PRODUCE = False, PLOTTING = False, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070, PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR=True, INCLUDE_LIFECYCLE_EMISSIONS=True, PLOT_EMISSIONS_FACTORS=False, SET_START_DATE_TO_AFTER_COVID=True):
     #take in energy and activity data 
     if ECONOMY_ID == None:
-        all_data = pd.read_csv('output_data/model_output/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
-        energy_use_by_fuels = pd.read_csv('output_data/model_output_with_fuels/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
-        detailed_data = pd.read_csv('output_data/model_output_detailed/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
+        all_data = pd.read_csv(root_dir + '/' + 'output_data/model_output/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
+        energy_use_by_fuels = pd.read_csv(root_dir + '/' + 'output_data/model_output_with_fuels/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
+        detailed_data = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
     else:
-        all_data = pd.read_csv('output_data/model_output/{}_{}'.format(ECONOMY_ID,config.model_output_file_name))
-        energy_use_by_fuels = pd.read_csv('output_data/model_output_with_fuels/{}_{}'.format(ECONOMY_ID,config.model_output_file_name))
-        detailed_data = pd.read_csv('output_data/model_output_detailed/{}_{}'.format(ECONOMY_ID,config.model_output_file_name))
+        all_data = pd.read_csv(root_dir + '/' + 'output_data/model_output/{}_{}'.format(ECONOMY_ID,config.model_output_file_name))
+        energy_use_by_fuels = pd.read_csv(root_dir + '/' + 'output_data/model_output_with_fuels/{}_{}'.format(ECONOMY_ID,config.model_output_file_name))
+        detailed_data = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}_{}'.format(ECONOMY_ID,config.model_output_file_name))
     
     if SET_START_DATE_TO_AFTER_COVID:
         #TO BE SAFE WE HAVE TO SET THE START DATE TO AFTER WHEN ANY RETURN TO NORMAL AFTER COVID WAS OVER. SO WE WILL SET IT TO 2024, EVEN THOUGH THAT IS 3 YEARS AFTER OUR BASE YEAR DATA:
@@ -297,8 +302,8 @@ def produce_lots_of_LMDI_charts(ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_PRODUCE =
                     
                     #create a dataset to be used for cumulative version of the addtive data as well
                     def save_copy_of_data_for_cumulative_version(extra_identifier, output_data_folder):
-                        data = pd.read_csv(f'{output_data_folder}{extra_identifier}_additive.csv')
-                        data.to_csv(f'{output_data_folder}{extra_identifier}_cumulative_additive.csv', index=False)
+                        data = pd.read_csv(root_dir + '/' +f'{output_data_folder}{extra_identifier}_additive.csv')
+                        data.to_csv(root_dir + '/' +f'{output_data_folder}{extra_identifier}_cumulative_additive.csv', index=False)
                         return extra_identifier+'_cumulative'
                     extra_identifier3 = save_copy_of_data_for_cumulative_version(extra_identifier2, output_data_folder)
                     try:
@@ -450,7 +455,7 @@ def calculate_emissions(energy_use_by_fuels, all_data, USE_AVG_GENERATION_EMISSI
         ValueError: _description_
     """
     
-    emissions_factors = pd.read_csv('config/9th_edition_emissions_factors.csv')
+    emissions_factors = pd.read_csv(root_dir + '/' + 'config/9th_edition_emissions_factors.csv')
     if drive_column != 'Drive':
         energy_use_by_fuels = energy_use_by_fuels.rename(columns={'Drive':drive_column})
     if energy_column != 'Energy':
@@ -467,7 +472,7 @@ def calculate_emissions(energy_use_by_fuels, all_data, USE_AVG_GENERATION_EMISSI
     
     if USE_AVG_GENERATION_EMISSIONS_FACTOR:
         #pull in the 8th outlook emissions factors by year then use that to claculate the emissions for electricity.
-        emissions_factor_elec = pd.read_csv('input_data/from_8th/outlook_8th_emissions_factors_with_electricity.csv')#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
+        emissions_factor_elec = pd.read_csv(root_dir + '/' + 'input_data/from_8th/outlook_8th_emissions_factors_with_electricity.csv')#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
         #extract the emissions factor for elctricity for each economy
         emissions_factor_elec = emissions_factor_elec[emissions_factor_elec.fuel_code=='17_electricity'].copy()
         #rename Carbon Neutral Scenario to Target
@@ -553,7 +558,7 @@ def calculate_emissions_effect_from_additive_data(extra_identifier,  output_data
     # main_function.run_divisia(data_title, extra_identifier2, activity_data_gen, energy_data_gen, structure_variables_list, activity_variable, emissions_variable = 'Emissions', energy_variable = energy_variable, emissions_divisia = emissions_divisia, emissions_data=emissions_data_gen, time_variable=time_variable,hierarchical=hierarchical,output_data_folder=output_data_folder)
     #load in the additive effect data and find the effect of electricity emissions on engine switching:
     # data_generation_emissions = pd.read_csv(f'{output_data_folder}{extra_identifier2}_additive.csv')
-    data = pd.read_csv(f'{output_data_folder}{extra_identifier}_additive.csv')
+    data = pd.read_csv(root_dir + '/' +f'{output_data_folder}{extra_identifier}_additive.csv')
     #keep only the date column and emissions column, also filter for transport type, medium from combination_dict
     electricity_emissions = electricity_emissions[(electricity_emissions['Transport Type']==combination_dict['transport_type']) & (electricity_emissions['Scenario']==combination_dict['scenario'])]
     if combination_dict['medium'] == 'road':
@@ -564,7 +569,7 @@ def calculate_emissions_effect_from_additive_data(extra_identifier,  output_data
     electricity_emissions = electricity_emissions.rename(columns={'Emissions':'Effect of electricity emissions'})
     data = data.merge(electricity_emissions, on='Date')
     
-    data.to_csv(f'{output_data_folder}{extra_identifier2}_additive.csv', index=False)
+    data.to_csv(root_dir + '/' +f'{output_data_folder}{extra_identifier2}_additive.csv', index=False)
     
     return extra_identifier2
     
@@ -572,7 +577,7 @@ def attach_lifecycle_emissions_series(extra_identifier2, output_data_folder, com
     
     #to help make the graph even more informative, we will add a series that represents the lifecyle emissions from purchasing ice and ev cars. This way the user can observe the difference in emissions when there are lots of evs vs not many purchased.
     #load in the lifecycle emissions data that was gatehred from multiple soruces and then averaged
-    lca = pd.read_excel('input_data/lifecycle_emissions.xlsx')
+    lca = pd.read_excel(root_dir + '/' +'input_data/lifecycle_emissions.xlsx')
     #drop where READY_TO_USE is not True
     lca = lca[lca['READY_TO_USE']==True]
     #grab the cols we need and average them out (we will exclude the cols on use phase emissions for now)
@@ -645,8 +650,8 @@ def attach_lifecycle_emissions_series(extra_identifier2, output_data_folder, com
     lca_wide.columns = ['Date'] + [f'Effect of lifecycle emissions {col}' for col in lca_wide.columns if col != 'Date']
     
     #add this to the data                            
-    data_mult = pd.read_csv(f'{output_data_folder}{extra_identifier2}_multiplicative.csv')
-    data_add = pd.read_csv(f'{output_data_folder}{extra_identifier2}_additive.csv')
+    data_mult = pd.read_csv(root_dir + '/' +f'{output_data_folder}{extra_identifier2}_multiplicative.csv')
+    data_add = pd.read_csv(root_dir + '/' +f'{output_data_folder}{extra_identifier2}_additive.csv')
     
     # add the lifecycle emissions to the data. convert to mult for data_mult and add for data_add
     data_mult = pd.merge(data_mult, lca_wide, on='Date', how='left')
@@ -656,8 +661,8 @@ def attach_lifecycle_emissions_series(extra_identifier2, output_data_folder, com
     for col in [col for col in data_mult.columns if 'Effect of lifecycle emissions' in col]:
         data_mult[col] = (data_mult['Total Emissions']+data_mult[col])/data_mult['Total Emissions']
     #save back to csv
-    data_mult.to_csv(f'{output_data_folder}{extra_identifier2}_multiplicative.csv', index=False)
-    data_add.to_csv(f'{output_data_folder}{extra_identifier2}_additive.csv', index=False)
+    data_mult.to_csv(root_dir + '/' +f'{output_data_folder}{extra_identifier2}_multiplicative.csv', index=False)
+    data_add.to_csv(root_dir + '/' +f'{output_data_folder}{extra_identifier2}_additive.csv', index=False)
 
 
 def plot_lca_bars(lca, numeric_cols=[], SIMPLE=True):
@@ -675,7 +680,7 @@ def plot_lca_bars(lca, numeric_cols=[], SIMPLE=True):
         fig = px.bar(lca, x='drive', y='non-use lifecycle emissions', color='drive', barmode='group', color_discrete_map={'bev':'green', 'ice_g':'purple'})
         #make text bigger
         fig.update_layout(font_size=35)
-        fig.write_html(f'plotting_output/lifecycle_emissions/lifecycle_emissions_SIMPLE.html')
+        fig.write_html(root_dir + '/' +f'plotting_output/lifecycle_emissions/lifecycle_emissions_SIMPLE.html')
 
     else:
         #make the value cols into one col
@@ -687,7 +692,7 @@ def plot_lca_bars(lca, numeric_cols=[], SIMPLE=True):
         
         #make text bigger
         fig.update_layout(font_size=35)
-        fig.write_html(f'plotting_output/lifecycle_emissions/lifecycle_emissions_by_source_FACETED.html')  
+        fig.write_html(root_dir + '/' +f'plotting_output/lifecycle_emissions/lifecycle_emissions_by_source_FACETED.html')  
 
 
 def plot_lifecycle_emissions(emissions_factors, fuels_to_plot):   
@@ -712,7 +717,7 @@ def plot_lifecycle_emissions(emissions_factors, fuels_to_plot):
     # Update layout if needed (e.g., making text bigger)
     fig.update_layout(font_size=35)
 
-    fig.write_html(f'plotting_output/lifecycle_emissions/{economy}_lifecycle_emissions_LINE.html')
+    fig.write_html(root_dir + '/' +f'plotting_output/lifecycle_emissions/{economy}_lifecycle_emissions_LINE.html')
 
 def calculate_emissions_effect_from_multiplicative_data(extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict):
     """please note that because emissions for passenger transport will likely go to 0, the multiplicative effect of the electricity emissions will be very high, making the graph look ugly.
@@ -755,7 +760,7 @@ def calculate_emissions_effect_from_multiplicative_data(extra_identifier, output
     
     #calcualte the multiplacite effect of this new effect: it is the (total emissions  for that year, + the effect of electricity emissions factor) divided by the total emissions for that year
     data['Effect of electricity emissions'] = (data['Total Emissions']+data['Effect of electricity emissions'])/data['Total Emissions']
-    data.to_csv(f'{output_data_folder}{extra_identifier2}_multiplicative.csv', index=False)
+    data.to_csv(root_dir + '/' +f'{output_data_folder}{extra_identifier2}_multiplicative.csv', index=False)
     
     return extra_identifier2
 

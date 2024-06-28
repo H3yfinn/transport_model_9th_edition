@@ -32,10 +32,10 @@ AUTO_OPEN_PLOTLY_GRAPHS = True
 #%%
 
 #load data in
-model_output_all = pd.read_csv('output_data/model_output/{}'.format(config.model_output_file_name))
-model_output_detailed = pd.read_csv('output_data/model_output_detailed/{}'.format(config.model_output_file_name))
-model_output_with_fuels = pd.read_csv('output_data/model_output_with_fuels/{}'.format(config.model_output_file_name))
-model_output_8th = pd.read_csv('intermediate_data/activity_efficiency_energy_road_stocks.csv')
+model_output_all = pd.read_csv(root_dir + '/' + 'output_data/model_output/{}'.format(config.model_output_file_name))
+model_output_detailed = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}'.format(config.model_output_file_name))
+model_output_with_fuels = pd.read_csv(root_dir + '/' + 'output_data/model_output_with_fuels/{}'.format(config.model_output_file_name))
+model_output_8th = pd.read_csv(root_dir + '/' + 'intermediate_data/activity_efficiency_energy_road_stocks.csv')
 
 #filter for only ref scenario
 model_output_all = model_output_all[model_output_all['Scenario'] == 'Reference']
@@ -45,7 +45,7 @@ model_output_8th = model_output_8th[model_output_8th['Scenario'] == 'Reference']
 
 #%%
 #check we have graph folder for the economy we are interested in
-if not os.path.exists('plotting_output/{}'.format(economy)):
+if not os.path.exists(root_dir + '/' + 'plotting_output/{}'.format(economy)):
     os.mkdir('plotting_output/{}'.format(economy))
     os.mkdir('plotting_output/{}/static/'.format(economy))
 else:

@@ -24,17 +24,17 @@ import plotly.io as pio
 # PLEASE NOTE THAT CURRENTLY THE DATAA IS NOT FORMATTED FOR USE WITH THE GRAPHS BELOW.\
 #load data.
 #we will load the vehicle sales shares that we INTEND  to use
-Vehicle_sales_share = pd.read_csv('intermediate_data/non_aggregated_input_data/Vehicle_sales_share.csv')
+Vehicle_sales_share = pd.read_csv(root_dir + '/' + 'intermediate_data/non_aggregated_input_data/Vehicle_sales_share.csv')
 
 # #we will load the vehicle sales shares in the input data folder of 8th edition, whoch it seems hugh projected.
-vehicle_sales_share_normalised = pd.read_csv('input_data/from_8th/reformatted/vehicle_sales_share_normalised.csv')
+vehicle_sales_share_normalised = pd.read_csv(root_dir + '/' + 'input_data/from_8th/reformatted/vehicle_sales_share_normalised.csv')
 
 #we will merge a regions dataframe so that we can treat data wrt regions if need be
-# regions = pd.read_csv('intermediate_data/non_aggregated_input_data/regions.csv')
+# regions = pd.read_csv(root_dir + '/' + 'intermediate_data/non_aggregated_input_data/regions.csv')
 
 #we will also load the output stocks data from hughs model and calcualte a vehicle sales share for each year from that. This will be used to test the model works like the 8th edition. it might also be better than the vehicle sales shares that were in the input data folder of 8th edition 
 #load 8th edition data
-road_stocks= pd.read_csv('intermediate_data/non_aggregated_input_data/road_stocks.csv')
+road_stocks= pd.read_csv(root_dir + '/' + 'intermediate_data/non_aggregated_input_data/road_stocks.csv')
 
 
 ################################################################################################################################################################

@@ -3,18 +3,21 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 
 import pandas as pd 
 import numpy as np
@@ -35,11 +38,11 @@ from plotly.subplots import make_subplots
 
 def filter_for_modelling_years(BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=False,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=False):
     ###############################
-    supply_side_fuel_mixing = pd.read_csv('intermediate_data/model_inputs/{}/{}_aggregated_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID,ECONOMY_ID))
-    demand_side_fuel_mixing = pd.read_csv('intermediate_data/model_inputs/{}/{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-    road_model_input_wide = pd.read_csv('intermediate_data/model_inputs/{}/{}_aggregated_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-    non_road_model_input_wide = pd.read_csv('intermediate_data/model_inputs/{}/{}_aggregated_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-    growth_forecasts_wide = pd.read_csv('intermediate_data/model_inputs/{}/{}_aggregated_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    supply_side_fuel_mixing = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID,ECONOMY_ID))
+    demand_side_fuel_mixing = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    road_model_input_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    non_road_model_input_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    growth_forecasts_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
     #check for vehicle type = car, rive = bev, date = 2020, scenario = target
     # road_model_input_wide[(road_model_input_wide['Vehicle Type']=='car') & (road_model_input_wide['Drive']=='bev') & (road_model_input_wide['Date']==2020) & (road_model_input_wide['Scenario']=='Target')]
     

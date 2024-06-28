@@ -10,18 +10,29 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+    
+    sys.path.append(f"{root_dir}/workflow/plotting_functions")
+    import plot_user_input_data
 
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    import archiving_scripts
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+    from ..plotting_functions import plot_user_input_data
+    from ..utility_functions import archiving_scripts
+#################
 
 import pandas as pd 
 import numpy as np
@@ -40,11 +51,6 @@ import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 import user_input_creation_functions
-sys.path.append(f"{root_dir}/workflow/plotting_functions")
-import plot_user_input_data
-
-sys.path.append(f"{root_dir}/workflow/utility_functions")
-import archiving_scripts
 
 X_ORDER = 'linear'#set me to linear or the order for the spline
 #%%
@@ -58,10 +64,10 @@ def vehicle_sales_share_creation_handler(ECONOMY_ID,  RECALCULATE_SALES_SHARES_U
     else:
         CURRENT_BASE_YEAR = config.DEFAULT_BASE_YEAR
     
-    ECONOMIES_WITH_MODELLING_COMPLETE_DICT = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
+    ECONOMIES_WITH_MODELLING_COMPLETE_DICT = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
     SET_YEAR_WITH_MOST_VALUES_TO_BASE_YEAR = ECONOMIES_WITH_MODELLING_COMPLETE_DICT[ECONOMY_ID]
     
-    transport_data_system_df = pd.read_csv('intermediate_data/model_inputs/transport_data_system_extract.csv')
+    transport_data_system_df = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/transport_data_system_extract.csv')
 
     if RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA: 
         # breakpoint()   
@@ -108,7 +114,7 @@ def create_alternate_sales_share_file(ECONOMY_ID, sales_shares=None, vehicle_typ
         new_directory = utility_functions.find_latest_folder_via_regex(directory)
         breakpoint()
         try:
-            sales_shares = pd.read_csv('{}/{}/{}_new_sales_shares_concat_interp.csv'.format(directory,new_directory, secondary_economy_ID))
+            sales_shares = pd.read_csv(root_dir + '/' + '{}/{}/{}_new_sales_shares_concat_interp.csv'.format(directory,new_directory, secondary_economy_ID))
         except FileNotFoundError:
             print(f'Since this file is not in the directory, you probably ran this function after half running the model for {secondary_economy_ID}. Please fully run the model for {secondary_economy_ID} first and then run this function again')
             raise FileNotFoundError
@@ -143,7 +149,7 @@ def create_alternate_sales_share_file(ECONOMY_ID, sales_shares=None, vehicle_typ
                         except Exception as e:
                             print(e)
                         
-                sales_shares_0.to_csv('input_data/alternate_sales_shares/{}/{}_{}.csv'.format(ECONOMY_ID, 'all_usa_ref_shares', scenario), index=False)
+                sales_shares_0.to_csv(root_dir + '/' + 'input_data/alternate_sales_shares/{}/{}_{}.csv'.format(ECONOMY_ID, 'all_usa_ref_shares', scenario), index=False)
         else:
             for transport_type in sales_shares['Transport Type'].unique():
                 for vehicle_type in sales_shares['Vehicle Type'].unique():
@@ -156,7 +162,7 @@ def create_alternate_sales_share_file(ECONOMY_ID, sales_shares=None, vehicle_typ
                             sales_shares_0.rename(columns={'Drive_share':'Share'}, inplace=True)
                             #drop road
                             sales_shares_0.drop(columns=['road'], inplace=True)
-                            sales_shares_0.to_csv('input_data/alternate_sales_shares/{}/{}_{}_{}_{}.csv'.format(ECONOMY_ID, transport_type, vehicle_type, medium, scenario), index=False)
+                            sales_shares_0.to_csv(root_dir + '/' + 'input_data/alternate_sales_shares/{}/{}_{}_{}_{}.csv'.format(ECONOMY_ID, transport_type, vehicle_type, medium, scenario), index=False)
                             
     else:
         #use the sales shares passed in as an arg
@@ -177,7 +183,7 @@ def archive_inputs_and_previous_results(ECONOMY_ID, new_sales_shares_all_new, al
         shutil.copy(filepath, archiving_folder + '/{}'.format(filename))
         
     #save data so it can be used for plotting and such:
-    new_sales_shares_all_new.to_csv('intermediate_data/model_inputs/{}/{}_vehicle_sales_share.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index = False)  
+    new_sales_shares_all_new.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_vehicle_sales_share.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index = False)  
     
 def format_and_check_current_and_historical_shares(ECONOMY_ID, new_transport_data_system_df, CURRENT_BASE_YEAR):
         
@@ -198,7 +204,7 @@ def format_and_check_current_and_historical_shares(ECONOMY_ID, new_transport_dat
             raise ValueError('new_sales_shares_sum_dupes is not empty. This should not happen. Investigate')
             
         #now doulbe check we have the required categories that are in the concordances
-        model_concordances_user_input_and_growth_rates = pd.read_csv('intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))
+        model_concordances_user_input_and_growth_rates = pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))
         #filter for ECONOMY_ID
         model_concordances_user_input_and_growth_rates = model_concordances_user_input_and_growth_rates.loc[model_concordances_user_input_and_growth_rates['Economy']==ECONOMY_ID]
         #drop all measures that are not vehicle sales share
@@ -410,15 +416,15 @@ def use_previous_projection_for_current_and_historical_sales_shares(ECONOMY_ID):
     Use the data from running the model up to the Actual base year to calcualte the sales shares for the years where we have input data available. This should be used instead of anything that is specified in the input sales share series, but is only used when RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA for this ECONOMY_ID is True (otherwise we use the data from the transport data system in create_current_and_historical_shares_from_activity)
     """
     try:
-        road_model_input_wide = pd.read_csv('intermediate_data/model_inputs/{}/{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-        non_road_model_input_wide = pd.read_csv('intermediate_data/model_inputs/{}/{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+        road_model_input_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+        non_road_model_input_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
     except FileNotFoundError: 
         #try find the  most recent available folder:
         directory = "intermediate_data/model_inputs/"  # Replace with your actual directory path
         import utility_functions
         new_directory = utility_functions.find_latest_folder_via_regex(directory)
-        road_model_input_wide = pd.read_csv('intermediate_data/model_inputs/{}/{}_road_model_input_wide.csv'.format(new_directory, ECONOMY_ID))
-        non_road_model_input_wide = pd.read_csv('intermediate_data/model_inputs/{}/{}_non_road_model_input_wide.csv'.format(new_directory, ECONOMY_ID))
+        road_model_input_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_road_model_input_wide.csv'.format(new_directory, ECONOMY_ID))
+        non_road_model_input_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_non_road_model_input_wide.csv'.format(new_directory, ECONOMY_ID))
     #reformat:
     #first make them tall
     road_model_input= road_model_input_wide.melt(id_vars=['Economy', 'Scenario', 'Date', 'Vehicle Type', 'Drive', 'Transport Type' , 'Medium'], var_name='Measure', value_name='Value')
@@ -438,7 +444,7 @@ def use_previous_projection_for_current_and_historical_sales_shares(ECONOMY_ID):
 
 def load_and_check_alternate_sales_share_files(filepath, sales_shares, ECONOMY_ID):
     #double check it has all the same columns
-    series = pd.read_csv('input_data/alternate_sales_shares/{}/{}'.format(ECONOMY_ID, filepath))
+    series = pd.read_csv(root_dir + '/' + 'input_data/alternate_sales_shares/{}/{}'.format(ECONOMY_ID, filepath))
     if not set(series.columns)==set(['Economy', 'Scenario', 'Date', 'Vehicle Type', 'Drive', 'Transport Type', 'Medium', 'Share']):
         breakpoint()
         raise ValueError('The file {} does not have the correct columns. Please check it has the following columns: Economy, Scenario, Date, Vehicle Type, Drive, Transport Type, Share'.format(filepath))
@@ -481,14 +487,14 @@ def incorporate_alternate_sales_shares(ECONOMY_ID):
         DataFrame: A DataFrame with incorporated sales shares.
     """
     #if there is no folder for this economy, create one (eventualy they will all have one)
-    if not os.path.exists('input_data/alternate_sales_shares/{}/'.format(ECONOMY_ID)):
+    if not os.path.exists(root_dir + '/' + 'input_data/alternate_sales_shares/{}/'.format(ECONOMY_ID)):
         os.makedirs('input_data/alternate_sales_shares/{}/'.format(ECONOMY_ID))
         filepaths=[]
     else:
         filepaths = [file for file in os.listdir('input_data/alternate_sales_shares/{}/'.format(ECONOMY_ID)) if file.endswith('.csv')]
     
     #load in the data that is available. to prevent issues with versioning we will only use the files that are specified in parameters.yml. They also need to be csvs!
-    economy_files = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['alternate_sales_share_files']
+    economy_files = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['alternate_sales_share_files']
     if ECONOMY_ID in economy_files.keys():
         economy_files = economy_files[ECONOMY_ID]
     else:
@@ -576,12 +582,12 @@ def check_and_format_manually_specified_sales_shares(ECONOMY_ID):
     also check that the sum of shares for any vehicle type transport type combination dont exceed 1
     """
     
-    passenger_drive_shares = pd.read_excel('input_data/vehicle_sales_share_inputs.xlsx',sheet_name='passenger_drive_shares').drop(columns=['Comment'])
-    freight_drive_shares = pd.read_excel('input_data/vehicle_sales_share_inputs.xlsx',sheet_name='freight_drive_shares').drop(columns=['Comment'])    
+    passenger_drive_shares = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx',sheet_name='passenger_drive_shares').drop(columns=['Comment'])
+    freight_drive_shares = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx',sheet_name='freight_drive_shares').drop(columns=['Comment'])    
     
     #CHECK AND MAP REGIONS TO ECONOMIES:
-    regions_passenger = pd.read_excel('input_data/vehicle_sales_share_inputs.xlsx',sheet_name='regions_passenger')
-    regions_freight = pd.read_excel('input_data/vehicle_sales_share_inputs.xlsx',sheet_name='regions_freight')    
+    regions_passenger = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx',sheet_name='regions_passenger')
+    regions_freight = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx',sheet_name='regions_freight')    
     user_input_creation_functions.check_region(regions_passenger, passenger_drive_shares)
     user_input_creation_functions.check_region(regions_freight, freight_drive_shares)
     #join regions
@@ -678,7 +684,7 @@ def clean_and_format_sales_shares_before_calcualtions(ECONOMY_ID, sales_shares, 
     #check the slaes shares against the concordance file, and if any rows are missing let the user know. however if it is jsut a drive missing, we will fill this in with 0 and let the user know. To do this we will  check for missing rows when we ignore the drive annd date cols.
 
     #now doulbe check we have the required categories that are in the concordances
-    model_concordances_user_input_and_growth_rates = pd.read_csv('intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))
+    model_concordances_user_input_and_growth_rates = pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))
     #filter for ECONOMY_ID
     model_concordances_user_input_and_growth_rates = model_concordances_user_input_and_growth_rates.loc[model_concordances_user_input_and_growth_rates['Economy']==ECONOMY_ID]
     #drop all measures that are not vehicle sales share
@@ -795,7 +801,7 @@ def fill_missing_drives_using_median_of_early_years(ECONOMY_ID, sales_shares, mo
     #drop the y cols
     final_df = final_df.drop(columns=['Drive_share_y', 'Drive_share_remainder'])
     #save the values at this point in time to use in the future if we need
-    final_df.to_csv('intermediate_data/model_inputs/{}/{}_new_sales_shares_concat_interp.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    final_df.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_new_sales_shares_concat_interp.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
     return final_df
 
     
@@ -986,8 +992,8 @@ def apply_vehicle_type_growth_rates(new_sales_shares_all):
     # first calcualte teh compound gorwth rate from the xlsx sheet=vehicle_type_growth, (it should be the growth rate . cumprod()) 
     # times that by each Transport_type_share to adjust them for the growth rate
     #then normalise all to 1 by transport type
-    vehicle_type_growth_regions = pd.read_excel('input_data/vehicle_sales_share_inputs.xlsx', sheet_name='vehicle_type_growth_regions')
-    vehicle_type_growth = pd.read_excel('input_data/vehicle_sales_share_inputs.xlsx', sheet_name='vehicle_type_growth').drop_duplicates().drop(columns=['Comment'])
+    vehicle_type_growth_regions = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx', sheet_name='vehicle_type_growth_regions')
+    vehicle_type_growth = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx', sheet_name='vehicle_type_growth').drop_duplicates().drop(columns=['Comment'])
     vehicle_type_growth['road'] = vehicle_type_growth['Medium']=='road'
     new_sales_shares_all_new= new_sales_shares_all.copy()
     #use vehicle_type_growth_regions to merge regions to econmy

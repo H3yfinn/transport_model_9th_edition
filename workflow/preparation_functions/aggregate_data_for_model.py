@@ -8,18 +8,21 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 
 import pandas as pd 
 import numpy as np
@@ -40,9 +43,9 @@ from plotly.subplots import make_subplots
 #%%
 def aggregate_data_for_model(ECONOMY_ID, REPLACE_ZEROS_WITH_AVGS_FROM_DIFFERENT_DATES_FOR_FACTOR_MEASURES=True, REPLACE_NAS_WITH_ZEROS=True, REPLACE_ZEROS_WITH_ONES_IN_GROWTH_VALUES=True):
     #load data from transport datasystem
-    new_transport_dataset = pd.read_csv('intermediate_data/model_inputs/transport_data_system_extract.csv')
-    user_input = pd.read_csv(f'intermediate_data/model_inputs/{ECONOMY_ID}_user_inputs_and_growth_rates.csv')
-    growth = pd.read_csv('intermediate_data/model_inputs/regression_based_growth_estimates.csv')
+    new_transport_dataset = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/transport_data_system_extract.csv')
+    user_input = pd.read_csv(root_dir + '/' +f'intermediate_data/model_inputs/{ECONOMY_ID}_user_inputs_and_growth_rates.csv')
+    growth = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/regression_based_growth_estimates.csv')
     
     # #drop age from new_transport_dataset
     # new_transport_dataset = new_transport_dataset.loc[new_transport_dataset['Measure']!='Average_age']
@@ -131,17 +134,17 @@ def aggregate_data_for_model(ECONOMY_ID, REPLACE_ZEROS_WITH_AVGS_FROM_DIFFERENT_
         breakpoint()#get rid of it
     
     #save data    
-    road_model_input_wide.to_csv('intermediate_data/model_inputs/{}/{}_aggregated_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    non_road_model_input_wide.to_csv('intermediate_data/model_inputs/{}/{}_aggregated_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID,ECONOMY_ID), index=False)
-    growth_forecasts_wide.to_csv('intermediate_data/model_inputs/{}/{}_aggregated_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID,ECONOMY_ID), index=False)
+    road_model_input_wide.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    non_road_model_input_wide.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID,ECONOMY_ID), index=False)
+    growth_forecasts_wide.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID,ECONOMY_ID), index=False)
 
-    stocks_per_capita_threshold.to_csv('intermediate_data/model_inputs/{}/{}_stocks_per_capita_threshold.csv'.format(config.FILE_DATE_ID,ECONOMY_ID), index=False)
+    stocks_per_capita_threshold.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_stocks_per_capita_threshold.csv'.format(config.FILE_DATE_ID,ECONOMY_ID), index=False)
     
     #lastly resave these files before they get changed in the modelling process
-    supply_side_fuel_mixing = pd.read_csv('intermediate_data/model_inputs/{}/{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID,ECONOMY_ID))
-    demand_side_fuel_mixing = pd.read_csv('intermediate_data/model_inputs/{}/{}_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-    supply_side_fuel_mixing.to_csv('intermediate_data/model_inputs/{}/{}_aggregated_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    demand_side_fuel_mixing.to_csv('intermediate_data/model_inputs/{}/{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    supply_side_fuel_mixing = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID,ECONOMY_ID))
+    demand_side_fuel_mixing = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    supply_side_fuel_mixing.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    demand_side_fuel_mixing.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
 
 def replace_zeros_with_avgs_from_different_dates(df, measure):
     #requires a df with a date col, a measure col and a value col so that we can group by everything except the value and date col to calcualte the avcerage. note that we will exclude the effect of 0s and nans on teh aavg

@@ -4,18 +4,25 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+    sys.path.append(f"{root_dir}/workflow/calculation_functions")
+    import road_model_functions
 
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+    from ..calculation_functions import road_model_functions
+#################
 
 import pandas as pd 
 import numpy as np
@@ -34,9 +41,6 @@ import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 
-sys.path.append(f"{root_dir}/workflow/calculation_functions")
-import road_model_functions
-
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 #%%
@@ -46,7 +50,7 @@ def calculate_emissions_from_energy_col(emissions_factors, model_output_with_fue
     model_output_with_fuels = model_output_with_fuels.merge(emissions_factors, how='left', on='Fuel')
 
     if USE_AVG_GENERATION_EMISSIONS_FACTOR:
-        emissions_factor_elec = pd.read_csv('input_data/from_8th/outlook_8th_emissions_factors_with_electricity.csv')
+        emissions_factor_elec = pd.read_csv(root_dir + '/' + 'input_data/from_8th/outlook_8th_emissions_factors_with_electricity.csv')
         emissions_factor_elec = emissions_factor_elec[emissions_factor_elec.fuel_code == '17_electricity'].copy()
         emissions_factor_elec['Scenario'] = emissions_factor_elec['Scenario'].replace('Carbon Neutral', 'Target')
         emissions_factor_elec.columns = [x.capitalize() for x in emissions_factor_elec.columns]
@@ -136,12 +140,12 @@ def compare_values_between_projections_using_two_files(projection_filename1, pro
         raise ValueError('Graph type not recognised')
 
     for name, fig in figs.items():
-        fig.write_html(f'{save_folder}/{title}_{name}.html')
+        fig.write_html(root_dir + '/' +f'{save_folder}/{title}_{name}.html')
 
     return
 #%%
 # Example usage
-emissions_factors = pd.read_csv('config/9th_edition_emissions_factors.csv')
+emissions_factors = pd.read_csv(root_dir + '/' + 'config/9th_edition_emissions_factors.csv')
 filter_dict = {'Scenario': ['Reference'], 'Economy': ['03_CDA'], 'Transport Type': ['passenger'], 'Medium': ['road']}
 compare_values_between_projections_using_two_files(
     'plotting_output/experimental/Nanjing_comparisons/03_CDA_model_output20240327.csv',

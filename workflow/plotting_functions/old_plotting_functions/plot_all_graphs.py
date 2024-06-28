@@ -7,18 +7,21 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 
 import pandas as pd 
 import numpy as np
@@ -68,13 +71,13 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
 
     ##############FORMATTING#############
     #load data in
-    original_model_output_8th = pd.read_csv('input_data/from_8th/reformatted/activity_energy_road_stocks.csv')
+    original_model_output_8th = pd.read_csv(root_dir + '/' + 'input_data/from_8th/reformatted/activity_energy_road_stocks.csv')
     #rename Year col into Date
     original_model_output_8th = original_model_output_8th.rename(columns={'Year':'Date'})
-    original_activity_growth = pd.read_csv('input_data/from_8th/reformatted/activity_growth_8th.csv')
-    original_model_output_detailed = pd.read_csv('output_data/model_output_detailed/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
-    original_model_output_all = pd.read_csv('output_data/model_output/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
-    original_model_output_with_fuels = pd.read_csv('output_data/model_output_with_fuels/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
+    original_activity_growth = pd.read_csv(root_dir + '/' + 'input_data/from_8th/reformatted/activity_growth_8th.csv')
+    original_model_output_detailed = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
+    original_model_output_all = pd.read_csv(root_dir + '/' + 'output_data/model_output/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
+    original_model_output_with_fuels = pd.read_csv(root_dir + '/' + 'output_data/model_output_with_fuels/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
     #loop thorugh scenarios:
     if ECONOMY_ID != None:
         #filter for economy of interest
@@ -213,16 +216,16 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
 
         def log_time(section, elapsed_time):
             try:
-                times_df = pd.read_csv('plotting_output/all_economy_graphs_plotting_times.csv')
+                times_df = pd.read_csv(root_dir + '/' + 'plotting_output/all_economy_graphs_plotting_times.csv')
             except FileNotFoundError:
                 times_df = pd.DataFrame(columns=['section', 'time'])
 
             times_df_new_row = pd.DataFrame({'section': section, 'time': elapsed_time, 'num_economies': 21}, index=[0])
             times_df = pd.concat([times_df, times_df_new_row])
-            times_df.to_csv('plotting_output/all_economy_graphs_plotting_times.csv', index=False)
+            times_df.to_csv(root_dir + '/' + 'plotting_output/all_economy_graphs_plotting_times.csv', index=False)
         def print_expected_time_to_run(section):
             try:
-                times_df = pd.read_csv('plotting_output/all_economy_graphs_plotting_times.csv')
+                times_df = pd.read_csv(root_dir + '/' + 'plotting_output/all_economy_graphs_plotting_times.csv')
                 times_df = times_df[times_df['section']==section]
                 times_df = times_df[times_df['num_economies']==21]
                 times_df = times_df['time']
@@ -249,7 +252,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
         #bascially we want to plot every column using economy as the facet then a mix of transport type, drive, vehicle type, medium and fuel as the categories. So we will create a function that does this:
         def check_graph_exists(save_folder, title, dont_overwrite_existing_graphs=False):
             #double check we havent already plotted this graph:
-            if (os.path.exists(f'./{save_folder}/static/' + title + '.png') | os.path.exists(f'./{save_folder}/' + title + '.html')) & dont_overwrite_existing_graphs:
+            if (os.path.exists(root_dir + '/' + f'./{save_folder}/static/' + title + '.png') | os.path.exists(root_dir + '/' + f'./{save_folder}/' + title + '.html')) & dont_overwrite_existing_graphs:
                 return True
             else:
                 return False
@@ -341,10 +344,10 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
             df = df[df[y_column] != '']
 
             #checkl that the folders wqe save to exist
-            if not os.path.exists(f'./{save_folder}/'):
+            if not os.path.exists(root_dir + '/' + f'./{save_folder}/'):
                 os.makedirs(f'./{save_folder}/')
             #create static folder too
-            if not os.path.exists(f'./{save_folder}/static'):
+            if not os.path.exists(root_dir + '/' + f'./{save_folder}/static'):
                 os.makedirs(f'./{save_folder}/static')
 
             
@@ -423,9 +426,9 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
             if x_axis_title == None:
                 x_axis_title = x_column
             df = df[df[y_column] != '']
-            if not os.path.exists(f'./{save_folder}/'):
+            if not os.path.exists(root_dir + '/' + f'./{save_folder}/'):
                 os.makedirs(f'./{save_folder}/')
-            if not os.path.exists(f'./{save_folder}/static'):
+            if not os.path.exists(root_dir + '/' + f'./{save_folder}/static'):
                 os.makedirs(f'./{save_folder}/static')
             if line_group_categories != None:
                 df = df.groupby([x_column, facet_col,color, line_group,hover_name])[y_column].sum().reset_index()
@@ -567,7 +570,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
         if ECONOMY_ID == None:#if we are plotting all economies then plot the regional data too
             #plot regional groupings of economys
             #import the region_economy_mappin.xlsx from config/concordances_and_config_data
-            region_economy_mapping = pd.read_csv('./config/concordances_and_config_data/region_economy_mapping.csv')
+            region_economy_mapping = pd.read_csv(root_dir + '/' + './config/concordances_and_config_data/region_economy_mapping.csv')
             #join with model_output_detailed_APEC.
             #where there is no region drop the row since we are just plotting singular economies atm
             model_output_detailed_regions = model_output_detailed.merge(region_economy_mapping, how='left', left_on='Economy', right_on='Economy')
@@ -656,7 +659,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
             #merge with regions
             #plot regional groupings of economys
             #import the region_economy_mappin.xlsx from config/concordances_and_config_data
-            region_economy_mapping = pd.read_csv('./config/concordances_and_config_data/region_economy_mapping.csv')
+            region_economy_mapping = pd.read_csv(root_dir + '/' + './config/concordances_and_config_data/region_economy_mapping.csv')
             model_output_with_fuels_regions = model_output_with_fuels.merge(region_economy_mapping, how='left', left_on='Economy', right_on='Economy')
 
             #drop nas
@@ -727,7 +730,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
             start = start_timer(dataframe_name,do_this)
             if do_this:
                 #PLOT 8TH VS 9TH FUEL:
-                # original_model_output_8th = pd.read_csv('intermediate_data/activity_energy_road_stocks.csv')
+                # original_model_output_8th = pd.read_csv(root_dir + '/' + 'intermediate_data/activity_energy_road_stocks.csv')
                 #['Medium', 'Transport Type', 'Vehicle Type', 'Drive', 'Date', 'Economy',
                 #    'Scenario', 'Activity', 'Energy', 'Stocks']
                 #we will merge together model_output_8th and model_output_all and then plot them together, with 8th on one facet, 9th on the oter. we will plot te values for 'energy, 'stocks' and 'activity'

@@ -21,19 +21,6 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
-
 import pandas as pd 
 import numpy as np
 import yaml
@@ -50,8 +37,21 @@ import matplotlib
 import matplotlib.pyplot as plt
 ###
 
-sys.path.append(f"{root_dir}/workflow/utility_functions")
-import utility_functions
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 
 import apply_fuel_mix_demand_side
 import apply_fuel_mix_supply_side
@@ -82,19 +82,19 @@ def adjust_data_to_match_esto_handler(BASE_YEAR, ECONOMY_ID, road_model_input_wi
     energy_use_esto = format_9th_input_energy_from_esto(ECONOMY_ID)#Economy missing in here
     
     #move electricity use in road to rail. This is based on the parameters the user has set. It should generally default to False unless the user things that Elec use in road is overexaggerated.
-    ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR']
+    ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR']
     if ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR[ECONOMY_ID]:
         USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=True
         energy_use_esto = move_electricity_use_in_road_to_rail_esto(energy_use_esto, ECONOMY_ID)
     else:
         USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=False 
             
-    input_data_based_on_previous_model_run = pd.read_csv('output_data/model_output_detailed/{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
-    energy_use_output = pd.read_csv('output_data/model_output_with_fuels/{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    input_data_based_on_previous_model_run = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    energy_use_output = pd.read_csv(root_dir + '/' + 'output_data/model_output_with_fuels/{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
     
     #save them for archiving because they will be overwritten later
-    input_data_based_on_previous_model_run.to_csv('intermediate_data/model_outputs/{}_input_data_based_on_previous_model_run_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
-    energy_use_output.to_csv('intermediate_data/model_outputs/{}_energy_use_output_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    input_data_based_on_previous_model_run.to_csv(root_dir + '/' + 'intermediate_data/model_outputs/{}_input_data_based_on_previous_model_run_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    energy_use_output.to_csv(root_dir + '/' + 'intermediate_data/model_outputs/{}_energy_use_output_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
     
     #double check that the max and min dates for the input data match the BASEYEAR AND config.OUTLOOK_BASE_YEAR, OTHERWISE THE USER NEEDS TO RUN THE MODEL WITH ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR SET TO FALSE AGAIN:
     if input_data_based_on_previous_model_run['Date'].max() != config.OUTLOOK_BASE_YEAR or input_data_based_on_previous_model_run['Date'].min() != BASE_YEAR:
@@ -478,7 +478,7 @@ def incorporate_fuel_mixing_before_recalculating_stocks(required_energy_use_by_d
     required_energy_use_by_drive_and_fuel = required_energy_use_by_drive_and_fuel.drop(columns=['ratio','addition','proportion_of_group', 'Energy_esto', 'Energy_model'])
     
     
-    drive_type_to_fuel = pd.read_csv('config/concordances_and_config_data/drive_type_to_fuel.csv')
+    drive_type_to_fuel = pd.read_csv(root_dir + '/' + 'config/concordances_and_config_data/drive_type_to_fuel.csv')
     #first supply side so we dont mix any biofuels with electricity which came from demand side fuel mixing:
     supply_side_fuel_mixing_drives = drive_type_to_fuel.loc[drive_type_to_fuel['Supply_side_fuel_mixing'] != False][['Drive','Fuel','Supply_side_fuel_mixing']].drop_duplicates()
     
@@ -585,7 +585,7 @@ def test_output_matches_expectations(ECONOMY_ID, supply_side_fuel_mixing, demand
     if diff_percent > 1.01 or diff_percent < 0.99:
         breakpoint()
         #saev output to csv
-        # diff_percent.to_csv('intermediate_data/errors/ajust_data_to_match_esto_energy_use_diff.csv')
+        # diff_percent.to_csv(root_dir + '/' + 'intermediate_data/errors/ajust_data_to_match_esto_energy_use_diff.csv')
         # raise ValueError('energy use does not match esto, proportion difference is  {}'.format(diff_percent))
         print('energy use does not match esto, proportion difference is  {}'.format(diff_percent))
         
@@ -637,8 +637,8 @@ def move_electricity_use_in_road_to_rail_esto(energy_use_esto, ECONOMY_ID):
 def format_9th_input_energy_from_esto(ECONOMY_ID=None):
     #take in data from the EBT system of 9th and format it so that it can be used to create the energy data to whcih the model will be rescaled:
     #load the 9th data
-    date_id = utility_functions.get_latest_date_for_data_file('input_data/9th_model_inputs', 'model_df_wide_')
-    energy_use_esto = pd.read_csv(f'input_data/9th_model_inputs/model_df_wide_{date_id}.csv')
+    date_id = utility_functions.get_latest_date_for_data_file(root_dir + '/' + 'input_data/9th_model_inputs', 'model_df_wide_')
+    energy_use_esto = pd.read_csv(root_dir + '/' +f'input_data/9th_model_inputs/model_df_wide_{date_id}.csv')
     #just quickly, if it contains '15_PHL', '17_SGP', then change them and resave it. this should be sorted out later but for now its okay desu.
     # if len(energy_use_esto.loc[energy_use_esto['economy'].isin(['15_PHL', '17_SGP'])]) > 0:
     #     energy_use_esto['economy'] = energy_use_esto['economy'].replace({'15_PHL': '15_PHL', '17_SIN': '17_SGP'})
@@ -738,7 +738,7 @@ def format_9th_input_energy_from_esto(ECONOMY_ID=None):
             energy_use_esto.loc[(energy_use_esto['Medium'] == medium) & (energy_use_esto['Fuel'] == fuel), 'Fuel'] = new_fuel_and_medium[0]
             energy_use_esto.loc[(energy_use_esto['Medium'] == medium) & (energy_use_esto['Fuel'] == fuel), 'Medium'] = new_fuel_and_medium[1]
     
-    concordances_fuels = pd.read_csv('intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_file_name_fuels))
+    concordances_fuels = pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_file_name_fuels))
     concordances_fuels = concordances_fuels[['Fuel', 'Medium']].drop_duplicates()
     energy_use_esto_fuel_medium = energy_use_esto[['Fuel', 'Medium']].drop_duplicates()
     #drop nonspecified and pipeline from energy_use_esto_fuel_medium
@@ -813,7 +813,7 @@ def plot_optimised_results(input_data_new_road_copy, new_measures_cols, original
     #and sort by them so 
     fig = px.strip(plotting_df, x='Vehicle Type', y='% change', color='Drive', title=title, facet_col='Transport Type', facet_row='Measure', hover_data=['New', 'Old'])
     #write to html in plotting_output/input_exploration/esto_reestimations
-    fig.write_html('plotting_output/input_exploration/esto_reestimations/{}_{}_{}.html'.format(id, economy, title), auto_open=False)
+    fig.write_html(root_dir + '/' + 'plotting_output/input_exploration/esto_reestimations/{}_{}_{}.html'.format(id, economy, title), auto_open=False)
     #remember to set input_data_new_road_copy to input_data_new_road once we are happy with the results 
     
 

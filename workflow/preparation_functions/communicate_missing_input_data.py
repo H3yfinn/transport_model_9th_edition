@@ -6,18 +6,21 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 
 import pandas as pd 
 import numpy as np
@@ -40,7 +43,7 @@ from plotly.subplots import make_subplots
 #load in the transport dataset that contains all data and plot the data coverage usinga  kind of scatterplot. 
 #this will allow the user to understand where data is missing and where it is present so that if any errors occur they can find out with ease
 def communicate_missing_input_data():
-    aggregated_model_data = pd.read_csv('intermediate_data/model_inputs/{}/aggregated_model_data.csv'.format(config.FILE_DATE_ID))
+    aggregated_model_data = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/aggregated_model_data.csv'.format(config.FILE_DATE_ID))
 
     #now plot the data available column to see what data is available and what is not using the data coverage plotting style;
     #%%
@@ -212,7 +215,7 @@ def communicate_missing_input_data():
     # %matplotlib inline
     #%%
     #plot the user input measures vs other measures
-    user_input = pd.read_csv('intermediate_data/model_inputs/user_inputs_and_growth_rates.csv')
+    user_input = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/user_inputs_and_growth_rates.csv')
     #loop through the measures
     user_input_measures = user_input.Measure.unique()
     non_user_input_measures = [measure for measure in aggregated_model_data.Measure.unique() if measure not in user_input_measures]

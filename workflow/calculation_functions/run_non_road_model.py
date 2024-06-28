@@ -9,18 +9,21 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 
 import pandas as pd 
 import numpy as np
@@ -61,22 +64,22 @@ def load_non_road_model_data(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_
     if USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD:
         growth_forecasts = pd.read_pickle(f'./intermediate_data/road_model/{ECONOMY_ID}_final_road_growth_forecasts.pkl')
     else:
-        growth_forecasts = pd.read_csv(f'intermediate_data/model_inputs/{config.FILE_DATE_ID}/{ECONOMY_ID}_growth_forecasts_wide.csv')
+        growth_forecasts = pd.read_csv(root_dir + '/' +f'intermediate_data/model_inputs/{config.FILE_DATE_ID}/{ECONOMY_ID}_growth_forecasts_wide.csv')
     #load all other data
-    non_road_model_input = pd.read_csv(f'intermediate_data/model_inputs/{config.FILE_DATE_ID}/{ECONOMY_ID}_non_road_model_input_wide.csv')
+    non_road_model_input = pd.read_csv(root_dir + '/' +f'intermediate_data/model_inputs/{config.FILE_DATE_ID}/{ECONOMY_ID}_non_road_model_input_wide.csv')
 
     #Merge growth forecasts with non_road_model_input:
     non_road_model_input.drop(columns=['Activity_growth'], inplace=True)
     non_road_model_input = non_road_model_input.merge(growth_forecasts[['Date', 'Economy','Scenario','Transport Type','Activity_growth']].drop_duplicates(), on=['Date', 'Economy','Scenario','Transport Type'], how='left')
     
     #load the parameters from the config file
-    turnover_rate_parameters_dict = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['turnover_rate_parameters_dict']
+    turnover_rate_parameters_dict = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['turnover_rate_parameters_dict']
     turnover_rate_steepness = turnover_rate_parameters_dict['turnover_rate_steepness_non_road']
     turnover_rate_max_value = turnover_rate_parameters_dict['turnover_rate_max_value_non_road']
     turnover_rate_midpoint = turnover_rate_parameters_dict['turnover_rate_midpoint_non_road']
         
-    turnover_rate_midpoint_mult_adjustment_road_reference = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_NON_ROAD_REFERENCE']
-    turnover_rate_midpoint_mult_adjustment_road_target = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET']
+    turnover_rate_midpoint_mult_adjustment_road_reference = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_NON_ROAD_REFERENCE']
+    turnover_rate_midpoint_mult_adjustment_road_target = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET']
     
     #extract the value for the economy, if it exists
     if ECONOMY_ID in turnover_rate_midpoint_mult_adjustment_road_reference.keys():
@@ -245,7 +248,7 @@ def run_non_road_model(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD =
         output_df.drop(columns=diff_cols, inplace=True)
         # raise ValueError("The columns in the output_df are not what we expect. {} are the extra cols. Please check the config file or any changes made to run_non_road_model.py".format(diff_cols))
     
-    # output_df.to_csv('a.csv', index=False)
+    # output_df.to_csv(root_dir + '/' + 'a.csv', index=False)
     output_df.to_csv(output_file_name, index=False)
     
     
@@ -260,10 +263,10 @@ def run_non_road_model(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD =
             
 #         if transport_type =='passenger':
 #             #load ECONOMIES_WITH_STOCKS_PER_CAPITA_REACHED from parameters.yml
-#             EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER =  yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER']
+#             EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER =  yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER']
 #             X = EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER[economy]
 #         elif transport_type =='freight':
-#             EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT =  yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT']
+#             EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT =  yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT']
 #             X = EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT[economy]
         
 #         #now revert decreaing mileage by a factor of 1-X

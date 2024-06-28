@@ -9,18 +9,21 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 
 import pandas as pd 
 import numpy as np
@@ -41,8 +44,8 @@ from plotly.subplots import make_subplots
 #%%
 def concatenate_model_output(ECONOMY_ID, SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_NON_ROAD=True):
     #load model output
-    road_model_output = pd.read_csv('intermediate_data/road_model/{}_{}'.format(ECONOMY_ID, config.model_output_file_name))#TODO WHY IS MEASURE A COLUMN IN HERE?
-    non_road_model_output = pd.read_csv('intermediate_data/non_road_model/{}_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    road_model_output = pd.read_csv(root_dir + '/' + 'intermediate_data/road_model/{}_{}'.format(ECONOMY_ID, config.model_output_file_name))#TODO WHY IS MEASURE A COLUMN IN HERE?
+    non_road_model_output = pd.read_csv(root_dir + '/' + 'intermediate_data/non_road_model/{}_{}'.format(ECONOMY_ID, config.model_output_file_name))
     
     # check if there are any NA's in any columns in the output dataframes. If there are, print them out
     if road_model_output.isnull().values.any():
@@ -68,7 +71,7 @@ def concatenate_model_output(ECONOMY_ID, SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_N
     model_output_all = pd.concat([road_model_output, non_road_model_output])
     
     #save
-    model_output_all.to_csv('intermediate_data/model_outputs/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    model_output_all.to_csv(root_dir + '/' + 'intermediate_data/model_outputs/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
 
     if SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_NON_ROAD:
         model_output_all = transfer_growth_between_mediums(model_output_all, ECONOMY_ID)
@@ -88,7 +91,7 @@ def transfer_growth_between_mediums(model_output_all, ECONOMY_ID):
     #         road_to_rail:
     #             05_PRC: 0.01
     
-    SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT = yaml.load(open('config/parameters.yml', 'r'), Loader=yaml.FullLoader)['SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT']
+    SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT = yaml.load(open(root_dir + '/' + 'config/parameters.yml', 'r'), Loader=yaml.FullLoader)['SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT']
     #create emptycsv for  _road_to_non_road_activity_change_for_plotting. it will get updated if SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_NON_ROAD is true for this economy
     activity_change_for_plotting_all = pd.DataFrame(columns=config.INDEX_COLS_NO_MEASURE + ['Change_in_activity', 'New_activity', 'Original_activity', 'FROM_or_TO', 'medium_to_medium_shift'])
     for transport_type in SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT.keys():
@@ -120,7 +123,7 @@ def transfer_growth_between_mediums(model_output_all, ECONOMY_ID):
                 
                 activity_change_for_plotting_all = pd.concat([activity_change_for_plotting_all, activity_change_for_plotting])
     #save activity_change_for_plotting to file
-    activity_change_for_plotting_all.to_csv('intermediate_data/model_outputs/{}_medium_to_medium_activity_change_for_plotting{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID), index=False)
+    activity_change_for_plotting_all.to_csv(root_dir + '/' + 'intermediate_data/model_outputs/{}_medium_to_medium_activity_change_for_plotting{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID), index=False)
     return model_output_all
 
 def fill_missing_output_cols_with_nans(ECONOMY_ID, road_model_input_wide, non_road_model_input_wide):
@@ -132,8 +135,8 @@ def fill_missing_output_cols_with_nans(ECONOMY_ID, road_model_input_wide, non_ro
             non_road_model_input_wide[col] = np.nan
             
     #save to file
-    road_model_input_wide.to_csv('intermediate_data/road_model/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
-    non_road_model_input_wide.to_csv('intermediate_data/non_road_model/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    road_model_input_wide.to_csv(root_dir + '/' + 'intermediate_data/road_model/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    non_road_model_input_wide.to_csv(root_dir + '/' + 'intermediate_data/non_road_model/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
 
 
 def find_cumulative_product_of_growth_rate(growth_rate,model_output_all):

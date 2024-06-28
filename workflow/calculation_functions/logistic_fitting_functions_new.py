@@ -5,18 +5,25 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+        
+    sys.path.append(f"{root_dir}/workflow/plotting_functions")
+    import plot_logistic_fitting_data
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+    from ..plotting_functions import plot_logistic_fitting_data
+#################
 
 import pandas as pd 
 import numpy as np
@@ -34,8 +41,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
-sys.path.append(f"{root_dir}/workflow/plotting_functions")
-import plot_logistic_fitting_data
 from scipy.optimize import curve_fit
 #######################################################################
 #######################################################################
@@ -121,7 +126,7 @@ def logistic_fitting_function_handler(ECONOMY_ID, model_data,show_plots=False,ma
     activity_growth_estimates.drop(columns=['Activity_growth_old'], inplace=True)
 
     #save parameters_estimates. at the very elast we will plot these later
-    parameters_estimates.to_csv('intermediate_data/road_model/{}_parameters_estimates_{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID), index=False)
+    parameters_estimates.to_csv(root_dir + '/' + 'intermediate_data/road_model/{}_parameters_estimates_{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID), index=False)
         
     return activity_growth_estimates 
 
@@ -160,10 +165,10 @@ def calculate_vehicles_per_stock_parameters(model_data,ECONOMY_ID, car_base_amou
         #load in the mean values for each vehicle type
         mean_df = pd.DataFrame()
         for economy in config.economy_scenario_concordance['Economy'].unique():
-            # if os.path.exists('intermediate_data/road_model/{}_vehicles_per_stock_parameters_{}.csv'.format(economy, 'passenger_only')) & ONLY_PASSENGER_VEHICLES:
-            #     e = pd.read_csv('intermediate_data/road_model/{}_vehicles_per_stock_parameters_{}.csv'.format(economy, 'passenger_only'))
-            if os.path.exists('intermediate_data/road_model/{}_vehicles_per_stock_parameters.csv'.format(economy)):
-                e = pd.read_csv('intermediate_data/road_model/{}_vehicles_per_stock_parameters.csv'.format(economy))
+            # if os.path.exists(root_dir + '/' + 'intermediate_data/road_model/{}_vehicles_per_stock_parameters_{}.csv'.format(economy, 'passenger_only')) & ONLY_PASSENGER_VEHICLES:
+            #     e = pd.read_csv(root_dir + '/' + 'intermediate_data/road_model/{}_vehicles_per_stock_parameters_{}.csv'.format(economy, 'passenger_only'))
+            if os.path.exists(root_dir + '/' + 'intermediate_data/road_model/{}_vehicles_per_stock_parameters.csv'.format(economy)):
+                e = pd.read_csv(root_dir + '/' + 'intermediate_data/road_model/{}_vehicles_per_stock_parameters.csv'.format(economy))
             else:
                 continue
             #calc mean while ignoring date and scenario
@@ -191,9 +196,9 @@ def calculate_vehicles_per_stock_parameters(model_data,ECONOMY_ID, car_base_amou
     
     #save for later use
     # if ONLY_PASSENGER_VEHICLES:
-    #     vehicles_per_stock_parameters.to_csv('intermediate_data/road_model/{}_vehicles_per_stock_parameters_{}_{}.csv'.format(ECONOMY_ID, 'passenger_only'), index=False)
+    #     vehicles_per_stock_parameters.to_csv(root_dir + '/' + 'intermediate_data/road_model/{}_vehicles_per_stock_parameters_{}_{}.csv'.format(ECONOMY_ID, 'passenger_only'), index=False)
     # else:
-    vehicles_per_stock_parameters.to_csv('intermediate_data/road_model/{}_vehicles_per_stock_parameters.csv'.format(ECONOMY_ID), index=False)
+    vehicles_per_stock_parameters.to_csv(root_dir + '/' + 'intermediate_data/road_model/{}_vehicles_per_stock_parameters.csv'.format(ECONOMY_ID), index=False)
     
     return vehicles_per_stock_parameters
     
@@ -456,7 +461,7 @@ def create_new_dataframe_with_logistic_predictions(new_model_data, new_stocks_pe
     #calculate new activity:
     model_data_logistic_predictions['New_Activity'] = model_data_logistic_predictions.apply(lambda row: row['New_Travel_km'] * row['Occupancy_or_load'], axis=1)
     
-    # model_data_logistic_predictions.to_csv('b.csv')
+    # model_data_logistic_predictions.to_csv(root_dir + '/' + 'b.csv')
     #repalce Thousand_stocks_per_capita, Stocks_per_thousand_capita, stocks, activity and travel km with new values
     model_data_logistic_predictions['Stocks'] = model_data_logistic_predictions['New_Stocks']
     model_data_logistic_predictions['Activity'] = model_data_logistic_predictions['New_Activity']
@@ -471,7 +476,7 @@ def create_new_dataframe_with_logistic_predictions(new_model_data, new_stocks_pe
 
 def find_parameters_for_logistic_function(new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA, PROPORTION_BELOW_GAMMA, EXTRA_YEARS_TO_REACH_GAMMA, INTERPOLATE_ALL_DATES):
     #load ECONOMIES_WITH_STOCKS_PER_CAPITA_REACHED from parameters.yml
-    ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED =  yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED']
+    ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED =  yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED']
     
     #loop through economies and transport types and perform the clacualtions ti find the parameters for the logistic function
     #create empty dataframe to store results

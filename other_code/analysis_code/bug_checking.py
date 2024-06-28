@@ -20,12 +20,12 @@ import plotly.io as pio
 #%%
 
 #load data in
-model_output_all = pd.read_csv('output_data/model_output/{}'.format(config.model_output_file_name))
-model_output_detailed = pd.read_csv('output_data/model_output_detailed/{}'.format(config.model_output_file_name))
-change_dataframe_aggregation = pd.read_csv('intermediate_data/road_model/change_dataframe_aggregation.csv')
+model_output_all = pd.read_csv(root_dir + '/' + 'output_data/model_output/{}'.format(config.model_output_file_name))
+model_output_detailed = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}'.format(config.model_output_file_name))
+change_dataframe_aggregation = pd.read_csv(root_dir + '/' + 'intermediate_data/road_model/change_dataframe_aggregation.csv')
 
 #lkoad 8th data
-model_output_8th = pd.read_csv('intermediate_data/activity_efficiency_energy_road_stocks.csv')
+model_output_8th = pd.read_csv(root_dir + '/' + 'intermediate_data/activity_efficiency_energy_road_stocks.csv')
 
 #%%
 #keep only columns in model_output_8th

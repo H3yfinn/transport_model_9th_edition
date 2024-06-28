@@ -21,7 +21,7 @@ import plotly.io as pio
 #%%
 #compare model output to 8th edition output. If there are any differences, print them
 #laod output from 8th edition
-model_output_with_fuels = pd.read_csv('output_data/model_output_with_fuels/{}'.format(config.model_output_file_name))
+model_output_with_fuels = pd.read_csv(root_dir + '/' + 'output_data/model_output_with_fuels/{}'.format(config.model_output_file_name))
 model_output_8th = pd.read_csv("intermediate_data/cleaned_input_data/energy_with_fuel.csv")
 # #%%
 # #keep only columns in model_output_8th

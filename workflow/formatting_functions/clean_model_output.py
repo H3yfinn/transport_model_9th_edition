@@ -3,18 +3,24 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+    sys.path.append(f"{root_dir}/workflow/calculation_functions")
+    import road_model_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+    from ..calculation_functions import road_model_functions
+#################
 
 import pandas as pd 
 import numpy as np
@@ -33,8 +39,6 @@ import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 
-sys.path.append(f"{root_dir}/workflow/calculation_functions")
-import road_model_functions
 #%%
 
 def process_data(df, is_fuel=False):
@@ -142,22 +146,22 @@ def clean_model_output(ECONOMY_ID, model_output_with_fuel_mixing, model_output_a
     
     
     #save data without the new drive cols for non road
-    model_output_detailed.to_csv('output_data/model_output_detailed/{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    model_output_detailed.to_csv(root_dir + '/' + 'output_data/model_output_detailed/{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
 
-    model_output_non_detailed.to_csv('output_data/model_output/{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    model_output_non_detailed.to_csv(root_dir + '/' + 'output_data/model_output/{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
 
-    model_output_all_with_fuels.to_csv('output_data/model_output_with_fuels/{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    model_output_all_with_fuels.to_csv(root_dir + '/' + 'output_data/model_output_with_fuels/{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
    
     model_output_all_with_fuels,model_output_detailed,model_output_non_detailed = clean_non_road_drive_types(model_output_all_with_fuels,model_output_detailed,model_output_non_detailed)
    
    
     #save data with the new drive cols for non road:
     
-    model_output_detailed.to_csv('output_data/model_output_detailed/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    model_output_detailed.to_csv(root_dir + '/' + 'output_data/model_output_detailed/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
 
-    model_output_non_detailed.to_csv('output_data/model_output/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    model_output_non_detailed.to_csv(root_dir + '/' + 'output_data/model_output/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
 
-    model_output_all_with_fuels.to_csv('output_data/model_output_with_fuels/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    model_output_all_with_fuels.to_csv(root_dir + '/' + 'output_data/model_output_with_fuels/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
       
     create_output_for_cost_modelling(model_output_detailed, ECONOMY_ID)
     
@@ -174,17 +178,17 @@ def concatenate_output_data():
     not_all_economies = False
     for e in config.ECONOMY_LIST:
         try:
-            model_output_detailed_economy = pd.read_csv('output_data/model_output_detailed/{}_{}'.format(e, config.model_output_file_name))
+            model_output_detailed_economy = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}_{}'.format(e, config.model_output_file_name))
         except:
             not_all_economies = True
             break#we didnt run the model for this economy, so no need to concatenate any
-        model_output_non_detailed_economy = pd.read_csv('output_data/model_output/{}_{}'.format(e, config.model_output_file_name))
-        model_output_all_with_fuels_economy = pd.read_csv('output_data/model_output_with_fuels/{}_{}'.format(e, config.model_output_file_name))
+        model_output_non_detailed_economy = pd.read_csv(root_dir + '/' + 'output_data/model_output/{}_{}'.format(e, config.model_output_file_name))
+        model_output_all_with_fuels_economy = pd.read_csv(root_dir + '/' + 'output_data/model_output_with_fuels/{}_{}'.format(e, config.model_output_file_name))
         
         #now for NON_ROAD_DETAILED_ files:
-        model_output_detailed_non_road_economy = pd.read_csv('output_data/model_output_detailed/{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name))
-        model_output_non_detailed_non_road_economy = pd.read_csv('output_data/model_output/{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name))
-        model_output_all_with_fuels_non_road_economy = pd.read_csv('output_data/model_output_with_fuels/{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name))
+        model_output_detailed_non_road_economy = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name))
+        model_output_non_detailed_non_road_economy = pd.read_csv(root_dir + '/' + 'output_data/model_output/{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name))
+        model_output_all_with_fuels_non_road_economy = pd.read_csv(root_dir + '/' + 'output_data/model_output_with_fuels/{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name))
         
         model_output_detailed = pd.concat([model_output_detailed, model_output_detailed_economy])
         model_output_non_detailed = pd.concat([model_output_non_detailed, model_output_non_detailed_economy])
@@ -200,14 +204,14 @@ def concatenate_output_data():
         return
     
     #save the final df: 
-    model_output_detailed.to_csv('output_data/model_output_detailed/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
-    model_output_non_detailed.to_csv('output_data/model_output/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
-    model_output_all_with_fuels.to_csv('output_data/model_output_with_fuels/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
+    model_output_detailed.to_csv(root_dir + '/' + 'output_data/model_output_detailed/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
+    model_output_non_detailed.to_csv(root_dir + '/' + 'output_data/model_output/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
+    model_output_all_with_fuels.to_csv(root_dir + '/' + 'output_data/model_output_with_fuels/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
     
     #save the final df: 
-    model_output_detailed_non_road.to_csv('output_data/model_output_detailed/all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
-    model_output_non_detailed_non_road.to_csv('output_data/model_output/all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
-    model_output_all_with_fuels_non_road.to_csv('output_data/model_output_with_fuels/all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
+    model_output_detailed_non_road.to_csv(root_dir + '/' + 'output_data/model_output_detailed/all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
+    model_output_non_detailed_non_road.to_csv(root_dir + '/' + 'output_data/model_output/all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
+    model_output_all_with_fuels_non_road.to_csv(root_dir + '/' + 'output_data/model_output_with_fuels/all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
     
 def create_output_for_cost_modelling(model_output_detailed, ECONOMY_ID):
     #create a version of the model output which is just the energy use, stocks and sales by vehicle type and drive. Later on we might also want to provid enegry use by fuel type so cost of fuel can be more precisely calculated (because of fuel mixing).
@@ -265,7 +269,7 @@ def create_output_for_cost_modelling_from_old_data(model_output_detailed,ECONOMY
 # model_output_with_fuel_mixing=pd.read_pickle('intermediate_data/analysis_single_use/{}_model_output_with_fuel_mixing.pkl'.format(ECONOMY_ID))
 # clean_model_output(ECONOMY_ID, model_output_with_fuel_mixing, model_output_all)
 
-# model_output_detailed = pd.read_csv('19_THA_model_output20230902.csv')
+# model_output_detailed = pd.read_csv(root_dir + '/' + '19_THA_model_output20230902.csv')
 # ECONOMY_ID = '19_THA'
 # stocks_9th = create_output_for_cost_modelling_from_old_data(model_output_detailed,ECONOMY_ID)
 

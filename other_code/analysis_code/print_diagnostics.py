@@ -18,10 +18,10 @@ plt.rcParams['figure.facecolor'] = 'w'
 #%%
 
 #load data in
-model_output_all = pd.read_csv('output_data/model_output/{}'.format(config.model_output_file_name))
-model_output_detailed = pd.read_csv('output_data/model_output_detailed/{}'.format(config.model_output_file_name))
+model_output_all = pd.read_csv(root_dir + '/' + 'output_data/model_output/{}'.format(config.model_output_file_name))
+model_output_detailed = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}'.format(config.model_output_file_name))
 
-model_output_8th = pd.read_csv('intermediate_data/activity_efficiency_energy_road_stocks.csv')
+model_output_8th = pd.read_csv(root_dir + '/' + 'intermediate_data/activity_efficiency_energy_road_stocks.csv')
 
 #%%
 #FILTER FOR SCENARIO OF INTEREST
@@ -236,8 +236,8 @@ plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
 # #%%
 # #compare model output to 8th edition output. If there are any differences, print them
 # #laod output from 8th edition
-# model_output = pd.read_csv('output_data/model_output_detailed/{}'.format(config.model_output_file_name))
-# model_output_8th = pd.read_csv('output_data/model_output_detailed/activity_efficiency_energy_road_stocks.csv')
+# model_output = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}'.format(config.model_output_file_name))
+# model_output_8th = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/activity_efficiency_energy_road_stocks.csv')
 
 # #%%
 # #plot energy use

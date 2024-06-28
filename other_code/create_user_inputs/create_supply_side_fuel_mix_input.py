@@ -19,7 +19,7 @@ from config import *
 #create fake user input for demand side fuel mixes using model concordances
 
 #load model concordances
-model_concordances = pd.read_csv('config/concordances/{}'.format(model_concordances_file_name_fuels))
+model_concordances = pd.read_csv(root_dir + '/' + 'config/concordances/{}'.format(model_concordances_file_name_fuels))
 #%%
 #startwith the model concordances with fuel types, filter for each fuel type, and split it into biofuel and fuel type. have to do each fuel type separately depnding on the resulting biofuel mix.
 #Remember this allows for the option of not splitting all diesel use into biofuels. you can set it so vehicle type doesnt equal rail for example
@@ -53,5 +53,5 @@ model_concordances_all = pd.concat([model_concordances_petrol_melt, model_concor
 
 #%%
 #save as user input csv
-model_concordances_all.to_csv('intermediate_data/model_inputs/{}/supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID), index=False)
+model_concordances_all.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID), index=False)
 #%%

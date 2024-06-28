@@ -25,8 +25,8 @@ import plotly.io as pio
 #%%
 
 #load data in
-model_output_all = pd.read_csv('output_data/model_output/{}'.format(config.model_output_file_name))
-model_output_detailed = pd.read_csv('output_data/model_output_detailed/{}'.format(config.model_output_file_name))
+model_output_all = pd.read_csv(root_dir + '/' + 'output_data/model_output/{}'.format(config.model_output_file_name))
+model_output_detailed = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}'.format(config.model_output_file_name))
 
 #FILTER FOR SCENARIO OF INTEREST
 #this should be temporary as the scenario should be passed in as a parameter through config if it is useed elsewhere

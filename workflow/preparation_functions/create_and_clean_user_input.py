@@ -6,18 +6,27 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+    sys.path.append(f"{root_dir}/workflow/data_creation_functions")
+    from create_vehicle_sales_share_data import vehicle_sales_share_creation_handler
+    from create_demand_side_fuel_mix_input import create_demand_side_fuel_mixing_input
+    from create_supply_side_fuel_mix_input import create_supply_side_fuel_mixing_input
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+    from ..data_creation_functions import vehicle_sales_share_creation_handler, create_demand_side_fuel_mixing_input, create_supply_side_fuel_mixing_input
+    
+#################
 
 import pandas as pd 
 import numpy as np
@@ -36,10 +45,6 @@ import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 
-sys.path.append(f"{root_dir}/workflow/data_creation_functions")
-from create_vehicle_sales_share_data import vehicle_sales_share_creation_handler
-from create_demand_side_fuel_mix_input import create_demand_side_fuel_mixing_input
-from create_supply_side_fuel_mix_input import create_supply_side_fuel_mixing_input
 
 #%%
 # data_available
@@ -61,15 +66,15 @@ def create_and_clean_user_input(ECONOMY_ID, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YE
     # #load these files in and concat them
     # user_input = pd.DataFrame()
     # print(f'There are {len(os.listdir(f"input_data/user_input_spreadsheets/{ECONOMY_ID}"))} user input files to import')
-    # for file in os.listdir(f'input_data/user_input_spreadsheets/{ECONOMY_ID}'):
+    # for file in os.listdir(root_dir + '/' + f'input_data/user_input_spreadsheets/{ECONOMY_ID}'):
     #     #check its a csv
     #     if file[-4:] != '.csv':
     #         continue
     #     print(f'Importing user input file: {file}')
-    #     user_input = pd.concat([user_input, pd.read_csv(f'input_data/user_input_spreadsheets/{ECONOMY_ID}/{file}')])
+    #     user_input = pd.concat([user_input, pd.read_csv(root_dir + '/' +f'input_data/user_input_spreadsheets/{ECONOMY_ID}/{file}')])
     
     #laod concordances for checking
-    model_concordances_user_input_and_growth_rates = pd.read_csv('intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))#seems we're missing ghompertz hbere?
+    model_concordances_user_input_and_growth_rates = pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))#seems we're missing ghompertz hbere?
     model_concordances_user_input_and_growth_rates = model_concordances_user_input_and_growth_rates[model_concordances_user_input_and_growth_rates.Economy == ECONOMY_ID]
     #print then remove any measures not in model_concordances_user_input_and_growth_rates
     if len(user_input[~user_input.Measure.isin(model_concordances_user_input_and_growth_rates.Measure)]) >0:
@@ -180,7 +185,7 @@ def create_and_clean_user_input(ECONOMY_ID, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YE
             #identify the rows where there are still nas in the Value col:
             user_input_new_nas = user_input_new[user_input_new.Value.isna()]
             #save them to csv
-            user_input_new_nas.to_csv('intermediate_data/errors/user_input_new_nas.csv', index=False)
+            user_input_new_nas.to_csv(root_dir + '/' + 'intermediate_data/errors/user_input_new_nas.csv', index=False)
             raise ValueError('There are still some rows where Value is NA. Please check this.')
         # #there will be soe cases where there are still nas because there are nas for every year in the group of config.INDEX_COLS_no_date. We will check for these cases and separate them for analysis. THen identify any extra cases where there are still nas in the Value col. these are problematic and we will raise an error
         # user_input_new_groups_with_all_nas = user_input_new.groupby(config.INDEX_COLS_no_date).apply(lambda group: group.isna().all()).reset_index()
@@ -209,7 +214,7 @@ def create_and_clean_user_input(ECONOMY_ID, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YE
     #             sheet_data.to_excel(writer, sheet_name=sheet, index=False)
     
     #the  data is probably missing data for the years previous to OUTLOOK_BASE_YEAR. Where this is the case we will fill in the missing data with the earliest available value.
-    ECONOMY_BASE_YEARS_DICT = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_BASE_YEARS_DICT']
+    ECONOMY_BASE_YEARS_DICT = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_BASE_YEARS_DICT']
     for economy in ECONOMY_BASE_YEARS_DICT.keys():
         economy_df = user_input_new[user_input_new.Economy == economy]
         if len(economy_df) == 0:
@@ -235,11 +240,11 @@ def create_and_clean_user_input(ECONOMY_ID, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YE
 def extract_economy_data_from_user_input_spreadsheets(ECONOMY_ID):
     #spreadhsheets that are in input_data/user_input_spreadsheets contain all economies to make it easier to edit them all in one go. we will extract the economy specific data for use in the model    
     user_input_all = pd.DataFrame()
-    for file in os.listdir(f'input_data/user_input_spreadsheets/'):
+    for file in os.listdir(root_dir + '/' + f'input_data/user_input_spreadsheets/'):
         #check its a csv
         if file[-4:] != '.csv':
             continue
-        user_input = pd.read_csv(f'input_data/user_input_spreadsheets/{file}')
+        user_input = pd.read_csv(root_dir + '/' +f'input_data/user_input_spreadsheets/{file}')
         #if there is a comment col, drop it
         if 'Comment' in user_input.columns:
             user_input.drop('Comment', axis=1, inplace=True)
@@ -260,7 +265,7 @@ def extract_economy_data_from_user_input_spreadsheets(ECONOMY_ID):
             # user_input.drop_duplicates(inplace=True)
             # user_input.to_csv(f'input_data/user_input_spreadsheets/{file}', index=False)
             
-        model_concordances_user_input_and_growth_rates_original= pd.read_csv('intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))
+        model_concordances_user_input_and_growth_rates_original= pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))
         user_input = user_input[user_input.Economy == ECONOMY_ID]
         #if any cols are missing from user input then deal with them:
         missing_cols = [col for col in config.INDEX_COLS if col not in user_input.columns]

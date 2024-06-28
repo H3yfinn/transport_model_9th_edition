@@ -10,18 +10,21 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 
 import pandas as pd 
 import numpy as np
@@ -38,19 +41,20 @@ import plotly.graph_objects as go
 import matplotlib
 import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
+
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
  #%%
 def apply_fuel_mix_demand_side(model_output_all, ECONOMY_ID, demand_side_fuel_mixing=None, supply_side_fuel_mixing=None):
     model_output= model_output_all.copy()
     if demand_side_fuel_mixing is None:
         #note that these may have a lot of years filtered out becuase of how model strucutre works.
-        demand_side_fuel_mixing = pd.read_csv('intermediate_data/model_inputs/{}/{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+        demand_side_fuel_mixing = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
     if supply_side_fuel_mixing is None:
-        supply_side_fuel_mixing =  pd.read_csv('intermediate_data/model_inputs/{}/{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+        supply_side_fuel_mixing =  pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
     supply_side_fuel_mixing_fuels = supply_side_fuel_mixing['New_fuel'].unique().tolist()
     
     #load model concordances with fuels
-    model_concordances_fuels = pd.read_csv('intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_file_name_fuels))
+    model_concordances_fuels = pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_file_name_fuels))
     model_concordances_fuels = model_concordances_fuels[model_concordances_fuels['Economy'] == ECONOMY_ID]
     
     #drop supply_side_fuel_mixing_fuels from model_concordances_fuels
@@ -82,7 +86,7 @@ def apply_fuel_mix_demand_side(model_output_all, ECONOMY_ID, demand_side_fuel_mi
     
     return model_output_with_fuel_mixing
     # #save data
-    # new_df_with_fuels.to_csv('intermediate_data/model_output_with_fuels/1_demand_side/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    # new_df_with_fuels.to_csv(root_dir + '/' + 'intermediate_data/model_output_with_fuels/1_demand_side/{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
 
     
 #%%

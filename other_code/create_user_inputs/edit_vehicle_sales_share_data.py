@@ -24,7 +24,7 @@ pio.renderers.default = "browser"#allow plotting of graphs in the interactive no
 #%%
 
 #load data
-new_sales_shares = pd.read_csv('input_data/from_8th/reformatted/vehicle_stocks_change_share_normalised.csv')
+new_sales_shares = pd.read_csv(root_dir + '/' + 'input_data/from_8th/reformatted/vehicle_stocks_change_share_normalised.csv')
 #%%
 #first we need to separate the sales share of vehicle types from the sales share of drives, by transport type. Since the way the values were created was simply mutliplication, we can jsut reverse that, i think.
 #so sum by vehicle type to get the total sales share of each vehicle type
@@ -320,10 +320,10 @@ for ttype in new_sales_shares_ref_plot['Transport Type'].unique():
 
 #%%
 #save using scenario_id
-new_sales_shares_all.to_csv('input_data/calculated/vehicle_stocks_change_share_{}.csv'.format(scenario_id), index = False)
+new_sales_shares_all.to_csv(root_dir + '/' + 'input_data/calculated/vehicle_stocks_change_share_{}.csv'.format(scenario_id), index = False)
 
 #save the variables we used to calculate the data by just saving this file
-shutil.copyfile('other_code/create_user_inputs/edit_vehicle_sales_share_data.py', 'input_data/calculated/saved_scripts/edit_vehicle_sales_share_data_{}.py'.format(scenario_id))
+shutil.copyfile(root_dir + '/' + 'other_code/create_user_inputs/edit_vehicle_sales_share_data.py', 'input_data/calculated/saved_scripts/edit_vehicle_sales_share_data_{}.py'.format(scenario_id))
 
 #%%
 #also save the data to the user_input_spreadsheet

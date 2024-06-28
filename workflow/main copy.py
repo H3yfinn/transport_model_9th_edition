@@ -5,18 +5,60 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+        
+    #PREPARATION FUNCTIONS
+    sys.path.append(f"{root_dir}/workflow/preparation_functions")
+    import concordance_scripts
+    import import_macro_data
+    import import_transport_system_data
+    import create_and_clean_user_input
+    import aggregate_data_for_model
+    import filter_for_modelling_years
+    #UTILITY FUNCTIONS
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    import archiving_scripts
+    import utility_functions
+    #CALCUALTION FUNCTIONS
+    sys.path.append(f"{root_dir}/workflow/calculation_functions")
+    import calculate_inputs_for_model
+    import run_road_model
+    import run_non_road_model
+    import apply_fuel_mix_demand_side
+    import apply_fuel_mix_supply_side
+    import estimate_charging_requirements
+    import international_bunkers
+    #FORMATTING FUNCTIONS
+    sys.path.append(f"{root_dir}/workflow/formatting_functions")
+    import concatenate_model_output
+    import clean_model_output
+    import create_output_for_outlook_data_system
+    #PLOTTING FUNCTIONS
+    sys.path.append(f"{root_dir}/workflow/plotting_functions")
+    import produce_LMDI_graphs
+    import plot_charging_graphs
+    import create_assumptions_dashboards
+    import calculate_and_plot_oil_displacement
+    import compare_esto_energy_to_data
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from workflow.utility_functions import *
+    from config.config import *
+    from workflow.preparation_functions import *
+    from workflow.utility_functions import *
+    from workflow.calculation_functions import *
+    from workflow.formatting_functions import *
+    from workflow.plotting_functions import *
+#################
 
 import pandas as pd 
 import numpy as np
@@ -33,47 +75,11 @@ import plotly.graph_objects as go
 import matplotlib
 import matplotlib.pyplot as plt
 ###
-#PREPARATION FUNCTIONS
-sys.path.append(f"{root_dir}/workflow/preparation_functions")
-import concordance_scripts
-import import_macro_data
-import import_transport_system_data
-import create_and_clean_user_input
-import aggregate_data_for_model
-import filter_for_modelling_years
-#UTILITY FUNCTIONS
-sys.path.append(f"{root_dir}/workflow/utility_functions")
-import archiving_scripts
-import utility_functions
-#CALCUALTION FUNCTIONS
-sys.path.append(f"{root_dir}/workflow/calculation_functions")
-import calculate_inputs_for_model
-import run_road_model
-import run_non_road_model
-import apply_fuel_mix_demand_side
-import apply_fuel_mix_supply_side
-import estimate_charging_requirements
-import international_bunkers
-#FORMATTING FUNCTIONS
-sys.path.append(f"{root_dir}/workflow/formatting_functions")
-import concatenate_model_output
-import clean_model_output
-import create_output_for_outlook_data_system
-#PLOTTING FUNCTIONS
-sys.path.append(f"{root_dir}/workflow/plotting_functions")
-import produce_LMDI_graphs
-import plot_charging_graphs
-import create_assumptions_dashboards
-import calculate_and_plot_oil_displacement
-import compare_esto_energy_to_data
-
 import ctypes
-
 USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=True
 USE_SAVED_OPT_PARAMATERS=True   
 #%%
 def main():
-
     # Prevent the system from going to sleep
     ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
     # To restore the original state, use:
@@ -93,8 +99,8 @@ def main():
             
         #####################################################################
         #since we're going to find that some economies have better base years than 2017 to start with, lets start changing the Base year vlaue and run the model economy by economy:
-        ECONOMY_BASE_YEARS_DICT = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_BASE_YEARS_DICT']
-        ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD']
+        ECONOMY_BASE_YEARS_DICT = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_BASE_YEARS_DICT']
+        ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD']
         #####################################################################
         FOUND = False
         for economy in ECONOMY_BASE_YEARS_DICT.keys():
@@ -249,7 +255,7 @@ def main():
             #     #add the economy to the txt of errors
             #     print('Error for economy {} so skipping it'.format(economy))
             #     #open txt file and add the error and economy and timestamp to it
-            #     with open('errors.txt', 'a') as f:
+            #     with open(root_dir + '/' + 'errors.txt', 'a') as f:
             #         f.write('Error for economy {} so skipping it. Error is {}. Time is {}\n'.format(economy, e, datetime.datetime.now()))
                     
                     

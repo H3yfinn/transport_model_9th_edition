@@ -13,18 +13,21 @@ from scipy.optimize import newton
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 
 import pandas as pd 
 import numpy as np
@@ -57,11 +60,11 @@ from scipy.optimize import minimize
 #the function will make use of the from scipy.optimize import minimize library to find the best parameters for the gompertz function given te values of gamma, the historical values and the gdp per capita and the stocks per capita in 2045 and 2050
 
 #to start we will attempt to use thw data from 'output_data/model_output_detailed/{}'.format(config.model_output_file_name), index=False)
-model_output_detailed = pd.read_csv('output_data/model_output_detailed/{}'.format(config.model_output_file_name))
+model_output_detailed = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}'.format(config.model_output_file_name))
 #and grab macro data too
-macro_data = pd.read_csv('intermediate_data/model_inputs/growth_forecasts.csv')
+macro_data = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/growth_forecasts.csv')
 #and grab gompertz inputs*
-road_model_input = pd.read_csv('intermediate_data/model_inputs/road_model_input_wide.csv')
+road_model_input = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/road_model_input_wide.csv')
 
 #separate gompertz inputs
 gompertz_parameters = road_model_input[['Economy','Scenario','Date', 'Transport Type'] + [col for col in road_model_input.columns if 'Gompertz_' in col]].drop_duplicates().dropna()

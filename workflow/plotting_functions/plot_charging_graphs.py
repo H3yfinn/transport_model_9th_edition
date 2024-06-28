@@ -3,18 +3,24 @@
 import os
 import sys
 import re
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
-# Check if the first path is not already in sys.path, then append it
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
-# Check if the second path is not already in sys.path, then append it
-if path_to_add_2 not in sys.path:
-    sys.path.append(path_to_add_2)
-import config
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+    sys.path.append(f"{root_dir}/workflow/calculation_functions")
+    import estimate_charging_requirements
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+    from ..calculation_functions import estimate_charging_requirements
+#################
 
 import pandas as pd 
 import numpy as np
@@ -34,15 +40,13 @@ from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 
 
-sys.path.append(f"{root_dir}/workflow/calculation_functions")
-import estimate_charging_requirements
 #%%    
 def plot_required_chargers(ECONOMY_ID): 
     # total_kwh_of_battery_capacity.to_csv(r'output_data\for_other_modellers\estimated_number_of_chargers.csv', index=False) 
     #grab colors dict:
     df, parameters, colors_dict, INCORPORATE_UTILISATION_RATE = estimate_charging_requirements.prepare_inputs_for_estimating_charging_requirements(ECONOMY_ID)
     
-    total_kwh_of_battery_capacity = pd.read_csv(f'output_data/for_other_modellers/charging/{ECONOMY_ID}_estimated_number_of_chargers.csv')
+    total_kwh_of_battery_capacity = pd.read_csv(root_dir + '/' +f'output_data/for_other_modellers/charging/{ECONOMY_ID}_estimated_number_of_chargers.csv')
 
     #use plotly to plot the number of chargers required for each economy, date and scenario and also by vehicle type.
     #total_kwh_of_battery_capacity'Economy','Date','Scenario','Vehicle Type','Stocks', 'sum_of_stocks','kwh_of_battery_capacity','sum_of_kwh_of_battery_capacity','sum_of_expected_number_of_chargers','expected_kw_of_chargers','sum_of_expected_kw_of_chargers','expected_number_of_chargers','sum_of_fast_kw_of_chargers_needed',,'sum_of_slow_kw_of_chargers_needed','sum_of_fast_chargers_needed','sum_of_slow_chargers_needed','fast_charger_utilisation_rate','average_kwh_of_battery_capacity_by_vehicle_type','average_kw_per_charger','average_kw_per_non_fast_charger','average_kw_per_fast_charger','slow_kw_of_chargers_needed','fast_kw_of_chargers_needed','slow_chargers_needed','fast_chargers_needed'
@@ -113,7 +117,7 @@ def plot_required_chargers(ECONOMY_ID):
             fig.update_layout(title_text=title)
 
             # wrtite the plot to a file
-            fig.write_html(f'plotting_output/charging_requirements/{title}.html')
+            fig.write_html(root_dir + '/' +f'plotting_output/charging_requirements/{title}.html')
             
             ############################################################
             
@@ -159,7 +163,7 @@ def plot_required_chargers(ECONOMY_ID):
             fig.update_layout(title_text=title)
 
             # wrtite the plot to a file
-            fig.write_html(f'plotting_output/charging_requirements/{title}.html')
+            fig.write_html(root_dir + '/' +f'plotting_output/charging_requirements/{title}.html')
             
             
             ############################################################
@@ -220,7 +224,7 @@ def plot_required_chargers(ECONOMY_ID):
             fig.update_layout(title_text=title)
 
             # wrtite the plot to a file
-            fig.write_html(f'plotting_output/charging_requirements/{title}.html')
+            fig.write_html(root_dir + '/' +f'plotting_output/charging_requirements/{title}.html')
             ############################################################
             
             ############################################################
@@ -277,7 +281,7 @@ def plot_required_chargers(ECONOMY_ID):
             fig.update_layout(title_text=title)
 
             # wrtite the plot to a file
-            fig.write_html(f'plotting_output/charging_requirements/{title}.html')
+            fig.write_html(root_dir + '/' +f'plotting_output/charging_requirements/{title}.html')
             ############################################################
     # #now plot all economies together for each scenario:
     # for scenario in df['Scenario'].unique():
@@ -335,7 +339,7 @@ def plot_required_evs(ev_stocks_and_chargers,colors_dict,economy, date, scenario
     fig.update_layout(title_text=title)
 
     # write to html in plotting_output\charging_requirements
-    fig.write_html(f'plotting_output/charging_requirements/{title}.html')
+    fig.write_html(root_dir + '/' +f'plotting_output/charging_requirements/{title}.html')
 
     #############################################################################do same but using batteries instead of stocks:
     title = 'Kw of EVs for {} public chargers {}kw in {}, {}, {}'.format(number_of_chargers, round(kw_of_charger_capacity,0),economy, date, scenario)
@@ -374,6 +378,6 @@ def plot_required_evs(ev_stocks_and_chargers,colors_dict,economy, date, scenario
     fig.update_layout(title_text=title)
 
     # write to html in plotting_output\charging_requirements
-    fig.write_html(f'plotting_output/charging_requirements/{title}.html')
+    fig.write_html(root_dir + '/' +f'plotting_output/charging_requirements/{title}.html')
 
     

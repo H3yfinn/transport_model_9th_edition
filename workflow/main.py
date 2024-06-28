@@ -2,20 +2,41 @@
 #%%
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
-import re
 import sys
-# Construct the first path to check
-root_dir = re.split('transport_model_9th_edition', os.getcwd())[0] + '\\transport_model_9th_edition'
+import re
+
+# Get the directory of the current script (main.py) regardless of where it's run from
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the root dir, relative to the script's location
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + '\\transport_model_9th_edition'
 # Check if the first path is not already in sys.path, then append it
 if root_dir not in sys.path:
     sys.path.append(root_dir)
 
-# Construct the second path to check (relative to the current working directory)
-path_to_add_2 = os.path.abspath(f"{root_dir}/config")
+# Construct the second path to check, also relative to the script's location
+path_to_add_2 = os.path.join(root_dir, 'config')
 # Check if the second path is not already in sys.path, then append it
 if path_to_add_2 not in sys.path:
     sys.path.append(path_to_add_2)
-import config
+
+
+    
+#################
+current_working_dir = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+if current_working_dir == script_dir: #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
+    # Modify sys.path to include the directory where utility_functions is located
+    sys.path.append(f"{root_dir}/workflow/utility_functions")
+    sys.path.append(f"{root_dir}/config")
+    import config
+    import utility_functions
+else:
+    # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
+    from ..utility_functions import *
+    from ...config.config import *
+#################
 import pandas as pd 
 import numpy as np
 import yaml
@@ -81,8 +102,8 @@ def main():
         
     #####################################################################
     #since we're going to find that some economies have better base years than 2017 to start with, lets start changing the Base year vlaue and run the model economy by economy:
-    ECONOMY_BASE_YEARS_DICT = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_BASE_YEARS_DICT']
-    ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict = yaml.load(open('config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD']
+    ECONOMY_BASE_YEARS_DICT = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_BASE_YEARS_DICT']
+    ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD']
     #####################################################################
     FOUND = False
     for economy in ECONOMY_BASE_YEARS_DICT.keys():
@@ -248,7 +269,7 @@ def main():
         #     #add the economy to the txt of errors
         #     print('Error for economy {} so skipping it'.format(economy))
         #     #open txt file and add the error and economy and timestamp to it
-        #     with open('errors.txt', 'a') as f:
+        #     with open(root_dir + '/' + 'errors.txt', 'a') as f:
         #         f.write('Error for economy {} so skipping it. Error is {}. Time is {}\n'.format(economy, e, datetime.datetime.now()))
             
     # international_bunkers.international_bunker_share_calculation_handler()
@@ -282,7 +303,7 @@ def main():
         # archiving_scripts.revert_to_previous_version_of_files('03_CDA', 'output_data/archived_runs/03_CDA_20230902_1626', CURRENT_FILE_DATE_ID='20230902')
 #%%
 main()#python workflow/main.py > output.txt 2>&1
-#testing what happens to the file road_model_input_wide = pd.read_csv('intermediate_data/model_inputs/{}/{}_aggregated_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID)) if i run png vs usa.
+#testing what happens to the file road_model_input_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID)) if i run png vs usa.
 #seems like something in C:\Users\finbar.maunsell\github\transport_model_9th_edition\workflow\calculation_functions\adjust_data_to_match_esto.py is causing the issue.
 #%%
 
