@@ -324,6 +324,80 @@ def replicate_data_from_fuel_mixing_for_new_fuel_for_all_economys():
     # Here you can export the dataframe to a CSV file
     replicated_data.to_csv(root_dir + '/' + 'replicated_data.csv', index=False)
     
+#######################################
+#following are for dealing with issue that windows has, where it can't handle long file paths (past 260 characters - which is a lot but can happen with long file names and deep folder structures)
+def get_extended_length_path(path):
+    path = os.path.abspath(path)
+    if not path.startswith("\\\\?\\"):
+        path = "\\\\?\\" + path
+    return path
+
+def save_to_file(data, path):
+    extended_path = get_extended_length_path(path)
+    with open(extended_path, 'w') as file:
+        file.write(data)
+
+def read_from_file(path):
+    extended_path = get_extended_length_path(path)
+    with open(extended_path, 'r') as file:
+        return file.read()
+
+def move_file(src, dst):
+    extended_src = get_extended_length_path(src)
+    extended_dst = get_extended_length_path(dst)
+    shutil.move(extended_src, extended_dst)
+
+def save_dataframe_to_csv(dataframe, path):
+    extended_path = get_extended_length_path(path)
+    dataframe.to_csv(extended_path, index=False)
     
+def save_to_csv(self, path, index=False):
+    #with current ways of doing things in the model, to use you will need to monkey patch the function to the dataframe class within the file under the import of this file. e.g. 
+    # from . import utility_functions
+    # pd.DataFrame.save_to_csv = save_to_csv
+    extended_path = get_extended_length_path(path)
+    self.to_csv(extended_path, index=index)
+    
+def save_to_pickle(self, path):
+    # To use this function, monkey patch it to the DataFrame class after importing this module. Example:
+    # from . import utility_functions
+    # pd.DataFrame.save_to_pickle = utility_functions.save_to_pickle
+    extended_path = get_extended_length_path(path)
+    self.to_pickle(extended_path)
+
+def save_to_excel(self, path, sheet_name='Sheet1', index=False):
+    # To use this function, monkey patch it to the DataFrame class after importing this module. Example:
+    # from . import utility_functions
+    # pd.DataFrame.save_to_excel = utility_functions.save_to_excel
+    extended_path = get_extended_length_path(path)
+    self.to_excel(extended_path, sheet_name=sheet_name, index=index)
+    
+def save_dataframe_to_excel(dataframe, path):
+    extended_path = get_extended_length_path(path)
+    dataframe.to_excel(extended_path, index=False)
+
+def read_dataframe_from_csv(path):
+    extended_path = get_extended_length_path(path)
+    return pd.read_csv(extended_path)
+
+def read_dataframe_from_excel(path):
+    extended_path = get_extended_length_path(path)
+    return pd.read_excel(extended_path)
+
+def save_plotly_figure_to_html(figure, path):
+    extended_path = get_extended_length_path(path)
+    pio.write_html(figure, extended_path)
+
+def save_pkl_to_file(data, path):
+    extended_path = get_extended_length_path(path)
+    with open(extended_path, 'wb') as file:
+        pickle.dump(data, file)
+
+def read_pkl_from_file(path):
+    extended_path = get_extended_length_path(path)
+    with open(extended_path, 'rb') as file:
+        return pickle.load(file)
+    
+#######################################
 #%%
 #%%

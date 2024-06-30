@@ -253,5 +253,5 @@ def main(economy_to_run='all', progress_callback=None):
 #%%
 
 if __name__ == "__main__":
-    main()  # python code/main.py > output.txt 2>&1
-4#%%
+    main(economy_to_run='01_AUS')  # python code/main.py > output.txt 2>&1
+#%%

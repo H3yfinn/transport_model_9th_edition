@@ -352,14 +352,14 @@ def archive_previous_dashboards_before_saving(economy, scenario, dashboard_name_
             #create dir:
             if not os.path.exists(root_dir + '/' + 'plotting_output/dashboards/archive/{}/{}'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy)):
                 os.makedirs(root_dir + '/' + 'plotting_output/dashboards/archive/{}/{}'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy))
-            shutil.move(root_dir + '/' + 'plotting_output/dashboards/{}/{}_{}_dashboard_{}.html'.format(economy,economy,  scenario,dashboard_name_id), root_dir + '/' + 'plotting_output/dashboards/archive/{}/{}/{}_{}_{}_dashboard_{}.html'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy,config.GRAPHING_END_YEAR, economy, scenario,dashboard_name_id))
+            utility_functions.move_file(root_dir + '/' + 'plotting_output/dashboards/{}/{}_{}_dashboard_{}.html'.format(economy,economy,  scenario,dashboard_name_id), root_dir + '/' + 'plotting_output/dashboards/archive/{}/{}/{}_{}_{}_dashboard_{}.html'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy,config.GRAPHING_END_YEAR, economy, scenario,dashboard_name_id))
 
     elif end_year == config.OUTLOOK_BASE_YEAR:
         if os.path.exists(root_dir + '/' + 'plotting_output/dashboards/{}/{}/{}_{}_dashboard_{}.html'.format(economy,config.OUTLOOK_BASE_YEAR,economy,  scenario,dashboard_name_id)):
             #create dir:
             if not os.path.exists(root_dir + '/' + 'plotting_output/dashboards/archive/{}/{}'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy)):
                 os.makedirs(root_dir + '/' + 'plotting_output/dashboards/archive/{}/{}'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy))
-            shutil.move(root_dir + '/' + 'plotting_output/dashboards/{}/{}/{}_{}_dashboard_{}.html'.format(economy,config.OUTLOOK_BASE_YEAR, economy, scenario,dashboard_name_id), root_dir + '/' + 'plotting_output/dashboards/archive/{}/{}/{}_{}_{}_dashboard_{}.html'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy,config.OUTLOOK_BASE_YEAR, economy, scenario,dashboard_name_id))
+            utility_functions.move_file(root_dir + '/' + 'plotting_output/dashboards/{}/{}/{}_{}_dashboard_{}.html'.format(economy,config.OUTLOOK_BASE_YEAR, economy, scenario,dashboard_name_id), root_dir + '/' + 'plotting_output/dashboards/archive/{}/{}/{}_{}_{}_dashboard_{}.html'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy,config.OUTLOOK_BASE_YEAR, economy, scenario,dashboard_name_id))
 
 
 def load_and_format_input_data(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_IDs, PREVIOUS_PROJECTION_FILE_DATE_ID):
