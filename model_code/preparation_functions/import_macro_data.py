@@ -35,7 +35,7 @@ def import_macro_data(UPDATE_INDUSTRY_VALUES, PLOT=False):
     # Modelling/Data/Gdp/Gdp projections 9th/Gdp_estimates/Gdp_estimates_12May2023/data
     
     macro_date_id = utility_functions.get_latest_date_for_data_file(root_dir + '\\' + 'input_data\\macro', 'APEC_GDP_data_')
-    macro = pd.read_csv(root_dir + '\\' +f'input_data\macro\APEC_GDP_data_{macro_date_id}.csv')
+    macro = pd.read_csv(root_dir + '\\' +f'input_data\\macro\\APEC_GDP_data_{macro_date_id}.csv')
     
     #convert 17_SIN to 17_SGP, as well as 15_RP to 15_PHL
     if '17_SIN' in macro.economy_code.unique():
@@ -279,9 +279,9 @@ def grab_gdp_shares_from_industry(UPDATE_INDUSTRY_VALUES):
         industry_filename = f'{economy}_NV.IND.TOTL.ZS.csv'
         manu_filename = f'{economy}_NV.IND.MANF.ZS.csv'
         industry_path_onedrive = root_onedrive  + '\\' + economy + '\\' + industry_filename
-        industry_path_local = root_local + industry_filename
+        industry_path_local = root_dir + '\\' +  root_local + industry_filename
         manu_path_onedrive = root_onedrive + '\\' + economy + '\\' + manu_filename
-        manu_path_local = root_local + manu_filename
+        manu_path_local = root_dir + '\\' + root_local + manu_filename
         
         if UPDATE_INDUSTRY_VALUES:
             
