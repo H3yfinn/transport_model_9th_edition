@@ -70,9 +70,22 @@ import ctypes
 USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=True
 USE_SAVED_OPT_PARAMATERS=True   
 #%%
-def main():
+def main(economy_to_run='all', progress_callback=None):
     #make config global:
-    
+    def update_progress(progress):
+        if progress_callback:
+            progress_callback(progress)
+    progress = 0
+    update_progress(progress)
+    #if economy_to_run is all, set increment to 100/21+1, if its a single economy, set increment to 100/1+1, and if its a list of economies, set increment to 100/len(economy_to_run)+1
+    if economy_to_run == 'all':
+        increment = 100/((3*21)+1)
+    elif type(economy_to_run) == str:
+        increment = 100/((3*1)+1)
+    elif type(economy_to_run) == list:
+        increment = 100/((3*len(economy_to_run))+1)
+    else:
+        raise Exception('Somethings going wrong with the economy_to_run variable')
     
     # Prevent the system from going to sleep
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
@@ -90,41 +103,32 @@ def main():
         if PREPARE_DATA:
             import_macro_data(UPDATE_INDUSTRY_VALUES=False)
             import_transport_system_data()
-            
         #####################################################################
         #since we're going to find that some economies have better base years than 2017 to start with, lets start changing the Base year vlaue and run the model economy by economy:
         ECONOMY_BASE_YEARS_DICT = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_BASE_YEARS_DICT']
         ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD']
         #####################################################################
+        progress += increment
+        update_progress(progress)
         FOUND = False
         for economy in ECONOMY_BASE_YEARS_DICT.keys():
-            # try:#TRY EXCEPT TO SKIP ECONOMIES THAT CAUSE ERRORS
-            
-            #completed:
-            completed = [ '20_USA', '19_THA']
-            #13_PNGbreakpoint()#for some reason china Max activity error margin is 788.7959117456285. need to debug this - also doesnt worrk for sales shares so that should be dealt with first.
-            #02_BD # for some reason has a differnece between esto data. I think that we need to check the nonn road data during optimisation
-            #malaysia 10_MAS showing same problems as bd. theis is esp for diesel/petrol
-            errors = ['02_BD', '13_PNG']# '13_PNG', #png always cuaisng issues cause system data not ready yet. need to fix this
-            #doing 
-            doing =['07_INA']# [ '15_PHL','10_MAS', '18_CT','05_PRC','09_ROK','01_AUS', ['20_USA','07_INA']#  '15_PHL']#'05_PRC', '08_JPN', '03_CDA','09_ROK', '18_CT', '17_SGP', '01_AUS']#stopped in optimisation 
-            fixing_elec_issue = ['19_THA']
-            #not run yet 
-            not_run_yet = ['14_PE', '16_RUS', '21_VN']
-            #assumptions not completed but model works:
-            assumptions_not_completed_but_model_works =  ['04_CHL', '06_HKC', '07_INA', '11_MEX', '15_PHL', '12_NZ']
-            # if economy!= '12_NZ':
-            #     continue
-            if economy in ['06_HKC']:#, '17_SGP'
+            if economy_to_run == 'all':
+                pass
+            elif economy in economy_to_run:
+                pass
+            elif economy == economy_to_run:
                 pass
             else:
                 continue
+             
             print('\nRunning model for {}\n'.format(economy))
             ECONOMY_ID = economy
             BASE_YEAR = ECONOMY_BASE_YEARS_DICT[economy]
             
             create_and_clean_user_input(ECONOMY_ID)
             aggregate_data_for_model(ECONOMY_ID)
+            progress += increment
+            update_progress(progress)
             MODEL_RUN_1  = True
             if MODEL_RUN_1:   
                 print('\nDoing first model run for {}\n'.format(economy))   
@@ -146,7 +150,9 @@ def main():
                 model_output_with_fuel_mixing = apply_fuel_mix_demand_side(model_output_all,ECONOMY_ID)
                 model_output_with_fuel_mixing = apply_fuel_mix_supply_side(model_output_with_fuel_mixing,ECONOMY_ID)
                 clean_model_output(ECONOMY_ID, model_output_with_fuel_mixing, model_output_all)
-                
+            
+            progress += increment
+            update_progress(progress)
             MODEL_RUN_2  = True
             if MODEL_RUN_2:
                 print('\nDoing 2nd model run for {}\n'.format(economy))
@@ -193,7 +199,9 @@ def main():
                         pass
                     dashboard_creation_handler(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
                     # compare_esto_energy_to_data.compare_esto_energy_to_data()#UNDER DEVELOPMENT   
-                    
+                
+                progress += increment
+                update_progress(progress)
                 copy_required_output_files_to_one_folder(ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data/for_other_modellers')
                     
                     
@@ -213,6 +221,8 @@ def main():
         print('\nFinished running model for all economies, now doing final formatting\n')
         concatenate_outlook_data_system_outputs()
         
+        progress += increment
+        update_progress(progress)
         concatenate_output_data()
         try:
             international_bunker_share_calculation_handler()
@@ -220,6 +230,8 @@ def main():
             pass#usually happens because the economies in ECONOMIES_WITH_MODELLING_COMPLETE_DICT havent been run for this file date id. check extract_non_road_modelled_data() in international_bunkers
         copy_required_output_files_to_one_folder(output_folder_path='output_data/for_other_modellers')
     
+        progress += increment
+        update_progress(progress)
         # ARCHIVE_INPUT_DATA = False
         # if ARCHIVE_INPUT_DATA:
         #     #set up archive folder:
