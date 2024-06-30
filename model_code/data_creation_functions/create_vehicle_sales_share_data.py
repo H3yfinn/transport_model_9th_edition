@@ -123,7 +123,7 @@ def create_alternate_sales_share_file(ECONOMY_ID, sales_shares=None, vehicle_typ
                 if drives != None:
                     sales_shares_0 = sales_shares_0[sales_shares_0.Drive.isin(drives)]
                 #remove all files from the folder first
-                folder = 'input_data\\alternate_sales_shares\\{}'.format(ECONOMY_ID)
+                folder = root_dir + '\\' +  'input_data\\alternate_sales_shares\\{}'.format(ECONOMY_ID)
                 #remove all files from the folder first
                 if DELETE_ALL_FILES_IN_FOLDER:
                     for the_file in os.listdir(folder):
@@ -477,7 +477,7 @@ def incorporate_alternate_sales_shares(ECONOMY_ID):
         os.makedirs(root_dir + '\\' + 'input_data\\alternate_sales_shares\\{}\\'.format(ECONOMY_ID))
         filepaths=[]
     else:
-        filepaths = [file for file in os.listdir('input_data\\alternate_sales_shares\\{}\\'.format(ECONOMY_ID)) if file.endswith('.csv')]
+        filepaths = [file for file in os.listdir(root_dir + '\\' +'input_data\\alternate_sales_shares\\{}\\'.format(ECONOMY_ID)) if file.endswith('.csv')]
     
     #load in the data that is available. to prevent issues with versioning we will only use the files that are specified in parameters.yml. They also need to be csvs!
     economy_files = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['alternate_sales_share_files']
