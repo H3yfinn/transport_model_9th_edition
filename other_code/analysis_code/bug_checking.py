@@ -261,8 +261,8 @@ for key, grp in change_dataframe_aggregation_nz_lv.groupby(['Drive']):
 #             fig.add_trace(go.Scatter(x=model_output_detailed_lv_passenger_economy_ttype['Year'], y=model_output_detailed_lv_passenger_economy_ttype['Percentage_change'], legendgroup=legend_name, name=legend_name, showlegend=False, line=dict(color=color4, dash='dot', width=2)), row=row_number, col=col_number, secondary_y=True)
 
 
-# plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
+# plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
 # # %%
 # #seems a bit odd that nz activity is about 0.002 growth rate lower than what it was projected to be, consistently. So we will take in the 89th eidtion adata and comparea actual activity vlaues to see if there is any pattern
 # # model_output_concat_nz = model_output_concat[model_output_concat['Economy']=='12_NZ']
@@ -279,8 +279,8 @@ for key, grp in change_dataframe_aggregation_nz_lv.groupby(['Drive']):
 #              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 # fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-# plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
+# plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
 
 # #after looking into it it seems that some economys do see a tiny decrease in the growth rate. why?
 

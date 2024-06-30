@@ -14,10 +14,10 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
+    sys.path.append(f"{root_dir}\\code")
     import config
     import utility_functions
 else:
@@ -48,8 +48,8 @@ from plotly.subplots import make_subplots
 
 FILE_DATE_ID2 = 'DATE20230214'
 
-transport_data_system_folder = '../transport_data_system'
-transport_data_system_df_original = pd.read_csv(root_dir + '/' + '{}/output_data/9th_dataset/combined_dataset_{}.csv'.format(transport_data_system_folder,FILE_DATE_ID2))
+transport_data_system_folder = '..\\transport_data_system'
+transport_data_system_df_original = pd.read_csv(root_dir + '\\' + '{}\\output_data\\9th_dataset\\combined_dataset_{}.csv'.format(transport_data_system_folder,FILE_DATE_ID2))
 
 INDEX_COLS = ['Date',
  'Economy',
@@ -78,7 +78,7 @@ if analyse:
 analyse = True
 if analyse:
     #lets also load in passengerkm, freight tonne km and energy use data from the transport data system.
-    transport_data_system_df2 = pd.read_csv(root_dir + '/' + '{}/output_data/9th_dataset/combined_dataset_{}.csv'.format(transport_data_system_folder,FILE_DATE_ID2))
+    transport_data_system_df2 = pd.read_csv(root_dir + '\\' + '{}\\output_data\\9th_dataset\\combined_dataset_{}.csv'.format(transport_data_system_folder,FILE_DATE_ID2))
     transport_data_system_df2 = transport_data_system_df2[transport_data_system_df2.Measure.isin(['passenger_km','freight_tonne_km','Energy','Occupancy', 'Load'])]
 
     #filter for 2017 only
@@ -148,7 +148,7 @@ if analyse:
     #make each y axis independent
     plot = plot.update_yaxes(matches=None)
     plot.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
-    plot.write_html(root_dir + '/' + 'plotting_output/testing/efficiency_data_bar.html', auto_open=True)
+    plot.write_html(root_dir + '\\' + 'plotting_output\\testing\\efficiency_data_bar.html', auto_open=True)
 
     # print avg eff for each economy for each dataset
     for economy in eff_data.Economy.unique():
@@ -159,7 +159,7 @@ if analyse:
                 continue
             print('Dataset: {}'.format(dataset))
             print(eff_data[(eff_data.Economy == economy) & (eff_data.Dataset == dataset)].Efficiency.mean())
-    #ok great it loks (jsut from a quick look no avg's) like the eff value centres around 3e-9 PJ per km for all data we plotted. If we convert that to litres of gasoline it is 3e-9/3.42e-8 = 0.087 litres per km.which is 8.7 per 100km which is just a bit higher than the average fuel economy of cars and vans in 2021 in the IEA https://www.iea.org/fuels-and-technologies/fuel-economy which is good because it measn we can feel happy using the IEA value, times the occupancy rate of 1.5 to get the eff per passenger km for ldv's!
+    #ok great it loks (jsut from a quick look no avg's) like the eff value centres around 3e-9 PJ per km for all data we plotted. If we convert that to litres of gasoline it is 3e-9\\3.42e-8 = 0.087 litres per km.which is 8.7 per 100km which is just a bit higher than the average fuel economy of cars and vans in 2021 in the IEA https:\\\\www.iea.org\\fuels-and-technologies\\fuel-economy which is good because it measn we can feel happy using the IEA value, times the occupancy rate of 1.5 to get the eff per passenger km for ldv's!
     #Its also good because it means that the ratio of enegry use to passenger km for ldv g or d drives is correct. 
 
 #ALSO PLOT EFFICIENCY IN LITRES PER KM
@@ -170,7 +170,7 @@ if analyse:
     plot = plot.update_yaxes(matches=None)
     plot.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
 
-    plot.write_html(root_dir + '/' + 'plotting_output/testing/efficiency_data_l_per_100km_bar.html', auto_open=True)
+    plot.write_html(root_dir + '\\' + 'plotting_output\\testing\\efficiency_data_l_per_100km_bar.html', auto_open=True)
 
     # print avg eff for each economy for each dataset
     for economy in eff_data.Economy.unique():
@@ -181,7 +181,7 @@ if analyse:
                 continue
             print('Dataset: {}'.format(dataset))
             print(eff_data[(eff_data.Economy == economy) & (eff_data.Dataset == dataset)].Efficiency.mean())
-    #ok great it loks (jsut from a quick look no avg's) like the eff value centres around 3e-9 PJ per km for all data we plotted. If we convert that to litres of gasoline it is 3e-9/3.42e-8 = 0.87 litres per km.which is 8.7 per 100km which is just a bit higher than the average fuel economy of cars and vans in 2021 in the IEA https://www.iea.org/fuels-and-technologies/fuel-economy which is good because it measn we can feel happy using the IEA value, times the occupancy rate of 1.5 to get the eff per passenger km for ldv's!
+    #ok great it loks (jsut from a quick look no avg's) like the eff value centres around 3e-9 PJ per km for all data we plotted. If we convert that to litres of gasoline it is 3e-9\\3.42e-8 = 0.87 litres per km.which is 8.7 per 100km which is just a bit higher than the average fuel economy of cars and vans in 2021 in the IEA https:\\\\www.iea.org\\fuels-and-technologies\\fuel-economy which is good because it measn we can feel happy using the IEA value, times the occupancy rate of 1.5 to get the eff per passenger km for ldv's!
     #Its also good because it means that the ratio of enegry use to passenger km for ldv g or d drives is correct. 
     #some others to expect:
     #heavy truck = 30-40 l/100km
@@ -213,7 +213,7 @@ if analyse:
     plot = plot.update_yaxes(matches=None)
     plot.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
 
-    plot.write_html(root_dir + '/' + 'plotting_output/testing/efficiency_data_l_per_100km_box_no_outliers.html', auto_open=True)
+    plot.write_html(root_dir + '\\' + 'plotting_output\\testing\\efficiency_data_l_per_100km_box_no_outliers.html', auto_open=True)
 
 
 #%%
@@ -227,7 +227,7 @@ if analyse:
     plot = plot.update_yaxes(matches=None)
     plot.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
 
-    plot.write_html(root_dir + '/' + 'plotting_output/testing/efficiency_data_l_per_100km_bar_no_outliers.html', auto_open=True)
+    plot.write_html(root_dir + '\\' + 'plotting_output\\testing\\efficiency_data_l_per_100km_bar_no_outliers.html', auto_open=True)
 #%%
 #drop index col and L_per_100km then merge on all the otehr nec cols
 avg_eff = avg_eff.drop(columns=['L_per_100km', 'index'])
@@ -252,7 +252,7 @@ for economy in transport_data_system_df2.Economy.unique()[1:]:
 #%%
 #thats good enough. lets just save that in a separate file and incorporate it with all data.
 #save it so that it can be concatenated to the transport_data_system_df_original
-new_df.to_csv(root_dir + '/' + 'input_data/calculated/new_vehicle_efficiency_other_estimates_2023Feb.csv',index=False)
+new_df.to_csv(root_dir + '\\' + 'input_data\\calculated\\new_vehicle_efficiency_other_estimates_2023Feb.csv',index=False)
 
 #%%
 
@@ -275,7 +275,7 @@ if analyse:
 
     #we dont know what the actual unit is for this data. should we bother using it?
     plot = px.line(new_vehicle_efficiency_data,x='Date',y='Value',color='Drive',line_dash='Vehicle Type',facet_col='Economy',facet_col_wrap=3,hover_data=['Vehicle Type','Transport Type','Drive'])
-    plot.write_html(root_dir + '/' + 'plotting_output/testing/new_vehicle_efficiency_data.html')
+    plot.write_html(root_dir + '\\' + 'plotting_output\\testing\\new_vehicle_efficiency_data.html')
     # print avg eff for each economy but assume that this is vehicle eff per million passenger km, so we will divide by 1.5 *one million to get eff per passenger km
     print(new_vehicle_efficiency_data.groupby(['Economy','Vehicle Type','Drive'])['Value'].mean()/1.5e6)#nah doesnt seem right aye
     #so we will create a new df with the IEA value for ldv's and then we will use the eff data we have to estimate the eff for the other vehicle types
@@ -315,18 +315,18 @@ if analyse:
         plot.update_layout(title_text='Efficiency for {}s'.format(vehicle))
         #show
         plot.show()
-        plot.write_html(root_dir + '/' + 'plotting_output/testing/efficiency_violins/efficiency_other_{}.html'.format(vehicle))
+        plot.write_html(root_dir + '\\' + 'plotting_output\\testing\\efficiency_violins\\efficiency_other_{}.html'.format(vehicle))
     # #plot box with a facet for each Vehicle_drive
     # plot = px.violin(efficiency_other,y='efficiency',x='Drive',facet_col_wrap=3, hover_data=['Economy'], facet_col='Vehicle Type')#points="all",
     # plot.show()
-    # plot.write_html(root_dir + '/' + 'plotting_output/testing/efficiency_other.html')
+    # plot.write_html(root_dir + '\\' + 'plotting_output\\testing\\efficiency_other.html')
 
 #its quite hard to tell but lets just assume its ok. Just for exploration lets print the average eff per drive type on a single violin plot
 if analyse:
     plot = px.violin(efficiency_other,y='efficiency',x='Drive',hover_data=['Economy','Vehicle Type','Drive'],box=True)
     plot.update_layout(title_text='Efficiency for all vehicle types')
     plot.show()
-    plot.write_html(root_dir + '/' + 'plotting_output/testing/efficiency_violins/efficiency_other_all.html')
+    plot.write_html(root_dir + '\\' + 'plotting_output\\testing\\efficiency_violins\\efficiency_other_all.html')
 
 #we're just going to assume that every economy has the same eff for each vehicle type and drive type. so we will just take the average for each vehicle type and drive type and use that for all economies
 efficiency_other = efficiency_other.groupby(['Vehicle Type','Drive'])['efficiency'].mean().reset_index()
@@ -397,7 +397,7 @@ if calculate_again:
         finalised_new_vehicle_efficiency_ldv_ice = finalised_new_vehicle_efficiency_ldv_ice.append(dummy_df,ignore_index=True)
 
     #save it so that it can be concatenated to the transport_data_system_df_original
-    finalised_new_vehicle_efficiency_ldv_ice.to_csv(root_dir + '/' + 'input_data/calculated/iea_new_vehicle_efficiency_ldv_ice.csv',index=False)
+    finalised_new_vehicle_efficiency_ldv_ice.to_csv(root_dir + '\\' + 'input_data\\calculated\\iea_new_vehicle_efficiency_ldv_ice.csv',index=False)
 
 #%%
 #and now create a similar dataframe for the other vehicle types
@@ -441,7 +441,7 @@ for year in years:
     dummy_df['Date'] = year
     other_eff_data_new = pd.concat([other_eff_data_new,dummy_df],ignore_index=True)
 #save it so that it can be concatenated to the transport_data_system_df_original
-other_eff_data_new.to_csv(root_dir + '/' + 'input_data/calculated/new_vehicle_efficiency_other_estimates.csv',index=False)
+other_eff_data_new.to_csv(root_dir + '\\' + 'input_data\\calculated\\new_vehicle_efficiency_other_estimates.csv',index=False)
 #%%
 #we are going to use the efficiency data we do have to try estimate the efficiency of the vehicles that we don't have data for.
 #first find what data we do have

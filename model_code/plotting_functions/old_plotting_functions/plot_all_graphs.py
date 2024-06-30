@@ -10,10 +10,10 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
+    sys.path.append(f"{root_dir}\\code")
     import config
     import utility_functions
 else:
@@ -46,7 +46,7 @@ dont_overwrite_existing_graphs = False
 plot_png = False
 plot_html = True
 subfolder_name = 'all_economy_graphs'
-original_default_save_folder = f'plotting_output/{subfolder_name}/{config.FILE_DATE_ID}/'#will add in scenario later to end of path
+original_default_save_folder = f'plotting_output\\{subfolder_name}\\{config.FILE_DATE_ID}\\'#will add in scenario later to end of path
 save_pickle = True
 #get all useful graphs and put them in one folder
 useful_graphs = []
@@ -70,13 +70,13 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
 
     ##############FORMATTING#############
     #load data in
-    original_model_output_8th = pd.read_csv(root_dir + '/' + 'input_data/from_8th/reformatted/activity_energy_road_stocks.csv')
+    original_model_output_8th = pd.read_csv(root_dir + '\\' + 'input_data\\from_8th\\reformatted\\activity_energy_road_stocks.csv')
     #rename Year col into Date
     original_model_output_8th = original_model_output_8th.rename(columns={'Year':'Date'})
-    original_activity_growth = pd.read_csv(root_dir + '/' + 'input_data/from_8th/reformatted/activity_growth_8th.csv')
-    original_model_output_detailed = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
-    original_model_output_all = pd.read_csv(root_dir + '/' + 'output_data/model_output/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
-    original_model_output_with_fuels = pd.read_csv(root_dir + '/' + 'output_data/model_output_with_fuels/all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
+    original_activity_growth = pd.read_csv(root_dir + '\\' + 'input_data\\from_8th\\reformatted\\activity_growth_8th.csv')
+    original_model_output_detailed = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
+    original_model_output_all = pd.read_csv(root_dir + '\\' + 'output_data\\model_output\\all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
+    original_model_output_with_fuels = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_with_fuels\\all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
     #loop thorugh scenarios:
     if ECONOMY_ID != None:
         #filter for economy of interest
@@ -88,10 +88,10 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
     
     for scenario in original_model_output_all['Scenario'].unique():
         config.SCENARIO_OF_INTEREST = scenario
-        default_save_folder = original_default_save_folder + f'{config.SCENARIO_OF_INTEREST}/'
+        default_save_folder = original_default_save_folder + f'{config.SCENARIO_OF_INTEREST}\\'
         #CHECK THAT SAVE FOLDER EXISTS, IF NOT CREATE IT
-        if not os.path.exists(default_save_folder):
-            os.makedirs(default_save_folder)
+        if not os.path.exists(root_dir + '\\' + default_save_folder):
+            os.makedirs(root_dir + '\\' + default_save_folder)
             
         #now do everything
         #FILTER FOR SCENARIO OF INTEREST
@@ -215,16 +215,16 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
 
         def log_time(section, elapsed_time):
             try:
-                times_df = pd.read_csv(root_dir + '/' + 'plotting_output/all_economy_graphs_plotting_times.csv')
+                times_df = pd.read_csv(root_dir + '\\' + 'plotting_output\\all_economy_graphs_plotting_times.csv')
             except FileNotFoundError:
                 times_df = pd.DataFrame(columns=['section', 'time'])
 
             times_df_new_row = pd.DataFrame({'section': section, 'time': elapsed_time, 'num_economies': 21}, index=[0])
             times_df = pd.concat([times_df, times_df_new_row])
-            times_df.to_csv(root_dir + '/' + 'plotting_output/all_economy_graphs_plotting_times.csv', index=False)
+            times_df.to_csv(root_dir + '\\' + 'plotting_output\\all_economy_graphs_plotting_times.csv', index=False)
         def print_expected_time_to_run(section):
             try:
-                times_df = pd.read_csv(root_dir + '/' + 'plotting_output/all_economy_graphs_plotting_times.csv')
+                times_df = pd.read_csv(root_dir + '\\' + 'plotting_output\\all_economy_graphs_plotting_times.csv')
                 times_df = times_df[times_df['section']==section]
                 times_df = times_df[times_df['num_economies']==21]
                 times_df = times_df['time']
@@ -251,7 +251,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
         #bascially we want to plot every column using economy as the facet then a mix of transport type, drive, vehicle type, medium and fuel as the categories. So we will create a function that does this:
         def check_graph_exists(save_folder, title, dont_overwrite_existing_graphs=False):
             #double check we havent already plotted this graph:
-            if (os.path.exists(root_dir + '/' + f'./{save_folder}/static/' + title + '.png') | os.path.exists(root_dir + '/' + f'./{save_folder}/' + title + '.html')) & dont_overwrite_existing_graphs:
+            if (os.path.exists(root_dir + '\\' + f'{save_folder}\\static\\' + title + '.png') | os.path.exists(root_dir + '\\' + f'{save_folder}\\' + title + '.html')) & dont_overwrite_existing_graphs:
                 return True
             else:
                 return False
@@ -269,9 +269,9 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
             fig.update_layout(yaxis_title=y_axis_title, xaxis_title=x_axis_title)
             #save the graph
             if plot_html:
-                plotly.offline.plot(fig, filename=f'./{save_folder}/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+                plotly.offline.plot(fig, filename=f'\\{save_folder}\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
             if plot_png:
-                fig.write_image(f"./{save_folder}/static/" + title + '.png', scale=1, width=width, height=height)
+                fig.write_image(root_dir + '\\' + f"{save_folder}\\static\\" + title + '.png', scale=1, width=width, height=height)
 
 
         def plot_line_by_economy(df, color_categories, y_column,title,line_dash_categories=None,  x_column='Date', save_folder='all_economy_graphs', facet_col_wrap=7, facet_col =None, hover_name = None, hover_data = None, log_y = False, log_x = False, y_axis_title = None, x_axis_title = None, width = 2000, height = 800,AUTO_OPEN_PLOTLY_GRAPHS=False, independent_y_axis = True,plot_png=True, plot_html=True, dont_overwrite_existing_graphs=False, PLOT=True):
@@ -330,7 +330,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
             #if y axis title is none then set it to the y column + unit
             if y_axis_title == None:
                 try:
-                    y_axis_title = y_column + measure_to_unit_concordance_dict[y_column]
+                    y_axis_title = y_column + config.measure_to_unit_concordance_dict[y_column]
                 except:
                     y_axis_title = y_column
             #if x axis title is none then set it to the x column
@@ -343,11 +343,11 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
             df = df[df[y_column] != '']
 
             #checkl that the folders wqe save to exist
-            if not os.path.exists(root_dir + '/' + f'./{save_folder}/'):
-                os.makedirs(f'./{save_folder}/')
+            if not os.path.exists(root_dir + '\\' + f'{save_folder}\\'):
+                os.makedirs(root_dir + '\\' + f'\\{save_folder}\\')
             #create static folder too
-            if not os.path.exists(root_dir + '/' + f'./{save_folder}/static'):
-                os.makedirs(f'./{save_folder}/static')
+            if not os.path.exists(root_dir + '\\' + f'{save_folder}\\static'):
+                os.makedirs(root_dir + '\\' + f'\\{save_folder}\\static')
 
             
             #if there are no line dashes then just plot the graph
@@ -371,9 +371,9 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                 fig.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
             fig.update_layout(yaxis_title=y_axis_title, xaxis_title=x_axis_title)
             if plot_html:
-                plotly.offline.plot(fig, filename=f'./{save_folder}/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+                plotly.offline.plot(fig, filename=f'\\{save_folder}\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
             if plot_png:
-                fig.write_image(f"./{save_folder}/static/" + title + '.png', scale=1, width=width, height=height)
+                fig.write_image(root_dir + '\\' + f"{save_folder}\\static\\" + title + '.png', scale=1, width=width, height=height)
                 
         def plot_area_by_economy(df, color_categories, y_column, title, line_group_categories=None,  x_column='Date', save_folder='all_economy_graphs', facet_col_wrap=7, facet_col =None, hover_name = None, hover_data = None, log_y = False, log_x = False, y_axis_title = None, x_axis_title = None, width = 2000, height = 800,AUTO_OPEN_PLOTLY_GRAPHS=False, independent_y_axis = True,plot_png=True, plot_html=True, dont_overwrite_existing_graphs=False, PLOT=True):
             if not PLOT:
@@ -419,16 +419,16 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                 hover_data = [y_column]
             if y_axis_title == None:
                 try:
-                    y_axis_title = y_column + measure_to_unit_concordance_dict[y_column]
+                    y_axis_title = y_column + config.measure_to_unit_concordance_dict[y_column]
                 except:
                     y_axis_title = y_column
             if x_axis_title == None:
                 x_axis_title = x_column
             df = df[df[y_column] != '']
-            if not os.path.exists(root_dir + '/' + f'./{save_folder}/'):
-                os.makedirs(f'./{save_folder}/')
-            if not os.path.exists(root_dir + '/' + f'./{save_folder}/static'):
-                os.makedirs(f'./{save_folder}/static')
+            if not os.path.exists(root_dir + '\\' + f'{save_folder}\\'):
+                os.makedirs(root_dir + '\\' + f'\\{save_folder}\\')
+            if not os.path.exists(root_dir + '\\' + f'{save_folder}\\static'):
+                os.makedirs(root_dir + '\\' + f'\\{save_folder}\\static')
             if line_group_categories != None:
                 df = df.groupby([x_column, facet_col,color, line_group,hover_name])[y_column].sum().reset_index()
             else:
@@ -480,7 +480,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
         dataframe_name = 'model_output_detailed'
         #save copy of data as pickle for use in recreating plots. put it in save_folder
         if save_pickle:
-            model_output_detailed.to_pickle(f'{default_save_folder}/{dataframe_name}.pkl')
+            model_output_detailed.to_pickle(root_dir + '\\' + f'{default_save_folder}\\{dataframe_name}.pkl')
             print(f'{dataframe_name} saved as pickle')
 
         #plot each combination of: one of the value cols and then any number of the categorical cols
@@ -495,7 +495,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                 for i in range(1, n_categorical_cols+1):
                     for combo in itertools.combinations(categorical_cols, i):
                         title = f'{value_col} by {combo} - {scenario}'
-                        save_folder = f'{default_save_folder}/{dataframe_name}/{value_col}'
+                        save_folder = f'{default_save_folder}\\{dataframe_name}\\{value_col}'
 
                         plot_line_by_economy(model_output_detailed, color_categories=list(combo), y_column=value_col, title=title, save_folder=save_folder, facet_col='Economy',AUTO_OPEN_PLOTLY_GRAPHS=AUTO_OPEN_PLOTLY_GRAPHS, plot_png=plot_png, plot_html=plot_html, dont_overwrite_existing_graphs=dont_overwrite_existing_graphs, PLOT=PLOT)
                         print(f'plotting {value_col} by {combo}')
@@ -556,7 +556,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                     for i in range(1, n_categorical_cols+1):
                         for combo in itertools.combinations(categorical_cols, i):
                             title = f'{value_col} by {combo} - {scenario}'
-                            save_folder = f'{default_save_folder}/{dataframe_name}/{economy_x}/{value_col}'
+                            save_folder = f'{default_save_folder}\\{dataframe_name}\\{economy_x}\\{value_col}'
                                                     
                             #filter for that ecovnomy only and then plot
                             model_output_detailed_econ = model_output_detailed[model_output_detailed['Economy'] == economy_x].copy()
@@ -569,7 +569,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
         if ECONOMY_ID == None:#if we are plotting all economies then plot the regional data too
             #plot regional groupings of economys
             #import the region_economy_mappin.xlsx from config/concordances_and_config_data
-            region_economy_mapping = pd.read_csv(root_dir + '/' + './config/concordances_and_config_data/region_economy_mapping.csv')
+            region_economy_mapping = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\region_economy_mapping.csv')
             #join with model_output_detailed_APEC.
             #where there is no region drop the row since we are just plotting singular economies atm
             model_output_detailed_regions = model_output_detailed.merge(region_economy_mapping, how='left', left_on='Economy', right_on='Economy')
@@ -583,7 +583,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
 
             #save copy of data as pickle for use in recreating plots. put it in save_folder
             if save_pickle:
-                model_output_detailed_regions.to_pickle(f'{default_save_folder}/{dataframe_name}_regional.pkl')
+                model_output_detailed_regions.to_pickle(root_dir + '\\' + f'{default_save_folder}\\{dataframe_name}_regional.pkl')
                 print(f'{dataframe_name}_regional saved as pickle')
             
             n_categorical_cols = len(categorical_cols)
@@ -599,7 +599,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                         for i in range(1, n_categorical_cols+1):
                             for combo in itertools.combinations(categorical_cols, i):
                                 title = f'{value_col} by {combo} - {scenario}'
-                                save_folder = f'{default_save_folder}/{dataframe_name}/{economy_x}/{value_col}'
+                                save_folder = f'{default_save_folder}\\{dataframe_name}\\{economy_x}\\{value_col}'
 
                                 #filter for that ecovnomy only and then plot
                                 model_output_detailed_econ = model_output_detailed_regions[model_output_detailed_regions['Region'] == economy_x].copy()
@@ -624,7 +624,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
 
         #save copy of data as pickle for use in recreating plots. put it in save_folder
         if save_pickle:
-            model_output_with_fuels_plot.to_pickle(f'{default_save_folder}/{dataframe_name}.pkl')
+            model_output_with_fuels_plot.to_pickle(root_dir + '\\' + f'{default_save_folder}\\{dataframe_name}.pkl')
         #plot singular graphs for each economy
         do_this = True
         
@@ -639,7 +639,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                             combo = list(combo) + ['Fuel']
                             dataframe_name = 'model_output_with_fuels'
                             title = f'{value_col} by {combo} - {scenario}'
-                            save_folder = f'{default_save_folder}/{dataframe_name}/{economy_x}/{value_col}/line/'
+                            save_folder = f'{default_save_folder}\\{dataframe_name}\\{economy_x}\\{value_col}\\line\\'
                                                     
                             #filter for that ecovnomy only and then plot
                             model_output_with_fuels_plot_econ = model_output_with_fuels_plot[model_output_with_fuels_plot['Economy'] == economy_x].copy()
@@ -647,7 +647,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                             print(f'plotting {value_col} by {combo}')
                             
                             title = f'{value_col} by {combo} - {scenario}'
-                            save_folder = f'{default_save_folder}/{dataframe_name}/{economy_x}/{value_col}/area/'
+                            save_folder = f'{default_save_folder}\\{dataframe_name}\\{economy_x}\\{value_col}\\area\\'
 
                             plot_area_by_economy(model_output_with_fuels_plot_econ, color_categories= list(combo), y_column=value_col, title=title, save_folder=save_folder, AUTO_OPEN_PLOTLY_GRAPHS=AUTO_OPEN_PLOTLY_GRAPHS,plot_png=plot_png, plot_html=plot_html, dont_overwrite_existing_graphs=dont_overwrite_existing_graphs, PLOT=PLOT)
         end_timer(start, dataframe_name+' by economy', do_this)
@@ -658,7 +658,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
             #merge with regions
             #plot regional groupings of economys
             #import the region_economy_mappin.xlsx from config/concordances_and_config_data
-            region_economy_mapping = pd.read_csv(root_dir + '/' + './config/concordances_and_config_data/region_economy_mapping.csv')
+            region_economy_mapping = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\region_economy_mapping.csv')
             model_output_with_fuels_regions = model_output_with_fuels.merge(region_economy_mapping, how='left', left_on='Economy', right_on='Economy')
 
             #drop nas
@@ -669,7 +669,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
             
             #save copy of data as pickle for use in recreating plots. put it in save_folder
             if save_pickle:
-                model_output_with_fuels_regions.to_pickle(f'{default_save_folder}/{dataframe_name}_regional.pkl')
+                model_output_with_fuels_regions.to_pickle(root_dir + '\\' + f'{default_save_folder}\\{dataframe_name}_regional.pkl')
                 print(f'{dataframe_name}_regional saved as pickle')
             do_this = True
             start = start_timer(dataframe_name+' by region',do_this)
@@ -685,7 +685,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                                 # combo = list(combo) + ['Fuel']
 
                                 title = f'{value_col} by {list(combo) + ["Fuel"]} - {scenario}'
-                                save_folder = f'{default_save_folder}/{dataframe_name}/{region}/{value_col}/line/'
+                                save_folder = f'{default_save_folder}\\{dataframe_name}\\{region}\\{value_col}\\line\\'
                                                         
                                 #filter for that ecovnomy only and then plot
                                 model_output_with_fuels_regions_region = model_output_with_fuels_regions[model_output_with_fuels_regions['Region'] == region]
@@ -694,7 +694,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                                 
                                 
                                 title = f'{value_col} by {list(combo) + ["Fuel"]} - {scenario}'
-                                save_folder = f'{default_save_folder}/{dataframe_name}/{economy_x}/{value_col}/area/'
+                                save_folder = f'{default_save_folder}\\{dataframe_name}\\{economy_x}\\{value_col}\\area\\'
                                 
                                 plot_area_by_economy(model_output_with_fuels_regions_region, color_categories = list(combo), y_column=value_col, title=title,  line_group_categories = 'Fuel', save_folder=save_folder, AUTO_OPEN_PLOTLY_GRAPHS=AUTO_OPEN_PLOTLY_GRAPHS,plot_png=plot_png, plot_html=plot_html, dont_overwrite_existing_graphs=dont_overwrite_existing_graphs, PLOT=PLOT)
             end_timer(start, dataframe_name+' by region', do_this)
@@ -712,12 +712,12 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                             # combo = list(combo) + ['Fuel']
                             title = f'{value_col} by {list(combo) + ["Fuel"]} - {scenario}'
                         
-                            save_folder = f'{default_save_folder}/energy_use_by_fuel/all_economies_plot/{value_col}/line'
+                            save_folder = f'{default_save_folder}\\energy_use_by_fuel\\all_economies_plot\\{value_col}\\line'
 
                             plot_line_by_economy(model_output_with_fuels_plot, color_categories= list(combo),y_column=value_col, title=title,  line_dash_categories='Fuel', save_folder=save_folder, facet_col='Economy',AUTO_OPEN_PLOTLY_GRAPHS=AUTO_OPEN_PLOTLY_GRAPHS,plot_png=plot_png, plot_html=plot_html, dont_overwrite_existing_graphs=dont_overwrite_existing_graphs, PLOT=PLOT)
                             print(f'plotting {value_col} by {list(combo) + ["Fuel"]}')
                             
-                            save_folder = f'{default_save_folder}/energy_use_by_fuel/all_economies_plot/{value_col}/area'
+                            save_folder = f'{default_save_folder}\\energy_use_by_fuel\\all_economies_plot\\{value_col}\\area'
                             plot_area_by_economy(model_output_with_fuels_plot, color_categories= list(combo),y_column=value_col, title=title,  line_group_categories='Fuel', save_folder=save_folder, facet_col='Economy',AUTO_OPEN_PLOTLY_GRAPHS=AUTO_OPEN_PLOTLY_GRAPHS,plot_png=plot_png, plot_html=plot_html, dont_overwrite_existing_graphs=dont_overwrite_existing_graphs, PLOT=PLOT)
             end_timer(start, dataframe_name+' with all economies on one graph', do_this)
         ##################################################################
@@ -729,7 +729,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
             start = start_timer(dataframe_name,do_this)
             if do_this:
                 #PLOT 8TH VS 9TH FUEL:
-                # original_model_output_8th = pd.read_csv(root_dir + '/' + 'intermediate_data/activity_energy_road_stocks.csv')
+                # original_model_output_8th = pd.read_csv(root_dir + '\\' + 'intermediate_data\\activity_energy_road_stocks.csv')
                 #['Medium', 'Transport Type', 'Vehicle Type', 'Drive', 'Date', 'Economy',
                 #    'Scenario', 'Activity', 'Energy', 'Stocks']
                 #we will merge together model_output_8th and model_output_all and then plot them together, with 8th on one facet, 9th on the oter. we will plot te values for 'energy, 'stocks' and 'activity'
@@ -751,12 +751,12 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                 #     for i in range(1, n_categorical_cols+1):
                 #         for combo in itertools.combinations(categorical_cols, i):
                 #             title = f'{value_col} by {combo} - {scenario}'
-                #             save_folder = f'{default_save_folder}/{dataframe_name}/{value_col}/line'
+                #             save_folder = f'{default_save_folder}\\{dataframe_name}\\{value_col}\\line'
 
                 #             plot_line_by_economy(model_output_comparison, color_categories=list(combo), y_column=value_col, title=title, save_folder=save_folder, AUTO_OPEN_PLOTLY_GRAPHS=AUTO_OPEN_PLOTLY_GRAPHS, plot_png=plot_png, plot_html=plot_html, dont_overwrite_existing_graphs=dont_overwrite_existing_graphs, facet_col='Dataset', PLOT=PLOT)
                 #             print(f'plotting {value_col} by {combo}')
                             
-                #             save_folder = f'{default_save_folder}/{dataframe_name}/{value_col}/area'
+                #             save_folder = f'{default_save_folder}\\{dataframe_name}\\{value_col}\\area'
                 #             plot_area_by_economy(model_output_comparison, color_categories=list(combo), y_column=value_col, title=title, save_folder=save_folder, AUTO_OPEN_PLOTLY_GRAPHS=AUTO_OPEN_PLOTLY_GRAPHS, plot_png=plot_png, plot_html=plot_html, dont_overwrite_existing_graphs=dont_overwrite_existing_graphs, facet_col='Dataset', PLOT=PLOT)
                 #then plot plot by economy
                 
@@ -769,14 +769,14 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                                 # combo = list(combo) + ['Fuel']
 
                                 title = f'Comparison - {value_col} by {list(combo)} - {scenario}'
-                                save_folder = f'{default_save_folder}/{dataframe_name}/{economy_x}/{value_col}/line/'
+                                save_folder = f'{default_save_folder}\\{dataframe_name}\\{economy_x}\\{value_col}\\line\\'
                                                         
                                 #filter for that ecovnomy only and then plot
                                 model_output_comparison_economy = model_output_comparison[model_output_comparison['Economy'] == economy_x].copy()
                             
                                 plot_line_by_economy(model_output_comparison_economy, color_categories=list(combo), y_column=value_col, title=title, save_folder=save_folder, AUTO_OPEN_PLOTLY_GRAPHS=AUTO_OPEN_PLOTLY_GRAPHS, plot_png=plot_png, plot_html=plot_html, dont_overwrite_existing_graphs=dont_overwrite_existing_graphs, facet_col='Dataset', PLOT=plot_comparisons)
                                 
-                                save_folder = f'{default_save_folder}/{dataframe_name}/{economy_x}/{value_col}/area'
+                                save_folder = f'{default_save_folder}\\{dataframe_name}\\{economy_x}\\{value_col}\\area'
                                 
                                 # if value_col=='Stocks':#doesnt work with stocks for osmoe reason. tried ot fix it., 
                                 #     breakpoint()
@@ -804,7 +804,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
             #now plot 
             #save copy of data as pickle for use in recreating plots. put it in save_folder
             if save_pickle:
-                macro.to_pickle(f'{default_save_folder}/{dataframe_name}.pkl')
+                macro.to_pickle(root_dir + '\\' + f'{default_save_folder}\\{dataframe_name}.pkl')
                 print(f'{dataframe_name} saved as pickle')
 
             #for each economy plot a single graph and then plot all on one graph
@@ -812,7 +812,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                 for measure in macro_cols_new:
                     value_col = measure
                     title = f'{measure} for {economy_x} - {scenario}'
-                    save_folder = f'{default_save_folder}/{dataframe_name}/{economy_x}/{value_col}'
+                    save_folder = f'{default_save_folder}\\{dataframe_name}\\{economy_x}\\{value_col}'
                                                 
                     #filter for that ecovnomy only and then plot
                     macro_econ = macro[macro['Economy'] == economy_x].copy()
@@ -833,7 +833,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
             activity_growth = activity_growth[activity_growth['Date'] != activity_growth['Date'].min()]
             #save copy of data as pickle for use in recreating plots. put it in save_folder
             if save_pickle:
-                activity_growth.to_pickle(f'{default_save_folder}/{dataframe_name}.pkl')
+                activity_growth.to_pickle(root_dir + '\\' + f'{default_save_folder}\\{dataframe_name}.pkl')
                 print(f'{dataframe_name} saved as pickle')
 
             #for each economy plot a single graph and then plot all on one graph
@@ -841,7 +841,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                 for economy_x in activity_growth['Economy'].unique():
                     
                     title = f'{value_col} for {economy_x} - {scenario}'
-                    save_folder = f'{default_save_folder}/{dataframe_name}/{economy_x}/{value_col}'
+                    save_folder = f'{default_save_folder}\\{dataframe_name}\\{economy_x}\\{value_col}'
                                                 
                     #filter for that ecovnomy only and then plot
                     activity_growth_econ = activity_growth[activity_growth['Economy'] == economy_x].copy()
@@ -856,7 +856,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
 
             for value_col in ['cumulative_activity_growth', 'Activity_growth']:
                 title = f'{value_col}  for all economies - {scenario}'
-                save_folder = f'{default_save_folder}/{dataframe_name}/{value_col}'
+                save_folder = f'{default_save_folder}\\{dataframe_name}\\{value_col}'
 
             
                 plot_line_by_economy(activity_growth, color_categories= ['Economy'], y_column=value_col, title=title, save_folder=save_folder, AUTO_OPEN_PLOTLY_GRAPHS=AUTO_OPEN_PLOTLY_GRAPHS,plot_png=plot_png, plot_html=plot_html, facet_col='Transport Type',dont_overwrite_existing_graphs=dont_overwrite_existing_graphs, PLOT=PLOT)
@@ -891,7 +891,7 @@ def plot_all_graphs(ECONOMY_ID=None, PLOT=True, plot_comparisons=True):
                     for combo in itertools.combinations(new_categorical_cols, i):
                         title = f'{value_col} by {combo} - {scenario}'
                         
-                        save_folder = f'{default_save_folder}/{dataframe_name}/all_economies_plot/{value_col}'
+                        save_folder = f'{default_save_folder}\\{dataframe_name}\\all_economies_plot\\{value_col}'
 
                         plot_line_by_economy(model_output_detailed_int, color_categories= list(combo),y_column=value_col, title=title, save_folder=save_folder, AUTO_OPEN_PLOTLY_GRAPHS=AUTO_OPEN_PLOTLY_GRAPHS,plot_png=plot_png, plot_html=plot_html, facet_col='Economy',dont_overwrite_existing_graphs=dont_overwrite_existing_graphs, PLOT=PLOT)
                         print(f'plotting {value_col} by {combo}')

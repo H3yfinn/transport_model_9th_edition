@@ -6,7 +6,7 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
 from .. import config
 from ..plotting_functions import colors_dict
@@ -103,8 +103,8 @@ def save_bunkers_data(new_esto_data, international_bunker_outputs, ECONOMY_ID):
     
     #save it to csv in output
     if ECONOMY_ID=='all':
-        new_esto_data.to_csv(f'output_data/for_other_modellers/output_for_outlook_data_system/international_bunker_energy_use_{config.FILE_DATE_ID}.csv', index=False)
-        international_bunker_outputs.to_csv(f'output_data/international_energy_use/international_bunker_outputs_{config.FILE_DATE_ID}.csv', index=False)
+        new_esto_data.to_csv(f'output_data\\for_other_modellers\\output_for_outlook_data_system\\international_bunker_energy_use_{config.FILE_DATE_ID}.csv', index=False)
+        international_bunker_outputs.to_csv(f'output_data\\international_energy_use\\international_bunker_outputs_{config.FILE_DATE_ID}.csv', index=False)
     #split newesto data into ecnomies and put them all in the output folder:
     for econ in new_esto_data.economy.unique():
         # if econ == '15_PHL':
@@ -115,9 +115,9 @@ def save_bunkers_data(new_esto_data, international_bunker_outputs, ECONOMY_ID):
         econ2 = econ
             
         new_esto_data_econ = new_esto_data.loc[new_esto_data['economy'] == econ].copy()
-        new_esto_data_econ.to_csv(f'output_data/for_other_modellers/output_for_outlook_data_system/{econ2}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv', index=False)
+        new_esto_data_econ.to_csv(f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{econ2}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv', index=False)
         
-        new_esto_data_econ.to_csv(f'output_data/for_other_modellers/{econ2}/{econ2}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv', index=False)
+        new_esto_data_econ.to_csv(f'output_data\\for_other_modellers\\{econ2}\\{econ2}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv', index=False)
     
 def remap_to_esto_mapping(international_bunker_outputs, energy_use_esto_mapping):
     #first check for duplicates when we ignore Energy col
@@ -125,7 +125,7 @@ def remap_to_esto_mapping(international_bunker_outputs, energy_use_esto_mapping)
     cols.remove('Energy')
     dupes = international_bunker_outputs[international_bunker_outputs.duplicated(subset=cols, keep=False)]
     if len(dupes) > 0:
-        dupes.to_csv(root_dir + '/' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
+        dupes.to_csv(root_dir + '\\' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
         breakpoint()
         time.sleep(1)
         raise Exception(f'There are duplicates in international_bunker_outputs. Please check the data and remove duplicates, {dupes}')
@@ -165,7 +165,7 @@ def plot_international_bunker_activity(international_bunker_outputs):
             
             fig = px.area(international_bunker_activity_m, x='Date', y='Activity', facet_col='Economy', color='Drive', facet_col_wrap=3, title = f'International bunker activity for {medium} in {scenario}', color_discrete_map=colors_dict)
             #save to html in plotting_output/international_activity
-            fig.write_html(root_dir + '/' +f'plotting_output/international_energy_use/{medium}_{scenario}_international_bunker_activity_{config.FILE_DATE_ID}.html')
+            fig.write_html(root_dir + '\\' +f'plotting_output\\international_energy_use\\{medium}_{scenario}_international_bunker_activity_{config.FILE_DATE_ID}.html')
             
     #plot a similar graph but with the medium in it by using pattern_shape="medium" and pattern_shape_sequence=["-", "."]
     for scenario in international_bunker_outputs.Scenario.unique():
@@ -182,7 +182,7 @@ def plot_international_bunker_activity(international_bunker_outputs):
         
         fig = px.area(international_bunker_activity_s, x='Date', y='Activity', facet_col='Economy', color='Drive', facet_col_wrap=3, pattern_shape="Medium", pattern_shape_sequence=["-", "."], title = f'International bunker activity for {scenario}', color_discrete_map=colors_dict)
         #save to html in plotting_output/international_energy_use
-        fig.write_html(root_dir + '/' +f'plotting_output/international_energy_use/{scenario}_international_bunker_activity_{config.FILE_DATE_ID}.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\international_energy_use\\{scenario}_international_bunker_activity_{config.FILE_DATE_ID}.html')
     
     #and plot one for all economies with a facet for each medium:
     for scenario in international_bunker_outputs.Scenario.unique():
@@ -199,7 +199,7 @@ def plot_international_bunker_activity(international_bunker_outputs):
         
         fig = px.area(international_bunker_activity_s, x='Date', y='Activity', facet_col='Medium', color='Drive', title = f'International bunker activity for {scenario}', color_discrete_map=colors_dict)
         #save to html in plotting_output/international_energy_use
-        fig.write_html(root_dir + '/' +f'plotting_output/international_energy_use/{scenario}_international_bunker_activity_{config.FILE_DATE_ID}_all_economies.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\international_energy_use\\{scenario}_international_bunker_activity_{config.FILE_DATE_ID}_all_economies.html')
 
 def plot_international_bunker_energy(international_bunker_energy):
     #plot a line graph using plotly with the following cols: Scenario, Medium, Economy, Drive, Date, Fuel, Value. We will plot this on a single plot with facet cols for economy, then line dash for Medium, color for Fuel. 
@@ -219,7 +219,7 @@ def plot_international_bunker_energy(international_bunker_energy):
             
             fig = px.area(international_bunker_energy_m, x='Date', y='Energy', facet_col='Economy', color='Fuel', facet_col_wrap=3, title = f'International bunker energy use for {medium} in {scenario}', color_discrete_map=colors_dict)
             #save to html in plotting_output/international_energy_use
-            fig.write_html(root_dir + '/' +f'plotting_output/international_energy_use/{medium}_{scenario}_international_bunker_energy_use_{config.FILE_DATE_ID}.html')
+            fig.write_html(root_dir + '\\' +f'plotting_output\\international_energy_use\\{medium}_{scenario}_international_bunker_energy_use_{config.FILE_DATE_ID}.html')
             
     #plot a similar graph but with the medium in it by using pattern_shape="medium" and pattern_shape_sequence=["-", "."]
     for scenario in international_bunker_energy.Scenario.unique():
@@ -241,7 +241,7 @@ def plot_international_bunker_energy(international_bunker_energy):
         #show y axis on both plots
         fig.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
         #save to html in plotting_output/international_energy_use
-        fig.write_html(root_dir + '/' +f'plotting_output/international_energy_use/{scenario}_international_bunker_energy_use_{config.FILE_DATE_ID}.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\international_energy_use\\{scenario}_international_bunker_energy_use_{config.FILE_DATE_ID}.html')
 
     #also plot the energy use across all economies for each fuel type with a facet for each medium: (and independtn axis)
     for scenario in international_bunker_energy.Scenario.unique():
@@ -263,7 +263,7 @@ def plot_international_bunker_energy(international_bunker_energy):
         #show y axis on both plots
         fig.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
         #save to html in plotting_output/international_energy_use
-        fig.write_html(root_dir + '/' +f'plotting_output/international_energy_use/{scenario}_international_bunker_energy_use_{config.FILE_DATE_ID}_all_economies.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\international_energy_use\\{scenario}_international_bunker_energy_use_{config.FILE_DATE_ID}_all_economies.html')
     
 
 def plot_international_bunker_shares_and_mixing(international_fuel_shares, international_supply_side_fuel_mixing):
@@ -276,7 +276,7 @@ def plot_international_bunker_shares_and_mixing(international_fuel_shares, inter
         
         fig = px.line(international_fuel_shares_s, x='Date', y='Share', facet_col='Economy', color='Drive', facet_col_wrap=3, line_dash="Medium", title = f'International bunker drive shares for {scenario}', color_discrete_map=colors_dict)
         #save to html in plotting_output/international_energy_use
-        fig.write_html(root_dir + '/' +f'plotting_output/international_energy_use/{scenario}_international_bunker_drive_shares_{config.FILE_DATE_ID}.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\international_energy_use\\{scenario}_international_bunker_drive_shares_{config.FILE_DATE_ID}.html')
 
     for scenario in international_supply_side_fuel_mixing.Scenario.unique():
         international_supply_side_fuel_mixing_s = international_supply_side_fuel_mixing.loc[(international_supply_side_fuel_mixing['Scenario'] == scenario)].copy()
@@ -287,7 +287,7 @@ def plot_international_bunker_shares_and_mixing(international_fuel_shares, inter
         
         fig = px.line(international_supply_side_fuel_mixing_s, x='Date', y='Mix', facet_col='Economy', color='New_fuel', facet_col_wrap=3, line_dash="Medium", title = f'Non weighted average international bunker fuel mixes for {scenario}', color_discrete_map=colors_dict)
         #save to html in plotting_output/international_energy_use
-        fig.write_html(root_dir + '/' +f'plotting_output/international_energy_use/{scenario}_average_international_bunker_fuel_mixes_{config.FILE_DATE_ID}.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\international_energy_use\\{scenario}_average_international_bunker_fuel_mixes_{config.FILE_DATE_ID}.html')
 
 def apply_fuel_mixing_to_energy(international_bunker_outputs, international_supply_side_fuel_mixing, ECCONOMY_ID):
     if ECCONOMY_ID != 'all':
@@ -316,7 +316,7 @@ def apply_fuel_mixing_to_energy(international_bunker_outputs, international_supp
     
     #drop any right only rows. these are where there is no fuel for that expected new fuel. make surte to communicate this to the user
     if len(new_fuels_energy_use.loc[new_fuels_energy_use['_merge'] == 'right_only']) > 0:
-        new_fuels_energy_use.to_csv(root_dir + '/' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
+        new_fuels_energy_use.to_csv(root_dir + '\\' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
         breakpoint()
         time.sleep(1)
         raise Exception(f'There are some fuels in the mixing which are not needed, please check the fuel mixing assumptions xlsx and remove them, {new_fuels_energy_use.loc[new_fuels_energy_use["_merge"] == "right_only"]}')
@@ -331,7 +331,7 @@ def apply_fuel_mixing_to_energy(international_bunker_outputs, international_supp
     
     #double check that total energy use is the same as before:
     if abs(international_bunker_energy['Energy'].sum() - international_bunker_outputs['Energy'].sum()) > 0.001:
-        international_bunker_energy.to_csv(root_dir + '/' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
+        international_bunker_energy.to_csv(root_dir + '\\' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
         breakpoint()
         time.sleep(1)
         raise Exception('The total energy use for the international_bunker_outputs df has changed after applying fuel mixing. Please check the data and remove duplicates, {}'.format(abs(international_bunker_energy['Energy'].sum() - international_bunker_outputs['Energy'].sum())))
@@ -341,11 +341,11 @@ def apply_fuel_mixing_to_energy(international_bunker_outputs, international_supp
 def extract_bunker_data_from_esto():
     
     #load the 9th data
-    date_id = utility_functions.get_latest_date_for_data_file(root_dir + '/' + 'input_data/9th_model_inputs', 'model_df_wide_')
-    energy_use_esto = pd.read_csv(root_dir + '/' +f'input_data/9th_model_inputs/model_df_wide_{date_id}.csv')#please  note that this will probably have 15_PHL and 17_SIN in it. we will need to change these to 15_PHL and 17_SGP later
+    date_id = utility_functions.get_latest_date_for_data_file(root_dir + '\\' + 'input_data\\9th_model_inputs', 'model_df_wide_')
+    energy_use_esto = pd.read_csv(root_dir + '\\' +f'input_data\\9th_model_inputs\\model_df_wide_{date_id}.csv')#please  note that this will probably have 15_PHL and 17_SIN in it. we will need to change these to 15_PHL and 17_SGP later
     
     #load the config\concordances_and_config_data\international_bunkers_mapping.csv
-    international_bunkers_mapping = pd.read_csv(root_dir + '/' + 'config/concordances_and_config_data/international_bunkers_mapping.csv')#cols = Medium	Drive	Fuel	Supply_side_fuel_mixing
+    international_bunkers_mapping = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\international_bunkers_mapping.csv')#cols = Medium	Drive	Fuel	Supply_side_fuel_mixing
     #note that Supply_side_fuel_mixing is a boolean
 
     #filter for only the Economys. So use config.economy_scenario_concordance.Economy.unique.to_list() to filter. this is to rmeove the regions
@@ -375,7 +375,7 @@ def extract_bunker_data_from_esto():
     #find if there are any fuels that we need to map to new Drives. these must have Value >0
     other_fuels = energy_use_esto_bunkers_tall.loc[(energy_use_esto_bunkers_tall['Drive'].isnull()) & (energy_use_esto_bunkers_tall['Energy'] > 0)]
     if len(other_fuels) > 0:
-        other_fuels.to_csv(root_dir + '/' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
+        other_fuels.to_csv(root_dir + '\\' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
         breakpoint()
         time.sleep(1)
         raise Exception(f'There are some fuels in the esto bunkers data that do not have drives mapped. Please check the data and add these to the mapping file, {other_fuels}')
@@ -403,10 +403,10 @@ def extract_bunker_data_from_esto():
     return energy_use_esto_bunkers_tall, energy_use_esto_mapping
 
 def extract_supply_side_fuel_mixing():
-    international_supply_side_fuel_mixing = pd.read_excel(root_dir + '/' + 'input_data/fuel_mixing_assumptions.xlsx',sheet_name='international_supply_side')
+    international_supply_side_fuel_mixing = pd.read_excel(root_dir + '\\' + 'input_data\\fuel_mixing_assumptions.xlsx',sheet_name='international_supply_side')
     #drop comment col
     international_supply_side_fuel_mixing = international_supply_side_fuel_mixing.drop(columns=['Comment'])
-    regions_mapping = pd.read_excel(root_dir + '/' + 'input_data/fuel_mixing_assumptions.xlsx',sheet_name='int_regions')
+    regions_mapping = pd.read_excel(root_dir + '\\' + 'input_data\\fuel_mixing_assumptions.xlsx',sheet_name='int_regions')
     #map economy to region
     international_supply_side_fuel_mixing = pd.merge(international_supply_side_fuel_mixing, regions_mapping, how='left', on='Region')
     international_supply_side_fuel_mixing = international_supply_side_fuel_mixing.drop(columns=['Region'])
@@ -419,8 +419,8 @@ def extract_supply_side_fuel_mixing():
 def extract_bunkers_fuel_share_inputs():
     #load data from vehicle_sales_share_inputs
     
-    international_fuel_shares = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx',sheet_name='international_fuel_shares') .drop(columns=['Comments'])  
-    international_shares_regions = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx',sheet_name='international_shares_regions')
+    international_fuel_shares = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='international_fuel_shares') .drop(columns=['Comments'])  
+    international_shares_regions = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='international_shares_regions')
     
     international_fuel_shares_r = pd.merge(international_fuel_shares, international_shares_regions, how='left', on='Region')
     
@@ -474,26 +474,26 @@ def get_economies_to_base_energy_use_off_of():
         list: A list of economies that have a value of True in the ECONOMIES_TO_BASE_ENERGY_USE_OFF_OF parameter.
     """
     # Read the ECONOMIES_TO_BASE_ENERGY_USE_OFF_OF parameter from the parameters.yml file
-    ECONOMIES_TO_BASE_ENERGY_USE_OFF_OF = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
+    ECONOMIES_TO_BASE_ENERGY_USE_OFF_OF = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
     # Filter for only economies with a value of True
     return [economy for economy in ECONOMIES_TO_BASE_ENERGY_USE_OFF_OF if ECONOMIES_TO_BASE_ENERGY_USE_OFF_OF[economy] == True]
 
 def extract_non_road_modelled_data():
     #get non road intensity and activity projections. the activity will be used to get the growth rate for energy use in the whole of apec, the intensity will be timesed by energy to get activity.
     #and extract intensity and activity from the model output:
-    # model_output_detailed = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
+    # model_output_detailed = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
     # non_road = model_output_detailed.loc[model_output_detailed['Medium'].isin(['air', 'ship'])]
     model_output_detailed = pd.DataFrame()
     #until we ahve completed all economies, we should just load data from what economies we have completed:
-    ECONOMIES_WITH_MODELLING_COMPLETE_DICT = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
+    ECONOMIES_WITH_MODELLING_COMPLETE_DICT = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
     for economy in ECONOMIES_WITH_MODELLING_COMPLETE_DICT.keys():
         if ECONOMIES_WITH_MODELLING_COMPLETE_DICT[economy]:
             #since we are often only running the model for one economy each day, just do a try, except here:
             try:
-                latest_date = utility_functions.get_latest_date_for_data_file(f'output_data/model_output_detailed/', f'{economy}_NON_ROAD_DETAILED_model_output')
+                latest_date = utility_functions.get_latest_date_for_data_file(f'output_data\\model_output_detailed\\', f'{economy}_NON_ROAD_DETAILED_model_output')
                 
                 #load data for that economy and concat it onto non_road
-                model_output_detailed_ = pd.read_csv(root_dir + '/' +f'output_data/model_output_detailed/{economy}_NON_ROAD_DETAILED_model_output{latest_date}.csv')
+                model_output_detailed_ = pd.read_csv(root_dir + '\\' +f'output_data\\model_output_detailed\\{economy}_NON_ROAD_DETAILED_model_output{latest_date}.csv')
                 model_output_detailed = pd.concat([model_output_detailed, model_output_detailed_])
             except:
                 pass
@@ -595,9 +595,9 @@ def apply_covid_effect_to_growth_rate_by_medium(international_bunker_inputs):
     if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
         breakpoint()
         print('WARNING: The apply_covid_effect_to_growth_rate_by_medium function is super simplified and will need to be updated to be more accurate. It is just a quick one for now since bunkers are not a priority')
-    INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH']
-    INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH']
-    LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_BUNKERS = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_BUNKERS']
+    INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH']
+    INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH']
+    LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_BUNKERS = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_BUNKERS']
     INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH = pd.DataFrame(INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH, index=[0])
     INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH = pd.DataFrame(INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH, index=[0])
     INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH = pd.melt(INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH, var_name='Economy', value_name='covid_effect')
@@ -618,17 +618,17 @@ def plot_non_road_activity(non_road_activity):
     
     #quickly plot the non road eneryg use so we can tell what the growth rate will be
     fig = px.line(non_road_activity, x='Date', y='Activity',color='Scenario', line_dash = 'Transport Type', color_discrete_map=colors_dict)
-    fig.write_html(root_dir + '/' + 'plotting_output/international_energy_use/non_road_activity_{}.html'.format(config.FILE_DATE_ID))
+    fig.write_html(root_dir + '\\' + 'plotting_output\\international_energy_use\\non_road_activity_{}.html'.format(config.FILE_DATE_ID))
 
 def plot_non_road_activity_growth(non_road_activity_growth_rate):
     
     #quickly plot the non road Activity so we can tell what the growth rate will be
     fig = px.line(non_road_activity_growth_rate, x='Date', y='Growth Rate', color='Scenario', color_discrete_map=colors_dict)
-    fig.write_html(root_dir + '/' + 'plotting_output/international_energy_use/non_road_activity_growth_{}.html'.format(config.FILE_DATE_ID))
+    fig.write_html(root_dir + '\\' + 'plotting_output\\international_energy_use\\non_road_activity_growth_{}.html'.format(config.FILE_DATE_ID))
 
 def plot_non_road_intensity(non_road_intensity):
     fig = px.line(non_road_intensity, x='Date', y='Intensity', color='Scenario', line_dash = 'Drive', color_discrete_map=colors_dict)
-    fig.write_html(root_dir + '/' + 'plotting_output/international_energy_use/non_road_intensity_{}.html'.format(config.FILE_DATE_ID))    
+    fig.write_html(root_dir + '\\' + 'plotting_output\\international_energy_use\\non_road_intensity_{}.html'.format(config.FILE_DATE_ID))    
     
 def plot_intensity_from_output_data(international_bunker_energy, non_road_intensity):
     """as a form of checking, calcualte intensity from the output data and plot it against the intensity from the input data. they should be the same
@@ -651,7 +651,7 @@ def plot_intensity_from_output_data(international_bunker_energy, non_road_intens
     for scenario in concat_intensity_df.Scenario.unique():
         df = concat_intensity_df.loc[concat_intensity_df['Scenario'] == scenario]
         fig = px.line(df, x='Date', y='Intensity', color='Drive', line_dash = 'measure', facet_col='medium', facet_col_wrap=3, title = f'Intensity for {scenario}', color_discrete_map=colors_dict)
-        fig.write_html(root_dir + '/' +f'plotting_output/international_energy_use/comparison_intensity_for_{scenario}_{config.FILE_DATE_ID}.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\international_energy_use\\comparison_intensity_for_{scenario}_{config.FILE_DATE_ID}.html')
     
     
 def calculate_non_road_activity_growth_rate(non_road_activity, PLOT=True):  
@@ -698,31 +698,31 @@ def check_for_duplicates_in_all_datasets(energy_use_esto_bunkers_tall, internati
     cols.remove('Energy')
     dupes = energy_use_esto_bunkers_tall[energy_use_esto_bunkers_tall.duplicated(subset=cols, keep=False)]
     if len(dupes) > 0:
-        dupes.to_csv(root_dir + '/' + 'error.csv')
+        dupes.to_csv(root_dir + '\\' + 'error.csv')
         breakpoint()
         time.sleep(1)
         raise Exception(f'There are duplicates in the energy_use_esto data. Please check the data and remove duplicates, {dupes}')
     dupes = international_fuel_shares[international_fuel_shares.duplicated(subset=['Scenario', 'Medium', 'Economy', 'Drive', 'Date'], keep=False)]
     if len(dupes) > 0:
-        dupes.to_csv(root_dir + '/' + 'error.csv')
+        dupes.to_csv(root_dir + '\\' + 'error.csv')
         breakpoint()
         time.sleep(1)
         raise Exception(f'There are duplicates in the international_fuel_shares data. Please check the data and remove duplicates, {dupes}')
     dupes = non_road_activity_growth_rate[non_road_activity_growth_rate.duplicated(subset=['Scenario', 'Date'], keep=False)]
     if len(dupes) > 0:
-        dupes.to_csv(root_dir + '/' + 'error.csv')
+        dupes.to_csv(root_dir + '\\' + 'error.csv')
         breakpoint()
         time.sleep(1)
         raise Exception(f'There are duplicates in the non_road_activity_growth_rate data. Please check the data and remove duplicates, {dupes}')
     dupes = non_road_intensity[non_road_intensity.duplicated(subset=['Scenario', 'Date', 'Drive'], keep=False)]
     if len(dupes) > 0:
-        dupes.to_csv(root_dir + '/' + 'error.csv')
+        dupes.to_csv(root_dir + '\\' + 'error.csv')
         breakpoint()
         time.sleep(1)
         raise Exception(f'There are duplicates in the non_road_intensity data. Please check the data and remove duplicates, {dupes}')
     dupes = international_supply_side_fuel_mixing[international_supply_side_fuel_mixing.duplicated(subset=['Scenario', 'Medium', 'Economy', 'Drive', 'Date', 'Fuel', 'New_fuel'], keep=False)]
     if len(dupes) > 0:
-        dupes.to_csv(root_dir + '/' + 'error.csv')
+        dupes.to_csv(root_dir + '\\' + 'error.csv')
         breakpoint()
         time.sleep(1)
         raise Exception(f'There are duplicates in the international_supply_side_fuel_mixing data. Please check the data and remove duplicates, {dupes}')
@@ -746,7 +746,7 @@ def check_and_fill_missing_fuel_mixing_dates(international_bunker_inputs, intern
     combos = unique_fuel_drive_medium_combos.merge(international_bunker_inputs[['Fuel', 'Drive', 'Medium', 'Date']].drop_duplicates(), how = 'outer', on=['Fuel', 'Drive', 'Medium'], indicator=True)
     left_only = combos.loc[combos['_merge'] == 'left_only']
     if len(left_only) > 0:
-        left_only.to_csv(root_dir + '/' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
+        left_only.to_csv(root_dir + '\\' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
         breakpoint()
         time.sleep(1)
         raise Exception(f'There are some rows in the international_supply_side_fuel_mixing that are not in the international_bunker_inputs df. Please check the data and remove duplicates, {left_only}')
@@ -762,7 +762,7 @@ def check_and_fill_missing_fuel_mixing_dates(international_bunker_inputs, intern
 
 def format_concordances_for_checking():  
     #laod in concordances to help check for any issues:
-    model_concordances_user_input_and_growth_rates = pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_user_input_and_growth_rates_file_name)) 
+    model_concordances_user_input_and_growth_rates = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_user_input_and_growth_rates_file_name)) 
     #remove the following cols since we dont need to make sure we have them here: Transport Type	Vehicle Type		Frequency Measure	Unit
     model_concordances_user_input_and_growth_rates = model_concordances_user_input_and_growth_rates.drop(columns=['Transport Type', 'Vehicle Type', 'Frequency', 'Measure', 'Unit']).drop_duplicates()
     #and filter for only medium = air, ship
@@ -785,7 +785,7 @@ def check_all_input_data_against_concordances(international_bunker_inputs):
     #find where indicator is not both:
     check_df_errors = check_df.loc[check_df['_merge'] != 'both']
     if len(check_df_errors) > 0:
-        check_df_errors.to_csv(root_dir + '/' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
+        check_df_errors.to_csv(root_dir + '\\' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
         breakpoint()
         time.sleep(1)
         raise Exception(f'There are some rows in the model_concordances_user_input_and_growth_rates that are not in the international_bunker_inputs df. Please check the data and remove duplicates, {check_df_errors}')
@@ -798,7 +798,7 @@ def check_all_input_data_against_concordances(international_bunker_inputs):
     cols.remove('Intensity')
     dupes = international_bunker_inputs[international_bunker_inputs.duplicated(subset=cols, keep=False)]
     if len(dupes) > 0:
-        dupes.to_csv(root_dir + '/' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
+        dupes.to_csv(root_dir + '\\' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
         breakpoint()
         time.sleep(1)
         raise Exception(f'There are some duplicates in the international_bunker_inputs df. Please check the data and remove duplicates, {dupes}')
@@ -960,7 +960,7 @@ def calculate_base_year_fuel_shares(international_fuel_shares, energy_use_esto_b
     cols = cols.remove('Share')
     dupes = fuel_shares[fuel_shares.duplicated(subset=cols, keep=False)]
     if len(dupes) > 0:
-        dupes.to_csv(root_dir + '/' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
+        dupes.to_csv(root_dir + '\\' + 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
         breakpoint()
         time.sleep(1)
         raise Exception(f'There are some duplicates in the fuel_shares df. Please check the data and remove duplicates, {dupes}')

@@ -95,8 +95,8 @@ for economy in model_output_detailed_lv_passenger['Economy'].unique():
             legend_name = drive_type + '_Vehicle_sales_share'
             fig.add_trace(go.Scatter(x=model_output_detailed_lv_passenger_economy_drive['Year'], y=model_output_detailed_lv_passenger_economy_drive['Vehicle_sales_share'], legendgroup=legend_name, name=legend_name, showlegend=False, line=dict(color=color, dash='dot', width=2)), row=row_number, col=col_number, secondary_y=True)
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
 
 
 #%%
@@ -111,8 +111,8 @@ fig = px.line(model_output_all_passenger, x="Year", y="Stocks", color="Vehicle T
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
 
 
 ################################################################################################################################################################
@@ -126,8 +126,8 @@ fig = px.line(model_output_detailed_vtype, x="Year", y="Energy", color="Drive", 
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
 
 #%%
 ################################################################################################################################################################
@@ -138,8 +138,8 @@ model_output_with_fuels_plot = model_output_with_fuels.groupby(['Year','Economy'
 #plot
 fig = px.line(model_output_with_fuels_plot, x="Year", y="Energy", color="Fuel", line_dash='Fuel', facet_col="Economy", facet_col_wrap=7, title=title)#, #facet_col="Economy",
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
 
 
 #%%
@@ -164,8 +164,8 @@ for transport_type in model_output_detailed_medium_road['Transport Type'].unique
         fig = px.line(model_output_detailed_vtype_melt, x="Year", y="Efficiency", color="Drive", line_dash='Measure', facet_col="Economy", facet_col_wrap=7, title=title)#, #facet_col="Economy",
 
         fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-        plotly.offline.plot(fig, filename='./plotting_output/' + title + '_' + vehicle + '_' + transport_type + '.html',auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-        fig.write_image("./plotting_output/static/" + title + '_' + vehicle + '_' + transport_type + '.png', scale=1, width=2000, height=1500)
+        plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '_' + vehicle + '_' + transport_type + '.html',auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+        fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '_' + vehicle + '_' + transport_type + '.png', scale=1, width=2000, height=1500)
 
 
 #%%

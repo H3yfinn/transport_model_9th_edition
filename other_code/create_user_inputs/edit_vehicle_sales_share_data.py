@@ -297,8 +297,8 @@ for ttype in new_sales_shares_ref_plot['Transport Type'].unique():
               #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
        fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-       plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html')
-       fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
+       plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html')
+       fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
 
        #and plot the orignal data for comparison:
 
@@ -313,8 +313,8 @@ for ttype in new_sales_shares_ref_plot['Transport Type'].unique():
               #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
        fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-       plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html')
-       fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
+       plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html')
+       fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
 
 ###############################################################################
 

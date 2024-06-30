@@ -66,8 +66,8 @@ fig = px.line(model_output_concat_sum_other_regions, x="Year", y="Energy", color
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 
 
 #%%
@@ -80,8 +80,8 @@ fig = px.line(model_output_concat_sum, x="Year", y="Energy", color="TransportTyp
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 ################################################################################################################################################################
@@ -95,8 +95,8 @@ fig = px.line(model_output_concat_sum_other_regions, x="Year", y="Activity", col
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 ################################################################################
@@ -109,8 +109,8 @@ fig = px.line(model_output_concat_sum, x="Year", y="Activity", color="TransportT
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 
 
 #%%
@@ -127,8 +127,8 @@ fig = px.line(model_output_concat_sum_stocks_other_regions, x="Year", y="Stocks"
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 ################################################################################################################################################################
@@ -139,8 +139,8 @@ fig = px.line(model_output_concat_sum_stocks, x="Year", y="Stocks", color="Trans
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #TO DO
@@ -162,8 +162,8 @@ model_output_concat_sum_ref['Drive_Vehicle'] = model_output_concat_sum_ref['Vehi
 #plot
 fig = px.line(model_output_concat_sum_ref, x="Year", y="Energy", color="Drive_Vehicle", line_dash='Dataset', facet_col="Transport Type", facet_col_wrap=3, title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
 
 #%%
 title = 'Compared to 8th Activity by year, drive, vehicle in each ttype'
@@ -171,8 +171,8 @@ title = 'Compared to 8th Activity by year, drive, vehicle in each ttype'
 #plot
 fig = px.line(model_output_concat_sum_ref, x="Year", y="Activity", color="Drive_Vehicle", line_dash='Dataset', facet_col="Transport Type", facet_col_wrap=3, title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
 
 #%%
 title = 'Compared to 8th Stocks by year, drive, vehicle in each ttype'
@@ -180,8 +180,8 @@ title = 'Compared to 8th Stocks by year, drive, vehicle in each ttype'
 #plot
 fig = px.line(model_output_concat_sum_ref, x="Year", y="Stocks", color="Drive_Vehicle", line_dash='Dataset', facet_col="Transport Type", facet_col_wrap=3, title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
 
 #%%
 ################################################################################################################################################################
@@ -208,8 +208,8 @@ model_output_concat_sum_sales = model_output_concat_sum_sales[model_output_conca
 #plot using plotly
 fig = px.line(model_output_concat_sum_sales, x="Year", y="Sales share", line_dash='Vehicle Type', color='Drive' ,facet_col="Dataset", facet_col_wrap=2, title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=True)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=True)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 
 # %%
 #filter for only cars
@@ -222,15 +222,15 @@ model_output_concat_sum_sales['Sales share'] = model_output_concat_sum_sales['Sa
 #plot using plotly
 fig = px.line(model_output_concat_sum_sales, x="Year", y="Sales share", color='Drive' ,facet_col="Dataset", facet_col_wrap=2, title=title)
 title = 'Compared to 8th, Sales share by drive in passenger cars'
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=True)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=True)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 
 title = 'APERC outlook 8th, sales share by drive in passenger cars'
 #create a area plot of sales by drive type
 fig = px.area(model_output_concat_sum_sales, x="Year", y="Sales share", color='Drive' ,facet_col="Dataset", facet_col_wrap=2, title=title, category_orders={'Drive': ['g', 'phevg', 'bev', 'fcev', 'cng', 'lpg', 'd']},
 color_discrete_map= {'g': 'red', 'phevg': 'white', 'bev': 'blue', 'fcev': 'green', 'cng': 'orange', 'lpg': 'purple', 'd': 'black'})
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=True)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=True)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 # %%
 ################################################################################################################################################################

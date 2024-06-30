@@ -13,7 +13,7 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
 from .. import config
 from ..plotting_functions import plot_user_input_data
@@ -60,15 +60,15 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
     """
     YEARS_TO_KEEP_AFTER_BASE_YEAR= 3
     
-    ECONOMIES_WITH_MODELLING_COMPLETE_DICT = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
+    ECONOMIES_WITH_MODELLING_COMPLETE_DICT = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
     SET_YEAR_WITH_MOST_VALUES_TO_BASE_YEAR = ECONOMIES_WITH_MODELLING_COMPLETE_DICT[ECONOMY_ID]
     #if we calculate using recalcualted input data we need to format the data differently*
     if RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA:
         
-        # road_model_input_wide.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-        # non_road_model_input_wide.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-        road_model_input_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-        non_road_model_input_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+        # road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+        # non_road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+        road_model_input_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+        non_road_model_input_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
         
         #reforma:
         #first make them tall
@@ -87,9 +87,9 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
         new_transport_data_system_df = new_transport_data_system_df.loc[new_transport_data_system_df['Date']==config.OUTLOOK_BASE_YEAR]
     else:
             
-        # new_sales_shares = pd.read_csv(root_dir + '/' + 'input_data/from_8th/reformatted/vehicle_stocks_change_share_normalised.csv')
+        # new_sales_shares = pd.read_csv(root_dir + '\\' + 'input_data\\from_8th\\reformatted\\vehicle_stocks_change_share_normalised.csv')
         #load groomed data from transport data system
-        transport_data_system_df = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/transport_data_system_extract.csv')
+        transport_data_system_df = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\transport_data_system_extract.csv')
         #filter for ECONOMY_ID
         transport_data_system_df = transport_data_system_df.loc[transport_data_system_df['Economy']==ECONOMY_ID]
         new_transport_data_system_df = transport_data_system_df.copy() 
@@ -114,14 +114,14 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
     sales = sales.drop(columns=['road'])
     #extract dictionary from csv
     #for later, load in vehicle_type_growth_regions sheet and vehicle_type_growth sheet
-    vehicle_type_growth_regions = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx',sheet_name='vehicle_type_growth_regions')
-    vehicle_type_growth = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx',sheet_name='vehicle_type_growth').drop(columns=['Comment'])
+    vehicle_type_growth_regions = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='vehicle_type_growth_regions')
+    vehicle_type_growth = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='vehicle_type_growth').drop(columns=['Comment'])
 
-    passenger_drive_shares = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx',sheet_name='passenger_drive_shares').drop(columns=['Comment'])
-    freight_drive_shares = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx',sheet_name='freight_drive_shares').drop(columns=['Comment'])    
+    passenger_drive_shares = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='passenger_drive_shares').drop(columns=['Comment'])
+    freight_drive_shares = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='freight_drive_shares').drop(columns=['Comment'])    
     
-    regions_passenger = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx',sheet_name='regions_passenger')
-    regions_freight = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx',sheet_name='regions_freight')
+    regions_passenger = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='regions_passenger')
+    regions_freight = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='regions_freight')
 
 
     ######################################
@@ -158,7 +158,7 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
         raise ValueError('new_sales_shares_sum_dupes is not empty. This should not happen. Investigate')
         
     #now doulbe check we have therequired categories that are in the concordances
-    model_concordances_user_input_and_growth_rates = pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))
+    model_concordances_user_input_and_growth_rates = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))
     #filter for ECONOMY_ID
     model_concordances_user_input_and_growth_rates = model_concordances_user_input_and_growth_rates.loc[model_concordances_user_input_and_growth_rates['Economy']==ECONOMY_ID]
     #drop all measures that are not vehicle sales share
@@ -377,7 +377,7 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
     new_sales_shares_concat_interp.loc[new_sales_shares_concat_interp['Drive_share']<0, 'Drive_share'] = 0
     
     #save the values at this point in time to use in the future if we need
-    new_sales_shares_concat_interp.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_new_sales_shares_concat_interp.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    new_sales_shares_concat_interp.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_new_sales_shares_concat_interp.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
     
     #now we just need to normalise by vehicle type so that the drive share for each vehicle type sums to 1
     new_sales_shares_concat_interp['Drive_sum'] = new_sales_shares_concat_interp.groupby(['Economy', 'Scenario','road', 'Transport Type','Medium', 'Vehicle Type', 'Date'])['Drive_share'].transform('sum')
@@ -434,8 +434,8 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
     # first calcualte teh compound gorwth rate from the xlsx sheet=vehicle_type_growth, (it should be the growth rate . cumprod()) 
     # times that by each Transport_type_share to adjust them for the growth rate
     #then normalise all to 1 by transport type
-    vehicle_type_growth_regions = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx', sheet_name='vehicle_type_growth_regions')
-    vehicle_type_growth = pd.read_excel(root_dir + '/' + 'input_data/vehicle_sales_share_inputs.xlsx', sheet_name='vehicle_type_growth').drop_duplicates().drop(columns=['Comment'])
+    vehicle_type_growth_regions = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx', sheet_name='vehicle_type_growth_regions')
+    vehicle_type_growth = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx', sheet_name='vehicle_type_growth').drop_duplicates().drop(columns=['Comment'])
     vehicle_type_growth['road'] = vehicle_type_growth['Medium']=='road'
     new_sales_shares_all_new= new_sales_shares_all.copy()
     #use vehicle_type_growth_regions to merge regions to econmy
@@ -483,8 +483,8 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
     
     #archive previous results:
     archiving_folder = archiving_scripts.create_archiving_folder_for_FILE_DATE_ID()
-    #save the variables we used to calculate the data by savinbg the 'input_data/vehicle_sales_share_inputs.xlsx' file
-    shutil.copy('input_data/vehicle_sales_share_inputs.xlsx', archiving_folder + '/vehicle_sales_share_inputs.xlsx')
+    #save the variables we used to calculate the data by savinbg the 'input_data\\vehicle_sales_share_inputs.xlsx' file
+    shutil.copy('input_data\\vehicle_sales_share_inputs.xlsx', archiving_folder + '\\vehicle_sales_share_inputs.xlsx')
 
     
     #before saving data to user input spreadsheety we will do some formatting:
@@ -515,7 +515,7 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
             new_sales_shares_all_new.loc[(new_sales_shares_all_new['Economy']=='17_SGP')&(new_sales_shares_all_new['Medium']!='road')&(new_sales_shares_all_new['Transport Type']=='freight'), 'Value'] = 0
             
     #save data so it can be used for plotting and such:
-    new_sales_shares_all_new.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_vehicle_sales_share.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index = False)
+    new_sales_shares_all_new.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_vehicle_sales_share.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index = False)
     return new_sales_shares_all_new
 
 

@@ -11,10 +11,10 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
+    sys.path.append(f"{root_dir}\\code")
     import config
     import utility_functions
 else:
@@ -49,15 +49,15 @@ save_fig=False
 
 #%%
 #laod data from 
-# road_model_input = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/road_model_input_wide.csv')
+# road_model_input = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\road_model_input_wide.csv')
 
-# growth_forecasts = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/growth_forecasts.csv')
+# growth_forecasts = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\growth_forecasts.csv')
 
-# non_road_model_input = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/non_road_model_input_wide.csv')
+# non_road_model_input = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\non_road_model_input_wide.csv')
 
-road_model_input_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/road_model_input_wide.csv')
-growth_forecasts = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/growth_forecasts.csv')
-non_road_model_input_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/non_road_model_input_wide.csv')
+road_model_input_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\road_model_input_wide.csv')
+growth_forecasts = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\growth_forecasts.csv')
+non_road_model_input_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\non_road_model_input_wide.csv')
 
 #%%
 ################################################################################################################################################################
@@ -72,7 +72,7 @@ x = x.dropna()
 import plotly.express as px
 fig = px.bar(x, x="Economy", y="Mileage_growth", color='Transport Type', facet_col="Transport Type", facet_col_wrap=3)
 #save to html
-fig.write_html("plotting_output/input_exploration/road_mileage_by_economy.html", auto_open=True)
+fig.write_html("plotting_output\\input_exploration\\road_mileage_by_economy.html", auto_open=True)
 #%%
 #plot mileage by economy (facets) using plotl;y
 #sum uo average mileage for each vehicle typew
@@ -85,5 +85,5 @@ x = x.dropna()
 import plotly.express as px
 fig = px.bar(x, x="Economy", y="Mileage", color='Transport Type', facet_col="Transport Type", facet_col_wrap=3)
 #save to html
-fig.write_html("plotting_output/input_exploration/road_mileage_by_economy.html", auto_open=True)
+fig.write_html("plotting_output\\input_exploration\\road_mileage_by_economy.html", auto_open=True)
 ################################################################################################################################################################

@@ -81,8 +81,8 @@ title='Energy use in evs vs oil displacement based on iea data'
 #plot using plotly
 fig = px.line(df_energy_use, x="year", y="value", color="Measure", title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/other_datasets/{}.html'.format(title), auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/other_datasets/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/other_datasets/{}.html'.format(title), auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/other_datasets/static/" + title + '.png', scale=1, width=2000, height=800)
 
 
 #%%
@@ -137,8 +137,8 @@ fig.update_xaxes(title_text="year")
 fig.update_yaxes(title_text="<b>primary</b> absolute", secondary_y=False)
 fig.update_yaxes(title_text="<b>secondary</b> percent", secondary_y=True)
 
-plotly.offline.plot(fig, filename='./plotting_output/other_datasets/{}.html'.format(title), auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/other_datasets/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/other_datasets/{}.html'.format(title), auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/other_datasets/static/" + title + '.png', scale=1, width=2000, height=800)
 #%%
 %matplotlib inline
 
@@ -344,8 +344,8 @@ fig.update_xaxes(title_text="year")
 fig.update_yaxes(title_text="<b>primary</b> absolute", secondary_y=False)
 fig.update_yaxes(title_text="<b>secondary</b> percent", secondary_y=True)
 
-plotly.offline.plot(fig, filename='./plotting_output/other_datasets/{}.html'.format(title), auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/other_datasets/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/other_datasets/{}.html'.format(title), auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/other_datasets/static/" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 

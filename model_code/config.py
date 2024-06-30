@@ -35,9 +35,8 @@ import matplotlib.pyplot as plt
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
-# from .utility_functions import get_latest_date_for_data_file # seemingly cyclic import error
-
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+from . import utility_functions
 #################
 #%%
 #TODO find way to put this in a different file. 
@@ -45,47 +44,6 @@ root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_m
 #can activate below to remove caveat warnings. but for now keep it there till confident:
 # pd.options.mode.chained_assignment = None  # default='warn'
 
-def get_latest_date_for_data_file(data_folder_path, file_name_start, file_name_end=None, EXCLUDE_DATE_STR_START=False):
-    """Note that if file_name_end is not specified then it will just take the first file that matches the file_name_start, eben if that matches the end if the file name as well. This is because the file_name_end is not always needed, and this cahnge was made post hoc, so we want to keep the old functionality.
-
-    Args:
-        data_folder_path (_type_): _description_
-        file_name_start (_type_): _description_
-        file_name_end (_type_, optional): _description_. Defaults to None.
-        EXCLUDE_DATE_STR_START if true, if there is DATE at th start of a file_date_id dont treat it as a date. Defaults to False.
-
-    Returns:
-        _type_: _description_
-    """
-    regex_pattern_date = r'\d{8}'
-    if EXCLUDE_DATE_STR_START:
-        regex_pattern_date = r'(?<!DATE)\d{8}'
-    
-    #get list of all files in the data folder
-    all_files = os.listdir(data_folder_path)
-    #filter for only the files with the correct file extension
-    if file_name_end is None:
-        all_files = [file for file in all_files if file_name_start in file]
-    else:
-        all_files = [file for file in all_files if file_name_start in file and file_name_end in file]
-    #drop any files with no date in the name
-    all_files = [file for file in all_files if re.search(regex_pattern_date, file)]
-    #get the date from the file name
-    all_files = [re.search(regex_pattern_date, file).group() for file in all_files]
-    #convert the dates to datetime objects
-    all_files = [datetime.datetime.strptime(date, '%Y%m%d') for date in all_files]
-    #get the latest date
-    if len(all_files) == 0:
-        print('No files found for ' + file_name_start + ' ' + file_name_end)
-        return None
-    # try:
-    latest_date = max(all_files)
-    # except ValueError:
-    #     print('No files found for ' + file_name_start + ' ' + file_name_end)
-    #     return None
-    #convert the latest date to a string
-    latest_date = latest_date.strftime('%Y%m%d')
-    return latest_date
 
 #%%
 #we can set FILE_DATE_ID to something other than the date here which is useful if we are running the script alone, versus through integrate.py
@@ -96,9 +54,9 @@ try:
     if FILE_DATE_ID:
        pass
     elif USE_LATEST_OUTPUT_DATE_ID:
-        data_folder_path = './output_data/model_output/'
+        data_folder_path = '\\output_data\\model_output\\'
         file_name = 'model_output_years_'
-        date_id = get_latest_date_for_data_file(data_folder_path, file_name)
+        date_id = utility_functions.get_latest_date_for_data_file(data_folder_path, file_name)
         FILE_DATE_ID ='_'+ date_id
 except NameError:
     # FILE_DATE_ID = ''
@@ -124,7 +82,7 @@ INDEX_COLS_NO_MEASURE.remove('Unit')
 model_output_file_name = 'model_output{}.csv'.format(FILE_DATE_ID)
 
 #get sceanrios from scenarios_list file
-SCENARIOS_LIST = pd.read_csv(root_dir + '/' + 'config/concordances_and_config_data/scenarios_list.csv')
+SCENARIOS_LIST = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\scenarios_list.csv')
 #grab the scenario names where 'Use' column is true and put them into a list
 SCENARIOS_LIST = SCENARIOS_LIST[SCENARIOS_LIST['Use'] == True]['Scenario'].tolist()
 
@@ -156,25 +114,25 @@ GROWTH_MEASURES = ['Occupancy_or_load_growth', 'Mileage_growth','Activity_growth
        'New_vehicle_efficiency_growth' ]#THESE WOULD NORMALLY HAVE A DEFAULT OF 1 RATHER THAN 0 FOR OTHJER MEASURES
 #%%
 #import measure to unit concordance
-measure_to_unit_concordance = pd.read_csv(root_dir + '/' + 'config/concordances_and_config_data/measure_to_unit_concordance.csv')
+measure_to_unit_concordance = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\measure_to_unit_concordance.csv')
 
 # Convert to dict
 measure_to_unit_concordance_dict = measure_to_unit_concordance.set_index('Measure')['Magnitude_adjusted_unit'].to_dict()
 
 #import manually_defined_transport_categories
-transport_categories = pd.read_csv(root_dir + '/' + 'config/concordances_and_config_data/manually_defined_transport_categories.csv')
+transport_categories = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\manually_defined_transport_categories.csv')
 ###################################################
 #%%
 
 ## Choose which economies to import and calculate data for:
 #first take in economy names file, then we will remove the economies we dont want (or if there are too many, just  choose the one you do want)
-economy_codes_path = root_dir + '/' +'config/concordances_and_config_data/economy_code_to_name.csv'
+economy_codes_path = root_dir + '\\' +'config\\concordances_and_config_data\\economy_code_to_name.csv'
 
 ECONOMY_LIST = pd.read_csv(economy_codes_path).iloc[:,0]#get the first column
 
 #ECONOMY REGIONS
 #load the economy regions file so that we can easily merge it with a dataframe to create a region column
-economy_regions_path = root_dir + '/' +'config/concordances_and_config_data/region_economy_mapping.csv'
+economy_regions_path = root_dir + '\\' +'config\\concordances_and_config_data\\region_economy_mapping.csv'
 ECONOMY_REGIONS = pd.read_csv(economy_regions_path)
 
 ###################################################
@@ -205,14 +163,14 @@ for economy in ECONOMY_LIST:
     for scenario in SCENARIOS_LIST:
         economy_scenario_concordance = pd.concat([economy_scenario_concordance, pd.DataFrame({'Economy': [economy], 'Scenario': [scenario]})], ignore_index=True)
 
-model_concordances_reference =  pd.read_csv(root_dir + '/' + 'config/concordances_and_config_data/manually_defined_transport_categories.csv')
+model_concordances_reference =  pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\manually_defined_transport_categories.csv')
 #AND A model_concordances_all_file_name
 # model_concordances_all_file_name = 'model_concordances_all{}.csv'.format(model_concordances_version)
 #%%
 #check that importnat folders exist:
-# "intermediate_data/model_inputs/{}".format(FILE_DATE_ID)
-if not os.path.exists(root_dir + '/' +"intermediate_data/model_inputs/{}".format(FILE_DATE_ID)):
-    os.makedirs(root_dir + '/' +"intermediate_data/model_inputs/{}".format(FILE_DATE_ID))
+# "intermediate_data\\model_inputs\\{}".format(FILE_DATE_ID)
+if not os.path.exists(root_dir + '\\' +"intermediate_data\\model_inputs\\{}".format(FILE_DATE_ID)):
+    os.makedirs(root_dir + '\\' +"intermediate_data\\model_inputs\\{}".format(FILE_DATE_ID))
 
 #%%
 

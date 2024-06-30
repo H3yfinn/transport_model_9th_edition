@@ -15,10 +15,10 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
+    sys.path.append(f"{root_dir}\\code")
     import config
     import utility_functions
 else:
@@ -56,11 +56,11 @@ pio.renderers.default = "browser"#allow plotting of graphs in the interactive no
 
 
 #we will merge a regions dataframe so that we can treat data wrt regions if need be
-# regions = pd.read_csv(root_dir + '/' + 'intermediate_data/non_aggregated_input_data/regions.csv')
+# regions = pd.read_csv(root_dir + '\\' + 'intermediate_data\\non_aggregated_input_data\\regions.csv')
 
 #we will also load the output stocks data from hughs model and calcualte a vehicle sales share for each year from that. This will be used to test the model works like the 8th edition. it might also be better than the vehicle sales shares that were in the input data folder of 8th edition 
 #load 8th edition data
-road_stocks= pd.read_csv(root_dir + '/' + 'intermediate_data/non_aggregated_input_data/road_stocks.csv')
+road_stocks= pd.read_csv(root_dir + '\\' + 'intermediate_data\\non_aggregated_input_data\\road_stocks.csv')
 
 ################################################################################################################################################################
 
@@ -168,11 +168,11 @@ if save_as_user_input:
        #rename Vehicle_sales_share_rolling_mean to Value
        new_sales_shares_rolling_mean_normalised = new_sales_shares_rolling_mean_normalised.rename(columns={"Vehicle_sales_share_rolling_mean": "Value"})
 
-       with pd.ExcelWriter('input_data/user_input_spreadsheet.xlsx',engine='openpyxl', mode='a',if_sheet_exists = 'replace') as writer: 
+       with pd.ExcelWriter('input_data\\user_input_spreadsheet.xlsx',engine='openpyxl', mode='a',if_sheet_exists = 'replace') as writer: 
               new_sales_shares_rolling_mean_normalised.to_excel(writer, sheet_name='Vehicle_sales_share',  index=False)
 
        #save to reformatted data folder
-       new_sales_shares_rolling_mean_normalised.to_csv(root_dir + '/' + 'input_data/from_8th/reformatted/vehicle_stocks_change_share_normalised.csv', index=False)
+       new_sales_shares_rolling_mean_normalised.to_csv(root_dir + '\\' + 'input_data\\from_8th\\reformatted\\vehicle_stocks_change_share_normalised.csv', index=False)
 #%%
 ################################################################################################################################################################
 
@@ -185,12 +185,12 @@ run_this= False
 if run_this:
 
     #we will load the vehicle sales shares that were in the input data folder of 8th edition, whoch it seems hugh projected.
-    # vehicle_sales_share = pd.read_excel(root_dir + '/' + 'input_data/adjustments_spreadsheet.xlsx', sheet_name='Vehicle_sales_share')
-    # vehicle_sales_share = pd.read_csv(root_dir + '/' + 'intermediate_data/non_aggregated_input_data/vehicle_sales_share.csv')#this is jsut a formatted version of above
+    # vehicle_sales_share = pd.read_excel(root_dir + '\\' + 'input_data\\adjustments_spreadsheet.xlsx', sheet_name='Vehicle_sales_share')
+    # vehicle_sales_share = pd.read_csv(root_dir + '\\' + 'intermediate_data\\non_aggregated_input_data\\vehicle_sales_share.csv')#this is jsut a formatted version of above
     #load data
-    vehicle_sales_share_ref = pd.read_excel(root_dir + '/' + 'input_data/from_8th/raw_data/vehicle_sales_share_model.xlsx', sheet_name='Reference')
+    vehicle_sales_share_ref = pd.read_excel(root_dir + '\\' + 'input_data\\from_8th\\raw_data\\vehicle_sales_share_model.xlsx', sheet_name='Reference')
 
-    vehicle_sales_share_netzero = pd.read_excel(root_dir + '/' + 'input_data/from_8th/raw_data/vehicle_sales_share_model.xlsx', sheet_name='Net-zero')
+    vehicle_sales_share_netzero = pd.read_excel(root_dir + '\\' + 'input_data\\from_8th\\raw_data\\vehicle_sales_share_model.xlsx', sheet_name='Net-zero')
     ################################################################################################################################################################
     #OPTION 2, cancelled
     #This method seemed okay until i realised that it was the proportion of sales per vehicle type, so it didnt consider the proportion of vehicle type sales for each transport type. 
@@ -230,11 +230,11 @@ if run_this:
         #rename Vehicle_sales_share_normalised to Value
         vehicle_sales_share_normalised2 = vehicle_sales_share_normalised.rename(columns={"Vehicle_sales_share_normalised": "Value"})
 
-        with pd.ExcelWriter('input_data/user_input_spreadsheet.xlsx',engine='openpyxl', mode='a',if_sheet_exists = 'replace') as writer: 
+        with pd.ExcelWriter('input_data\\user_input_spreadsheet.xlsx',engine='openpyxl', mode='a',if_sheet_exists = 'replace') as writer: 
                 vehicle_sales_share_normalised2.to_excel(writer, sheet_name='Vehicle_sales_share',  index=False)
 
         #save to reformatted data folder
-        vehicle_sales_share_normalised.to_csv(root_dir + '/' + 'input_data/from_8th/reformatted/vehicle_sales_share_normalised.csv', index=False)
+        vehicle_sales_share_normalised.to_csv(root_dir + '\\' + 'input_data\\from_8th\\reformatted\\vehicle_sales_share_normalised.csv', index=False)
 
 
 

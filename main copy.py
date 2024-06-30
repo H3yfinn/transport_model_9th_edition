@@ -8,7 +8,7 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 # from model_code import config, preparation_functions, utility_functions, calculation_functions, formatting_functions, plotting_functions
 from model_code import config
 from model_code.preparation_functions.import_macro_data import import_macro_data
@@ -105,8 +105,8 @@ def main(economy_to_run='all', progress_callback=None):
             import_transport_system_data()
         #####################################################################
         #since we're going to find that some economies have better base years than 2017 to start with, lets start changing the Base year vlaue and run the model economy by economy:
-        ECONOMY_BASE_YEARS_DICT = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_BASE_YEARS_DICT']
-        ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD']
+        ECONOMY_BASE_YEARS_DICT = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_BASE_YEARS_DICT']
+        ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD']
         #####################################################################
         progress += increment
         update_progress(progress)
@@ -176,7 +176,7 @@ def main(economy_to_run='all', progress_callback=None):
                 #now concatenate all the model outputs together
                 create_output_for_outlook_data_system(ECONOMY_ID)
 
-                # exec(open(f"{root_dir}/code/6_create_osemosys_output.py").read())
+                # exec(open(f"{root_dir}\\code\\6_create_osemosys_output.py").read())
                 # import create_osemosys_output
                 # create_osemosys_output.create_osemosys_output()
                 # ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True
@@ -202,7 +202,7 @@ def main(economy_to_run='all', progress_callback=None):
                 
                 progress += increment
                 update_progress(progress)
-                copy_required_output_files_to_one_folder(ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data/for_other_modellers')
+                copy_required_output_files_to_one_folder(ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\\for_other_modellers')
                     
                     
                     
@@ -211,7 +211,7 @@ def main(economy_to_run='all', progress_callback=None):
             #     #add the economy to the txt of errors
             #     print('Error for economy {} so skipping it'.format(economy))
             #     #open txt file and add the error and economy and timestamp to it
-            #     with open(root_dir + '/' + 'errors.txt', 'a') as f:
+            #     with open(root_dir + '\\' + 'errors.txt', 'a') as f:
             #         f.write('Error for economy {} so skipping it. Error is {}. Time is {}\n'.format(economy, e, datetime.datetime.now()))
                     
                     
@@ -228,7 +228,7 @@ def main(economy_to_run='all', progress_callback=None):
             international_bunker_share_calculation_handler()
         except:
             pass#usually happens because the economies in ECONOMIES_WITH_MODELLING_COMPLETE_DICT havent been run for this file date id. check extract_non_road_modelled_data() in international_bunkers
-        copy_required_output_files_to_one_folder(output_folder_path='output_data/for_other_modellers')
+        copy_required_output_files_to_one_folder(output_folder_path='output_data\\for_other_modellers')
     
         progress += increment
         update_progress(progress)
@@ -244,8 +244,8 @@ def main(economy_to_run='all', progress_callback=None):
                 folder_name = utility_functions.save_economy_projections_and_all_inputs(economy, ARCHIVED_FILE_DATE_ID=config.FILE_DATE_ID)
         UNARCHIVE_RESULTS=False
         if UNARCHIVE_RESULTS:
-            folder_name =None# 'output_data/archived_runs/20_USA_20230902_2331'
-            # archiving_scripts.revert_to_previous_version_of_files('03_CDA', 'output_data/archived_runs/03_CDA_20230902_1626', CURRENT_FILE_DATE_ID='20230902')
+            folder_name =None# 'output_data\\archived_runs\\20_USA_20230902_2331'
+            # archiving_scripts.revert_to_previous_version_of_files('03_CDA', 'output_data\\archived_runs\\03_CDA_20230902_1626', CURRENT_FILE_DATE_ID='20230902')
     finally:
         pass
     #     # Restore the original state

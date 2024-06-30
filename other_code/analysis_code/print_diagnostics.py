@@ -53,7 +53,7 @@ fig, ax = plt.subplots()
 for key, grp in model_output_detailed_vtype.groupby(['Drive']):
     ax = grp.plot(ax=ax, kind='line', x='Year', y='Energy', label=key)
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + './plotting_output/diagnostics/{}.png'.format(title))
 
 ################################################################################################################################################################
 #%%
@@ -66,7 +66,7 @@ fig, ax = plt.subplots()
 for key, grp in model_output_detailed_vtype.groupby(['Drive']):
     ax = grp.plot(ax=ax, kind='line', x='Year', y='Stocks', label=key)
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + './plotting_output/diagnostics/{}.png'.format(title))
 
 ################################################################################################################################################################
 #%%
@@ -80,7 +80,7 @@ fig, ax = plt.subplots()
 for key, grp in model_output_detailed_bevs.groupby(['Economy']):
     ax = grp.plot(ax=ax, kind='line', x='Year', y='Stocks', label=key)
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + './plotting_output/diagnostics/{}.png'.format(title))
 
 #%%
 ################################################################################################################################################################
@@ -98,7 +98,7 @@ for key, grp in model_output_detailed_sales.groupby(['Drive']):
     ax = grp.plot(ax=ax, kind='line', x='Year', y='Vehicle_sales_share', label=key)
     
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + './plotting_output/diagnostics/{}.png'.format(title))
 
 #%%
 ################################################################################################################################################################
@@ -114,7 +114,7 @@ for key, grp in model_output_detailed_sales.groupby(['Drive']):
     ax = grp.plot(ax=ax, kind='line', x='Year', y='Vehicle_sales_share', label=key)
 
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + './plotting_output/diagnostics/{}.png'.format(title))
 
 ################################################################################################################################################################
 
@@ -126,7 +126,7 @@ model_output_surplus = model_output_detailed.groupby(['Year'])['Surplus_stocks']
 
 plt.plot(model_output_surplus['Year'], model_output_surplus['Surplus_stocks'])
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + './plotting_output/diagnostics/{}.png'.format(title))
 
 ################################################################################################################################################################
 #%%
@@ -139,7 +139,7 @@ fig, ax = plt.subplots()
 for key, grp in model_output_energy.groupby(['Dataset']):
     ax = grp.plot(ax=ax, kind='line', x='Year', y='Energy', label=key)
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + './plotting_output/diagnostics/{}.png'.format(title))
 
 title = 'Total activity compared to the 8th edition'
 #sum activity for each dataset for each year
@@ -149,7 +149,7 @@ fig, ax = plt.subplots()
 for key, grp in model_output_activity.groupby(['Dataset']):
     ax = grp.plot(ax=ax, kind='line', x='Year', y='Activity', label=key)
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + './plotting_output/diagnostics/{}.png'.format(title))
 
 title = 'Total stocks compared to the 8th edition'
 #sum stocks for each dataset for each year
@@ -159,7 +159,7 @@ fig, ax = plt.subplots()
 for key, grp in model_output_stocks.groupby(['Dataset']):
     ax = grp.plot(ax=ax, kind='line', x='Year', y='Stocks', label=key)
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + './plotting_output/diagnostics/{}.png'.format(title))
 
 ################################################################################################################################################################
 #%%
@@ -177,7 +177,7 @@ for key, grp in model_output_activity_drive.groupby(['Drive']):
     i+=1
     ax = grp.plot(ax=ax, kind='line', x='Year', y='Activity', label=key,c=next(color))
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + './plotting_output/diagnostics/{}.png'.format(title))
 
 #%%
 
@@ -208,7 +208,7 @@ for key, grp in model_output_travel_km_per_stock.groupby(['Vehicle_transport_typ
     ax = grp.plot(ax=ax, kind='line', x='Year', y='Travel_km_per_stock', label=key,c=next(color))
 
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + './plotting_output/diagnostics/{}.png'.format(title))
 
 
 
@@ -255,8 +255,8 @@ plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
 
 # #fig.show()  
 # import plotly
-# plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image("./plotting_output/static/" + title + '.png')
+# plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png')
 
 
 # #%%
@@ -272,8 +272,8 @@ plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
 
 # #fig.show()  
 # import plotly
-# plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image("./plotting_output/static/" + title + '.png')
+# plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png')
 
 
 # #%%

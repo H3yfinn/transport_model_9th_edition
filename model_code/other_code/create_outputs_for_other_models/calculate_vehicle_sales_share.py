@@ -13,10 +13,10 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
+    sys.path.append(f"{root_dir}\\code")
     import config
     import utility_functions
 else:
@@ -52,7 +52,7 @@ font_size = 20
 AUTO_OPEN_PLOTLY_GRAPHS = True
 #%%
 #laod output from 8th edition
-model_output_8th = pd.read_csv(root_dir + '/' + 'intermediate_data/activity_efficiency_energy_road_stocks.csv')
+model_output_8th = pd.read_csv(root_dir + '\\' + 'intermediate_data\\activity_efficiency_energy_road_stocks.csv')
 #change 'Carbon Neutral' Scenario to Carbon Neutrality
 model_output_8th.loc[model_output_8th['Scenario']=='Carbon Neutral','Scenario'] = 'Carbon Neutrality'
 
@@ -99,7 +99,7 @@ model_output_8th_with_sales_share = model_output_8th_sum.merge(model_output_conc
 
 #%%
 #save this data for use later on:
-model_output_8th_with_sales_share.to_csv(root_dir + '/' + 'intermediate_data/cleaned_input_data/8th_activity_efficiency_energy_road_stocks_sales_share.csv', index=False)
+model_output_8th_with_sales_share.to_csv(root_dir + '\\' + 'intermediate_data\\cleaned_input_data\\8th_activity_efficiency_energy_road_stocks_sales_share.csv', index=False)
 
 
 #%%
@@ -121,11 +121,11 @@ for transport_type in model_output_8th_with_sales_share['Transport Type'].unique
         fig = px.line(data, x='Year', y='Sales share', color='Vehicle Type', facet_col='Economy', facet_col_wrap=7, line_dash='Drive')
         fig.update_layout(title_text=transport_type + ' ' + scenario)
         
-        plotly.offline.plot(fig, filename='./plotting_output/8th_edition/' + title + '.html', auto_open=False)
+        plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=False)
 # %%
 
 #compare agaisnt previously calcualted vlaues: 
-prev_sales_share = pd.read_csv(root_dir + '/' + 'intermediate_data/cleaned_input_data/vehicle_sales_share.csv')
+prev_sales_share = pd.read_csv(root_dir + '\\' + 'intermediate_data\\cleaned_input_data\\vehicle_sales_share.csv')
 
 #join the two dataframes using left join then calcualte the diff
 model_output_8th_with_sales_share_diff = model_output_8th_with_sales_share.merge(prev_sales_share, how='left', on=['Year', 'Transport Type', 'Vehicle Type','Scenario', 'Drive', 'Economy'])
@@ -149,7 +149,7 @@ for transport_type in model_output_8th_with_sales_share_diff['Transport Type'].u
         fig = px.line(data, x='Year', y='diff', color='Vehicle Type', facet_col='Economy', facet_col_wrap=7, line_dash='Drive')
         fig.update_layout(title_text=transport_type + ' ' + scenario)
         
-        plotly.offline.plot(fig, filename='./plotting_output/8th_edition/archive/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+        plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\archive\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
 #%%
 
 #and also plot the prev_sales_share data
@@ -168,6 +168,6 @@ for transport_type in prev_sales_share['Transport Type'].unique():
         fig = px.line(data, x='Year', y='Vehicle_sales_share', color='Vehicle Type', facet_col='Economy', facet_col_wrap=7, line_dash='Drive')
         fig.update_layout(title_text=transport_type + ' ' + scenario)
         
-        plotly.offline.plot(fig, filename='./plotting_output/8th_edition/archive/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+        plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\archive\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
         
 # %%

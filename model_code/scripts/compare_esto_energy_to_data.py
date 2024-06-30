@@ -7,7 +7,7 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
 from .. import config
 #################
@@ -36,11 +36,11 @@ plt.rcParams['figure.facecolor'] = 'w'
 def compare_esto_energy_to_data():
     #TODO, THIS NEEDS TO BE MADE TO WORK WITH THE OUTPUT FOR 9TH OUTLOOK, AS THAT IS THE MOST ACCURATE REPRESENTATION OF ESTO DATA WE NOW HAVE. AND IT SWOULD MAKE IT MRESUSTAIBNLE.
     #find latest date for our energy data that was cleaned in transpoirt data system:
-    # date_id = utility_functions.get_latest_date_for_data_file(root_dir + '/' + '../transport_data_system/intermediate_data/EGEDA/', 'model_input_9th_cleaned')
-    # energy_use_esto = pd.read_csv(root_dir + '/' +f'../transport_data_system/intermediate_data/EGEDA/model_input_9th_cleanedDATE{date_id}.csv')
+    # date_id = utility_functions.get_latest_date_for_data_file(root_dir + '\\' + '..\\transport_data_system\\intermediate_data\\EGEDA\\', 'model_input_9th_cleaned')
+    # energy_use_esto = pd.read_csv(root_dir + '\\' +f'..\\transport_data_system\\intermediate_data\\EGEDA\\model_input_9th_cleanedDATE{date_id}.csv')
 
 
-    # original_model_output_with_fuels = pd.read_csv(root_dir + '/' + 'output_data/model_output_with_fuels/{}'.format(config.model_output_file_name))#cols 	Date	Economy	Scenario	Transport Type	Vehicle Type	Drive	Medium	Fuel	Energy
+    # original_model_output_with_fuels = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}'.format(config.model_output_file_name))#cols 	Date	Economy	Scenario	Transport Type	Vehicle Type	Drive	Medium	Fuel	Energy
     # #grab scenario only = Reference
     # original_model_output_with_fuels = original_model_output_with_fuels[original_model_output_with_fuels['Scenario'] == 'Reference']
     # original_model_output_with_fuels_all_fuels = original_model_output_with_fuels.copy()
@@ -116,13 +116,13 @@ def compare_esto_energy_to_data():
         #by economy create a line chart of energy use. make the color the origin, the line dash the origin and facet the medium
         title = f'Line chart of energy use by medium for {economy} - model vs esto'
         fig = px.line(original_model_output_with_fuels[original_model_output_with_fuels['Economy'] == economy], x='Date', y='Energy', color='origin', facet_col='Medium', facet_col_wrap=2, line_dash='origin', title=title, markers=True)
-        fig.write_html(root_dir + '/' +f'plotting_output/diagnostics/esto_vs_model_energy_use/{title}.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\diagnostics\\esto_vs_model_energy_use\\{title}.html')
         
 
     #by economy create a line chart of energy use. make the color the origin, the line dash the origin and facet the medium
     title = 'Line chart of energy use by medium for each economy - model vs esto'
     fig = px.line(original_model_output_with_fuels, x='Date', y='Energy', color='Medium', facet_col='Economy', facet_col_wrap=3, line_dash='origin', title=title, markers=True)
-    fig.write_html(root_dir + '/' +f'plotting_output/diagnostics/esto_vs_model_energy_use/{title}.html')
+    fig.write_html(root_dir + '\\' +f'plotting_output\\diagnostics\\esto_vs_model_energy_use\\{title}.html')
     #%%
     #conat them
     original_model_output_with_fuels_all_fuels = pd.concat([original_model_output_with_fuels_all_fuels, energy_use_all_fuels])
@@ -131,7 +131,7 @@ def compare_esto_energy_to_data():
         title = f'Line chart of energy use by medium and fuel for {economy} - model vs esto'
 
         fig = px.line(original_model_output_with_fuels_all_fuels[original_model_output_with_fuels_all_fuels['Economy'] == economy], x='Date', y='Energy', color='Fuel', facet_col='Medium', facet_col_wrap=2, line_dash='origin', title=title, markers=True)
-        fig.write_html(root_dir + '/' +f'plotting_output/diagnostics/esto_vs_model_energy_use/{title}.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\diagnostics\\esto_vs_model_energy_use\\{title}.html')
         
 
 
@@ -140,7 +140,7 @@ def compare_esto_energy_to_data():
     #sum up all mediums
     original_model_output_with_fuels_all_fuels = original_model_output_with_fuels_all_fuels.groupby(['Date', 'Economy', 'Fuel', 'origin']).sum().reset_index()
     fig = px.line(original_model_output_with_fuels_all_fuels, x='Date', y='Energy', color='Fuel', facet_col='Economy', facet_col_wrap=3, line_dash='origin', title=title, markers=True)
-    fig.write_html(root_dir + '/' +f'plotting_output/diagnostics/esto_vs_model_energy_use/{title}.html')
+    fig.write_html(root_dir + '\\' +f'plotting_output\\diagnostics\\esto_vs_model_energy_use\\{title}.html')
 
     #%%
     #filter for only 2017 in original_model_output_with_fuels_all_fuels and calcaaulte the diff between model and esto. then plot that as a bar, by economy, by fuel.
@@ -152,6 +152,6 @@ def compare_esto_energy_to_data():
     #plot the diff
     title = 'Diff between model and esto energy use by fuel for each economy in 2017'
     fig = px.bar(original_model_output_with_fuels_all_fuels_2017, x='Economy', y='diff', color='Fuel', title=title)
-    fig.write_html(root_dir + '/' +f'plotting_output/diagnostics/esto_vs_model_energy_use/{title}.html')
+    fig.write_html(root_dir + '\\' +f'plotting_output\\diagnostics\\esto_vs_model_energy_use\\{title}.html')
 
     # %%

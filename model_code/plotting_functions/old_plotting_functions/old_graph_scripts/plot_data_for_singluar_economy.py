@@ -14,10 +14,10 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
+    sys.path.append(f"{root_dir}\\code")
     import config
     import utility_functions
 else:
@@ -64,10 +64,10 @@ AUTO_OPEN_PLOTLY_GRAPHS = True
 #%%
 
 #load data in
-model_output_all = pd.read_csv(root_dir + '/' + 'output_data/model_output/{}'.format(config.model_output_file_name))
-model_output_detailed = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}'.format(config.model_output_file_name))
-model_output_with_fuels = pd.read_csv(root_dir + '/' + 'output_data/model_output_with_fuels/{}'.format(config.model_output_file_name))
-model_output_8th = pd.read_csv(root_dir + '/' + 'intermediate_data/activity_energy_road_stocks.csv')
+model_output_all = pd.read_csv(root_dir + '\\' + 'output_data\\model_output\\{}'.format(config.model_output_file_name))
+model_output_detailed = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\{}'.format(config.model_output_file_name))
+model_output_with_fuels = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}'.format(config.model_output_file_name))
+model_output_8th = pd.read_csv(root_dir + '\\' + 'intermediate_data\\activity_energy_road_stocks.csv')
 #%%
 #create 'all' economy by grouping by all categories but economy and summing
 #'Date', 'Scenario', 'Transport Type', 'Vehicle Type',
@@ -101,9 +101,9 @@ model_output_8th = model_output_8th[model_output_8th['Scenario'] == 'Reference']
 
 #%%
 #check we have graph folder for the economy we are interested in
-if not os.path.exists(root_dir + '/' + 'plotting_output/{}'.format(economy)):
-    os.mkdir('plotting_output/{}'.format(economy))
-    os.mkdir('plotting_output/{}/static/'.format(economy))
+if not os.path.exists(root_dir + '\\' + 'plotting_output\\{}'.format(economy)):
+    os.mkdir('plotting_output\\{}'.format(economy))
+    os.mkdir('plotting_output\\{}\\static\\'.format(economy))
 else:
     print('folder already exists')
 
@@ -174,8 +174,8 @@ title='Energy use by fuel type for {}'.format(economy)
 #plot using plotly
 fig = px.line(model_output_with_fuels_plot, x="Date", y="Energy", color="Fuel", title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\{}\\'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "\\plotting_output\\{}\\static\\".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 # #%%
 
@@ -187,8 +187,8 @@ fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png',
 # #plot using plotly
 # fig = px.line(model_output_detailed, x="Date", y="Energy", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_drive_type", title=title)
 
-# plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+# plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\{}\\'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(root_dir + '\\' + "\\plotting_output\\{}\\static\\".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 # #%%
 # #plot travel km by vehicle type / drive type combination
@@ -196,8 +196,8 @@ fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png',
 # #plot using plotly
 # fig = px.line(model_output_detailed, x="Date", y="Travel_km", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_drive_type", title=title)
 
-# plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+# plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + title + '.png', scale=1, width=2000, height=800)
 
 # #%%
 # #plot activity by vehicle type / drive type combination
@@ -205,8 +205,8 @@ fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png',
 # #plot using plotly
 # fig = px.line(model_output_detailed, x="Date", y="Activity", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_drive_type", title=title)
 
-# plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+# plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + title + '.png', scale=1, width=2000, height=800)
 
 # #%%
 # #plot efficiency over time by vehicle type / drive type combination
@@ -214,8 +214,8 @@ fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png',
 # #plot using plotly
 # fig = px.line(model_output_detailed, x="Date", y="Efficiency", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_drive_type", title=title)
 
-# plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+# plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\{}\\'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(root_dir + '\\' + "\\plotting_output\\{}\\static\\".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 # #%%
 # #plot stocks over time by vehicle type / drive type combination
@@ -223,8 +223,8 @@ fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png',
 # #plot using plotly
 # fig = px.line(model_output_detailed, x="Date", y="Stocks", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_drive_type", title=title)
 
-# plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+# plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\{}\\'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(root_dir + '\\' + "\\plotting_output\\{}\\static\\".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 # #%%
 # #plot sales share over time by vehicle type / drive type combination
@@ -232,8 +232,8 @@ fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png',
 # #plot using plotly
 # fig = px.line(model_output_detailed, x="Date", y="Vehicle_sales_share", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_drive_type", title=title)
 
-# plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+# plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\{}\\'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(root_dir + '\\' + "\\plotting_output\\{}\\static\\".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #energy use by vehicle type fuel type combination
@@ -249,8 +249,8 @@ model_output_with_fuels_no_drive['vehicle_type_fuel_type'] = model_output_with_f
 #plot using plotly
 fig = px.line(model_output_with_fuels_no_drive, x="Date", y="Energy", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_fuel_type", title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\{}\\'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "\\plotting_output\\{}\\static\\".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #energy use by vehicle type fuel type combination
@@ -266,8 +266,8 @@ model_output_with_fuels_no_v['drive_fuel_type'] = model_output_with_fuels_no_v['
 #plot using plotly
 fig = px.line(model_output_with_fuels_no_v, x="Date", y="Energy", facet_col="Transport Type", facet_col_wrap=2, color="drive_fuel_type", title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\{}\\'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "\\plotting_output\\{}\\static\\".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 # #%%
 # #energy use by medium, transport type combination
@@ -283,8 +283,8 @@ fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png',
 # #plot using plotly
 # fig = px.line(model_output_with_fuels_no_v, x="Date", y="Energy", facet_col="Transport Type", facet_col_wrap=2, color="medium_fuel_type", title=title)
 
-# plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+# plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\{}\\'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(root_dir + '\\' + "\\plotting_output\\{}\\static\\".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 # #%%
 # #passenger km by medium, transport type combination
@@ -301,21 +301,21 @@ fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png',
 # #show y axis on both plots
 # fig.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
 
-# plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+# plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\{}\\'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(root_dir + '\\' + "\\plotting_output\\{}\\static\\".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 
 #%%
 
 #plot activity growth for the economy to help understand trend:
-activity_growth = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/activity_growth.csv')
+activity_growth = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\activity_growth.csv')
 #filter for economy
 activity_growth = activity_growth[activity_growth['Economy'] == economy]
 #plot using plotly
 fig = px.line(activity_growth, x="Date", y="Activity_growth",color ='Scenario', title='Activity growth for {}'.format(economy))
 
-plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\{}\\'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "\\plotting_output\\{}\\static\\".format(economy) + title + '.png', scale=1, width=2000, height=800)
 #%%
 
 
@@ -341,10 +341,10 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
+    sys.path.append(f"{root_dir}\\code")
     import config
     import utility_functions
 else:
@@ -378,11 +378,11 @@ import plotly.io as pio
 #%%
 
 #load data in
-model_output_all = pd.read_csv(root_dir + '/' + 'output_data/model_output/{}'.format(config.model_output_file_name))
-model_output_detailed = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}'.format(config.model_output_file_name))
-# change_dataframe_aggregation = pd.read_csv(root_dir + '/' + 'intermediate_data/road_model/change_dataframe_aggregation.csv')
-model_output_with_fuels = pd.read_csv(root_dir + '/' + 'output_data/model_output_with_fuels/{}'.format(config.model_output_file_name))
-model_output_8th = pd.read_csv(root_dir + '/' + 'intermediate_data/activity_energy_road_stocks.csv')
+model_output_all = pd.read_csv(root_dir + '\\' + 'output_data\\model_output\\{}'.format(config.model_output_file_name))
+model_output_detailed = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\{}'.format(config.model_output_file_name))
+# change_dataframe_aggregation = pd.read_csv(root_dir + '\\' + 'intermediate_data\\road_model\\change_dataframe_aggregation.csv')
+model_output_with_fuels = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}'.format(config.model_output_file_name))
+model_output_8th = pd.read_csv(root_dir + '\\' + 'intermediate_data\\activity_energy_road_stocks.csv')
 #%%
 #economys:'01_AUS', '02_BD', '03_CDA', '04_CHL', '05_PRC', '06_HKC',
     #    '07_INA', '08_JPN', '09_ROK', '10_MAS', '11_MEX', '12_NZ',
@@ -526,11 +526,11 @@ if stack_ttype:
 #     df = df[df[y_column] != '']
 
 #     #checkl that the folders wqe save to exist
-#     if not os.path.exists(root_dir + '/' + f'./plotting_output/{save_folder}'):
-#         os.makedirs(f'./plotting_output/{save_folder}')
+#     if not os.path.exists(root_dir + '\\' + f'plotting_output\\{save_folder}'):
+#         os.makedirs(f'\\plotting_output\\{save_folder}')
 #     #create static folder too
-#     if not os.path.exists(root_dir + '/' + f'./plotting_output/{save_folder}/static'):
-#         os.makedirs(f'./plotting_output/{save_folder}/static')
+#     if not os.path.exists(root_dir + '\\' + f'plotting_output\\{save_folder}\\static'):
+#         os.makedirs(f'\\plotting_output\\{save_folder}\\static')
 
 #     if line_dash_categories != None:
 #         df = df.groupby([x_column, facet_col,color, line_dash])[y_column].sum().reset_index()
@@ -542,8 +542,8 @@ if stack_ttype:
 #         #do y_axis_title and x_axis_title
 #         fig.update_layout(yaxis_title=y_axis_title, xaxis_title=x_axis_title)
 
-#         plotly.offline.plot(fig, filename=f'./plotting_output/{save_folder}' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-#         fig.write_image(f"./plotting_output/{save_folder}/static/" + title + '.png', scale=1, width=width, height=height)
+#         plotly.offline.plot(fig, filename=f'\\plotting_output\\{save_folder}' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+#         fig.write_image(root_dir + '\\' + f"plotting_output\\{save_folder}\\static\\" + title + '.png', scale=1, width=width, height=height)
 #     else:
 #         df = df.groupby([x_column, facet_col,color])[y_column].sum().reset_index()
 #         fig = px.line(df, x="Date", y=y_column, color=color, facet_col_wrap=facet_col_wrap, facet_col =facet_col, hover_name = hover_name, hover_data = hover_data, log_y = log_y, log_x = log_x, title=title)
@@ -553,8 +553,8 @@ if stack_ttype:
 #             fig.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
 #         #do y_axis_title and x_axis_title
 #         fig.update_layout(yaxis_title=y_axis_title, xaxis_title=x_axis_title)
-#         plotly.offline.plot(fig, filename=f'./plotting_output/{save_folder}' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-#         fig.write_image(f"./plotting_output/{save_folder}/static/" + title + '.png', scale=1, width=width, height=height)
+#         plotly.offline.plot(fig, filename=f'\\plotting_output\\{save_folder}' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+#         fig.write_image(root_dir + '\\' + f"plotting_output\\{save_folder}\\static\\" + title + '.png', scale=1, width=width, height=height)
 
 
 # #%%
@@ -582,6 +582,6 @@ if stack_ttype:
 #                 title = f'{value_col} by {combo}'
 #                 #filter for that ecovnomy only and then plot
 #                 model_output_all = model_output_all_all_economies[model_output_all_all_economies['Economy'] == economy_x]
-#                 plot_line_by_economy(model_output_all, list(combo), value_col, title, save_folder=f'all_economy_graphs/{value_col}', AUTO_OPEN_PLOTLY_GRAPHS=AUTO_OPEN_PLOTLY_GRAPHS)
+#                 plot_line_by_economy(model_output_all, list(combo), value_col, title, save_folder=f'all_economy_graphs\\{value_col}', AUTO_OPEN_PLOTLY_GRAPHS=AUTO_OPEN_PLOTLY_GRAPHS)
 #                 print(f'plotting {value_col} by {combo}')
 

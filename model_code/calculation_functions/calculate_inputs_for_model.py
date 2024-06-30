@@ -12,7 +12,7 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
 from .. import config
 from .. import plotting_functions
@@ -91,12 +91,12 @@ def calculate_inputs_for_model(road_model_input_wide,non_road_model_input_wide,g
         
         
         #save non_road_model_input_wide
-        non_road_model_input_wide.to_csv(root_dir + '/' + '1_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+        non_road_model_input_wide.to_csv(root_dir + '\\' + '1_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
         
         road_model_input_wide, non_road_model_input_wide, supply_side_fuel_mixing = adjust_data_to_match_esto.adjust_data_to_match_esto_handler(BASE_YEAR, ECONOMY_ID, road_model_input_wide,non_road_model_input_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, TESTING=adjust_data_to_match_esto_TESTING, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS)
         
         #save non_road_model_input_wide
-        non_road_model_input_wide.to_csv(root_dir + '/' + '2_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+        non_road_model_input_wide.to_csv(root_dir + '\\' + '2_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
         
     #set New_vehicle_efficiency now, since it may have been affected by efficie4ncy adjsutments in adjust_data_to_match_esto.py
     road_model_input_wide['New_vehicle_efficiency'] = road_model_input_wide['Efficiency'] *1.15#seems like new vehicles are 15% more efficient than the average vehicle (which is probasbly about 10 years old. this would make sense with an avg 1.5% efficiency improvement per year (leading to about 16% improvement).
@@ -105,11 +105,11 @@ def calculate_inputs_for_model(road_model_input_wide,non_road_model_input_wide,g
     road_model_input_wide, growth_forecasts_wide = apply_activity_efficiency_improvements(road_model_input_wide, growth_forecasts_wide)#todo check that growth_forecasts_wide is being used in foloowing functions
     
     #save
-    supply_side_fuel_mixing.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    demand_side_fuel_mixing.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    growth_forecasts_wide.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    road_model_input_wide.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    non_road_model_input_wide.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    supply_side_fuel_mixing.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    demand_side_fuel_mixing.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    growth_forecasts_wide.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    non_road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
     
     if ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR:
         #because we jsut made changes to the input data we should adjsut the vehicle sales shares so that they are consistent with the new data. We'll do this now out of simplicity:
@@ -126,8 +126,8 @@ def calculate_inputs_for_model(road_model_input_wide,non_road_model_input_wide,g
         non_road_model_input_wide = non_road_model_input_wide.drop(columns=['Vehicle_sales_share'])
         non_road_model_input_wide = non_road_model_input_wide.merge(sales_share_data, on=['Economy', 'Scenario', 'Date', 'Transport Type','Vehicle Type', 'Medium', 'Drive'], how='left')
                 
-        road_model_input_wide.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-        non_road_model_input_wide.to_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+        road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+        non_road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
 #%%
 
 

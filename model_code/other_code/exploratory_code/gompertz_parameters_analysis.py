@@ -16,10 +16,10 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
+    sys.path.append(f"{root_dir}\\code")
     import config
     import utility_functions
 else:
@@ -111,7 +111,7 @@ if test_params:
     #drop legend
     # fig.update_layout(showlegend=False)
     # Show the plot
-    fig.write_html(root_dir + '/' +f'plotting_output/input_exploration/gompertz/gompertz_curve_test_{gamma}.html', auto_open=True)
+    fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\gompertz_curve_test_{gamma}.html', auto_open=True)
 #%%
 #https://www.mdpi.com/2071-1050/6/8/4877
 test_params = False
@@ -173,11 +173,11 @@ if test_params:
     #drop legend
     # fig.update_layout(showlegend=False)
     # Show the plot
-    fig.write_html(root_dir + '/' +f'plotting_output/input_exploration/gompertz/gompertz_curve_test_{gamma}.html', auto_open=True)
+    fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\gompertz_curve_test_{gamma}.html', auto_open=True)
 #%%
 
 #save data as pickle to be analysed seprartely )we want to see if we can estimate beter paramter vlaues to aovid stocks per cpita estiamtes being equal to the gamma value (theoretical amximum for stocks per capita)
-gompertz_parameters = pd.read_pickle('intermediate_data/analysis_single_use/gompertz_change_dataframe_road_model.pkl')
+gompertz_parameters = pd.read_pickle('intermediate_data\\analysis_single_use\\gompertz_change_dataframe_road_model.pkl')
 analyse_this = True
 if analyse_this:
     #frist lets look at 01_AUS, and try find parameters that fit the data better
@@ -249,12 +249,12 @@ if analyse_this:
         #drop legend for all but the first plot
         fig.update_layout(showlegend=True)
         # Show the plot
-        fig.write_html(root_dir + '/' +f'plotting_output/input_exploration/gompertz/01aus_gompertz_curve_test_{gamma}.html', auto_open=True)
+        fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\01aus_gompertz_curve_test_{gamma}.html', auto_open=True)
 #%%
 
 
 
-gompertz_parameters = pd.read_pickle('intermediate_data/analysis_single_use/gompertz_change_dataframe_road_model.pkl')
+gompertz_parameters = pd.read_pickle('intermediate_data\\analysis_single_use\\gompertz_change_dataframe_road_model.pkl')
 #get the data. filter for reference and feight
 gompertz_parameters = gompertz_parameters[(gompertz_parameters['Economy'] == '01_AUS') & (gompertz_parameters['Scenario'] == 'Reference') & (gompertz_parameters['Transport Type'] != 'freight')]
 def gompertz_stocks(gdp_per_capita, gamma, beta, alpha):
@@ -339,7 +339,7 @@ if analyse_this:
                     yaxis_title='Vehicle Ownership Rates')
 
     # save plot as html
-    fig.write_html(root_dir + '/' +f'plotting_output/input_exploration/gompertz/01aus_gompertz_curve_log_fit.html', auto_open=True)
+    fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\01aus_gompertz_curve_log_fit.html', auto_open=True)
 
 
 #%%
@@ -441,7 +441,7 @@ fig.update_layout(title='Vehicle Ownership Rates',
                 yaxis_title='Vehicle Ownership Rates')
 
 # write the plot
-fig.write_html(root_dir + '/' +f'plotting_output/input_exploration/gompertz/01aus_gompertz_curve_log_fit.html', auto_open=True)
+fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\01aus_gompertz_curve_log_fit.html', auto_open=True)
 
 
 #%%
@@ -503,7 +503,7 @@ if run_this_section == True:
     gompertz_parameters['Expected_stocks_per_thousand_capita_derivative'] = gompertz_parameters.apply(lambda x: gompertz_stocks_derivative(x['Gdp_per_capita'], x['Gompertz_gamma'], x['Gompertz_beta'], x['Gompertz_alpha']), axis=1)
 
 #save gompertz_parameters as a pickle and we will load it in another file to analyse
-# gompertz_parameters.to_pickle('intermediate_data/gompertz_parameters_analysis.pkl')
+# gompertz_parameters.to_pickle('intermediate_data\\gompertz_parameters_analysis.pkl')
 
 #%%
 run_this_section = False

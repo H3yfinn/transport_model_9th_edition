@@ -64,8 +64,8 @@ title='Energy use by fuel type for {}'.format(economy)
 #plot using plotly
 fig = px.line(model_output_with_fuels_plot, x="Year", y="Energy", color="Fuel", title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 
@@ -77,8 +77,8 @@ title='Energy use by vehicle type drive type combination, sep by transport type 
 #plot using plotly
 fig = px.line(model_output_detailed, x="Year", y="Energy", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_drive_type", title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #plot travel km by vehicle type / drive type combination
@@ -86,8 +86,8 @@ title = 'Travel km by vehicle type drive type combination, sep by transport type
 #plot using plotly
 fig = px.line(model_output_detailed, x="Year", y="Travel_km", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_drive_type", title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #plot activity by vehicle type / drive type combination
@@ -95,8 +95,8 @@ title = 'Activity by vehicle type drive type combination, sep by transport type 
 #plot using plotly
 fig = px.line(model_output_detailed, x="Year", y="Activity", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_drive_type", title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #plot efficiency over time by vehicle type / drive type combination
@@ -104,8 +104,8 @@ title = 'Efficiency by vehicle type drive type combination, sep by transport typ
 #plot using plotly
 fig = px.line(model_output_detailed, x="Year", y="Efficiency", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_drive_type", title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #plot stocks over time by vehicle type / drive type combination
@@ -113,8 +113,8 @@ title = 'Stocks by vehicle type drive type combination, sep by transport type fo
 #plot using plotly
 fig = px.line(model_output_detailed, x="Year", y="Stocks", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_drive_type", title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #plot sales share over time by vehicle type / drive type combination
@@ -122,8 +122,8 @@ title = 'Sales share by vehicle type drive type combination, sep by transport ty
 #plot using plotly
 fig = px.line(model_output_detailed, x="Year", y="Vehicle_sales_share", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_drive_type", title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #energy use by vehicle type fuel type combination
@@ -139,8 +139,8 @@ model_output_with_fuels_no_drive['vehicle_type_fuel_type'] = model_output_with_f
 #plot using plotly
 fig = px.line(model_output_with_fuels_no_drive, x="Year", y="Energy", facet_col="Transport Type", facet_col_wrap=2, color="vehicle_type_fuel_type", title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #energy use by vehicle type fuel type combination
@@ -156,8 +156,8 @@ model_output_with_fuels_no_v['drive_fuel_type'] = model_output_with_fuels_no_v['
 #plot using plotly
 fig = px.line(model_output_with_fuels_no_v, x="Year", y="Energy", facet_col="Transport Type", facet_col_wrap=2, color="drive_fuel_type", title=title)
 
-plotly.offline.plot(fig, filename='./plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/{}/'.format(economy) + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/{}/static/".format(economy) + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 

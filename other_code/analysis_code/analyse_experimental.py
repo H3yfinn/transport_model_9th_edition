@@ -57,8 +57,8 @@ fig = px.line_3d(model_output_detailed_ratio_drive, x="BEV_ICE_ratio", y="PHEV_I
 fig.update_xaxes(range=[0, 1])
 fig.update_yaxes(range=[0, 1])
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #lets take a look at this for Vehicle_sales_share instead of stocks
@@ -86,8 +86,8 @@ fig = px.line_3d(model_output_detailed_ratio_drive, x="BEV_ICE_ratio", y="PHEV_I
 fig.update_xaxes(range=[0, 1])
 fig.update_yaxes(range=[0, 1])
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #how about a graph which combines the two above so we can see the relationship between the sales and stock shares

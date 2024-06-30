@@ -13,10 +13,10 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
+    sys.path.append(f"{root_dir}\\code")
     import config
     import utility_functions
 else:
@@ -42,9 +42,9 @@ import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 #%%
-model_output_all_with_fuels = pd.read_csv(root_dir + '/' + 'output_data/model_output_with_fuels/{}'.format(config.model_output_file_name))
+model_output_all_with_fuels = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}'.format(config.model_output_file_name))
 
-model_output_detailed = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}'.format(config.model_output_file_name))
+model_output_detailed = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\{}'.format(config.model_output_file_name))
 
 #%%
 #extract data so we have a measure in each dataframe and create a units column
@@ -59,8 +59,8 @@ model_output_electricity['Units'] = 'PJ'
 model_output_electricity_wide = model_output_electricity.pivot_table(index=['Fuel', 'Economy', 'Scenario', 'Transport Type', 'Vehicle Type', 'Drive', 'Medium', 'Units'], columns='Year', values='Energy')
 
 #save in wide and long format
-model_output_electricity.to_csv(root_dir + '/' + 'output_data/for_other_modellers/LONG_ELEC_PJ_{}'.format(config.model_output_file_name), index=False)
-model_output_electricity_wide.to_csv(root_dir + '/' + 'output_data/for_other_modellers/WIDE_ELEC_PJ_{}'.format(config.model_output_file_name))
+model_output_electricity.to_csv(root_dir + '\\' + 'output_data\\for_other_modellers\\LONG_ELEC_PJ_{}'.format(config.model_output_file_name), index=False)
+model_output_electricity_wide.to_csv(root_dir + '\\' + 'output_data\\for_other_modellers\\WIDE_ELEC_PJ_{}'.format(config.model_output_file_name))
 
 #%%
 #extract stocks for phev and evs
@@ -76,8 +76,8 @@ model_output_phev_ev_stocks_wide = model_output_phev_ev_stocks.pivot_table(index
 
 
 #save in wide and long format
-model_output_phev_ev_stocks.to_csv(root_dir + '/' + 'output_data/for_other_modellers/LONG_PHEV_EV_STOCKS_{}'.format(config.model_output_file_name), index=False)
-model_output_phev_ev_stocks_wide.to_csv(root_dir + '/' + 'output_data/for_other_modellers/WIDE_PHEV_EV_STOCKS_{}'.format(config.model_output_file_name))
+model_output_phev_ev_stocks.to_csv(root_dir + '\\' + 'output_data\\for_other_modellers\\LONG_PHEV_EV_STOCKS_{}'.format(config.model_output_file_name), index=False)
+model_output_phev_ev_stocks_wide.to_csv(root_dir + '\\' + 'output_data\\for_other_modellers\\WIDE_PHEV_EV_STOCKS_{}'.format(config.model_output_file_name))
 
 #%%
 

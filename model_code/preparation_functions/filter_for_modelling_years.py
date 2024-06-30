@@ -6,7 +6,7 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
 from .. import config
 #################
@@ -30,11 +30,11 @@ from plotly.subplots import make_subplots
 
 def filter_for_modelling_years(BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=False,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=False):
     ###############################
-    supply_side_fuel_mixing = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID,ECONOMY_ID))
-    demand_side_fuel_mixing = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-    road_model_input_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-    non_road_model_input_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-    growth_forecasts_wide = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_aggregated_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    supply_side_fuel_mixing = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID,ECONOMY_ID))
+    demand_side_fuel_mixing = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    road_model_input_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    non_road_model_input_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    growth_forecasts_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
     #check for vehicle type = car, rive = bev, date = 2020, scenario = target
     # road_model_input_wide[(road_model_input_wide['Vehicle Type']=='car') & (road_model_input_wide['Drive']=='bev') & (road_model_input_wide['Date']==2020) & (road_model_input_wide['Scenario']=='Target')]
     

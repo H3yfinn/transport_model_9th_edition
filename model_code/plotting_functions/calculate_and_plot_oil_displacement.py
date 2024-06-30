@@ -7,7 +7,7 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
 from .. import config
 #################
@@ -38,14 +38,14 @@ def calculate_and_plot_oil_displacement(ECONOMY_ID, CHART_OPTION='stacked_bar', 
     plot_png = False
     plot_html = True
     subfolder_name = 'all_economy_graphs'
-    default_save_folder = f'plotting_output/oil_displacement/{config.FILE_DATE_ID}/'
+    default_save_folder = f'plotting_output\\oil_displacement\\{config.FILE_DATE_ID}\\'
     #CHECK THAT SAVE FOLDER EXISTS, IF NOT CREATE IT
-    if not os.path.exists(default_save_folder):
-        os.makedirs(default_save_folder)
-    model_output_detailed = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    if not os.path.exists(root_dir + '\\' + default_save_folder):
+        os.makedirs(root_dir + '\\' + default_save_folder)
+    model_output_detailed = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name))
 
     #create regions dataset and then concat that on with regions = Economy. so that we can plot regions too.
-    region_economy_mapping = pd.read_csv(root_dir + '/' + './config/concordances_and_config_data/region_economy_mapping.csv')
+    region_economy_mapping = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\region_economy_mapping.csv')
 
     #join with model_output_detailed_APEC.
     #where there is no region drop the row since we are just plotting singular economies atm
@@ -505,7 +505,7 @@ def plot_stacked_area_with_difference(df, v_types, color_map, default_save_folde
         fig.update_yaxes(title_text='PJ')
         fig.update_layout(title=f'Oil displacement for {t_type} in {economy} in {scenario} (BEV)')
         
-        fig.write_html(root_dir + '/' +f'{default_save_folder}/oil_displacement_{t_type}_{economy}_bev_{scenario}.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+        fig.write_html(root_dir + '\\' +f'{default_save_folder}\\oil_displacement_{t_type}_{economy}_bev_{scenario}.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
     elif drive == 'fcev':
         fig = go.Figure()
         # first, an empty space
@@ -551,7 +551,7 @@ def plot_stacked_area_with_difference(df, v_types, color_map, default_save_folde
         fig.update_yaxes(title_text='PJ')
         #give it a title:
         fig.update_layout(title=f'Oil displacement for {t_type} in {economy} in {scenario} (FCEV)')
-        fig.write_html(root_dir + '/' +f'{default_save_folder}/oil_displacement_{t_type}_{economy}_fcev_{scenario}.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+        fig.write_html(root_dir + '\\' +f'{default_save_folder}\\oil_displacement_{t_type}_{economy}_fcev_{scenario}.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
 
 def plot_stacked_bar(df, v_types, color_map, default_save_folder, t_type, economy, scenario, AUTO_OPEN_PLOTLY_GRAPHS, drive, INCLUDE_OIL_USE):
     if drive == 'bev':
@@ -580,7 +580,7 @@ def plot_stacked_bar(df, v_types, color_map, default_save_folder, t_type, econom
         fig.update_layout(barmode='relative')
         fig.update_yaxes(title_text='PJ')
         fig.update_layout(title=f'Oil displacement for {t_type} in {economy} in {scenario} (BEV)', font_size=30)
-        fig.write_html(root_dir + '/' +f'{default_save_folder}/BAR_oil_displacement_{t_type}_{economy}_bev_{scenario}.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+        fig.write_html(root_dir + '\\' +f'{default_save_folder}\\BAR_oil_displacement_{t_type}_{economy}_bev_{scenario}.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
     if drive == 'fcev':
         fig = go.Figure()
         for v_type in v_types:
@@ -605,7 +605,7 @@ def plot_stacked_bar(df, v_types, color_map, default_save_folder, t_type, econom
                 ))
         fig.update_layout(barmode='relative')
         fig.update_layout(title=f'Oil displacement for {t_type} in {economy} in {scenario} (FCEV)', font_size=30)
-        fig.write_html(root_dir + '/' +f'{default_save_folder}/BAR_oil_displacement_{t_type}_{economy}_fcev_{scenario}.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+        fig.write_html(root_dir + '\\' +f'{default_save_folder}\\BAR_oil_displacement_{t_type}_{economy}_fcev_{scenario}.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
 #%%
 # ECONOMY_ID = '12_NZ'
 # calculate_and_plot_oil_displacement(ECONOMY_ID, CHART_OPTION='stacked_bar', COMBINE_LPVS = True, bar_graph_year_intervals=[2025, 2035, 2050, 2070])

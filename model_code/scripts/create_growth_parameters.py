@@ -6,7 +6,7 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
 from .. import config
 from ..data_creation_functions import *
@@ -33,16 +33,16 @@ from plotly.subplots import make_subplots
 #%%
 #grab the file D:\APERC\transport_model_9th_edition\input_data\macro\APEC_GDP_population.csv
 #find latest file in input_data/macro/ that starts with APEC_GDP_data_ using the FILE_DATE_ID:
-date_id = utility_functions.get_latest_date_for_data_file(root_dir + '/' + 'input_data/macro/', 'APEC_GDP_data_')
-macro = pd.read_csv(root_dir + '/' +f'input_data/macro/APEC_GDP_data_{date_id}.csv')
+date_id = utility_functions.get_latest_date_for_data_file(root_dir + '\\' + 'input_data\\macro\\', 'APEC_GDP_data_')
+macro = pd.read_csv(root_dir + '\\' +f'input_data\\macro\\APEC_GDP_data_{date_id}.csv')
 #pull in activity_growth from 8th edition
-activity_8th = pd.read_csv(root_dir + '/' + 'input_data/from_8th/reformatted/8th_activity_efficiency_energy_road_stocks_sales_share.csv')
+activity_8th = pd.read_csv(root_dir + '\\' + 'input_data\\from_8th\\reformatted\\8th_activity_efficiency_energy_road_stocks_sales_share.csv')
 # macro.columns#Index(['economy_code', 'economy', 'date', 'variable', 'value'], dtype='object')
 #find latest date for our energy data that was cleaned in transpoirt data system:
-date_id = utility_functions.get_latest_date_for_data_file(root_dir + '/' + '../transport_data_system/intermediate_data/EGEDA/', 'EGEDA_transport_output')
-energy_use = pd.read_csv(root_dir + '/' +f'../transport_data_system/intermediate_data/EGEDA/EGEDA_transport_outputDATE{date_id}.csv')
+date_id = utility_functions.get_latest_date_for_data_file(root_dir + '\\' + '..\\transport_data_system\\intermediate_data\\EGEDA\\', 'EGEDA_transport_output')
+energy_use = pd.read_csv(root_dir + '\\' +f'..\\transport_data_system\\intermediate_data\\EGEDA\\EGEDA_transport_outputDATE{date_id}.csv')
 
-activity_9th = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/transport_data_system_extract.csv')
+activity_9th = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\transport_data_system_extract.csv')
 
 independent_variables = ['Gdp_per_capita_growth', 'Gdp_times_capita_growth', 'Gdp_growth', 'Population_growth']#, 'Population_growth_2', 'Population_growth_3']
 #add lagged and leaded variables:
@@ -81,12 +81,12 @@ def calculate_and_analyse_activity_growth_using_new_growth_coefficients(growth_c
     # PLOTTING
     #####################
     #save results to pickle so we can plot them when we want:
-    df.to_pickle('intermediate_data/growth_analysis/df_growth_parameter_analysis.pkl')
+    df.to_pickle('intermediate_data\\growth_analysis\\df_growth_parameter_analysis.pkl')
     
-    with open(root_dir + '/' + 'intermediate_data/growth_analysis/measures_to_plot.txt', 'w') as f:
+    with open(root_dir + '\\' + 'intermediate_data\\growth_analysis\\measures_to_plot.txt', 'w') as f:
         for item in measures_to_plot:
             f.write("%s\n" % item)
-    with open(root_dir + '/' + 'intermediate_data/growth_analysis/indexed_measures_to_plot.txt', 'w') as f:
+    with open(root_dir + '\\' + 'intermediate_data\\growth_analysis\\indexed_measures_to_plot.txt', 'w') as f:
         for item in indexed_measures_to_plot:
             f.write("%s\n" % item)
 
@@ -151,7 +151,7 @@ def growth_analysis_handler(independent_variables, dependent_variable, macro, en
     # growth_coefficients_df = model_handler(df, x, y,independent_variables, drop_outliers=False)
     growth_coefficients_df = growth_parameter_creation_functions.find_growth_coefficients(df, independent_variables,dependent_variable,models)
     
-    growth_coefficients_df.to_csv(f'intermediate_data/growth_analysis/growth_coefficients_by_region{config.FILE_DATE_ID}.csv', index=False)
+    growth_coefficients_df.to_csv(f'intermediate_data\\growth_analysis\\growth_coefficients_by_region{config.FILE_DATE_ID}.csv', index=False)
     #ANALYSIS
     growth_parameter_creation_functions.plot_growth_coefficients(growth_coefficients_df, independent_variables)
     
@@ -172,21 +172,21 @@ def filter_coefficients_for_chosen_model(growth_coefficients_df, models):
 
 def choose_and_filter_for_model_by_region(chosen_model_by_region_dict, chosen_file_date_id=None,region_column = 'Region_growth_regression2'):
     #find latest date for this file: 
-    # csv(f'intermediate_data/growth_analysis/growth_coefficients_by_region{config.FILE_DATE_ID}.csv', index=False)
+    # csv(f'intermediate_data\\growth_analysis\\growth_coefficients_by_region{config.FILE_DATE_ID}.csv', index=False)
     if chosen_file_date_id is not None:
         date_id = chosen_file_date_id
     else:
         
-        date_id = utility_functions.get_latest_date_for_data_file(root_dir + '/' + 'intermediate_data/growth_analysis/','growth_coefficients_by_region')
+        date_id = utility_functions.get_latest_date_for_data_file(root_dir + '\\' + 'intermediate_data\\growth_analysis\\','growth_coefficients_by_region')
         
-    growth_coefficients_df = pd.read_csv(root_dir + '/' +f'intermediate_data/growth_analysis/growth_coefficients_by_region{date_id}.csv')
+    growth_coefficients_df = pd.read_csv(root_dir + '\\' +f'intermediate_data\\growth_analysis\\growth_coefficients_by_region{date_id}.csv')
     #now filter out the data we dont want by choosing the model we wwant for each region
     new_df = pd.DataFrame()
     for region, model in chosen_model_by_region_dict.items():
         df_dummy = growth_coefficients_df[(growth_coefficients_df['Region']==region)&(growth_coefficients_df['Model']==model)]
         new_df = pd.concat([new_df, df_dummy])
     
-    regional_mapping = pd.read_csv(root_dir + '/' + 'config/concordances_and_config_data/region_economy_mapping.csv')
+    regional_mapping = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\region_economy_mapping.csv')
     #extract Region_growth_regression and Economy
     regional_mapping = regional_mapping[[region_column, 'Economy']]
     #make economyt lowercase
@@ -196,12 +196,12 @@ def choose_and_filter_for_model_by_region(chosen_model_by_region_dict, chosen_fi
     df = pd.merge(new_df, regional_mapping, on='Region', how='inner')
     
     #if input_data/growth_coefficients_by_region.csv already exists, save  it to a new file input_data/previous_growth_coefficients/ with the date_id on it
-    if os.path.isfile(f'input_data/growth_coefficients_by_region.csv'):
+    if os.path.isfile(f'input_data\\growth_coefficients_by_region.csv'):
         #save to previous_growth_coefficients
-        df.to_csv(f'input_data/previous_growth_coefficients/growth_coefficients_by_region{date_id}.csv', index=False)
+        df.to_csv(f'input_data\\previous_growth_coefficients\\growth_coefficients_by_region{date_id}.csv', index=False)
     
     #now save to same location as before
-    df.to_csv(root_dir + '/' + 'input_data/growth_coefficients_by_region.csv', index=False)
+    df.to_csv(root_dir + '\\' + 'input_data\\growth_coefficients_by_region.csv', index=False)
     
     
         

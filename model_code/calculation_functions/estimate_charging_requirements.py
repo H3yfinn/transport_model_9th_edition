@@ -10,7 +10,7 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
 from .. import config
 from ..plotting_functions import plot_charging_graphs
@@ -36,7 +36,7 @@ import matplotlib.pyplot as plt
 def prepare_inputs_for_estimating_charging_requirements(ECONOMY_ID):
     ##############################################
 
-    df = pd.read_csv(root_dir + '/' + 'output_data/model_output/{}_{}'.format(ECONOMY_ID,config.model_output_file_name))
+    df = pd.read_csv(root_dir + '\\' + 'output_data\\model_output\\{}_{}'.format(ECONOMY_ID,config.model_output_file_name))
     #reaple any nan values with 0
     df = df.fillna(0)#bit of a temp measure, but will do for now
     ##############################################
@@ -159,7 +159,7 @@ def estimate_kw_of_required_chargers(ECONOMY_ID):
     #rename stocks to stocks_{stocks_magnitude_name}
     total_kwh_of_battery_capacity.rename(columns={'Stocks':'Stocks_'+parameters['stocks_magnitude_name']}, inplace=True)
     #save data to csv for use in \output_data\for_other_modellers/charging
-    total_kwh_of_battery_capacity.to_csv(f'output_data/for_other_modellers/charging/{ECONOMY_ID}_estimated_number_of_chargers.csv', index=False)
+    total_kwh_of_battery_capacity.to_csv(f'output_data\\for_other_modellers\\charging\\{ECONOMY_ID}_estimated_number_of_chargers.csv', index=False)
     
 # return total_kwh_of_battery_capacity
 #%%

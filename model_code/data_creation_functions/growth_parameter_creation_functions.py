@@ -6,7 +6,7 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
 from .. import config
 #################
@@ -160,12 +160,12 @@ def prepare_comparison_inputs(growth_coefficients_df, energy_macro, BASE_YEAR_ac
 #now plot the results:
 def plot_and_compare_new_growth_coefficients(GROWTH_MEASURES_TO_PLOT, ACTIVITY_MEASURES_TO_PLOT):
     #LOAD DATA:
-    with open(root_dir + '/' + 'intermediate_data/growth_analysis/measures_to_plot.txt', 'r') as f:
+    with open(root_dir + '\\' + 'intermediate_data\\growth_analysis\\measures_to_plot.txt', 'r') as f:
         measures_to_plot = [line.rstrip() for line in f]
         
-    with open(root_dir + '/' + 'intermediate_data/growth_analysis/indexed_measures_to_plot.txt', 'r') as f:
+    with open(root_dir + '\\' + 'intermediate_data\\growth_analysis\\indexed_measures_to_plot.txt', 'r') as f:
         indexed_measures_to_plot = [line.rstrip() for line in f]
-    df = pd.read_pickle('intermediate_data/growth_analysis/df_growth_parameter_analysis.pkl')
+    df = pd.read_pickle('intermediate_data\\growth_analysis\\df_growth_parameter_analysis.pkl')
     
     #PLOT:
     #do this for the measures to plot and the indexed measures to plot:
@@ -175,32 +175,32 @@ def plot_and_compare_new_growth_coefficients(GROWTH_MEASURES_TO_PLOT, ACTIVITY_M
         title = f'{economy} - activity growth using new growth coefficients'
         fig = px.line(df_economy, x='Date', y=measures_to_plot, title=title)
         #write to html
-        fig.write_html(root_dir + '/' +f'plotting_output/growth_analysis/{title}.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
         
         #and plot for the indexed measures:
         title = f'{economy} - indexed activity growth using new growth coefficients'
         fig = px.line(df_economy, x='Date', y=indexed_measures_to_plot, title=title)
         #write to html
-        fig.write_html(root_dir + '/' +f'plotting_output/growth_analysis/{title}.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
     
         #and plot for hand picked measure using MEASURES_TO_PLOT:
         title = f'{economy} chosen growth measures'
         #  Economy	Date 
         fig = px.line(df_economy, x='Date', y=GROWTH_MEASURES_TO_PLOT, title=title)
-        fig.write_html(root_dir + '/' +f'plotting_output/growth_analysis/{title}.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
         
         title = f'{economy} chosen activity measures'
         fig = px.line(df_economy, x='Date', y=ACTIVITY_MEASURES_TO_PLOT, title=title)
-        fig.write_html(root_dir + '/' +f'plotting_output/growth_analysis/{title}.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
     
     #PLOT GROWTH_MEASURES_TO_PLOT AND ACTIVITY_MEASURES_TO_PLOT FOR ALL ECONOMIES IN ONE PLOT USING FACETS
     title = f'chosen growth measures for all economies'
     fig = px.line(df, x='Date', y=GROWTH_MEASURES_TO_PLOT, facet_col='Economy', facet_col_wrap=7, title=title)
-    fig.write_html(root_dir + '/' +f'plotting_output/growth_analysis/{title}.html')
+    fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
     
     title = f'chosen activity measures for all economies'
     fig = px.line(df, x='Date', y=ACTIVITY_MEASURES_TO_PLOT, facet_col='Economy', facet_col_wrap=7, title=title)
-    fig.write_html(root_dir + '/' +f'plotting_output/growth_analysis/{title}.html')
+    fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
     
        
 
@@ -395,7 +395,7 @@ def plot_growth_coefficients(growth_coefficients_df, independent_variables):
         fig = px.bar(model_data, x = 'variable', y = 'value', color = 'variable', facet_col='Region', barmode='group', title=title)
         
         #save
-        fig.write_html(root_dir + '/' +f'plotting_output/growth_analysis/{model}_growth_coefficients.html')
+        fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{model}_growth_coefficients.html')
         
 ##########################################
 #FORMATTING
@@ -496,7 +496,7 @@ def caculate_growth_rates(energy_macro):
 
 def group_by_region(energy_macro, region_column = 'Region_growth_regression2'):
     #lets try grouping the economys by regions (based on georgaphy and economic development) and then running the regression on each region. LAter on it would probably be a good idea to look into ato's urban density data and stuff
-    regional_mapping = pd.read_csv(root_dir + '/' + 'config/concordances_and_config_data/region_economy_mapping.csv')
+    regional_mapping = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\region_economy_mapping.csv')
     #extract Region_growth_regression and Economy
     regional_mapping = regional_mapping[[region_column, 'Economy']]
     #make economyt lowercase

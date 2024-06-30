@@ -49,8 +49,8 @@ model_output_all_drive = model_output_all.groupby(['Year', 'Drive']).sum().reset
 
 fig = px.line(model_output_all_drive, x="Year", y="Energy", color='Drive', title='Energy use by drive type')
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
 
 
 #%%

@@ -9,7 +9,7 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
 from .. import config
 from . import road_model_functions
@@ -36,11 +36,11 @@ from plotly.subplots import make_subplots
 def run_road_model(ECONOMY_ID):
     
     #laod all data
-    road_model_input = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-    growth_forecasts = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/{}/{}_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    road_model_input = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    growth_forecasts = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
         
     #grab from the paramters.yml file:
-    turnover_rate_parameters_dict = yaml.load(open(root_dir + '/' + 'config/parameters.yml'), Loader=yaml.FullLoader)['turnover_rate_parameters_dict']
+    turnover_rate_parameters_dict = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['turnover_rate_parameters_dict']
     
     main_dataframe,previous_year_main_dataframe, low_ram_computer_files_list, change_dataframe_aggregation, previous_10_year_block, user_inputs_df_dict,low_ram_computer = road_model_functions.prepare_road_model_inputs(road_model_input,ECONOMY_ID,low_ram_computer=False)
 
@@ -65,7 +65,7 @@ def run_road_model(ECONOMY_ID):
     activity_growth_estimates = logistic_fitting_functions_new.logistic_fitting_function_handler(ECONOMY_ID, main_dataframe,show_plots=False,matplotlib_bool=False, plotly_bool=False, FIT_LOGISTIC_CURVE_TO_DATA=False, PROPORTION_BELOW_GAMMA= 0.4, EXTRA_YEARS_TO_REACH_GAMMA=10, APPLY_SMOOTHING_TO_GROWTH_RATE=True, INTERPOLATE_ALL_DATES=False)
     #check that the activity growth is the same for both scenarios:
     growth_forecasts = incorporate_logisitc_fitting_functions_new_growth_rates(growth_forecasts, activity_growth_estimates)
-    growth_forecasts.to_pickle(f'./intermediate_data/road_model/{ECONOMY_ID}_final_road_growth_forecasts.pkl')#save them sincewe will use them for non road
+    growth_forecasts.to_pickle(root_dir + '\\' + f'intermediate_data\\road_model\\{ECONOMY_ID}_final_road_growth_forecasts.pkl')#save them sincewe will use them for non road
     
     #######################################################################
     main_dataframe,previous_year_main_dataframe, low_ram_computer_files_list, change_dataframe_aggregation,previous_10_year_block, user_inputs_df_dict,low_ram_computer = road_model_functions.prepare_road_model_inputs(road_model_input,ECONOMY_ID,low_ram_computer=False)

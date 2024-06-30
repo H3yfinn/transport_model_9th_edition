@@ -18,14 +18,14 @@ import warnings
 warnings.filterwarnings('ignore', message='Calling int on a single element Series is deprecated')#from line ~190
 
 #%%
-def plot_multiplicative_timeseries(data_title, extra_identifier, structure_variables_list,activity_variable,energy_variable='Energy', emissions_variable='Emissions',emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25,AUTO_OPEN=False, hierarchical=False,output_data_folder='output_data',plotting_output_folder='./plotting_output/', INCLUDE_EXTRA_FACTORS_AT_END = False):
+def plot_multiplicative_timeseries(data_title, extra_identifier, structure_variables_list,activity_variable,energy_variable='Energy', emissions_variable='Emissions',emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25,AUTO_OPEN=False, hierarchical=False,output_data_folder='output_data',plotting_output_folder='\\plotting_output\\', INCLUDE_EXTRA_FACTORS_AT_END = False):
     """
     data used by this function:
         
         data_title eg. 'outlook-transport-divisia'
         extra_identifier eg. 'PASSENGER_REF'
-        lmdi_output_multiplicative eg. pd.read_csv('output_data/{}{}_lmdi_output_multiplicative.csv'.format(data_title, extra_identifier))
-        lmdi_output_additive = pd.read_csv('output_data/{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
+        lmdi_output_multiplicative eg. pd.read_csv('output_data\\{}{}_lmdi_output_multiplicative.csv'.format(data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('output_data\\{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
         emissions_divisia eg. False
         structure_variables_list eg. ['Economy','Vehicle Type', 'Drive']
         graph_title eg. 'Road passenger - Drivers of changes in energy use (Ref)'
@@ -37,7 +37,7 @@ def plot_multiplicative_timeseries(data_title, extra_identifier, structure_varia
     if emissions_divisia == False and hierarchical == False:
         
         #get data
-        lmdi_output_multiplicative = pd.read_csv('{}/{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier))
+        lmdi_output_multiplicative = pd.read_csv('{}\\{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier))
 
         #remove activity and total energy data from the dataset
         lmdi_output_multiplicative.drop('Total_{}'.format(activity_variable), axis=1, inplace=True)
@@ -72,13 +72,13 @@ def plot_multiplicative_timeseries(data_title, extra_identifier, structure_varia
             )
         )
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_multiplicative_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + 'multiplicative_timeseries.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
 
     elif emissions_divisia == True and hierarchical == False:
         
         #get data
-        lmdi_output_multiplicative = pd.read_csv('{}/{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier))
-        # lmdi_output_multiplicative = pd.read_csv('output_data/{}{}_multiplicative.csv'.format(data_title, extra_identifier))
+        lmdi_output_multiplicative = pd.read_csv('{}\\{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier))
+        # lmdi_output_multiplicative = pd.read_csv('output_data\\{}{}_multiplicative.csv'.format(data_title, extra_identifier))
 
         #remove ' effect' where it is at the end of all column names using regex ($ marks the end of the string)
         lmdi_output_multiplicative.columns = lmdi_output_multiplicative.columns.str.replace(' effect$', '', regex=True)
@@ -120,12 +120,12 @@ def plot_multiplicative_timeseries(data_title, extra_identifier, structure_varia
             )
         )
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_multiplicative_timeseries.html',auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + 'multiplicative_timeseries.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
     
     elif emissions_divisia == False and hierarchical == True:
                 
         #get data
-        lmdi_output_multiplicative = pd.read_csv('{}/{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier))
+        lmdi_output_multiplicative = pd.read_csv('{}\\{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier))
 
         #remove activity and total energy data from the dataset
         lmdi_output_multiplicative.drop('Total_{}'.format(activity_variable), axis=1, inplace=True)
@@ -160,17 +160,17 @@ def plot_multiplicative_timeseries(data_title, extra_identifier, structure_varia
         fig.update_layout(
             font=dict(
                 size=font_size
-            ),legend_title_text='Line/Driver')
+            ),legend_title_text='Line\\Driver')
         #set name of y axis to 'Proportional effect on energy use'
         fig.update_yaxes(title_text='Proportional effect on energy use')
 
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_multiplicative_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + 'multiplicative_timeseries.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
         
     elif emissions_divisia == True and hierarchical == True:
                 
         #get data
-        lmdi_output_multiplicative = pd.read_csv('{}/{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier))
+        lmdi_output_multiplicative = pd.read_csv('{}\\{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier))
 
         #remove activity and total energy data from the dataset
         lmdi_output_multiplicative.drop('Total_{}'.format(activity_variable), axis=1, inplace=True)
@@ -205,22 +205,22 @@ def plot_multiplicative_timeseries(data_title, extra_identifier, structure_varia
         fig.update_layout(
             font=dict(
                 size=font_size
-            ),legend_title_text='Line/Driver')
+            ),legend_title_text='Line\\Driver')
         #set name of y axis to 'Proportional effect on energy use'
         fig.update_yaxes(title_text='Proportional effect on emissions use')
 
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_multiplicative_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + 'multiplicative_timeseries.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
 
 
-def plot_additive_timeseries(data_title, extra_identifier, structure_variables_list,activity_variable,energy_variable='Energy', emissions_variable='Emissions',emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25,AUTO_OPEN=False, hierarchical=False,output_data_folder='output_data',plotting_output_folder='./plotting_output/', INCLUDE_EXTRA_FACTORS_AT_END = False):
+def plot_additive_timeseries(data_title, extra_identifier, structure_variables_list,activity_variable,energy_variable='Energy', emissions_variable='Emissions',emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25,AUTO_OPEN=False, hierarchical=False,output_data_folder='output_data',plotting_output_folder='\\plotting_output\\', INCLUDE_EXTRA_FACTORS_AT_END = False):
     """
     data used by this function:
         
         data_title eg. 'outlook-transport-divisia'
         extra_identifier eg. 'PASSENGER_REF'
-        lmdi_output_additive eg. pd.read_csv('output_data/{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
-        lmdi_output_additive = pd.read_csv('output_data/{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
+        lmdi_output_additive eg. pd.read_csv('output_data\\{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('output_data\\{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
         emissions_divisia eg. False
         structure_variables_list eg. ['Economy','Vehicle Type', 'Drive']
         graph_title eg. 'Road passenger - Drivers of changes in energy use (Ref)'
@@ -232,7 +232,7 @@ def plot_additive_timeseries(data_title, extra_identifier, structure_variables_l
     if emissions_divisia == False and hierarchical == False:
         
         #get data
-        lmdi_output_additive = pd.read_csv('{}/{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
 
         #remove activity and total energy data from the dataset
         lmdi_output_additive.drop('Total_{}'.format(activity_variable), axis=1, inplace=True)
@@ -268,13 +268,13 @@ def plot_additive_timeseries(data_title, extra_identifier, structure_variables_l
             )
         )
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + 'additive_timeseries.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'additive_timeseries.png')
 
     elif emissions_divisia == True and hierarchical == False:
         
         #get data
-        lmdi_output_additive = pd.read_csv('{}/{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
-        # lmdi_output_additive = pd.read_csv('output_data/{}{}_additive.csv'.format(data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+        # lmdi_output_additive = pd.read_csv('output_data\\{}{}_additive.csv'.format(data_title, extra_identifier))
 
         #remove ' effect' where it is at the end of all column names using regex ($ marks the end of the string)
         lmdi_output_additive.columns = lmdi_output_additive.columns.str.replace(' effect$', '', regex=True)
@@ -315,12 +315,12 @@ def plot_additive_timeseries(data_title, extra_identifier, structure_variables_l
             )
         )
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html',auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + 'additive_timeseries.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'additive_timeseries.png')
     
     elif emissions_divisia == False and hierarchical == True:
                 
         #get data
-        lmdi_output_additive = pd.read_csv('{}/{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
 
         #if there is a row in the minimum year that contains nans in the effects columns, then remove it. We get this because of the way additive df is created to include the total energy and activity data from the year before the effects are recorded (we record effects in the year that that effect is felt, so the first year in the df will always have nans in the effects columns if we include it)
         effects = [col for col in lmdi_output_additive.columns if ' effect' in col]
@@ -360,17 +360,17 @@ def plot_additive_timeseries(data_title, extra_identifier, structure_variables_l
         fig.update_layout(
             font=dict(
                 size=font_size
-            ),legend_title_text='Line/Driver')
+            ),legend_title_text='Line\\Driver')
         #set name of y axis to 'Proportional effect on energy use'
         fig.update_yaxes(title_text='Proportional effect on energy use')
 
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + 'additive_timeseries.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'additive_timeseries.png')
     
     elif emissions_divisia == True and hierarchical == True:
                 
         #get data
-        lmdi_output_additive = pd.read_csv('{}/{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
 
         #if there is a row in the minimum year that contains nans in the effects columns, then remove it. We get this because of the way additive df is created to include the total energy and activity data from the year before the effects are recorded (we record effects in the year that that effect is felt, so the first year in the df will always have nans in the effects columns if we include it)
         effects = [col for col in lmdi_output_additive.columns if ' effect' in col]
@@ -410,12 +410,12 @@ def plot_additive_timeseries(data_title, extra_identifier, structure_variables_l
         fig.update_layout(
             font=dict(
                 size=font_size
-            ),legend_title_text='Line/Driver')
+            ),legend_title_text='Line\\Driver')
         #set name of y axis to 'Proportional effect on emissions use'
         fig.update_yaxes(title_text='Proportional effect on emissions')
 
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + 'additive_timeseries.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'additive_timeseries.png')
 
 
     
@@ -430,8 +430,8 @@ def plot_additive_waterfall(data_title, extra_identifier, structure_variables_li
         
         data_title eg. 'outlook-transport-divisia'
         extra_identifier eg. 'PASSENGER_REF'
-        lmdi_output_multiplicative eg. pd.read_csv('output_data/{}{}_lmdi_output_multiplicative.csv'.format(data_title, extra_identifier))
-        lmdi_output_additive = pd.read_csv('output_data/{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
+        lmdi_output_multiplicative eg. pd.read_csv('output_data\\{}{}_lmdi_output_multiplicative.csv'.format(data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('output_data\\{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
         emissions_divisia eg. False
         structure_variables_list eg. ['Economy','Vehicle Type', 'Drive']
         graph_title eg. 'Road passenger - Drivers of changes in energy use (Ref)'
@@ -454,7 +454,7 @@ def plot_additive_waterfall(data_title, extra_identifier, structure_variables_li
         
     if emissions_divisia == False and hierarchical == False:
         
-        lmdi_output_additive = pd.read_csv('{}/{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
 
         if PLOT_CUMULATIVE_VERSION:
             lmdi_output_additive = calculate_accumulated_values_for_cumulative_version_of_graph(lmdi_output_additive, time_variable)
@@ -543,11 +543,11 @@ def plot_additive_waterfall(data_title, extra_identifier, structure_variables_li
         fig.update_xaxes(tickangle=25)
         
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '.html',auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + '.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + '.png')
 
     elif emissions_divisia  == True and hierarchical == False:
         #this is for emissions plot:
-        lmdi_output_additive = pd.read_csv('{}/{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
         
         if PLOT_CUMULATIVE_VERSION:
             lmdi_output_additive = calculate_accumulated_values_for_cumulative_version_of_graph(lmdi_output_additive, time_variable)
@@ -632,10 +632,10 @@ def plot_additive_waterfall(data_title, extra_identifier, structure_variables_li
         fig.update_yaxes(title_text='MtCO2')
         
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '.html',auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + '.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + '.png')
 
     elif emissions_divisia == False and hierarchical == True: 
-        lmdi_output_additive = pd.read_csv('{}/{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
 
         if PLOT_CUMULATIVE_VERSION:
             lmdi_output_additive = calculate_accumulated_values_for_cumulative_version_of_graph(lmdi_output_additive, time_variable)
@@ -731,11 +731,11 @@ def plot_additive_waterfall(data_title, extra_identifier, structure_variables_li
         fig.update_xaxes(tickangle=25)
         
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier +'_additive_hierarchical.html',auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + '.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + '.png')
     
     
     elif emissions_divisia == True and hierarchical == True: 
-        lmdi_output_additive = pd.read_csv('{}/{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
 
         if PLOT_CUMULATIVE_VERSION:
             lmdi_output_additive = calculate_accumulated_values_for_cumulative_version_of_graph(lmdi_output_additive, time_variable)
@@ -838,7 +838,7 @@ def plot_additive_waterfall(data_title, extra_identifier, structure_variables_li
         fig.update_xaxes(tickangle=25)
         
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier +'_additive_hierarchical.html',auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + '.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + '.png')
         
         
 def concat_waterfall_inputs(data_title,new_extra_identifier, extra_identifiers,activity_variables, new_activity_variable,time_variable='Year',  hierarchical=False, output_data_folder='output_data'):
@@ -850,8 +850,8 @@ def concat_waterfall_inputs(data_title,new_extra_identifier, extra_identifiers,a
         
         data_title eg. 'outlook-transport-divisia'
         extra_identifier eg. 'PASSENGER_REF'
-        lmdi_output_multiplicative eg. pd.read_csv('output_data/{}{}_lmdi_output_multiplicative.csv'.format(data_title, extra_identifier))
-        lmdi_output_additive = pd.read_csv('output_data/{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
+        lmdi_output_multiplicative eg. pd.read_csv('output_data\\{}{}_lmdi_output_multiplicative.csv'.format(data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('output_data\\{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
         emissions_divisia eg. False
         structure_variables_list eg. ['Economy','Vehicle Type', 'Drive']
         graph_title eg. 'Road passenger - Drivers of changes in energy use (Ref)'
@@ -864,7 +864,7 @@ def concat_waterfall_inputs(data_title,new_extra_identifier, extra_identifiers,a
             extra_identifier_ = extra_identifiers[i]
             activity_variable = activity_variables[i]
             
-            lmdi_output_additive_ = pd.read_csv('{}/{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier_))
+            lmdi_output_additive_ = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier_))
             #rename the activity varaialbe to the new activity variable
             lmdi_output_additive_.rename(columns={activity_variable+' effect':new_activity_variable+' effect'}, inplace=True)
             #and change Total_{activity_variable} to Total_{new_activity_variable}
@@ -879,7 +879,7 @@ def concat_waterfall_inputs(data_title,new_extra_identifier, extra_identifiers,a
         #sum up additive effects
         lmdi_output_additive = lmdi_output_additive.groupby([time_variable]).sum(numeric_only=True).reset_index()
         #save with new id so we can plot it
-        lmdi_output_additive.to_csv('{}/{}{}_concatenated_additive.csv'.format(output_data_folder,data_title, new_extra_identifier), index=False)
+        lmdi_output_additive.to_csv('{}\\{}{}_concatenated_additive.csv'.format(output_data_folder,data_title, new_extra_identifier), index=False)
         
     elif hierarchical:
         lmdi_output_additive = pd.DataFrame() 
@@ -887,7 +887,7 @@ def concat_waterfall_inputs(data_title,new_extra_identifier, extra_identifiers,a
             extra_identifier_ = extra_identifiers[i]
             activity_variable = activity_variables[i]
             
-            lmdi_output_additive_ = pd.read_csv('{}/{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier_))
+            lmdi_output_additive_ = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier_))
             #rename the activity varaialbe to the new activity variable
             lmdi_output_additive_.rename(columns={activity_variable + ' effect':new_activity_variable + ' effect'}, inplace=True)
             #and change Total_{activity_variable} to Total_{new_activity_variable}
@@ -902,7 +902,7 @@ def concat_waterfall_inputs(data_title,new_extra_identifier, extra_identifiers,a
         #sum up additive effects
         lmdi_output_additive = lmdi_output_additive.groupby([time_variable]).sum(numeric_only=True).reset_index()
         #save with new id so we can plot it
-        lmdi_output_additive.to_csv('{}/{}{}_concatenated_additive.csv'.format(output_data_folder,data_title, new_extra_identifier), index=False)
+        lmdi_output_additive.to_csv('{}\\{}{}_concatenated_additive.csv'.format(output_data_folder,data_title, new_extra_identifier), index=False)
         
 def plot_combined_waterfalls(data_title,graph_titles,extra_identifiers, new_extra_identifier, structure_variables_list, activity_variables,energy_variable='Energy', emissions_variable='Emissions',emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25,y_axis_min_percent_decrease=0.9,AUTO_OPEN=False, hierarchical=False, output_data_folder='output_data', plotting_output_folder='plotting_output', INCLUDE_TEXT = False):  
     """
@@ -910,8 +910,8 @@ def plot_combined_waterfalls(data_title,graph_titles,extra_identifiers, new_extr
         
         data_title eg. 'outlook-transport-divisia'
         extra_identifier eg. 'PASSENGER_REF'
-        lmdi_output_multiplicative eg. pd.read_csv('output_data/{}{}_lmdi_output_multiplicative.csv'.format(data_title, extra_identifier))
-        lmdi_output_additive = pd.read_csv('output_data/{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
+        lmdi_output_multiplicative eg. pd.read_csv('output_data\\{}{}_lmdi_output_multiplicative.csv'.format(data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('output_data\\{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
         emissions_divisia eg. False
         structure_variables_list eg. ['Economy','Vehicle Type', 'Drive']
         graph_title eg. 'Road passenger - Drivers of changes in energy use (Ref)'
@@ -931,7 +931,7 @@ def plot_combined_waterfalls(data_title,graph_titles,extra_identifiers, new_extr
                 )))
         for i in range(len(extra_identifiers)):
             extra_identifier = extra_identifiers[i]
-            lmdi_output_additive = pd.read_csv('{}/{}{}_concatenated_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+            lmdi_output_additive = pd.read_csv('{}\\{}{}_concatenated_additive.csv'.format(output_data_folder,data_title, extra_identifier))
             activity_variable = activity_variables[i]
             
             #remove activity data from the dataset
@@ -1020,7 +1020,7 @@ def plot_combined_waterfalls(data_title,graph_titles,extra_identifiers, new_extr
                 )))
         for i in range(len(extra_identifiers)):
             extra_identifier = extra_identifiers[i]
-            lmdi_output_additive = pd.read_csv('{}/{}{}_concatenated_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+            lmdi_output_additive = pd.read_csv('{}\\{}{}_concatenated_additive.csv'.format(output_data_folder,data_title, extra_identifier))
             activity_variable = activity_variables[i]
             
             #remove activity data from the dataset
@@ -1111,7 +1111,7 @@ def plot_combined_waterfalls(data_title,graph_titles,extra_identifiers, new_extr
                 )))
         for i in range(len(extra_identifiers)):
             extra_identifier = extra_identifiers[i]
-            lmdi_output_additive = pd.read_csv('{}/{}{}_concatenated_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+            lmdi_output_additive = pd.read_csv('{}\\{}{}_concatenated_additive.csv'.format(output_data_folder,data_title, extra_identifier))
             activity_variable = activity_variables[i]
             
             #remove activity data from the dataset
@@ -1204,7 +1204,7 @@ def plot_combined_waterfalls(data_title,graph_titles,extra_identifiers, new_extr
 # # print('Please note that the hierarchical LMDI method only produces a multiplicative output. So the output will be a multiplicative waterfall plot.')
         
 #         #get data
-#         lmdi_output_multiplicative = pd.read_csv('{}/{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier))
+#         lmdi_output_multiplicative = pd.read_csv('{}\\{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier))
 #         #Regardless of the column names, rename data in order of, 'Year', activity_variable, structure_variables_list, residual_variable1, 'Multiplicative change in {}'.format(energy_variable)
 #         try:
 #             lmdi_output_multiplicative.columns = [time_variable, activity_variable] + structure_variables_list + [residual_variable1, 'Multiplicative change in {}'.format(energy_variable)]
@@ -1278,17 +1278,17 @@ def plot_combined_waterfalls(data_title,graph_titles,extra_identifiers, new_extr
 #         )
 
 #         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_multiplicative_waterfall.html',auto_open=AUTO_OPEN)
-#         #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + 'multiplicative_waterfall.png')
+#         #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_waterfall.png')
 
 
-def plot_additive_timeseries_WEIRD_COPY(data_title, extra_identifier, structure_variables_list,activity_variable,energy_variable='Energy', emissions_variable='Emissions',emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25,AUTO_OPEN=False, hierarchical=False,output_data_folder='output_data',plotting_output_folder='./plotting_output/', INCLUDE_EXTRA_FACTORS_AT_END = False):#cant work out why this was here?
+def plot_additive_timeseries_WEIRD_COPY(data_title, extra_identifier, structure_variables_list,activity_variable,energy_variable='Energy', emissions_variable='Emissions',emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25,AUTO_OPEN=False, hierarchical=False,output_data_folder='output_data',plotting_output_folder='\\plotting_output\\', INCLUDE_EXTRA_FACTORS_AT_END = False):#cant work out why this was here?
     """
     data used by this function:
         
         data_title eg. 'outlook-transport-divisia'
         extra_identifier eg. 'PASSENGER_REF'
-        lmdi_output_additive eg. pd.read_csv('output_data/{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
-        lmdi_output_additive = pd.read_csv('output_data/{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
+        lmdi_output_additive eg. pd.read_csv('output_data\\{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('output_data\\{}{}_lmdi_output_additive.csv'.format(data_title, extra_identifier))
         emissions_divisia eg. False
         structure_variables_list eg. ['Economy','Vehicle Type', 'Drive']
         graph_title eg. 'Road passenger - Drivers of changes in energy use (Ref)'
@@ -1300,7 +1300,7 @@ def plot_additive_timeseries_WEIRD_COPY(data_title, extra_identifier, structure_
     if emissions_divisia == False and hierarchical == False:
         
         #get data
-        lmdi_output_additive = pd.read_csv('{}/{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
 
         #remove activity and total energy data from the dataset
         lmdi_output_additive.drop('Total_{}'.format(activity_variable), axis=1, inplace=True)
@@ -1338,13 +1338,13 @@ def plot_additive_timeseries_WEIRD_COPY(data_title, extra_identifier, structure_
             )
         )
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + 'Additive_timeseries.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'Additive_timeseries.png')
 
     elif emissions_divisia == True and hierarchical == False:
         
         #get data
-        lmdi_output_additive = pd.read_csv('{}/{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
-        # lmdi_output_additive = pd.read_csv('output_data/{}{}_additive.csv'.format(data_title, extra_identifier))
+        lmdi_output_additive = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+        # lmdi_output_additive = pd.read_csv('output_data\\{}{}_additive.csv'.format(data_title, extra_identifier))
 
         #remove ' effect' where it is at the end of all column names using regex ($ marks the end of the string)
         lmdi_output_additive.columns = lmdi_output_additive.columns.str.replace(' effect$', '', regex=True)
@@ -1388,7 +1388,7 @@ def plot_additive_timeseries_WEIRD_COPY(data_title, extra_identifier, structure_
             )
         )
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html',auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + 'Additive_timeseries.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'Additive_timeseries.png')
     
     elif emissions_divisia == False and hierarchical == True:
         print('Not plotting timeseries of hierarchical additive data yet. Code not completed')
@@ -1398,7 +1398,7 @@ def plot_additive_timeseries_WEIRD_COPY(data_title, extra_identifier, structure_
         
         
         # #get data
-        # lmdi_output_additive = pd.read_csv('{}/{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
+        # lmdi_output_additive = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
 
         # #remove ' effect' where it is at the end of all column names using regex ($ marks the end of the string)
         # lmdi_output_additive.columns = lmdi_output_additive.columns.str.replace(' effect$', '', regex=True)
@@ -1435,12 +1435,12 @@ def plot_additive_timeseries_WEIRD_COPY(data_title, extra_identifier, structure_
         # fig.update_layout(
         #     font=dict(
         #         size=font_size
-        #     ),legend_title_text='Line/Driver')
+        #     ),legend_title_text='Line\\Driver')
         # #set name of y axis to 'Proportional effect on energy use'
         # fig.update_yaxes(title_text='Effect on energy use')
 
         # plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image("./plotting_output/static/" + data_title + extra_identifier + 'multiplicative_timeseries.png')
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
 
 
 

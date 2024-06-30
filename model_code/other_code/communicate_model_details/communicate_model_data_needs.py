@@ -13,7 +13,7 @@
 # import re
 # sys.path.append(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
 # import sys
-# sys.path.append("./config")
+# sys.path.append("\\config")
 # import config
 
 # import pandas as pd 
@@ -36,14 +36,14 @@ import time
 # #%%
 
 # #impoort model concordances
-# # all_df = pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(model_concordances_all_file_name))
+# # all_df = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(model_concordances_all_file_name))
 
-# # general_df = pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(model_concordances_file_name))
+# # general_df = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(model_concordances_file_name))
 
-# user_input_concordances = pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(model_concordances_user_input_and_growth_rates_file_name))
-# BASE_YEAR_measure_concordances = pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(model_concordances_BASE_YEAR_measures_file_name))
-# demand_side_fuel_mixing_concordances = pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(model_concordances_demand_side_fuel_mixing_file_name))
-# supply_side_fuel_mixing_concordances = pd.read_csv(root_dir + '/' + 'intermediate_data/computer_generated_concordances/{}'.format(model_concordances_supply_side_fuel_mixing_file_name))
+# user_input_concordances = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(model_concordances_user_input_and_growth_rates_file_name))
+# BASE_YEAR_measure_concordances = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(model_concordances_BASE_YEAR_measures_file_name))
+# demand_side_fuel_mixing_concordances = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(model_concordances_demand_side_fuel_mixing_file_name))
+# supply_side_fuel_mixing_concordances = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(model_concordances_supply_side_fuel_mixing_file_name))
 
 # #%%
 # #realistically we just want data for the base year and then for user inputs and growth rates plus fuel mixing, we would jsut estimate our own growth rates for future years
@@ -102,7 +102,7 @@ import time
 # fig.show()
 
 # #save
-# fig.write_html("plotting_output/input_data_communication/transport_type_vehicle_type_drive_sunburst.html")
+# fig.write_html("plotting_output\\input_data_communication\\transport_type_vehicle_type_drive_sunburst.html")
 # #%%
 
 # ##########################################

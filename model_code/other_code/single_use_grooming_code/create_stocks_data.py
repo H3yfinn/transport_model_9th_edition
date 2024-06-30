@@ -118,10 +118,10 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
+    sys.path.append(f"{root_dir}\\code")
     import config
     import utility_functions
 else:
@@ -151,12 +151,12 @@ from plotly.subplots import make_subplots
 
 FILE_DATE_ID2 = 'DATE20230126'
 
-transport_data_system_folder = '../transport_data_system'
-transport_data_system_df_original = pd.read_csv(root_dir + '/' + '{}/output_data/{}_interpolated_combined_data.csv'.format(transport_data_system_folder,FILE_DATE_ID2))
+transport_data_system_folder = '..\\transport_data_system'
+transport_data_system_df_original = pd.read_csv(root_dir + '\\' + '{}\\output_data\\{}_interpolated_combined_data.csv'.format(transport_data_system_folder,FILE_DATE_ID2))
 
 #laod estimated ldv data
-# './input_data/calculated/ldv_data.csv'
-ldv_data = pd.read_csv(root_dir + '/' + './input_data/calculated/ldv_data.csv')
+# '\\input_data\\calculated\\ldv_data.csv'
+ldv_data = pd.read_csv(root_dir + '\\' + 'input_data\\calculated\\ldv_data.csv')
 
 #stack ldv data onto transport data system
 transport_data_system_df_original = pd.concat([transport_data_system_df_original,ldv_data],sort=False)

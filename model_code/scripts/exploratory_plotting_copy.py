@@ -7,7 +7,7 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
 from .. import config
 from ..calculation_functions import road_model_functions
@@ -39,7 +39,7 @@ def calculate_emissions_from_energy_col(emissions_factors, model_output_with_fue
     model_output_with_fuels = model_output_with_fuels.merge(emissions_factors, how='left', on='Fuel')
 
     if USE_AVG_GENERATION_EMISSIONS_FACTOR:
-        emissions_factor_elec = pd.read_csv(root_dir + '/' + 'input_data/from_8th/outlook_8th_emissions_factors_with_electricity.csv')
+        emissions_factor_elec = pd.read_csv(root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')
         emissions_factor_elec = emissions_factor_elec[emissions_factor_elec.fuel_code == '17_electricity'].copy()
         emissions_factor_elec['Scenario'] = emissions_factor_elec['Scenario'].replace('Carbon Neutral', 'Target')
         emissions_factor_elec.columns = [x.capitalize() for x in emissions_factor_elec.columns]
@@ -129,64 +129,64 @@ def compare_values_between_projections_using_two_files(projection_filename1, pro
         raise ValueError('Graph type not recognised')
 
     for name, fig in figs.items():
-        fig.write_html(root_dir + '/' +f'{save_folder}/{title}_{name}.html')
+        fig.write_html(root_dir + '\\' +f'{save_folder}\\{title}_{name}.html')
 
     return
 #%%
 # Example usage
-emissions_factors = pd.read_csv(root_dir + '/' + 'config/9th_edition_emissions_factors.csv')
+emissions_factors = pd.read_csv(root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
 filter_dict = {'Scenario': ['Reference'], 'Economy': ['03_CDA'], 'Transport Type': ['passenger'], 'Medium': ['road']}
 compare_values_between_projections_using_two_files(
-    'plotting_output/experimental/Nanjing_comparisons/03_CDA_model_output20240327.csv',
-    'plotting_output/experimental/Nanjing_comparisons/03_CDA_model_output20240327_HEV.csv',
+    'plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327.csv',
+    'plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327_HEV.csv',
     measure='cumulative_emissions',
     title='Canada cumulative emissions comparison (REF)',
     filter_dict=filter_dict,
     grouping=['Date', 'Fuel'],
     graph_type='timeseries_proportion',
-    save_folder='plotting_output/experimental/Nanjing_comparisons',
+    save_folder='plotting_output\\experimental\\Nanjing_comparisons',
     emissions_factors=emissions_factors,
     font_size=24
 )
 #%%
 filter_dict = {'Scenario': ['Target'], 'Economy': ['03_CDA'], 'Medium': ['road'], 'Transport Type': ['passenger']}
 compare_values_between_projections_using_two_files(
-    'plotting_output/experimental/Nanjing_comparisons/03_CDA_model_output20240327.csv',
-    'plotting_output/experimental/Nanjing_comparisons/03_CDA_model_output20240327_HEV.csv',
+    'plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327.csv',
+    'plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327_HEV.csv',
     measure='cumulative_emissions',
     title='Canada cumulative emissions comparison (TGT)',
     filter_dict=filter_dict,
     grouping=['Date', 'Fuel'],
     graph_type='timeseries_proportion',
-    save_folder='plotting_output/experimental/Nanjing_comparisons',
+    save_folder='plotting_output\\experimental\\Nanjing_comparisons',
     emissions_factors=emissions_factors,
     font_size=24
 )
 
 filter_dict = {'Scenario': ['Reference'], 'Economy': ['03_CDA'], 'Transport Type': ['passenger'], 'Medium': ['road']}
 compare_values_between_projections_using_two_files(
-    'plotting_output/experimental/Nanjing_comparisons/03_CDA_model_output20240327.csv',
-    'plotting_output/experimental/Nanjing_comparisons/03_CDA_model_output20240327_HEV.csv',
+    'plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327.csv',
+    'plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327_HEV.csv',
     measure='Emissions',
     title='Canada emissions comparison (REF)',
     filter_dict=filter_dict,
     grouping=['Date', 'Fuel'],
     graph_type='timeseries_proportion',
-    save_folder='plotting_output/experimental/Nanjing_comparisons',
+    save_folder='plotting_output\\experimental\\Nanjing_comparisons',
     emissions_factors=emissions_factors,
     font_size=24
 )
 
 filter_dict = {'Scenario': ['Target'], 'Economy': ['03_CDA'], 'Medium': ['road'], 'Transport Type': ['passenger']}
 compare_values_between_projections_using_two_files(
-    'plotting_output/experimental/Nanjing_comparisons/03_CDA_model_output20240327.csv',
-    'plotting_output/experimental/Nanjing_comparisons/03_CDA_model_output20240327_HEV.csv',
+    'plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327.csv',
+    'plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327_HEV.csv',
     measure='Emissions',
     title='Canada emissions comparison (TGT)',
     filter_dict=filter_dict,
     grouping=['Date', 'Fuel'],
     graph_type='timeseries_proportion',
-    save_folder='plotting_output/experimental/Nanjing_comparisons',
+    save_folder='plotting_output\\experimental\\Nanjing_comparisons',
     emissions_factors=emissions_factors,
     font_size=24
 )

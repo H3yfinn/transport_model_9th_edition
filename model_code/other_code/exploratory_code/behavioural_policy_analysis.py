@@ -37,10 +37,10 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
+    sys.path.append(f"{root_dir}\\code")
     import config
     import utility_functions
 else:
@@ -75,7 +75,7 @@ import plotly.io as pio
 #%%
 
 #laod outputs
-model_output = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}'.format(config.model_output_file_name))
+model_output = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\{}'.format(config.model_output_file_name))
 
 behavioural_policy_df = model_output.loc[model_output['Year'] >= 2018] #filter for 2018 to 2025
 behavioural_policy_df = behavioural_policy_df.loc[behavioural_policy_df['Year'] <= 2025] #filter for 2018 to 2025
@@ -140,10 +140,10 @@ behavioural_policy_df_4 = behavioural_policy_df_4.groupby(['Year','Region']).sum
 #%%
 
 #save the data to csvs in \other_code\other_data\archive
-behavioural_policy_df_1.to_csv(root_dir + '/' + 'other_code/other_data/archive/behavioural_policy_df_1.csv')
-behavioural_policy_df_2.to_csv(root_dir + '/' + 'other_code/other_data/archive/behavioural_policy_df_2.csv')
-behavioural_policy_df_3.to_csv(root_dir + '/' + 'other_code/other_data/archive/behavioural_policy_df_3.csv')
-behavioural_policy_df_4.to_csv(root_dir + '/' + 'other_code/other_data/archive/behavioural_policy_df_4.csv')
+behavioural_policy_df_1.to_csv(root_dir + '\\' + 'other_code\\other_data\\archive\\behavioural_policy_df_1.csv')
+behavioural_policy_df_2.to_csv(root_dir + '\\' + 'other_code\\other_data\\archive\\behavioural_policy_df_2.csv')
+behavioural_policy_df_3.to_csv(root_dir + '\\' + 'other_code\\other_data\\archive\\behavioural_policy_df_3.csv')
+behavioural_policy_df_4.to_csv(root_dir + '\\' + 'other_code\\other_data\\archive\\behavioural_policy_df_4.csv')
 
 #%%
 #calculate average vehicle efficiency

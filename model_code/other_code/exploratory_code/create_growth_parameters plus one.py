@@ -14,10 +14,10 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
+    sys.path.append(f"{root_dir}\\code")
     import config
     import utility_functions
 else:
@@ -44,9 +44,9 @@ from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 
 #grab the file D:\APERC\transport_model_9th_edition\input_data\macro\APEC_GDP_population.csv
-macro = pd.read_csv(root_dir + '/' + 'D:/APERC/transport_model_9th_edition/input_data/macro/APEC_GDP_population.csv')
+macro = pd.read_csv(root_dir + '\\' + 'D:\\APERC\\transport_model_9th_edition\\input_data\\macro\\APEC_GDP_population.csv')
 #pull in activity_growth 
-activity_growth = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/activity_growth.csv')
+activity_growth = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\activity_growth.csv')
 # macro.columns#Index(['economy_code', 'economy', 'date', 'variable', 'value'], dtype='object')
 #pivot so each measure in the vairable column is its own column.
 macro = macro.pivot_table(index=['economy_code', 'economy', 'year'], columns='variable', values='value').reset_index()
@@ -61,7 +61,7 @@ macro = macro.rename(columns={'real_GDP':'GDP', 'population':'Population', 'econ
 #try taking in energy use for transport from these ecoinomys balance tables. We have this data form the ESTO team:
 #\transport_data_system\intermediate_data\EGEDA\EGEDA_transport_outputDATE20230215.csv
 #load it in
-energy_use = pd.read_csv(root_dir + '/' + 'D:/APERC/transport_data_system/intermediate_data/EGEDA/EGEDA_transport_outputDATE20230215.csv')
+energy_use = pd.read_csv(root_dir + '\\' + 'D:\\APERC\\transport_data_system\\intermediate_data\\EGEDA\\EGEDA_transport_outputDATE20230215.csv')
 
 
 #cols: ['Economy', 'Fuel_Type', 'Date', 'Value', 'Transport Type', 'Frequency','Unit', 'Source', 'Dataset', 'Measure', 'Vehicle Type', 'Drive','Medium'],
@@ -289,7 +289,7 @@ def plot_regression_results(results,model, x_values, y_values, df, x, y,plot_nam
             fig.update_layout(title_text=plot_name)
 
         #save the plot
-        fig.write_html(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/{}.html'.format(plot_name))
+        fig.write_html(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\{}.html'.format(plot_name))
         return
 
     # Adding the plane of best fit to the figure
@@ -313,7 +313,7 @@ def plot_regression_results(results,model, x_values, y_values, df, x, y,plot_nam
                             margin=dict(r=20, b=10, l=10, t=10))
         
     #save the plot
-    fig.write_html(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/{}.html'.format(plot_name))
+    fig.write_html(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\{}.html'.format(plot_name))
     
 
 
@@ -358,14 +358,14 @@ for economy in df.economy.unique():
     growth_coefficients_df = growth_coefficients_df.append({'economy': economy, 'const': coefficients[0], 'gdp_per_capita_growth': coefficients[1], 'gdp_times_capita_growth': coefficients[2], 'gdp_growth': coefficients[3], 'r2': results.rsquared}, ignore_index=True)
 # %%
 #save to csv
-growth_coefficients_df.to_csv(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/growth_coefficients.csv')
+growth_coefficients_df.to_csv(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\growth_coefficients.csv')
 #plot all growth coefficients on a bar chart with facets for economys and x as the coefficients
 #melt
 growth_coefficients_df_melt = pd.melt(growth_coefficients_df, id_vars=['economy', 'r2'], value_vars=['const', 'gdp_per_capita_growth', 'gdp_times_capita_growth', 'gdp_growth'])
 #plot
 fig = px.bar(growth_coefficients_df_melt, x = 'variable', y = 'value', color = 'economy', facet_col = 'economy', facet_col_wrap=3, barmode='group', title='Macro regression coefficients for growth vs energy total growth')
 #save
-fig.write_html(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/growth_coefficients.html')
+fig.write_html(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\growth_coefficients.html')
     
 #%%
 ###########################################################################
@@ -374,14 +374,14 @@ fig.write_html(root_dir + '/' + 'plotting_output/growth_analysis/macro_regressio
 #double check that these coefficients work well with activity growth using the 8th edition activity growth as a comparison. 
 #load in the activity growth data
 #pull in activity_growth 
-activity_growth = pd.read_csv(root_dir + '/' + 'intermediate_data/model_inputs/activity_growth.csv')
+activity_growth = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\activity_growth.csv')
 #make activity growth columns into lowercase
 activity_growth.columns = [x.lower() for x in activity_growth.columns]
 #drop scenario col and filter out duplicates
 activity_growth = activity_growth.drop(columns=['scenario']).drop_duplicates()
 
 #pull in forecasted growth rates:
-macro = pd.read_csv(root_dir + '/' + 'D:/APERC/transport_model_9th_edition/input_data/macro/APEC_GDP_population.csv')
+macro = pd.read_csv(root_dir + '\\' + 'D:\\APERC\\transport_model_9th_edition\\input_data\\macro\\APEC_GDP_population.csv')
 # macro.columns#Index(['economy_code', 'economy', 'date', 'variable', 'value'], dtype='object')
 #pivot so each measure in the vairable column is its own column.
 macro = macro.pivot_table(index=['economy_code', 'economy', 'year'], columns='variable', values='value').reset_index()
@@ -431,7 +431,7 @@ if plot_this:
     # #name y axis as an indexed
     # fig.update_yaxes(title_text='Index (base date = {}'.format(macro1['date'].min()))
     # #save to plotting_output\growth_analysis
-    # fig.write_html(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/activity_8th_vs_regression_growth_indexes.html')
+    # fig.write_html(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\activity_8th_vs_regression_growth_indexes.html')
 
     macro1 = activity_macro_energy_coefficients[['economy', 'date', 'activity_growth_estimate_cumulative', 'activity_growth_cumulative']]
 
@@ -440,7 +440,7 @@ if plot_this:
     import plotly.express as px
     fig = px.line(macro1_melt, x='date', y='value', color='variable', facet_col='economy', facet_col_wrap=3)
     #save to plotting_output\growth_analysis
-    fig.write_html(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/activity_8th_vs_regression_growth.html')
+    fig.write_html(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\activity_8th_vs_regression_growth.html')
 #%%
 # %%
 
@@ -454,18 +454,18 @@ if analyse == True:
     #plot   
     import plotly.express as px
     fig = px.scatter(energy_gdp_per_capita, x='gdp_per_capita', y='total', color='economy', trendline='ols', log_x=True, log_y=True)
-    fig.write_html(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/energy_vs_gdp_per_capita.html', auto_open=True)
+    fig.write_html(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\energy_vs_gdp_per_capita.html', auto_open=True)
 
     import plotly.express as px
     fig = px.scatter(energy_gdp_per_capita, x='gdp_per_capita_index', y='total_index', color='economy', trendline='ols', log_x=True, log_y=True)
-    fig.write_html(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/energy_vs_gdp_per_capita_index.html', auto_open=True)
+    fig.write_html(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\energy_vs_gdp_per_capita_index.html', auto_open=True)
 
 # %%
 
 
 
 #lets try grouping the economys by regions (based on georgaphy and economic development) and then running the regression on each region. LAter on it would probably be a good idea to look into ato's urban density data and stuff
-regional_mapping = pd.read_csv(root_dir + '/' + 'config/concordances_and_config_data/region_economy_mapping.csv')
+regional_mapping = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\region_economy_mapping.csv')
 #extract Region_growth_regression and Economy
 regional_mapping = regional_mapping[['Region_growth_regression', 'Economy']]
 #make economyt lowercase
@@ -501,14 +501,14 @@ if independent_variables == ['gdp_per_capita_growth', 'gdp_times_capita_growth',
         #save coefficients to df
         growth_coefficients_df = growth_coefficients_df.append({'region': economy, 'const': coefficients[0], 'gdp_per_capita_growth': coefficients[1], 'gdp_times_capita_growth': coefficients[2], 'gdp_growth': coefficients[3], 'r2': results.rsquared}, ignore_index=True)
     #save to csv
-    growth_coefficients_df.to_csv(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/growth_coefficients_by_region.csv')
+    growth_coefficients_df.to_csv(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\growth_coefficients_by_region.csv')
     #plot all growth coefficients on a bar chart with facets for economys and x as the coefficients
     #melt
     growth_coefficients_df_melt = pd.melt(growth_coefficients_df, id_vars=['region', 'r2'], value_vars=['const', 'gdp_per_capita_growth', 'gdp_times_capita_growth', 'gdp_growth'])
     #plot
     fig = px.bar(growth_coefficients_df_melt, x = 'variable', y = 'value', color = 'region', facet_col = 'region', facet_col_wrap=3, barmode='group', title='Macro regression coefficients for growth vs energy total growth')
     #save
-    fig.write_html(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/growth_coefficients_by_region.html')
+    fig.write_html(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\growth_coefficients_by_region.html')
 
 elif independent_variables == ['gdp_per_capita_growth', 'gdp_times_capita_growth']:
     #replace PNG in regions wqith Developed_low_density
@@ -527,14 +527,14 @@ elif independent_variables == ['gdp_per_capita_growth', 'gdp_times_capita_growth
         #save coefficients to df
         growth_coefficients_df = growth_coefficients_df.append({'region': economy, 'const': coefficients[0], 'gdp_per_capita_growth': coefficients[1], 'gdp_times_capita_growth': coefficients[2], 'r2': results.rsquared}, ignore_index=True)
             #save to csv
-    growth_coefficients_df.to_csv(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/growth_coefficients_by_region.csv')
+    growth_coefficients_df.to_csv(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\growth_coefficients_by_region.csv')
     #plot all growth coefficients on a bar chart with facets for economys and x as the coefficients
     #melt
     growth_coefficients_df_melt = pd.melt(growth_coefficients_df, id_vars=['region', 'r2'], value_vars=['const', 'gdp_per_capita_growth', 'gdp_times_capita_growth'])
     #plot
     fig = px.bar(growth_coefficients_df_melt, x = 'variable', y = 'value', color = 'region', facet_col = 'region', facet_col_wrap=3, barmode='group', title='Macro regression coefficients for growth vs energy total growth')
     #save
-    fig.write_html(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/growth_coefficients_by_region.html')
+    fig.write_html(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\growth_coefficients_by_region.html')
 
 elif independent_variables == 'gdp_per_capita_growth':
     growth_coefficients_df = pd.DataFrame(columns=['region', 'const', 'gdp_per_capita_growth', 'r2'])
@@ -549,14 +549,14 @@ elif independent_variables == 'gdp_per_capita_growth':
         #save coefficients to df
         growth_coefficients_df = growth_coefficients_df.append({'region': economy, 'const': coefficients[0], 'gdp_per_capita_growth': coefficients[1], 'r2': results.rsquared}, ignore_index=True)
             #save to csv
-    growth_coefficients_df.to_csv(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/growth_coefficients_by_region.csv')
+    growth_coefficients_df.to_csv(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\growth_coefficients_by_region.csv')
     #plot all growth coefficients on a bar chart with facets for economys and x as the coefficients
     #melt
     growth_coefficients_df_melt = pd.melt(growth_coefficients_df, id_vars=['region', 'r2'], value_vars=['const', 'gdp_per_capita_growth'])
     #plot
     fig = px.bar(growth_coefficients_df_melt, x = 'variable', y = 'value', color = 'region', facet_col = 'region', facet_col_wrap=3, barmode='group', title='Macro regression coefficients for growth vs energy total growth')
     #save
-    fig.write_html(root_dir + '/' + 'plotting_output/growth_analysis/macro_regression_final/growth_coefficients_by_region.html')
+    fig.write_html(root_dir + '\\' + 'plotting_output\\growth_analysis\\macro_regression_final\\growth_coefficients_by_region.html')
 
 # %%
 #this is jsut quick might ahve to do it again.
@@ -572,9 +572,9 @@ growth_coefficients_df.loc[growth_coefficients_df['region'] == 'Developed_low_de
 # #join back on economys
 # growth_coefficients_df = growth_coefficients_df.merge(regional_mapping, on='region', how='left')
 #resave
-growth_coefficients_df.to_csv(root_dir + '/' + 'input_data/growth_coefficients_by_region.csv', index=False)
+growth_coefficients_df.to_csv(root_dir + '\\' + 'input_data\\growth_coefficients_by_region.csv', index=False)
 # %%
 #lets just  use the output for['gdp_per_capita_growth', 'gdp_times_capita_growth']. I think its thebest. but png is a bit weird so i put it in with developed low density to create Low_density
 #currenlty i think the coefficients graph is the most useful. it shows how low density economies are different to the rest because they have a larger coefficient for gdp per capita growth, which is what youd expect when an ecnonmys opoulation has to drive further
-#you can load the ocefficients via 'plotting_output/growth_analysis/macro_regression_final/growth_coefficients_by_region.csv'
+#you can load the ocefficients via 'plotting_output\\growth_analysis\\macro_regression_final\\growth_coefficients_by_region.csv'
 # %%

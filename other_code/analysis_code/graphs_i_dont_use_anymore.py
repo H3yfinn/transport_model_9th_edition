@@ -19,7 +19,7 @@ fig, ax = plt.subplots()
 for key, grp in model_output_detailed_ratio_drive.groupby(['Economy']):
     ax = grp.plot(ax=ax, kind='line', x='Year', y='BEV_ICE_ratio', label=key)
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + './plotting_output/diagnostics/{}.png'.format(title))
 
 #plot
 title='Ratio of PHEVs to ICEs for each year, by economy'
@@ -27,7 +27,7 @@ fig, ax = plt.subplots()
 for key, grp in model_output_detailed_ratio_drive.groupby(['Economy']):
     ax = grp.plot(ax=ax, kind='line', x='Year', y='PHEV_ICE_ratio', label=key)
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + './plotting_output/diagnostics/{}.png'.format(title))
 
 
 
@@ -83,6 +83,6 @@ for economy in change_dataframe_aggregation_act_ag['Economy'].unique():
         legend_name = 'Activity_growth'
         fig.add_trace(go.Scatter(x=change_dataframe_aggregation_act_ag_e['Year'], y=change_dataframe_aggregation_act_ag_e['Activity_growth'], legendgroup=legend_name, name=legend_name, showlegend=False, line=dict(color='red', dash='dot', width=2)), row=row_number, col=col_number, secondary_y=True)
 
-plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=root_dir + '\\' + './plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(root_dir + '\\' + "./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
 

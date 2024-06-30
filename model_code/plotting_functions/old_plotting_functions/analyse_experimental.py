@@ -13,10 +13,10 @@ import re
 #################
 current_working_dir = os.getcwd()
 script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}/code")
+    sys.path.append(f"{root_dir}\\code")
     import config
     import utility_functions
 else:
@@ -56,8 +56,8 @@ import plotly.io as pio
 #%%
 
 #load data in
-model_output_all = pd.read_csv(root_dir + '/' + 'output_data/model_output/{}'.format(config.model_output_file_name))
-model_output_detailed = pd.read_csv(root_dir + '/' + 'output_data/model_output_detailed/{}'.format(config.model_output_file_name))
+model_output_all = pd.read_csv(root_dir + '\\' + 'output_data\\model_output\\{}'.format(config.model_output_file_name))
+model_output_detailed = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\{}'.format(config.model_output_file_name))
 
 #FILTER FOR SCENARIO OF INTEREST
 #this should be temporary as the scenario should be passed in as a parameter through config if it is useed elsewhere
@@ -92,8 +92,8 @@ fig = px.line_3d(model_output_detailed_ratio_drive, x="BEV_ICE_ratio", y="PHEV_I
 fig.update_xaxes(range=[0, 1])
 fig.update_yaxes(range=[0, 1])
 
-plotly.offline.plot(fig, filename='./plotting_output/experimental/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# #fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\experimental\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #lets take a look at this for Vehicle_sales_share instead of stocks
@@ -123,8 +123,8 @@ fig = px.line_3d(model_output_detailed_ratio_drive, x="BEV_ICE_ratio", y="PHEV_I
 fig.update_xaxes(range=[0, 1])
 fig.update_yaxes(range=[0, 1])
 
-plotly.offline.plot(fig, filename='./plotting_output/experimental/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# #fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\experimental\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #how about a graph which combines the two above so we can see the relationship between the sales and stock shares
@@ -187,8 +187,8 @@ if change_dataframe_aggregation is not None:
             legend_name = 'Activity_growth'
             fig.add_trace(go.Scatter(x=change_dataframe_aggregation_act_ag_e['Date'], y=change_dataframe_aggregation_act_ag_e['Activity_growth'], legendgroup=legend_name, name=legend_name, showlegend=False, line=dict(color='red', dash='dot', width=2)), row=row_number, col=col_number, secondary_y=True)
 
-    plotly.offline.plot(fig, filename='./plotting_output/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-    #fig.write_image("./plotting_output/static/" + title + '.png', scale=1, width=2000, height=1500)
+    plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+    #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + title + '.png', scale=1, width=2000, height=1500)
 
 
 
@@ -217,8 +217,8 @@ for transport_type in model_output_detailed_medium_road['Transport Type'].unique
         fig = px.line(model_output_detailed_vtype_melt, x="Date", y="Efficiency", color="Drive", line_dash='Measure', facet_col="Economy", facet_col_wrap=7, title=title)#, #facet_col="Economy",
 
         fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-        plotly.offline.plot(fig, filename='./plotting_output/for_others/' + title + '_' + vehicle + '_' + transport_type + '.html',auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-        #fig.write_image("./plotting_output/static/" + title + '_' + vehicle + '_' + transport_type + '.png', scale=1, width=2000, height=1500)
+        plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\for_others\\' + title + '_' + vehicle + '_' + transport_type + '.html',auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + title + '_' + vehicle + '_' + transport_type + '.png', scale=1, width=2000, height=1500)
 
 
 
@@ -241,8 +241,8 @@ title = 'Efficiency of new vehicles by drive type vs efficiency of current stock
 fig = px.line(model_output_detailed_eff_df, x="Date", y="Efficiency", color="Drive_Transport_Vehicle", line_dash='Measure', facet_col="Economy", facet_col_wrap=7, title=title)
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 
-plotly.offline.plot(fig, filename='./plotting_output/input_exploration/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-#fig.write_image("./plotting_output/input_exploration/static/" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\input_exploration\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+#fig.write_image(root_dir + '\\' + "\\plotting_output\\input_exploration\\static\\" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 #plot the base Date efficiency values for new vehicles by drive type, transport type and vehicle type, vs the efficiency of the current stocks in use
@@ -261,8 +261,8 @@ title = 'Box plot Efficiency of new vehicles by drive type vs efficiency of curr
 fig = px.box(model_output_detailed_eff_df, x="Drive", y="Efficiency", color="Measure", facet_col="Transport_Vehicle_Type", facet_col_wrap=6, title=title)
 fig.update_traces(quartilemethod="exclusive") # or "inclusive", or "linear" by default
 
-plotly.offline.plot(fig, filename='./plotting_output/input_exploration/' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-#fig.write_image("./plotting_output/input_exploration/static/" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\input_exploration\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+#fig.write_image(root_dir + '\\' + "\\plotting_output\\input_exploration\\static\\" + title + '.png', scale=1, width=2000, height=1500)
 #%%
 
 #############################################################################################################################################################
@@ -281,7 +281,7 @@ for key, grp in model_output_detailed_bevs.groupby(['Economy']):
     ax.plot(grp['Date'], grp['Stocks'], label=key)
 
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + 'plotting_output\\diagnostics\\{}.png'.format(title))
 
 #%%
 ################################################################################################################################################################
@@ -302,5 +302,5 @@ plt.legend(loc='best')
 
 
 plt.title(title)
-plt.savefig('./plotting_output/diagnostics/{}.png'.format(title))
+plt.savefig(root_dir + '\\' + 'plotting_output\\diagnostics\\{}.png'.format(title))
 #%%
