@@ -41,7 +41,7 @@ def create_archiving_folder_for_FILE_DATE_ID():
                 os.mkdir(archive_folder_name)
         else:
             if not os.path.exists(root_dir + '\\' + 'input_data\\previous_run_archive\\'):
-                os.mkdir('input_data\\previous_run_archive\\')
+                os.mkdir(root_dir + '\\' + 'input_data\\previous_run_archive\\')
             os.mkdir(archive_folder_name)
     return archive_folder_name
 
@@ -68,7 +68,7 @@ def archive_lots_of_files(archive_folder_name):
     recursively_save_file(root_dir + '\\' + 'code', archive_folder_name, 'file_extension=.py', exclude_archive_folder=True)
     #save all csvs in \input_data\user_input_spreadsheets
     recursively_save_file(root_dir + '\\' + 'input_data\\user_input_spreadsheets', archive_folder_name, file_extension='.csv', exclude_archive_folder=True)
-    recursively_save_file(f'intermediate_data\\model_inputs\\{config.FILE_DATE_ID}', archive_folder_name, file_extension='.csv', exclude_archive_folder=True)
+    recursively_save_file(root_dir + '\\' + f'intermediate_data\\model_inputs\\{config.FILE_DATE_ID}', archive_folder_name, file_extension='.csv', exclude_archive_folder=True)
     recursively_save_file(root_dir + '\\' + 'output_data\\for_other_modellers', archive_folder_name, exclude_archive_folder=True)
     
     #and save individual files
