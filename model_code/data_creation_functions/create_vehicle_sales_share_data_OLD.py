@@ -484,7 +484,7 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
     #archive previous results:
     archiving_folder = archiving_scripts.create_archiving_folder_for_FILE_DATE_ID()
     #save the variables we used to calculate the data by savinbg the 'input_data\\vehicle_sales_share_inputs.xlsx' file
-    shutil.copy('input_data\\vehicle_sales_share_inputs.xlsx', archiving_folder + '\\vehicle_sales_share_inputs.xlsx')
+    shutil.copy(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx', archiving_folder + '\\vehicle_sales_share_inputs.xlsx')
 
     
     #before saving data to user input spreadsheety we will do some formatting:
