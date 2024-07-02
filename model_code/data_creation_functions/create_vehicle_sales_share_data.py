@@ -450,7 +450,7 @@ def load_and_check_alternate_sales_share_files(filepath, sales_shares, ECONOMY_I
             breakpoint()
             raise ValueError('The file {} has rows that are already in the sales share. Please remove these rows from the sales share or remove the file from alternate_sales_share_files'.format(filepath)) 
     
-    full_filepath = 'input_data\\alternate_sales_shares\\{}\\{}'.format(ECONOMY_ID, filepath)
+    full_filepath = root_dir + '\\' +  'input_data\\alternate_sales_shares\\{}\\{}'.format(ECONOMY_ID, filepath)
 
     return series, full_filepath
 
