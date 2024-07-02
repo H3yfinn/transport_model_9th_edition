@@ -47,7 +47,7 @@ from . import utility_functions
 
 #%%
 #we can set FILE_DATE_ID to something other than the date here which is useful if we are running the script alone, versus through integrate.py
-USE_LATEST_OUTPUT_DATE_ID = True
+USE_LATEST_OUTPUT_DATE_ID = False
 #create option to set FILE_DATE_ID to the date_id of the latest created output files. this can be helpful when producing graphs and analysing output data
 # FILE_DATE_ID = '20240529'
 try:

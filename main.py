@@ -248,7 +248,7 @@ def main(economy_to_run='all', progress_callback=None):
             folder_name =None# 'output_data\\archived_runs\\20_USA_20230902_2331'
             # archiving_scripts.revert_to_previous_version_of_files('03_CDA', 'output_data\\archived_runs\\03_CDA_20230902_1626', CURRENT_FILE_DATE_ID='20230902')
     finally:
-        pass
+        return config.FILE_DATE_ID
     #     # Restore the original state
     #     ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
 #%%
