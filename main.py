@@ -116,6 +116,10 @@ def main(economy_to_run='all', progress_callback=None):
             if economy_to_run == 'all':
                 pass
             elif economy in economy_to_run:
+                # if economy == '04_CHL':
+                #     FOUND = True
+                # if not FOUND:
+                #     continue
                 pass
             elif economy == economy_to_run:
                 pass
@@ -130,7 +134,7 @@ def main(economy_to_run='all', progress_callback=None):
             aggregate_data_for_model(ECONOMY_ID)
             progress += increment
             update_progress(progress)
-            MODEL_RUN_1  = True
+            MODEL_RUN_1  = False
             if MODEL_RUN_1:   
                 print('\nDoing first model run for {}\n'.format(economy))   
                 #MODEL RUN 1: (RUN MODEL FOR DATA BETWEEN AND INCLUDIONG BASE YEAR AND config.OUTLOOK_BASE_YEAR. This is important because we often dont have the data up to OUTLOOK_BASE_YEAR, so we have to model it. But its also important the data in the OUTLOOK_BASE_YEAR matches the energy use from ESTO. Otherwise we'd just model it all in one go)).
@@ -154,12 +158,13 @@ def main(economy_to_run='all', progress_callback=None):
             
             progress += increment
             update_progress(progress)
-            MODEL_RUN_2  = True
+            MODEL_RUN_2  = False
+            #below are required for MODEL_RUN_2. only chasnge them if you just want to run the model for the base year and not the whole period
+            PROJECT_TO_JUST_OUTLOOK_BASE_YEAR = False
+            ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR = True
             if MODEL_RUN_2:
                 print('\nDoing 2nd model run for {}\n'.format(economy))
                 #MODEL RUN 1: (RUN MODEL FOR DATA BETWEEN  AND INCLUDIONG BASE YEAR AND config.OUTLOOK_BASE_YEAR)
-                PROJECT_TO_JUST_OUTLOOK_BASE_YEAR = False
-                ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR = True
                 #perform final filtering of data (eg for one economy only)
                 supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years(BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
                 calculate_inputs_for_model(road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS)
@@ -177,29 +182,29 @@ def main(economy_to_run='all', progress_callback=None):
                 #now concatenate all the model outputs together
                 create_output_for_outlook_data_system(ECONOMY_ID)
 
-                # exec(open(f"{root_dir}\\code\\6_create_osemosys_output.py").read())
-                # import create_osemosys_output
-                # create_osemosys_output.create_osemosys_output()
-                # ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True
-                ANALYSE_OUTPUT = True
-                ARCHIVE_PREVIOUS_DASHBOARDS = False
-                if ANALYSE_OUTPUT: 
-                    estimate_kw_of_required_chargers(ECONOMY_ID)
-                    plot_required_chargers(ECONOMY_ID)
-                    calculate_and_plot_oil_displacement(ECONOMY_ID)   
-                    # produce_LMDI_graphs.produce_lots_of_LMDI_charts(ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=False, END_DATE=2035)
-                    # produce_LMDI_graphs.produce_lots_of_LMDI_charts(ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=False, END_DATE=2050)
-                    ###################do bunkers calc for this economy###################
-                    international_bunker_share_calculation_handler(ECONOMY_ID=ECONOMY_ID)
-                    ###################do bunkers calc for this economy###################
-                    try:
-                        produce_lots_of_LMDI_charts(ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
-                    except:
-                        print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
-                        breakpoint()
-                        pass
-                    dashboard_creation_handler(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
-                    # compare_esto_energy_to_data.compare_esto_energy_to_data()#UNDER DEVELOPMENT   
+            # exec(open(f"{root_dir}\\code\\6_create_osemosys_output.py").read())
+            # import create_osemosys_output
+            # create_osemosys_output.create_osemosys_output()
+            # ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True
+            ANALYSE_OUTPUT = True
+            ARCHIVE_PREVIOUS_DASHBOARDS = False
+            if ANALYSE_OUTPUT: 
+                estimate_kw_of_required_chargers(ECONOMY_ID)
+                plot_required_chargers(ECONOMY_ID)
+                calculate_and_plot_oil_displacement(ECONOMY_ID)   
+                # produce_LMDI_graphs.produce_lots_of_LMDI_charts(ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=False, END_DATE=2035)
+                # produce_LMDI_graphs.produce_lots_of_LMDI_charts(ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=False, END_DATE=2050)
+                ###################do bunkers calc for this economy###################
+                international_bunker_share_calculation_handler(ECONOMY_ID=ECONOMY_ID)
+                ###################do bunkers calc for this economy###################
+                try:
+                    produce_lots_of_LMDI_charts(ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
+                except:
+                    print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
+                    breakpoint()
+                    pass
+                dashboard_creation_handler(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
+                # compare_esto_energy_to_data.compare_esto_energy_to_data()#UNDER DEVELOPMENT   
                 
                 progress += increment
                 update_progress(progress)
@@ -215,9 +220,7 @@ def main(economy_to_run='all', progress_callback=None):
             #     with open(root_dir + '\\' + 'errors.txt', 'a') as f:
             #         f.write('Error for economy {} so skipping it. Error is {}. Time is {}\n'.format(economy, e, datetime.datetime.now()))
                     
-                    
-                
-                
+
         # international_bunkers.international_bunker_share_calculation_handler()
         print('\nFinished running model for all economies, now doing final formatting\n')
         concatenate_outlook_data_system_outputs()
@@ -247,12 +250,42 @@ def main(economy_to_run='all', progress_callback=None):
         if UNARCHIVE_RESULTS:
             folder_name =None# 'output_data\\archived_runs\\20_USA_20230902_2331'
             # archiving_scripts.revert_to_previous_version_of_files('03_CDA', 'output_data\\archived_runs\\03_CDA_20230902_1626', CURRENT_FILE_DATE_ID='20230902')
+    except Exception as e:
+        print('Error in main()')
+        print(e)
     finally:
         return config.FILE_DATE_ID
     #     # Restore the original state
     #     ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
+    
+#%%
+if __name__ == "__main__":
+    main(economy_to_run='02_BD')  # python code/main.py > output.txt 2>&1
 #%%
 
-if __name__ == "__main__":
-    main(economy_to_run='01_AUS')  # python code/main.py > output.txt 2>&1
+# dashboard_creation_handler('01_AUS')# dashboard_creation_handler(True,'20_USA')
+#%%
+# dashboard_creation_handler(True,'15_PHL', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
+# dashboard_creation_handler(True,'03_CDA')#, 
+# dashboard_creation_handler(True,'07_INA')#, PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
+# dashboard_creation_handler(True,'09_ROK', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
+# dashboard_creation_handler(True,'18_CT', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
+# remove_old_dashboards(ECONOMIES_TO_SKIP=[], dashboard_name_id=' - high evs')
+
+# setup_and_run_multi_economy_plots()
+#'03_CDA','09_ROK', '18_CT', '05_PRC', '17_SGP', '21_VN', '15_PHL', '01_AUS', '10_MAS', '07_INA', '20_USA', '19_THA', '08_JPN'
+# do for these once ive run it all
+# dashboard_creation_handler(True,'03_CDA', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
+# dashboard_creation_handler(True,'09_ROK', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
+# dashboard_creation_handler(True,'18_CT', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
+# dashboard_creation_handler(True,'05_PRC', PREVIOUS_PROJECTION_FILE_DATE_ID='20240315')
+# dashboard_creation_handler(True,'17_SGP', PREVIOUS_PROJECTION_FILE_DATE_ID='20240108')
+# dashboard_creation_handler(True,'21_VN', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
+# dashboard_creation_handler(True,'15_PHL', PREVIOUS_PROJECTION_FILE_DATE_ID='20240529')
+# # dashboard_creation_handler(True,'01_AUS', PREVIOUS_PROJECTION_FILE_DATE_ID='20240529')
+# dashboard_creation_handler(True,'10_MAS', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
+# dashboard_creation_handler(True,'07_INA', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
+# # dashboard_creation_handler(True,'20_USA', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
+# dashboard_creation_handler(True,'19_THA', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
+# dashboard_creation_handler(True,'08_JPN', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
 #%%

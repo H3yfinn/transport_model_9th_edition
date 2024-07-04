@@ -50,15 +50,15 @@ from . import utility_functions
 USE_LATEST_OUTPUT_DATE_ID = False
 #create option to set FILE_DATE_ID to the date_id of the latest created output files. this can be helpful when producing graphs and analysing output data
 # FILE_DATE_ID = '20240529'
-try:
-    if FILE_DATE_ID:
-       pass
-    elif USE_LATEST_OUTPUT_DATE_ID:
-        data_folder_path = '\\output_data\\model_output\\'
-        file_name = 'model_output_years_'
-        date_id = utility_functions.get_latest_date_for_data_file(data_folder_path, file_name)
-        FILE_DATE_ID ='_'+ date_id
-except NameError:
+# try:
+#     if FILE_DATE_ID:
+#        pass
+if USE_LATEST_OUTPUT_DATE_ID:
+    data_folder_path = '\\output_data\\model_output\\'
+    file_name = 'model_output_years_'
+    date_id = utility_functions.get_latest_date_for_data_file(data_folder_path, file_name)
+    FILE_DATE_ID ='_'+ date_id
+else:
     # FILE_DATE_ID = ''
     file_date = datetime.datetime.now().strftime("%Y%m%d")
     FILE_DATE_ID = '{}'.format(file_date)#Note that this is not the official file date id anymore because it was interacting badly with how we should instead set it in onfig.py
