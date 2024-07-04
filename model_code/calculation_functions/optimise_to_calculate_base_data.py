@@ -1462,7 +1462,7 @@ def plot_data_from_saved_results(config, ECONOMY_ID, FILE_DATE_ID=None, FILE_DAT
         results_dict = pickle.load(open(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\results_dict_{ECONOMY_ID}_{FILE_DATE_ID_MIN_HOURS}_{config.transport_data_system_FILE_DATE_ID}.pkl', 'rb'))
         plot_optimisation_results(config, optimised_data, input_data_new_road, results_dict=results_dict)
     elif FILE_DATE_ID is not None:
-        for file in os.listdir('intermediate_data\\analysis_single_use\\'):
+        for file in os.listdir(config.root_dir + '\\' + 'intermediate_data\\analysis_single_use\\'):
             if file.startswith(f'results_dict_{ECONOMY_ID}_{FILE_DATE_ID}'):
                 MIN_HOURS = file.split('_')[-1].split('.')[0]
                 FILE_DATE_ID_MIN_HOURS = f'{FILE_DATE_ID}_{MIN_HOURS}'
@@ -1473,7 +1473,7 @@ def plot_data_from_saved_results(config, ECONOMY_ID, FILE_DATE_ID=None, FILE_DAT
     else:
         #find latest file_date_id
         file_date_ids = []
-        for file in os.listdir('intermediate_data\\analysis_single_use\\'):
+        for file in os.listdir(config.root_dir + '\\' + 'intermediate_data\\analysis_single_use\\'):
             if file.startswith(f'results_dict_{ECONOMY_ID}_'):
                 file_date_ids.append(file.split('_')[-1].split('.')[0])
         file_date_ids.sort()

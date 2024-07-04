@@ -161,7 +161,7 @@ def plot_and_compare_new_growth_coefficients(config, GROWTH_MEASURES_TO_PLOT, AC
         
     with open(config.root_dir + '\\' + 'intermediate_data\\growth_analysis\\indexed_measures_to_plot.txt', 'r') as f:
         indexed_measures_to_plot = [line.rstrip() for line in f]
-    df = pd.read_pickle('intermediate_data\\growth_analysis\\df_growth_parameter_analysis.pkl')
+    df = pd.read_pickle(config.root_dir + '\\' + 'intermediate_data\\growth_analysis\\df_growth_parameter_analysis.pkl')
     
     #PLOT:
     #do this for the measures to plot and the indexed measures to plot:

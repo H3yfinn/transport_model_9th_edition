@@ -253,7 +253,7 @@ def save_economy_projections_and_all_inputs(config, ECONOMY_ID, ZIP_UP_ARCHIVE_F
     #save all data in teh output_data/for_other_modellers/{ECONOMY_ID} folder
     if not os.path.exists(archive_folder_name+'\\output_data\\for_other_modellers\\{}'.format(ECONOMY_ID)):
         os.makedirs(archive_folder_name+'\\output_data\\for_other_modellers\\{}'.format(ECONOMY_ID))
-    for file in os.listdir('output_data\\for_other_modellers\\{}'.format(ECONOMY_ID)):
+    for file in os.listdir(config.root_dir + '\\' + 'output_data\\for_other_modellers\\{}'.format(ECONOMY_ID)):
         shutil.copyfile(config.root_dir + '\\' + 'output_data\\for_other_modellers\\{}\\'.format(ECONOMY_ID)+file, archive_folder_name+'\\output_data\\for_other_modellers\\{}\\'.format(ECONOMY_ID)+file)
             
     # input_data/fuel_mixing_assumptions.xlsx
@@ -263,7 +263,7 @@ def save_economy_projections_and_all_inputs(config, ECONOMY_ID, ZIP_UP_ARCHIVE_F
     # input_data\\user_input_spreadsheets/*
     if not os.path.exists(archive_folder_name+'\\input_data\\user_input_spreadsheets'):
         os.makedirs(archive_folder_name+'\\input_data\\user_input_spreadsheets')
-    for file in os.listdir('input_data\\user_input_spreadsheets'):
+    for file in os.listdir(config.root_dir + '\\' + 'input_data\\user_input_spreadsheets'):
         if file.endswith('.csv'):
             shutil.copyfile(config.root_dir + '\\' + 'input_data\\user_input_spreadsheets\\'+file, archive_folder_name+'\\input_data\\user_input_spreadsheets\\'+file)
     
@@ -287,7 +287,7 @@ def save_economy_projections_and_all_inputs(config, ECONOMY_ID, ZIP_UP_ARCHIVE_F
     #save all csvs in config\\concordances_and_config_data/* 
     if not os.path.exists(archive_folder_name+'\\config\\concordances_and_config_data'):
         os.makedirs(archive_folder_name+'\\config\\concordances_and_config_data')
-    for file in os.listdir('config\\concordances_and_config_data'):
+    for file in os.listdir(config.root_dir + '\\' + 'config\\concordances_and_config_data'):
         if file.endswith('.csv'):
             shutil.copyfile(config.root_dir + '\\' + 'config\\concordances_and_config_data\\'+file, archive_folder_name+'\\config\\concordances_and_config_data\\'+file)
     

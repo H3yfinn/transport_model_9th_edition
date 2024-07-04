@@ -475,7 +475,7 @@ def concatenate_outlook_data_system_outputs(config):
     #load in all files:    
     for file_ending in ['transport_energy_use', 'transport_stocks']:
         final_df = pd.DataFrame()
-        for file in os.listdir('output_data\\for_other_modellers\\output_for_outlook_data_system'):
+        for file in os.listdir(config.root_dir + '\\' + 'output_data\\for_other_modellers\\output_for_outlook_data_system'):
             if file.endswith('_{}_{}.csv'.format(config.FILE_DATE_ID, file_ending)):
                 #double check its not {config.FILE_DATE_ID}_transport_energy_use.csv' since that is the file we are creating
                 if file == '{}_{}.csv'.format(config.FILE_DATE_ID, file_ending):
