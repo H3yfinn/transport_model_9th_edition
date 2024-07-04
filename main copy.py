@@ -4,7 +4,7 @@
 import os
 import sys
 import re
-from model_code import configurations
+import configurations
 from model_code.preparation_functions.import_macro_data import import_macro_data
 from model_code.preparation_functions.import_transport_system_data import import_transport_system_data
 from model_code.preparation_functions.concordance_scripts import create_all_concordances

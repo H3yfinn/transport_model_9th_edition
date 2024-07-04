@@ -1022,13 +1022,13 @@ def plotting_handler(config, ECONOMY_IDs, plots, fig_dict, color_preparation_lis
     #breakpoint()
     if 'energy_efficiency_timeseries_passenger' in plots:
         DROP_NON_ROAD_TRANSPORT=True
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_energy_efficiency_timeseries(ECONOMY_IDs,model_output_detailed,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict,
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_energy_efficiency_timeseries(config, ECONOMY_IDs,model_output_detailed,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict,
         transport_type = 'passenger', WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     
     if 'energy_efficiency_timeseries_all' in plots:
         DROP_NON_ROAD_TRANSPORT=True
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_energy_efficiency_timeseries(ECONOMY_IDs,model_output_detailed,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict,
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_energy_efficiency_timeseries(config, ECONOMY_IDs,model_output_detailed,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict,
         transport_type = 'all', WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'energy_intensity_strip' in plots:
@@ -1069,7 +1069,7 @@ def plotting_handler(config, ECONOMY_IDs, plots, fig_dict, color_preparation_lis
         fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.activity_growth(config, ECONOMY_IDs,model_output_detailed,fig_dict,  color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'compare_ev_8th_and_9th_stocks_sales' in plots:
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.compare_ev_8th_and_9th_stocks_sales(ECONOMY_IDs,data_8th, model_output_detailed,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.compare_ev_8th_and_9th_stocks_sales(config, ECONOMY_IDs,data_8th, model_output_detailed,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'decrease_in_activity_from_activity_efficiency' in plots:
         fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_decrease_in_activity_from_activity_efficiency(config, ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)

@@ -312,7 +312,7 @@ def plot_share_of_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_
 
 
 ###################################################
-def plot_share_of_transport_type_non_road(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, fig_dict, color_preparation_list, colors_dict):
+def plot_share_of_transport_type_non_road(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, fig_dict, color_preparation_list, colors_dict, WRITE_HTML=True):
     PLOTTED=True
     new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df[new_sales_shares_all_plot_drive_shares_df['Medium']!='road'].copy()
     
@@ -338,6 +338,9 @@ def plot_share_of_transport_type_non_road(config, ECONOMY_IDs, new_sales_shares_
 
             #add fig to dictionary for scenario and economy:
             fig_dict[economy][scenario]['non_road_share_of_transport_type'] = [fig, title, PLOTTED]
+            
+            if WRITE_HTML:
+                write_graph_to_html(config, filename=f'non_road_share_of_transport_type_{scenario}.html', graph_type='line', plot_data=plot_data,economy=economy, x='Date', y='Value', color='Drive', title=title, line_dash='Transport Type', y_axes_title='%', legend_title='', font_size=30, marker_line_width=2.5, line_width=10, colors_dict=colors_dict)
             # #############
             # else:
             #     raise ValueError('share_of_transport_type_type must be either passenger or freight')
@@ -3760,7 +3763,7 @@ def line_energy_use_by_transport_type(config, ECONOMY_IDs, model_output_detailed
             # Write the figure to HTML if required
             if WRITE_HTML:
                 filename = title_dict[f'{medium}_{transport_type}'] + f'_{scenario}_{economy}.html'
-                write_graph_to_html(
+                write_graph_to_html(config, 
                     filename=filename, 
                     graph_type='line', 
                     plot_data=energy_use_by_scen_by_economy, 
@@ -3988,7 +3991,7 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
     
     return fig_dict, color_preparation_list
 
-def plot_decrease_in_activity_from_activity_efficiency(config, ECONOMY_IDs, model_output_detailed_df, fig_dict, color_preparation_list, colors_dict):
+def plot_decrease_in_activity_from_activity_efficiency(config, ECONOMY_IDs, model_output_detailed_df, fig_dict, color_preparation_list, colors_dict, WRITE_HTML=True):
     #grab Activity_efficiency_improvement, activity and activity growth from model_output_detailed. backcalcualte activity if the activity efficiency is 1, by calcualting cumprod of Activity_efficiency_improvement and multiplying by activity. Then plot the activity vs the backcalculated activity for each transpott type
     
     #filter for road only
@@ -4026,9 +4029,11 @@ def plot_decrease_in_activity_from_activity_efficiency(config, ECONOMY_IDs, mode
             
             #add fig to dictionary for scenario and economy:
             fig_dict[economy][scenario]['decrease_in_activity_from_activity_efficiency'] = [fig, title, True]
+            
+            if WRITE_HTML:
+                write_graph_to_html(config, filename=f'decrease_in_activity_from_activity_efficiency_{scenario}_{economy}.html', graph_type='line', plot_data=activity_efficiency_improvement_scenario_economy, x='Date', y='Activity', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
     
     return fig_dict, color_preparation_list
-
 
 # def plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs,activity_change_for_plotting_df,fig_dict, color_preparation_list, colors_dict):
     
