@@ -7,11 +7,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 #################
 
 import pandas as pd 
@@ -35,7 +31,7 @@ from plotly.subplots import make_subplots
 #UTILITY FUNCTIONS:
 ##########################################
 
-def check_region(df_regions, data_df):
+def check_region(config, df_regions, data_df):
     
     #first find a col that is in one of the dfs not the other, for each df, and make sure there are no nas in htat col
     unique_col1 = [col for col in df_regions.columns if col not in data_df.columns][0]

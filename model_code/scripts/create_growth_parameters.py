@@ -4,11 +4,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 from ..data_creation_functions import *
 #################
 
@@ -31,18 +27,20 @@ from plotly.subplots import make_subplots
 
 ##########################
 #%%
-#grab the file D:\APERC\transport_model_9th_edition\input_data\macro\APEC_GDP_population.csv
+
+#grab the file 
+# D:\APERC\transport_model_9th_edition\input_data\macro\APEC_GDP_population.csv
 #find latest file in input_data/macro/ that starts with APEC_GDP_data_ using the FILE_DATE_ID:
-date_id = utility_functions.get_latest_date_for_data_file(root_dir + '\\' + 'input_data\\macro\\', 'APEC_GDP_data_')
-macro = pd.read_csv(root_dir + '\\' +f'input_data\\macro\\APEC_GDP_data_{date_id}.csv')
+date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + 'input_data\\macro\\', 'APEC_GDP_data_')
+macro = pd.read_csv(config.root_dir + '\\' +f'input_data\\macro\\APEC_GDP_data_{date_id}.csv')
 #pull in activity_growth from 8th edition
-activity_8th = pd.read_csv(root_dir + '\\' + 'input_data\\from_8th\\reformatted\\8th_activity_efficiency_energy_road_stocks_sales_share.csv')
+activity_8th = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\reformatted\\8th_activity_efficiency_energy_road_stocks_sales_share.csv')
 # macro.columns#Index(['economy_code', 'economy', 'date', 'variable', 'value'], dtype='object')
 #find latest date for our energy data that was cleaned in transpoirt data system:
-date_id = utility_functions.get_latest_date_for_data_file(root_dir + '\\' + '..\\transport_data_system\\intermediate_data\\EGEDA\\', 'EGEDA_transport_output')
-energy_use = pd.read_csv(root_dir + '\\' +f'..\\transport_data_system\\intermediate_data\\EGEDA\\EGEDA_transport_outputDATE{date_id}.csv')
+date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + '..\transport_data_system\intermediate_data\EGEDA\', 'EGEDA_transport_output')
+energy_use = pd.read_csv(config.root_dir + '\\' +f'..\\transport_data_system\\intermediate_data\\EGEDA\\EGEDA_transport_outputDATE{date_id}.csv')
 
-activity_9th = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\transport_data_system_extract.csv')
+activity_9th = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\transport_data_system_extract.csv')
 
 independent_variables = ['Gdp_per_capita_growth', 'Gdp_times_capita_growth', 'Gdp_growth', 'Population_growth']#, 'Population_growth_2', 'Population_growth_3']
 #add lagged and leaded variables:
@@ -69,13 +67,13 @@ ACTIVITY_MEASURES_TO_PLOT = [
 ]
 #%%
     
-def calculate_and_analyse_activity_growth_using_new_growth_coefficients(growth_coefficients_df, energy_macro, activity_9th, activity_8th,independent_variables, models, GROWTH_MEASURES_TO_PLOT, ACTIVITY_MEASURES_TO_PLOT):
+def calculate_and_analyse_activity_growth_using_new_growth_coefficients(config, growth_coefficients_df, energy_macro, activity_9th, activity_8th, independent_variables, models, GROWTH_MEASURES_TO_PLOT, ACTIVITY_MEASURES_TO_PLOT):
     # breakpoint()
-    activity_growth_8th, activity_8th = growth_parameter_creation_functions.format_8th_edition_data(activity_8th)
+    activity_growth_8th, activity_8th = growth_parameter_creation_functions.format_8th_edition_data(config, activity_8th)
     
-    BASE_YEAR_activity_9th = growth_parameter_creation_functions.import_BASE_YEAR_activity_9th(activity_9th)
+    BASE_YEAR_activity_9th = growth_parameter_creation_functions.import_BASE_YEAR_activity_9th(config, activity_9th)
     
-    df, measures_to_plot,indexed_measures_to_plot = growth_parameter_creation_functions.prepare_comparison_inputs(growth_coefficients_df, energy_macro, BASE_YEAR_activity_9th, activity_growth_8th, activity_8th,independent_variables,models)
+    df, measures_to_plot,indexed_measures_to_plot = growth_parameter_creation_functions.prepare_comparison_inputs(config, growth_coefficients_df, energy_macro, BASE_YEAR_activity_9th, activity_growth_8th, activity_8th,independent_variables,models)
     
     #####################
     # PLOTTING
@@ -83,44 +81,44 @@ def calculate_and_analyse_activity_growth_using_new_growth_coefficients(growth_c
     #save results to pickle so we can plot them when we want:
     df.to_pickle('intermediate_data\\growth_analysis\\df_growth_parameter_analysis.pkl')
     
-    with open(root_dir + '\\' + 'intermediate_data\\growth_analysis\\measures_to_plot.txt', 'w') as f:
+    with open(config.root_dir + '\\' + 'intermediate_data\\growth_analysis\\measures_to_plot.txt', 'w') as f:
         for item in measures_to_plot:
             f.write("%s\n" % item)
-    with open(root_dir + '\\' + 'intermediate_data\\growth_analysis\\indexed_measures_to_plot.txt', 'w') as f:
+    with open(config.root_dir + '\\' + 'intermediate_data\\growth_analysis\\indexed_measures_to_plot.txt', 'w') as f:
         for item in indexed_measures_to_plot:
             f.write("%s\n" % item)
 
-    growth_parameter_creation_functions.plot_and_compare_new_growth_coefficients(GROWTH_MEASURES_TO_PLOT, ACTIVITY_MEASURES_TO_PLOT)
+    growth_parameter_creation_functions.plot_and_compare_new_growth_coefficients(config, GROWTH_MEASURES_TO_PLOT, ACTIVITY_MEASURES_TO_PLOT)
     
     
-def create_growth_parameters(macro, energy_use, independent_variables):
-    macro = growth_parameter_creation_functions.macro_formatting(macro)
-    energy_use = growth_parameter_creation_functions.APERC_energy_formatting(energy_use)
+def create_growth_parameters(config, macro, energy_use, independent_variables):
+    macro = growth_parameter_creation_functions.macro_formatting(config, macro)
+    energy_use = growth_parameter_creation_functions.APERC_energy_formatting(config, energy_use)
 
-    energy_macro = growth_parameter_creation_functions.merge_macro_and_energy(macro, energy_use)
-    energy_macro = growth_parameter_creation_functions.caculate_growth_rates(energy_macro)
-    energy_macro = growth_parameter_creation_functions.group_by_region(energy_macro, region_column='Region_growth_regression2')
+    energy_macro = growth_parameter_creation_functions.merge_macro_and_energy(config, macro, energy_use)
+    energy_macro = growth_parameter_creation_functions.caculate_growth_rates(config, energy_macro)
+    energy_macro = growth_parameter_creation_functions.group_by_region(config, energy_macro, region_column='Region_growth_regression2')
     
     #drop 00_apec from the data. Maybe later i can try incroporating it across all regions
     energy_macro = energy_macro[energy_macro['Economy']!='00_APEC']
     
-    energy_macro = create_duplicate_columns(energy_macro, independent_variables)
+    energy_macro = create_duplicate_columns(config, energy_macro, independent_variables)
 
-    energy_macro = create_lag_and_lead_handler(energy_macro, independent_variables)
+    energy_macro = create_lag_and_lead_handler(config, energy_macro, independent_variables)
     #breakpoint()
     energy_macro = energy_macro[['Economy','Region', 'Date', 'Total_growth','road_growth', 'Total','road', 'Gdp', 'Population', 'Gdp_per_capita', 'Gdp_times_capita']+independent_variables]
     
     energy_macro.rename(columns={'Total': 'energy_total', 'road': 'energy_road',  'Total_growth': 'energy_total_growth', 'road_growth': 'energy_road_growth'}, inplace=True)        
     return energy_macro
 
-def create_duplicate_columns(df, independent_variables):
+def create_duplicate_columns(config, df, independent_variables):
     duplicates = [col for col in independent_variables if re.search(r'_\d*$', col)]
     for duplicate in duplicates:
         original_col = re.sub(r'_\d*$', '', duplicate)
         df[duplicate] = df[original_col].copy()
     return df
 
-def create_lag_and_lead_handler(df, independent_variables):
+def create_lag_and_lead_handler(config, df, independent_variables):
     lag_cols = [col for col in independent_variables if re.search(r'_lag\d*$', col)]
     lead_cols = [col for col in independent_variables if re.search(r'_lead\d*$', col)]
     
@@ -143,17 +141,17 @@ def create_lag_and_lead_handler(df, independent_variables):
     
     return df
 
-def growth_analysis_handler(independent_variables, dependent_variable, macro, energy_use, activity_8th, activity_9th, models, GROWTH_MEASURES_TO_PLOT, ACTIVITY_MEASURES_TO_PLOT):
+def growth_analysis_handler(config, independent_variables, dependent_variable, macro, energy_use, activity_8th, activity_9th, models, GROWTH_MEASURES_TO_PLOT, ACTIVITY_MEASURES_TO_PLOT):
     # breakpoint()
-    energy_macro = create_growth_parameters(macro, energy_use,independent_variables)
+    energy_macro = create_growth_parameters(config, macro, energy_use,independent_variables)
     df = energy_macro.copy()
     
     # growth_coefficients_df = model_handler(df, x, y,independent_variables, drop_outliers=False)
-    growth_coefficients_df = growth_parameter_creation_functions.find_growth_coefficients(df, independent_variables,dependent_variable,models)
+    growth_coefficients_df = growth_parameter_creation_functions.find_growth_coefficients(config, df, independent_variables,dependent_variable,models)
     
     growth_coefficients_df.to_csv(f'intermediate_data\\growth_analysis\\growth_coefficients_by_region{config.FILE_DATE_ID}.csv', index=False)
     #ANALYSIS
-    growth_parameter_creation_functions.plot_growth_coefficients(growth_coefficients_df, independent_variables)
+    growth_parameter_creation_functions.plot_growth_coefficients(config, growth_coefficients_df, independent_variables)
     
     #attach economy col to growth_coefficients_df:
     growth_coefficients_df = pd.merge(growth_coefficients_df, df[['Economy', 'Region']].drop_duplicates(), on='Region', how='left')
@@ -161,32 +159,32 @@ def growth_analysis_handler(independent_variables, dependent_variable, macro, en
     growth_coefficients_df.drop(columns=['Region'], inplace=True)
     
     #COMPARE THE GROWTH COEFFICIENTS TO FIND THE BEST ONE:
-    calculate_and_analyse_activity_growth_using_new_growth_coefficients(growth_coefficients_df, energy_macro, activity_9th, activity_8th,independent_variables,models, GROWTH_MEASURES_TO_PLOT, ACTIVITY_MEASURES_TO_PLOT)
+    calculate_and_analyse_activity_growth_using_new_growth_coefficients(config, growth_coefficients_df, energy_macro, activity_9th, activity_8th,independent_variables,models, GROWTH_MEASURES_TO_PLOT, ACTIVITY_MEASURES_TO_PLOT)
     
-def filter_coefficients_for_chosen_model(growth_coefficients_df, models):
+def filter_coefficients_for_chosen_model(config, growth_coefficients_df, models):
     # breakpoint()
     growth_coefficients_df = growth_coefficients_df[growth_coefficients_df['model'].isin(models)]
     return growth_coefficients_df
 
 #%%
 
-def choose_and_filter_for_model_by_region(chosen_model_by_region_dict, chosen_file_date_id=None,region_column = 'Region_growth_regression2'):
+def choose_and_filter_for_model_by_region(config, chosen_model_by_region_dict, chosen_file_date_id=None, region_column = 'Region_growth_regression2'):
     #find latest date for this file: 
     # csv(f'intermediate_data\\growth_analysis\\growth_coefficients_by_region{config.FILE_DATE_ID}.csv', index=False)
     if chosen_file_date_id is not None:
         date_id = chosen_file_date_id
     else:
         
-        date_id = utility_functions.get_latest_date_for_data_file(root_dir + '\\' + 'intermediate_data\\growth_analysis\\','growth_coefficients_by_region')
+        date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + 'intermediate_data\growth_analysis\','growth_coefficients_by_region')
         
-    growth_coefficients_df = pd.read_csv(root_dir + '\\' +f'intermediate_data\\growth_analysis\\growth_coefficients_by_region{date_id}.csv')
+    growth_coefficients_df = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\growth_analysis\\growth_coefficients_by_region{date_id}.csv')
     #now filter out the data we dont want by choosing the model we wwant for each region
     new_df = pd.DataFrame()
     for region, model in chosen_model_by_region_dict.items():
         df_dummy = growth_coefficients_df[(growth_coefficients_df['Region']==region)&(growth_coefficients_df['Model']==model)]
         new_df = pd.concat([new_df, df_dummy])
     
-    regional_mapping = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\region_economy_mapping.csv')
+    regional_mapping = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\region_economy_mapping.csv')
     #extract Region_growth_regression and Economy
     regional_mapping = regional_mapping[[region_column, 'Economy']]
     #make economyt lowercase
@@ -201,13 +199,13 @@ def choose_and_filter_for_model_by_region(chosen_model_by_region_dict, chosen_fi
         df.to_csv(f'input_data\\previous_growth_coefficients\\growth_coefficients_by_region{date_id}.csv', index=False)
     
     #now save to same location as before
-    df.to_csv(root_dir + '\\' + 'input_data\\growth_coefficients_by_region.csv', index=False)
+    df.to_csv(config.root_dir + '\\' + 'input_data\\growth_coefficients_by_region.csv', index=False)
     
     
         
 #%%
 
-growth_analysis_handler(independent_variables, dependent_variable, macro, energy_use, activity_8th, activity_9th, models, GROWTH_MEASURES_TO_PLOT, ACTIVITY_MEASURES_TO_PLOT)
+growth_analysis_handler(config, independent_variables, dependent_variable, macro, energy_use, activity_8th, activity_9th, models, GROWTH_MEASURES_TO_PLOT, ACTIVITY_MEASURES_TO_PLOT)
 #%%
 chosen=True
 if chosen:
@@ -217,7 +215,7 @@ if chosen:
     # Developed_high_density
     chosen_model_by_region_dict ={'Low_density':'lasso', 'City':'lasso', 'Developing_high_density':'lasso', 'Developed_high_density':'lasso'}
 
-    choose_and_filter_for_model_by_region(chosen_model_by_region_dict,region_column = 'Region_growth_regression2')
+    choose_and_filter_for_model_by_region(config, chosen_model_by_region_dict,region_column = 'Region_growth_regression2')
         
     
 #%%

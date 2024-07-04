@@ -6,11 +6,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 from ..calculation_functions import adjust_data_to_match_esto
 #################
 
@@ -32,7 +28,7 @@ from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 
 #%%
-def import_transport_system_data():
+def import_transport_system_data(config):
     """
     Imports data from the transport data system and returns a dictionary of data frames.
 
@@ -46,7 +42,7 @@ def import_transport_system_data():
     #import data from the transport data system and extract what we need from it.
     # We can use the model_concordances_measures concordance file to determine what we need to extract from the transport data system. This way we dont rely on things like dataset names.
 
-    model_concordances_measures = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_base_year_measures_file_name))
+    model_concordances_measures = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_base_year_measures_file_name))
 
 
     #load transport data  from the transport data system which is out of this repo but is in the same folder as this repo #file name is like DATE20221214_interpolated_combined_data_concordance
@@ -59,7 +55,7 @@ def import_transport_system_data():
         transport_data_system_folder = '..\\transport_data_system\\output_data'
     else:
         transport_data_system_folder = 'input_data\\transport_data_system'
-    transport_data_system_df = pd.read_csv(root_dir + '\\' + '{}\\combined_data_{}.csv'.format(transport_data_system_folder,config.transport_data_system_FILE_DATE_ID))
+    transport_data_system_df = pd.read_csv(config.root_dir + '\\' + '{}\\combined_data_{}.csv'.format(transport_data_system_folder,config.transport_data_system_FILE_DATE_ID))
 
     
     #if they are there, remove cols called index, level_0
@@ -103,14 +99,14 @@ def import_transport_system_data():
     #filter for the same measures as are in the model concordances in the transport data system
     transport_data_system_df = transport_data_system_df[transport_data_system_df.Measure.isin(model_concordances_measures.Measure.unique())]
     
-    TRANSPORT_DATA_SYSTEM_DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['TRANSPORT_DATA_SYSTEM_DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS']
+    TRANSPORT_DATA_SYSTEM_DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['TRANSPORT_DATA_SYSTEM_DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS']
     new_transport_data_system_df = pd.DataFrame()
     
     for economy in transport_data_system_df.Economy.unique():
         DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS = TRANSPORT_DATA_SYSTEM_DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS[economy]
         transport_data_system_df_economy = transport_data_system_df[transport_data_system_df.Economy==economy].copy()
         
-        transport_data_system_df_economy = adjust_non_road_TEMP(transport_data_system_df_economy,model_concordances_measures,DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS, economy)   
+        transport_data_system_df_economy = adjust_non_road_TEMP(config, transport_data_system_df_economy,model_concordances_measures,DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS, economy)   
     
         new_transport_data_system_df = pd.concat([new_transport_data_system_df, transport_data_system_df_economy]) 
     
@@ -119,7 +115,7 @@ def import_transport_system_data():
 
 
     ################################MANUAL FIXES HERE################################
-    transport_data_system_df = manual_fixes(transport_data_system_df)
+    transport_data_system_df = manual_fixes(config, transport_data_system_df)
     
     ################################MANUAL FIXES HERE################################
     
@@ -193,7 +189,7 @@ def import_transport_system_data():
             #save a to a csv so we can see what values are missing and fill them in in the trans[port datasyetem
             save_this = True
             if save_this:
-              a.to_csv(root_dir + '\\' + 'intermediate_data\\transport_data_system\\missing_important_values.csv')
+              a.to_csv(config.root_dir + '\\' + 'intermediate_data\\transport_data_system\\missing_important_values.csv')
             if USE_REPLACEMENTS:#im not sure what the intendsed option if this was false was? I guess it doesnt really matter, we have made it so that the data coming from the transport data system is what we need.
                 #for now jsut replace them with the mean for the same vehicle type:
                 #first find the mean for each vehicle type by measure and then replace the missing values with these means
@@ -266,7 +262,7 @@ def import_transport_system_data():
     if not missing_index_values1.empty:
         missing_index_values1.reset_index(inplace=True)
         #save the missing values to a csv for use separately:
-        missing_index_values1.to_csv(root_dir + '\\' + 'output_data\\for_other_modellers\\missing_values\\{}_missing_input_values.csv'.format(config.FILE_DATE_ID), index=False)
+        missing_index_values1.to_csv(config.root_dir + '\\' + 'output_data\\for_other_modellers\\missing_values\\{}_missing_input_values.csv'.format(config.FILE_DATE_ID), index=False)
     else:
         print('No missing values in the transport data system dataset')
     
@@ -288,12 +284,12 @@ def import_transport_system_data():
     # new_transport_data_system_df = new_transport_data_system_df[new_transport_data_system_df.Date <= config.DEFAULT_BASE_YEAR]
     
     #save the new transport dataset
-    new_transport_data_system_df.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\transport_data_system_extract.csv', index=False)
+    new_transport_data_system_df.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\transport_data_system_extract.csv', index=False)
 
 
 #TODO need to update thids
 
-def adjust_non_road_TEMP(transport_data_system_df, model_concordances_measures,TRANSPORT_DATA_SYSTEM_DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS, SINGLE_ECONOMY=None, RAISE_ERROR=False):
+def adjust_non_road_TEMP(config, transport_data_system_df, model_concordances_measures, TRANSPORT_DATA_SYSTEM_DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS, SINGLE_ECONOMY=None, RAISE_ERROR=False):
     """
     Adjusts the non-road transport data in the transport data system dataframe.
 
@@ -312,13 +308,13 @@ def adjust_non_road_TEMP(transport_data_system_df, model_concordances_measures,T
     #however, we will also adjsut the intensity values a tad, since you can expect inttensity of electiricty to be at least a half of that of the fossil fuel types. so we will adjust the intensity of electricity to be 0.5 of the fossil fuel types.
     transport_data_system_df_road=transport_data_system_df[transport_data_system_df['Medium']=='road'].copy()
     #load model concordances with fuels
-    model_concordances_fuels = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
+    model_concordances_fuels = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
 
 
-    # date_id = utility_functions.get_latest_date_for_data_file(root_dir + '\\' + '..\\transport_data_system\\intermediate_data\\EGEDA\\', 'model_input_9th_cleaned')
-    # esto_non_road = pd.read_csv(root_dir + '\\' +f'..\\transport_data_system\\intermediate_data\\EGEDA\\model_input_9th_cleanedDATE{date_id}.csv')
+    # date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + '..\transport_data_system\intermediate_data\EGEDA\', 'model_input_9th_cleaned')
+    # esto_non_road = pd.read_csv(config.root_dir + '\\' +f'..\\transport_data_system\\intermediate_data\\EGEDA\\model_input_9th_cleanedDATE{date_id}.csv')
     
-    energy_use_esto = adjust_data_to_match_esto.format_9th_input_energy_from_esto()
+    energy_use_esto = adjust_data_to_match_esto.format_9th_input_energy_from_esto(config)
     
     #keep medium in rail, air and ship
     esto_non_road = energy_use_esto[energy_use_esto.Medium.isin(['rail', 'air', 'ship'])].copy()
@@ -362,7 +358,7 @@ def adjust_non_road_TEMP(transport_data_system_df, model_concordances_measures,T
     esto_non_road_drives = pd.merge(esto_non_road, model_concordances_fuels_non_road, how='outer', on=['Medium', 'Fuel'])
 
     #also drop any fuels that are mixed in on the supply side only (i.e. biofuels):    
-    supply_side_fuel_mixing_fuels = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_supply_side_fuel_mixing_file_name), dtype={'Demand_side_fuel_mixing': str}).New_fuel.unique().tolist()
+    supply_side_fuel_mixing_fuels = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_supply_side_fuel_mixing_file_name), dtype={'Demand_side_fuel_mixing': str}).New_fuel.unique().tolist()
     # #TEMP
     # #IF 16_01_biogas ISNT IN THERE, ADD IT
     # if '16_01_biogas' not in supply_side_fuel_mixing_fuels:
@@ -547,7 +543,7 @@ def adjust_non_road_TEMP(transport_data_system_df, model_concordances_measures,T
     new_drive_types = [drive for drive in final_df_non_road.Drive.dropna().unique().tolist() if 'electric' in drive]# or 'ammonia' in drive or 'hydrogen' in drive]
 
     #set intensity to 0.5 for electric drive types
-    final_df_non_road['Intensity'] = final_df_non_road.apply(lambda row: set_new_non_road_drives_to_half_intensity(row,new_drive_types), axis=1)
+    final_df_non_road['Intensity'] = final_df_non_road.apply(lambda row: set_new_non_road_drives_to_half_intensity(config, row,new_drive_types), axis=1)
     
     #where the drive is in electric_drive_types, set the intensity to 0.5 of the intensity 
     # final_df_non_road.loc[final_df_non_road['Drive'].isin(electric_drive_types), 'Intensity'] = final_df_non_road.loc[final_df_non_road['Drive'].isin(electric_drive_types)].Intensity * 0.5
@@ -580,14 +576,14 @@ def adjust_non_road_TEMP(transport_data_system_df, model_concordances_measures,T
     return transport_data_system_df_new
 
     
-def set_new_non_road_drives_to_half_intensity(row,new_drive_types):
+def set_new_non_road_drives_to_half_intensity(config, row, new_drive_types):
     #made in to a funciton for visibilty!
     if row.Drive in new_drive_types:
         return row.Intensity * 0.5
     else:
         return row.Intensity
     
-def manual_fixes(transport_data_system_df):
+def manual_fixes(config, transport_data_system_df):
     #in rare occasions its necessary to manually fix the transport data system data. This is where we do that.
 
     #halve the intensity of indonesian rail so we get more activity per pj
@@ -595,5 +591,5 @@ def manual_fixes(transport_data_system_df):
     
     return transport_data_system_df
 #%%
-# import_transport_system_data()
+# import_transport_system_data(config)
 #%%

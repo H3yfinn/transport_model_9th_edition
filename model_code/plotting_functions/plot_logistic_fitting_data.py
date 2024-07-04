@@ -4,11 +4,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 from ..calculation_functions import logistic_fitting_functions
 #################
 
@@ -28,7 +24,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
-def plot_logistic_fit(date, stocks_per_capita, gdp_per_capita, gamma, growth_rate, midpoint, economy_ttype_scenario,show_plots, matplotlib_bool, plotly_bool):
+def plot_logistic_fit(config, date, stocks_per_capita, gdp_per_capita, gamma, growth_rate, midpoint, economy_ttype_scenario, show_plots, matplotlib_bool, plotly_bool):
     if plotly_bool:
         #now plot the results with x = date, y = stocks per capita
         fig = go.Figure()
@@ -40,9 +36,9 @@ def plot_logistic_fit(date, stocks_per_capita, gdp_per_capita, gamma, growth_rat
         #write to png and open it
         write_to_img = False
         if write_to_img:
-            fig.write_image(f'plotting_output\\input_exploration\\gompertz\\fitting\\log_fit_{economy_ttype_scenario}.png')
+            fig.write_image(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\fitting\\log_fit_{economy_ttype_scenario}.png')
         #write to html
-        fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\fitting\\log_fit_{economy_ttype_scenario}.html')
+        fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\fitting\\log_fit_{economy_ttype_scenario}.html')
 
         #and plot the same but wth gdp per capita in x
         fig = go.Figure()
@@ -52,10 +48,10 @@ def plot_logistic_fit(date, stocks_per_capita, gdp_per_capita, gamma, growth_rat
         #plot gamma as its own value for every date
         fig.add_trace(go.Scatter(x=gdp_per_capita, y=[gamma]*len(gdp_per_capita), mode='lines', name='gamma'))
         if write_to_img:
-            fig.write_image(f'plotting_output\\input_exploration\\gompertz\\fitting\\log_fit_gdp_per_capita_{economy_ttype_scenario}.png')
-        fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\fitting\\logistic_fit_gdp_per_capita_{economy_ttype_scenario}.html')
+            fig.write_image(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\fitting\\log_fit_gdp_per_capita_{economy_ttype_scenario}.png')
+        fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\fitting\\logistic_fit_gdp_per_capita_{economy_ttype_scenario}.html')
         
-def plot_logistic_function_all_economies(model_data_logistic_predictions, activity_growth_estimates, parameters_estimates, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA):
+def plot_logistic_function_all_economies(config, model_data_logistic_predictions, activity_growth_estimates, parameters_estimates, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA):
     #we will plot the results of the logistic function fit. To cut down on the number of plots we will facet by economy and onily plot the first scenario
     #we will also plot the gamma value for each economy as a horizontal line if the data is on stock per capita
     #extact model_data that will be used. so grab passenger transport type, times by the 
@@ -90,13 +86,13 @@ def plot_logistic_function_all_economies(model_data_logistic_predictions, activi
             fig = px.line(all_data_stocks_per_capita, x='Date', y='Stocks_per_thousand_capita_value', color='Transport Type Scenario',line_dash='Measure', facet_col='Economy', facet_col_wrap=7, title='Comparitive stocks per capita')#, markers=True)
 
             #write to html
-            fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\log_fit_new_stocks_per_capita_all_economies.html')
+            fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\log_fit_new_stocks_per_capita_all_economies.html')
             ######################
             #and plot the same but wth gdp per capita in x
             fig = px.line(all_data_stocks_per_capita, x='Gdp_per_capita', y='Stocks_per_thousand_capita_value', line_dash='Measure', facet_col='Economy', color='Transport Type Scenario',facet_col_wrap=7, title='Comparitive stocks per capita vs GDP per capita')#, markers=True)
 
             #write to html
-            fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\log_fit_new_stocks_per_capita_gdp_per_capita_all_economies.html')
+            fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\log_fit_new_stocks_per_capita_gdp_per_capita_all_economies.html')
     
         ######################
         #plot stocks for each economy with x as gdp per capita and then x as date. First calcualte stocks from the logistic function 
@@ -114,12 +110,12 @@ def plot_logistic_function_all_economies(model_data_logistic_predictions, activi
             all_data_stocks['Transport Type Scenario'] = all_data_stocks['Transport Type'] + ' ' + all_data_stocks['Scenario']
             fig = px.line(all_data_stocks, x='Date', y='Stocks_value', color='Transport Type Scenario', line_dash = 'Stocks', facet_col='Economy', facet_col_wrap=7, title='Stocks for each economy')#, markers=True)
             #write to html
-            fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\log_fit_new_stocks_all_economies.html')
+            fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\log_fit_new_stocks_all_economies.html')
 
             ######################
             fig = px.line(all_data_stocks, x='Gdp_per_capita', y='Stocks_value', facet_col='Economy', color='Transport Type Scenario', line_dash = 'Stocks',  facet_col_wrap=7, title='Stocks for each economy with x as gdp per cpita')#, markers=True)
             #write to html
-            fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\log_fit_new_stocks_all_economies.html')
+            fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\log_fit_new_stocks_all_economies.html')
 
         ######################
 
@@ -149,11 +145,11 @@ def plot_logistic_function_all_economies(model_data_logistic_predictions, activi
             fig = px.line(all_data_activity_growth, x='Date', y='Activity_growth_value', color='Transport Type Scenario',line_dash='Activity_growth', facet_col='Economy', facet_col_wrap=7, title='Comparitive activity growth')#, markers=True)
 
             #write to html
-            fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\log_fit_new_activity_growth.html')
+            fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\log_fit_new_activity_growth.html')
         
         ######################
 
-def plot_logistic_function_by_economy(model_data_logistic_predictions, activity_growth_estimates, parameters_estimates, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA):
+def plot_logistic_function_by_economy(config, model_data_logistic_predictions, activity_growth_estimates, parameters_estimates, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA):
     #we will plot the results of the logistic function fit. To cut down on the number of plots we will facet by economy and onily plot the first scenario
     #we will also plot the gamma value for each economy as a horizontal line if the data is on stock per capita
     #extact new_model_data that will be used
@@ -207,13 +203,13 @@ def plot_logistic_function_by_economy(model_data_logistic_predictions, activity_
                     fig = px.line(all_data_stocks_per_capita, x='Date', y='Stocks_per_thousand_capita_value', color='Transport Type',line_dash='Measure', title=f'Comparitive stocks per capita {economy}', facet_col='Scenario', facet_col_wrap=1)#, markers=True)
 
                     #write to html
-                    fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\economy\\log_fit_new_stocks_per_capita_{economy}.html')
+                    fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\economy\\log_fit_new_stocks_per_capita_{economy}.html')
                     
                     #and plot the same but wth gdp per capita in x
                     fig = px.line(all_data_stocks_per_capita, x='Gdp_per_capita', y='Stocks_per_thousand_capita_value', line_dash='Measure', color='Transport Type', title=f'Comparitive stocks per capita vs GDP per capita {economy}', facet_col='Scenario', facet_col_wrap=1)#, markers=True)#, markers=True)
 
                     #write to html
-                    fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\economy\\log_fit_new_stocks_per_capita_gdp_per_capita_{economy}.html')
+                    fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\economy\\log_fit_new_stocks_per_capita_gdp_per_capita_{economy}.html')
 
                 #now plot the activity growth vs the previous activity growth from the df activity_growth_estimates
                             
@@ -240,39 +236,39 @@ def plot_logistic_function_by_economy(model_data_logistic_predictions, activity_
                     fig = px.line(all_data_activity_growth, x='Date', y='Activity_growth_value', color='Transport Type',line_dash='Activity_growth', title=f'Comparitive activity growth {economy}', facet_col='Scenario', facet_col_wrap=1)#, markers=True)#, markers=True)
 
                     #write to html
-                    fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\economy\\log_fit_new_activity_growth_{economy}.html')
+                    fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\economy\\log_fit_new_activity_growth_{economy}.html')
                 
                 #o same graph for stocks:
                 all_data_economy_stocks = all_data_economy[['Economy','Date','Scenario','Transport Type', 'Gdp_per_capita', 'Stocks_logistic', 'Stocks_previous']]
                 #melt
                 all_data_economy_stocks_melt = all_data_economy_stocks.melt(id_vars=['Economy', 'Transport Type','Date','Scenario', 'Gdp_per_capita'], value_vars=['Stocks_logistic', 'Stocks_previous'], var_name='Stocks', value_name='Stocks_value')
                 fig = px.line(all_data_economy_stocks_melt, x='Date', y='Stocks_value', color='Transport Type',line_dash='Stocks', title=f'Comparitive stocks {economy}', facet_col='Scenario', facet_col_wrap=1)#, markers=True)#, markers=True)
-                fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\economy\\log_fit_new_stocks_{economy}.html')
+                fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\economy\\log_fit_new_stocks_{economy}.html')
                 
-def plot_aggregated_input_data_for_logisitc_fitting(ECONOMY_ID, new_model_data):
+def plot_aggregated_input_data_for_logisitc_fitting(config, ECONOMY_ID, new_model_data):
     #the pltos will go in \input_exploration\gompertz\aggregated_input_data
     #plot the data for ['Economy', 'Scenario', 'Date', 'Transport Type']
     a = new_model_data.copy()
     a['Transport Type'] = a['Transport Type']+'_'+a['Scenario'] + '_'+a['Economy']
     fig = px.line(a, x='Date', y='Stocks', color='Transport Type')
-    fig.write_html(root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_stocks.html'.format(ECONOMY_ID))
+    fig.write_html(config.root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_stocks.html'.format(ECONOMY_ID))
     
     fig = px.line(a, x='Date', y='Activity', color='Transport Type')
-    fig.write_html(root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_activity.html'.format(ECONOMY_ID))
+    fig.write_html(config.root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_activity.html'.format(ECONOMY_ID))
     
     fig = px.line(a, x='Date', y='Travel_km', color='Transport Type')
-    fig.write_html(root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_travel_km.html'.format(ECONOMY_ID))
+    fig.write_html(config.root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_travel_km.html'.format(ECONOMY_ID))
     
     fig = px.line(a, x='Date', y='Mileage', color='Transport Type')
-    fig.write_html(root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_mileage.html'.format(ECONOMY_ID))
+    fig.write_html(config.root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_mileage.html'.format(ECONOMY_ID))
     
     fig = px.line(a, x='Date', y='Occupancy_or_load', color='Transport Type')
-    fig.write_html(root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_occupancy_or_load.html'.format(ECONOMY_ID))
+    fig.write_html(config.root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_occupancy_or_load.html'.format(ECONOMY_ID))
     
     fig = px.line(a, x='Date', y='Population', color='Transport Type')
-    fig.write_html(root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_population.html'.format(ECONOMY_ID))
+    fig.write_html(config.root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_population.html'.format(ECONOMY_ID))
     
     fig = px.line(a, x='Date', y='Gdp_per_capita', color='Transport Type')
-    fig.write_html(root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_gdp_per_capita.html'.format(ECONOMY_ID))
+    fig.write_html(config.root_dir + '\\' + 'plotting_output\\input_exploration\\gompertz\\aggregated_input_data\\{}_gdp_per_capita.html'.format(ECONOMY_ID))
     
     return

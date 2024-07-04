@@ -4,11 +4,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 #################
 
 import pandas as pd 
@@ -41,7 +37,7 @@ drop_outliers = True
 
 #%%
 #%%
-def prepare_comparison_inputs(growth_coefficients_df, energy_macro, BASE_YEAR_activity_9th, activity_growth_8th, activity_8th,independent_variables, models):
+def prepare_comparison_inputs(config, growth_coefficients_df, energy_macro, BASE_YEAR_activity_9th, activity_growth_8th, activity_8th, independent_variables, models):
     growth_coefficients_df_copy = growth_coefficients_df.copy()
     energy_macro_copy = energy_macro.copy()
     BASE_YEAR_activity_9th_copy = BASE_YEAR_activity_9th.copy()
@@ -158,12 +154,12 @@ def prepare_comparison_inputs(growth_coefficients_df, energy_macro, BASE_YEAR_ac
     return df, measures_to_plot, indexed_measures_to_plot
 
 #now plot the results:
-def plot_and_compare_new_growth_coefficients(GROWTH_MEASURES_TO_PLOT, ACTIVITY_MEASURES_TO_PLOT):
+def plot_and_compare_new_growth_coefficients(config, GROWTH_MEASURES_TO_PLOT, ACTIVITY_MEASURES_TO_PLOT):
     #LOAD DATA:
-    with open(root_dir + '\\' + 'intermediate_data\\growth_analysis\\measures_to_plot.txt', 'r') as f:
+    with open(config.root_dir + '\\' + 'intermediate_data\\growth_analysis\\measures_to_plot.txt', 'r') as f:
         measures_to_plot = [line.rstrip() for line in f]
         
-    with open(root_dir + '\\' + 'intermediate_data\\growth_analysis\\indexed_measures_to_plot.txt', 'r') as f:
+    with open(config.root_dir + '\\' + 'intermediate_data\\growth_analysis\\indexed_measures_to_plot.txt', 'r') as f:
         indexed_measures_to_plot = [line.rstrip() for line in f]
     df = pd.read_pickle('intermediate_data\\growth_analysis\\df_growth_parameter_analysis.pkl')
     
@@ -175,32 +171,32 @@ def plot_and_compare_new_growth_coefficients(GROWTH_MEASURES_TO_PLOT, ACTIVITY_M
         title = f'{economy} - activity growth using new growth coefficients'
         fig = px.line(df_economy, x='Date', y=measures_to_plot, title=title)
         #write to html
-        fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
+        fig.write_html(config.root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
         
         #and plot for the indexed measures:
         title = f'{economy} - indexed activity growth using new growth coefficients'
         fig = px.line(df_economy, x='Date', y=indexed_measures_to_plot, title=title)
         #write to html
-        fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
+        fig.write_html(config.root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
     
         #and plot for hand picked measure using MEASURES_TO_PLOT:
         title = f'{economy} chosen growth measures'
         #  Economy	Date 
         fig = px.line(df_economy, x='Date', y=GROWTH_MEASURES_TO_PLOT, title=title)
-        fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
+        fig.write_html(config.root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
         
         title = f'{economy} chosen activity measures'
         fig = px.line(df_economy, x='Date', y=ACTIVITY_MEASURES_TO_PLOT, title=title)
-        fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
+        fig.write_html(config.root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
     
     #PLOT GROWTH_MEASURES_TO_PLOT AND ACTIVITY_MEASURES_TO_PLOT FOR ALL ECONOMIES IN ONE PLOT USING FACETS
     title = f'chosen growth measures for all economies'
     fig = px.line(df, x='Date', y=GROWTH_MEASURES_TO_PLOT, facet_col='Economy', facet_col_wrap=7, title=title)
-    fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
+    fig.write_html(config.root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
     
     title = f'chosen activity measures for all economies'
     fig = px.line(df, x='Date', y=ACTIVITY_MEASURES_TO_PLOT, facet_col='Economy', facet_col_wrap=7, title=title)
-    fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
+    fig.write_html(config.root_dir + '\\' +f'plotting_output\\growth_analysis\\{title}.html')
     
        
 
@@ -211,7 +207,7 @@ def plot_and_compare_new_growth_coefficients(GROWTH_MEASURES_TO_PLOT, ACTIVITY_M
 
 
 #%%
-def remove_outliers(df, column):
+def remove_outliers(config, df, column):
     Q1 = df[column].quantile(0.25)
     Q3 = df[column].quantile(0.75)
     IQR = Q3 - Q1
@@ -220,7 +216,7 @@ def remove_outliers(df, column):
     
     return df_out
 
-def fit_lasso_regression(X, Y, alphas= [0.001, 0.01, 0.1, 1, 10, 100]):
+def fit_lasso_regression(config, X, Y, alphas= [0.001, 0.01, 0.1, 1, 10, 100]):
     # Add a constant (intercept term) to the independent variables
     X = sm.add_constant(X)
 
@@ -248,7 +244,7 @@ def fit_lasso_regression(X, Y, alphas= [0.001, 0.01, 0.1, 1, 10, 100]):
     
     return coefficients
 
-def fit_linear_regression(X, Y):
+def fit_linear_regression(config, X, Y):
     independent_variables = X.columns.tolist()
     # Add a constant (intercept term) to the independent variables
     X = sm.add_constant(X)
@@ -267,12 +263,12 @@ def fit_linear_regression(X, Y):
     coefficients = dict(results.params)
     coefficients['r2'] = results.rsquared
 
-    coefficients = map_coefficients_to_variable_names(coefficients, independent_variables)
+    coefficients = map_coefficients_to_variable_names(config, coefficients, independent_variables)
     return coefficients
 
     
     
-def fit_ridge_regression(X, Y, alphas= [0.001, 0.01, 0.1, 1, 10, 100]):
+def fit_ridge_regression(config, X, Y, alphas= [0.001, 0.01, 0.1, 1, 10, 100]):
     
     #add '_coeff' to the end of each coefficient name
     coeff_cols = [x+'_coeff' for x in X.columns if x != 'const']
@@ -305,7 +301,7 @@ def fit_ridge_regression(X, Y, alphas= [0.001, 0.01, 0.1, 1, 10, 100]):
     
     return coefficients
 
-def map_coefficients_to_variable_names(coefficients, independent_variables):
+def map_coefficients_to_variable_names(config, coefficients, independent_variables):
     # Create a copy of coefficients to not modify the original one
     coefficients_copy = coefficients.copy()
 
@@ -323,7 +319,7 @@ def map_coefficients_to_variable_names(coefficients, independent_variables):
 
     return coefficients
 
-def find_growth_coefficients(df, independent_variables,dependent_variable, models):
+def find_growth_coefficients(config, df, independent_variables, dependent_variable, models):
     independent_variables_coeff_named = [x+'_coeff' for x in independent_variables]
     columns= ['Region', 'const','alpha', 'r2', 'Model']+independent_variables_coeff_named
     growth_coefficients_df = pd.DataFrame(columns=columns)
@@ -337,12 +333,12 @@ def find_growth_coefficients(df, independent_variables,dependent_variable, model
         if drop_outliers:
             outliers_df = pd.merge(independent_variables_df, dependent_variables_df, left_index=True, right_index=True)
             for col in independent_variables + [dependent_variable]:
-                outliers_df = remove_outliers(outliers_df, col)
+                outliers_df = remove_outliers(config, outliers_df, col)
             independent_variables_df = outliers_df[independent_variables]
             dependent_variables_df = outliers_df[dependent_variable]
         for MODEL in models:
             if MODEL == 'linear':
-                coefficients = fit_linear_regression(independent_variables_df, dependent_variables_df)  # or fit_lasso_regression(X, Y, alpha=0.1)
+                coefficients = fit_linear_regression(config, independent_variables_df, dependent_variables_df)  # or fit_lasso_regression(config, X, Y, alpha=0.1)
                 coefficients['alpha'] = 0
                 coefficients['Region'] = region
                 coefficients['Model'] = 'linear'
@@ -351,14 +347,14 @@ def find_growth_coefficients(df, independent_variables,dependent_variable, model
                 
             elif MODEL == 'lasso':
                 
-                coefficients = fit_lasso_regression(independent_variables_df, dependent_variables_df)  # or fit_lasso_regression(X, Y, alpha=0.1)
+                coefficients = fit_lasso_regression(config, independent_variables_df, dependent_variables_df)  # or fit_lasso_regression(config, X, Y, alpha=0.1)
                 
                 coefficients['Region'] = region
                 coefficients['Model'] = 'lasso'
                 growth_coefficients_df = pd.concat([growth_coefficients_df, pd.DataFrame([coefficients], columns=columns)])
             
             elif MODEL == 'ridge':
-                coefficients = fit_ridge_regression(independent_variables_df, dependent_variables_df)
+                coefficients = fit_ridge_regression(config, independent_variables_df, dependent_variables_df)
                 coefficients['Region'] = region
                 coefficients['Model'] = 'ridge'
                 growth_coefficients_df = pd.concat([growth_coefficients_df, pd.DataFrame([coefficients], columns=columns)])
@@ -372,7 +368,7 @@ def find_growth_coefficients(df, independent_variables,dependent_variable, model
 #########################################################
 # PLOTTING
 #########################################################
-def plot_growth_coefficients(growth_coefficients_df, independent_variables):
+def plot_growth_coefficients(config, growth_coefficients_df, independent_variables):
     #plot all growth coefficients on a bar chart with facets for economys and x as the coefficients
     independent_variables_coeff = [x+'_coeff' for x in independent_variables]
     growth_coefficients_df_melt = pd.melt(growth_coefficients_df, id_vars=['Region','r2','alpha', 'Model'], value_vars=['const']+independent_variables_coeff)
@@ -395,14 +391,14 @@ def plot_growth_coefficients(growth_coefficients_df, independent_variables):
         fig = px.bar(model_data, x = 'variable', y = 'value', color = 'variable', facet_col='Region', barmode='group', title=title)
         
         #save
-        fig.write_html(root_dir + '\\' +f'plotting_output\\growth_analysis\\{model}_growth_coefficients.html')
+        fig.write_html(config.root_dir + '\\' +f'plotting_output\\growth_analysis\\{model}_growth_coefficients.html')
         
 ##########################################
 #FORMATTING
 ##########################################
 #%%
 
-def macro_formatting(macro):
+def macro_formatting(config, macro):
     new_macro = macro.copy()
     #make all cols start with capital letter
     new_macro.columns = [x.capitalize() for x in new_macro.columns]
@@ -417,7 +413,7 @@ def macro_formatting(macro):
     new_macro = new_macro.rename(columns={'real_GDP':'Gdp', 'Economy_code':'Economy', 'Year':'Date', 'population':'Population', 'GDP_per_capita':'Gdp_per_capita'})
     return new_macro
 
-def APERC_energy_formatting(energy_use):
+def APERC_energy_formatting(config, energy_use):
     #cols: ['Economy', 'Fuel_Type', 'Date', 'Value', 'Transport Type', 'Frequency','Unit', 'Source', 'Dataset', 'Measure', 'Vehicle Type', 'Drive','Medium'],
     #get unique vlaues for each col
     # energy_use['Economy'].unique()
@@ -462,7 +458,7 @@ def APERC_energy_formatting(energy_use):
     energy_use['Date'] = energy_use['Date'].astype(int)
     return energy_use
 
-def merge_macro_and_energy(macro, energy_use):
+def merge_macro_and_energy(config, macro, energy_use):
     #do same for macro
     new_macro=macro.copy()
 
@@ -475,7 +471,7 @@ def merge_macro_and_energy(macro, energy_use):
     energy_macro = energy_macro.sort_values('Date')
     return energy_macro
 
-def caculate_growth_rates(energy_macro):
+def caculate_growth_rates(config, energy_macro):
     # Calculate growth rates for each column except date and economy
     for col in energy_macro.columns:
         if col not in ['Date', 'Economy']:
@@ -494,9 +490,9 @@ def caculate_growth_rates(energy_macro):
     return energy_macro
 
 
-def group_by_region(energy_macro, region_column = 'Region_growth_regression2'):
+def group_by_region(config, energy_macro, region_column = 'Region_growth_regression2'):
     #lets try grouping the economys by regions (based on georgaphy and economic development) and then running the regression on each region. LAter on it would probably be a good idea to look into ato's urban density data and stuff
-    regional_mapping = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\region_economy_mapping.csv')
+    regional_mapping = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\region_economy_mapping.csv')
     #extract Region_growth_regression and Economy
     regional_mapping = regional_mapping[[region_column, 'Economy']]
     #make economyt lowercase
@@ -508,7 +504,7 @@ def group_by_region(energy_macro, region_column = 'Region_growth_regression2'):
     return df
 
 
-def format_8th_edition_data(activity_8th):
+def format_8th_edition_data(config, activity_8th):
     #filter for only Reference sicne both scenarios have the same activity growth
     activity_8th = activity_8th[activity_8th['Scenario']=='Reference']
     #drop non specified from transport type
@@ -519,11 +515,11 @@ def format_8th_edition_data(activity_8th):
     activity_8th = activity_8th[['Date', 'Economy', 'Transport Type','Activity']].groupby(['Date', 'Economy', 'Transport Type']).sum().reset_index()
     #drop Economy == 00_APEC
     activity_8th = activity_8th[activity_8th['Economy']!='00_APEC']
-    activity_growth_8th = calculate_activity_growth_8th(activity_8th)
-    activity_8th = import_activity_8th(activity_8th)
+    activity_growth_8th = calculate_activity_growth_8th(config, activity_8th)
+    activity_8th = import_activity_8th(config, activity_8th)
     return activity_growth_8th, activity_8th
 
-def calculate_activity_growth_8th(activity_8th):
+def calculate_activity_growth_8th(config, activity_8th):
     
     #now calcualte pct change for each year
     activity_growth_8th = activity_8th.sort_values(['Transport Type','Economy', 'Date'])
@@ -538,14 +534,14 @@ def calculate_activity_growth_8th(activity_8th):
     
     return activity_growth_8th
     
-def import_activity_8th(activity_8th):
+def import_activity_8th(config, activity_8th):
     #pivot the transport type column to make it into columns
     activity_8th = activity_8th.pivot_table(index=['Economy', 'Date'], columns='Transport Type', values='Activity').reset_index()
     #reanme the columns to passenger_activity_9th and freight_activity_9th
     activity_8th = activity_8th.rename(columns={'passenger':'passenger_activity_8th', 'freight':'freight_activity_8th'})
     return activity_8th
     
-def import_BASE_YEAR_activity_9th(BASE_YEAR_activity):
+def import_BASE_YEAR_activity_9th(config, BASE_YEAR_activity):
     #filter for Activity only
     BASE_YEAR_activity = BASE_YEAR_activity[BASE_YEAR_activity['Measure']=='Activity']
     #filter for config.DEFAULT_BASE_YEAR only

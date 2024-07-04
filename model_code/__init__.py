@@ -1,5 +1,4 @@
 from .utility_functions import *
-from .config import *
 from .archiving_scripts import *
 from .preparation_functions import *
 from .calculation_functions import *

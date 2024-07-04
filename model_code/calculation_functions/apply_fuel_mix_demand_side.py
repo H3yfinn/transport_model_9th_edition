@@ -11,11 +11,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 #################
 
 import pandas as pd 
@@ -36,17 +32,17 @@ from plotly.subplots import make_subplots
 
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
  #%%
-def apply_fuel_mix_demand_side(model_output_all, ECONOMY_ID, demand_side_fuel_mixing=None, supply_side_fuel_mixing=None):
+def apply_fuel_mix_demand_side(config, model_output_all, ECONOMY_ID, demand_side_fuel_mixing=None, supply_side_fuel_mixing=None):
     model_output= model_output_all.copy()
     if demand_side_fuel_mixing is None:
         #note that these may have a lot of years filtered out becuase of how model strucutre works.
-        demand_side_fuel_mixing = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+        demand_side_fuel_mixing = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
     if supply_side_fuel_mixing is None:
-        supply_side_fuel_mixing =  pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+        supply_side_fuel_mixing =  pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
     supply_side_fuel_mixing_fuels = supply_side_fuel_mixing['New_fuel'].unique().tolist()
     
     #load model concordances with fuels
-    model_concordances_fuels = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
+    model_concordances_fuels = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
     model_concordances_fuels = model_concordances_fuels[model_concordances_fuels['Economy'] == ECONOMY_ID]
     
     #drop supply_side_fuel_mixing_fuels from model_concordances_fuels
@@ -60,11 +56,11 @@ def apply_fuel_mix_demand_side(model_output_all, ECONOMY_ID, demand_side_fuel_mi
     #join the fuel mixing data to the model output. This will result in a new fuel column. Note that there can be multiple fuels per drive, so this could also create new rows for each drive. 
     df_with_fuels = model_output_to_mix.merge(demand_side_fuel_mixing, on=['Scenario', 'Economy', 'Transport Type', 'Medium', 'Vehicle Type','Drive', 'Date','Fuel'], how='left')
     
-    #identify any nas in Demand_side_fuel_share column. If so make the user add them to other_code\create_user_inputs\create_demand_side_fuel_mix_input.py.
+    #identify any nas in Demand_side_fuel_share column. If so make the user add them to other_code\\create_user_inputs\\create_demand_side_fuel_mix_input.py.
     #this is because the user needs to specify what the fuel share is for each medium/vehicletype/drive type, and if it is not specified it will cause an error.
     if df_with_fuels['Demand_side_fuel_share'].isna().sum() > 0:
         breakpoint()
-        print('There are {} rows with a missing fuel share. Please add them to other_code\create_user_inputs\create_demand_side_fuel_mix_input.py'.format(df_with_fuels['Demand_side_fuel_share'].isna().sum()))
+        print('There are {} rows with a missing fuel share. Please add them to other_code\\create_user_inputs\\create_demand_side_fuel_mix_input.py'.format(df_with_fuels['Demand_side_fuel_share'].isna().sum()))
         raise Exception('Missing fuel shares')
     
     #times teh fuel sahres by energy. This will result in a new energy value, reflecting the share of fuel used in each drive type.
@@ -78,9 +74,9 @@ def apply_fuel_mix_demand_side(model_output_all, ECONOMY_ID, demand_side_fuel_mi
     
     return model_output_with_fuel_mixing
     # #save data
-    # new_df_with_fuels.to_csv(root_dir + '\\' + 'intermediate_data\\model_output_with_fuels\\1_demand_side\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    # new_df_with_fuels.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_output_with_fuels\\1_demand_side\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
 
     
 #%%
-# apply_fuel_mix_demand_side('10_MAS')
+# apply_fuel_mix_demand_side(config, '10_MAS')
 #%%

@@ -4,11 +4,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 from ..calculation_functions import estimate_charging_requirements
 #################
 
@@ -31,12 +27,12 @@ from plotly.subplots import make_subplots
 
 
 #%%    
-def plot_required_chargers(ECONOMY_ID): 
+def plot_required_chargers(config, ECONOMY_ID):
     # total_kwh_of_battery_capacity.to_csv(r'output_data\for_other_modellers\estimated_number_of_chargers.csv', index=False) 
     #grab colors dict:
-    df, parameters, colors_dict, INCORPORATE_UTILISATION_RATE = estimate_charging_requirements.prepare_inputs_for_estimating_charging_requirements(ECONOMY_ID)
+    df, parameters, colors_dict, INCORPORATE_UTILISATION_RATE = estimate_charging_requirements.prepare_inputs_for_estimating_charging_requirements(config, ECONOMY_ID)
     
-    total_kwh_of_battery_capacity = pd.read_csv(root_dir + '\\' +f'output_data\\for_other_modellers\\charging\\{ECONOMY_ID}_estimated_number_of_chargers.csv')
+    total_kwh_of_battery_capacity = pd.read_csv(config.root_dir + '\\' +f'output_data\\for_other_modellers\\charging\\{ECONOMY_ID}_estimated_number_of_chargers.csv')
 
     #use plotly to plot the number of chargers required for each economy, date and scenario and also by vehicle type.
     #total_kwh_of_battery_capacity'Economy','Date','Scenario','Vehicle Type','Stocks', 'sum_of_stocks','kwh_of_battery_capacity','sum_of_kwh_of_battery_capacity','sum_of_expected_number_of_chargers','expected_kw_of_chargers','sum_of_expected_kw_of_chargers','expected_number_of_chargers','sum_of_fast_kw_of_chargers_needed',,'sum_of_slow_kw_of_chargers_needed','sum_of_fast_chargers_needed','sum_of_slow_chargers_needed','fast_charger_utilisation_rate','average_kwh_of_battery_capacity_by_vehicle_type','average_kw_per_charger','average_kw_per_non_fast_charger','average_kw_per_fast_charger','slow_kw_of_chargers_needed','fast_kw_of_chargers_needed','slow_chargers_needed','fast_chargers_needed'
@@ -107,7 +103,7 @@ def plot_required_chargers(ECONOMY_ID):
             fig.update_layout(title_text=title)
 
             # wrtite the plot to a file
-            fig.write_html(root_dir + '\\' +f'plotting_output\\charging_requirements\\{title}.html')
+            fig.write_html(config.root_dir + '\\' +f'plotting_output\\charging_requirements\\{title}.html')
             
             ############################################################
             
@@ -153,7 +149,7 @@ def plot_required_chargers(ECONOMY_ID):
             fig.update_layout(title_text=title)
 
             # wrtite the plot to a file
-            fig.write_html(root_dir + '\\' +f'plotting_output\\charging_requirements\\{title}.html')
+            fig.write_html(config.root_dir + '\\' +f'plotting_output\\charging_requirements\\{title}.html')
             
             
             ############################################################
@@ -214,7 +210,7 @@ def plot_required_chargers(ECONOMY_ID):
             fig.update_layout(title_text=title)
 
             # wrtite the plot to a file
-            fig.write_html(root_dir + '\\' +f'plotting_output\\charging_requirements\\{title}.html')
+            fig.write_html(config.root_dir + '\\' +f'plotting_output\\charging_requirements\\{title}.html')
             ############################################################
             
             ############################################################
@@ -271,7 +267,7 @@ def plot_required_chargers(ECONOMY_ID):
             fig.update_layout(title_text=title)
 
             # wrtite the plot to a file
-            fig.write_html(root_dir + '\\' +f'plotting_output\\charging_requirements\\{title}.html')
+            fig.write_html(config.root_dir + '\\' +f'plotting_output\\charging_requirements\\{title}.html')
             ############################################################
     # #now plot all economies together for each scenario:
     # for scenario in df['Scenario'].unique():
@@ -279,7 +275,7 @@ def plot_required_chargers(ECONOMY_ID):
         
 
   
-def plot_required_evs(ev_stocks_and_chargers,colors_dict,economy, date, scenario):
+def plot_required_evs(config, ev_stocks_and_chargers, colors_dict, economy, date, scenario):
     #[['Economy','Date','Scenario','Vehicle Type',"Transport Type",'expected_kwh_of_battery_capacity', 'sum_of_expected_kwh_of_battery_capacity','expected_stocks', 'total_expected_stocks', 'portion_of_stocks_kwh_of_battery_capacity','number_of_chargers','number_of_fast_chargers','number_of_non_fast_chargers','kw_of_charger_capacity','kw_of_fast_charger_capacity','kw_of_non_fast_charger_capacity']]
     #use plotly to plot the number of chargers required for each economy, date and scenario and also by vehicle type.
     
@@ -329,7 +325,7 @@ def plot_required_evs(ev_stocks_and_chargers,colors_dict,economy, date, scenario
     fig.update_layout(title_text=title)
 
     # write to html in plotting_output\charging_requirements
-    fig.write_html(root_dir + '\\' +f'plotting_output\\charging_requirements\\{title}.html')
+    fig.write_html(config.root_dir + '\\' +f'plotting_output\\charging_requirements\\{title}.html')
 
     #############################################################################do same but using batteries instead of stocks:
     title = 'Kw of EVs for {} public chargers {}kw in {}, {}, {}'.format(number_of_chargers, round(kw_of_charger_capacity,0),economy, date, scenario)
@@ -368,6 +364,6 @@ def plot_required_evs(ev_stocks_and_chargers,colors_dict,economy, date, scenario
     fig.update_layout(title_text=title)
 
     # write to html in plotting_output\charging_requirements
-    fig.write_html(root_dir + '\\' +f'plotting_output\\charging_requirements\\{title}.html')
+    fig.write_html(config.root_dir + '\\' +f'plotting_output\\charging_requirements\\{title}.html')
 
     

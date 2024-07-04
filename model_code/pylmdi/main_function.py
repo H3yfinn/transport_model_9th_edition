@@ -7,7 +7,7 @@ from ..data_creation_functions import *
 from .LMDI_functions import *
 import re
 #%%
-def run_divisia(data_title, extra_identifier, activity_data, energy_data, structure_variables_list, activity_variable = 'Activity', emissions_variable = 'Emissions', energy_variable = 'Energy', emissions_divisia = False, emissions_data=[], time_variable='Year', hierarchical=False,output_data_folder='output_data'):
+def run_divisia(config, data_title, extra_identifier, activity_data, energy_data, structure_variables_list, activity_variable = 'Activity', emissions_variable = 'Emissions', energy_variable = 'Energy', emissions_divisia = False, emissions_data=[], time_variable='Year', hierarchical=False, output_data_folder='output_data'):
     """This is a central function that will run the LMDI model. It will take the input data and format/adjust it using the functions in data_creation_functions.py. 
     It will then run the LMDI model and save the output. It will also plot the output.
     If you want to run the method using emissions intensity then you jsut set emissions divisia to true and include data for emissions_data"""
@@ -42,8 +42,8 @@ def run_divisia(data_title, extra_identifier, activity_data, energy_data, struct
 
         ###################################
         #run LMDI_functions for additivie and multpiplicatuve outputs from the LMDI_functions.py file. It is the meat and sausages of this process.
-        lmdi_output_additive = LMDI_functions.Add(driver_input_data, energy_data, drivers_list, structure_variables_list,energy_variable,time_variable,extra_identifier)
-        lmdi_output_multiplicative = LMDI_functions.Mult(driver_input_data, energy_data, drivers_list, structure_variables_list,energy_variable,time_variable,extra_identifier)
+        lmdi_output_additive = LMDI_functions.Add(config, driver_input_data, energy_data, drivers_list, structure_variables_list,energy_variable,time_variable,extra_identifier)
+        lmdi_output_multiplicative = LMDI_functions.Mult(config, driver_input_data, energy_data, drivers_list, structure_variables_list,energy_variable,time_variable,extra_identifier)
 
         ###################################
         #add energy and activity (summed per year) as a column since this is very useful for analysis
@@ -93,9 +93,9 @@ def run_divisia(data_title, extra_identifier, activity_data, energy_data, struct
         ###################################
         #run LMDI_functions for additivie and multpiplicatuve outputs from the LMDI_functions.py file. It is the meat and sausages of this process.
         
-        lmdi_output_additive = LMDI_functions.Add(driver_input_data, emissions_data, drivers_list, structure_variables_list,emissions_variable,time_variable,extra_identifier)
+        lmdi_output_additive = LMDI_functions.Add(config, driver_input_data, emissions_data, drivers_list, structure_variables_list,emissions_variable,time_variable,extra_identifier)
 
-        lmdi_output_multiplicative = LMDI_functions.Mult(driver_input_data, emissions_data, drivers_list, structure_variables_list,emissions_variable,time_variable,extra_identifier)
+        lmdi_output_multiplicative = LMDI_functions.Mult(config, driver_input_data, emissions_data, drivers_list, structure_variables_list,emissions_variable,time_variable,extra_identifier)
 
         ###################################
         #replace energy in 'change in energy' col names with emissions
@@ -129,8 +129,8 @@ def run_divisia(data_title, extra_identifier, activity_data, energy_data, struct
             print('You need to have more than one structure variable to run hierarchical LMDI. Please use the other method.')
             return None
 
-        hierarchical_multiplicative_output = LMDI_functions.hierarchical_LMDI(energy_data, activity_data, energy_variable, activity_variable, structure_variables_list, time_variable,extra_identifier)
-        hierarchical_additive_output = LMDI_functions.convert_multiplicative_to_additive(hierarchical_multiplicative_output, energy_data,activity_data, activity_variable, energy_variable, time_variable, extra_identifier)
+        hierarchical_multiplicative_output = LMDI_functions.hierarchical_LMDI(config, energy_data, activity_data, energy_variable, activity_variable, structure_variables_list, time_variable,extra_identifier)
+        hierarchical_additive_output = LMDI_functions.convert_multiplicative_to_additive(config, hierarchical_multiplicative_output, energy_data,activity_data, activity_variable, energy_variable, time_variable, extra_identifier)
         
         ###################################
         #add energy and activity (summed per year) as a column since this is very useful for analysis
@@ -151,8 +151,8 @@ def run_divisia(data_title, extra_identifier, activity_data, energy_data, struct
         #run hierarchical fully from a separate script in LMDI_functions.py
         #Ive taken another look at this but i just cant work out how to calcualte the intensity varaible, where for non hierarchical we get an emissions and enegy intensity, for hierarchical it seems we can only get one, emissions intensity.
         print('Running hierarchical LMDI for emissions.') 
-        hierarchical_multiplicative_output = LMDI_functions.hierarchical_LMDI_emissions(energy_data, emissions_data, activity_data, energy_variable, emissions_variable, activity_variable, structure_variables_list, time_variable,extra_identifier)
-        hierarchical_additive_output = LMDI_functions.convert_multiplicative_to_additive_emissions(hierarchical_multiplicative_output, emissions_data, activity_data, activity_variable, energy_variable,emissions_variable, time_variable, extra_identifier)
+        hierarchical_multiplicative_output = LMDI_functions.hierarchical_LMDI_emissions(config, energy_data, emissions_data, activity_data, energy_variable, emissions_variable, activity_variable, structure_variables_list, time_variable,extra_identifier)
+        hierarchical_additive_output = LMDI_functions.convert_multiplicative_to_additive_emissions(config, hierarchical_multiplicative_output, emissions_data, activity_data, activity_variable, energy_variable,emissions_variable, time_variable, extra_identifier)
         
         ###################################
         #add emissions and activity (summed per year) as a column since this is very useful for analysis

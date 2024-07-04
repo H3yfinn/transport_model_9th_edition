@@ -6,11 +6,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 from ..plotting_functions import plot_logistic_fitting_data
 #################
 
@@ -42,7 +38,7 @@ from scipy.optimize import curve_fit
 #######################################################################
 
 
-def logistic_fitting_function_handler(ECONOMY_ID, model_data,show_plots=False,matplotlib_bool=False, plotly_bool=False, FIT_LOGISTIC_CURVE_TO_DATA=False, PROPORTION_BELOW_GAMMA= 0.4, EXTRA_YEARS_TO_REACH_GAMMA=10, APPLY_SMOOTHING_TO_GROWTH_RATE=True, INTERPOLATE_ALL_DATES=False):
+def logistic_fitting_function_handler(config, ECONOMY_ID, model_data, show_plots=False, matplotlib_bool=False, plotly_bool=False, FIT_LOGISTIC_CURVE_TO_DATA=False, PROPORTION_BELOW_GAMMA= 0.4, EXTRA_YEARS_TO_REACH_GAMMA=10, APPLY_SMOOTHING_TO_GROWTH_RATE=True, INTERPOLATE_ALL_DATES=False):
     """Take in output of stocks,occupancy, travel_km, activity and mileage from running road model on a gdp per cpita based growth rate. Then fit a logistic curve to the stocks data with the gamma value from each economy provided. 
     Then with this curve, extract the expected activity per year based on the expected stocks per year and the expected mileage per year. Then recalculate the growth rate over time based on this. We will then use this to rerun the road model with the new growth rate.
     This was origianlly done for each economy and vehicle type in passenger vehicles, now for each economy and transport type. 
@@ -66,10 +62,10 @@ def logistic_fitting_function_handler(ECONOMY_ID, model_data,show_plots=False,ma
         
     model_data_to_edit = model_data_to_edit.loc[(model_data_to_edit['Transport Type'] == 'passenger')] 
     
-    new_model_data = prepare_data_for_logistic_fitting(model_data_to_edit,ECONOMY_ID)
+    new_model_data = prepare_data_for_logistic_fitting(config, model_data_to_edit,ECONOMY_ID)
         
     #EXTRACT PARAMETERS FOR LOGISTIC FUNCTION:
-    parameters_estimates, new_stocks_per_capita_estimates, date_where_gamma_is_reached = find_parameters_for_logistic_function(new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA, PROPORTION_BELOW_GAMMA, EXTRA_YEARS_TO_REACH_GAMMA, INTERPOLATE_ALL_DATES)
+    parameters_estimates, new_stocks_per_capita_estimates, date_where_gamma_is_reached = find_parameters_for_logistic_function(config, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA, PROPORTION_BELOW_GAMMA, EXTRA_YEARS_TO_REACH_GAMMA, INTERPOLATE_ALL_DATES)
     #some parameters will be np.nan because we dont need to fit the curve for all economies. We will drop these and not recalculate the growth rate for these economies
     parameters_estimates = parameters_estimates.dropna(subset=['Gompertz_gamma'])
     #grab only cols we need
@@ -87,14 +83,14 @@ def logistic_fitting_function_handler(ECONOMY_ID, model_data,show_plots=False,ma
     new_model_data.drop(columns=['Stocks','Activity', 'Travel_km'], inplace=True)
     new_model_data.drop_duplicates(inplace=True)
     new_model_data = new_model_data.merge(summed_values, on=['Date','Economy', 'Scenario','Transport Type'], how='left')
-    model_data_logistic_predictions = create_new_dataframe_with_logistic_predictions(new_model_data, new_stocks_per_capita_estimates, FIT_LOGISTIC_CURVE_TO_DATA)
+    model_data_logistic_predictions = create_new_dataframe_with_logistic_predictions(config, new_model_data, new_stocks_per_capita_estimates, FIT_LOGISTIC_CURVE_TO_DATA)
     # model_data_logistic_predictions[['Scenario', 'Economy', 'Date', 'Transport Type', 'Stocks_per_thousand_capita']].pivot(index=['Economy', 'Date', 'Transport Type'], columns='Scenario', values='Stocks_per_thousand_capita').reset_index()
     #find growth rate of activity as the percentage change in activity from the previous year plus 1. make sur eto group by economy and scenario BUT NOT BY VEHICLE TYPE (PLEASE NOTE THAT THIS MAY CHANGE IN THE FUTURE)
-    activity_growth_estimates = estimate_new_growth_rate(model_data_logistic_predictions, date_where_gamma_is_reached, APPLY_SMOOTHING_TO_GROWTH_RATE)
+    activity_growth_estimates = estimate_new_growth_rate(config, model_data_logistic_predictions, date_where_gamma_is_reached, APPLY_SMOOTHING_TO_GROWTH_RATE)
     #if matplotlib_bool or plotly_bool:
     if matplotlib_bool or plotly_bool:
-        plot_logistic_fitting_data.plot_logistic_function_all_economies(model_data_logistic_predictions, activity_growth_estimates, parameters_estimates, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA)
-        plot_logistic_fitting_data.plot_logistic_function_by_economy(model_data_logistic_predictions, activity_growth_estimates, parameters_estimates, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA)
+        plot_logistic_fitting_data.plot_logistic_function_all_economies(config, model_data_logistic_predictions, activity_growth_estimates, parameters_estimates, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA)
+        plot_logistic_fitting_data.plot_logistic_function_by_economy(config, model_data_logistic_predictions, activity_growth_estimates, parameters_estimates, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA)
 
     #drop Activity from activity_growth_estimates
     activity_growth_estimates.drop(columns=['Activity'], inplace=True)
@@ -112,11 +108,11 @@ def logistic_fitting_function_handler(ECONOMY_ID, model_data,show_plots=False,ma
     activity_growth_estimates.drop(columns=['Activity_growth_old'], inplace=True)
 
     #save parameters_estimates. at the very elast we will plot these later
-    parameters_estimates.to_csv(root_dir + '\\' + 'intermediate_data\\road_model\\{}_parameters_estimates_{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID), index=False)
+    parameters_estimates.to_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_parameters_estimates_{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID), index=False)
         
     return activity_growth_estimates 
 
-def calculate_vehicles_per_stock_parameters(model_data,ECONOMY_ID, car_base_amount=1,lcv_base_amount=3):
+def calculate_vehicles_per_stock_parameters(config, model_data, ECONOMY_ID, car_base_amount=1, lcv_base_amount=3):
     breakpoint()#phl getting nans?
     #usig cars as the base (1) and for freight, lcv as the base (as 3?) then we will calcualte the relative amount if activity theat the other vehicle types have compared to this base. This will be used to calcualte the 'comparitive stocks' of each vehicle type in each economy, which is only used to idneifty if the maximum stocks per cpita for that transport type has been reached.
     #the base_amounts are used to allow for the two transport types to use the same gompertz gamma value, which is based on passenger transport.
@@ -152,10 +148,10 @@ def calculate_vehicles_per_stock_parameters(model_data,ECONOMY_ID, car_base_amou
         #load in the mean values for each vehicle type
         mean_df = pd.DataFrame()
         for economy in config.economy_scenario_concordance['Economy'].unique():
-            # if os.path.exists(root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters_{}.csv'.format(economy, 'passenger_only')) & ONLY_PASSENGER_VEHICLES:
-            #     e = pd.read_csv(root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters_{}.csv'.format(economy, 'passenger_only'))
-            if os.path.exists(root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters.csv'.format(economy)):
-                e = pd.read_csv(root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters.csv'.format(economy))
+            # if os.path.exists(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters_{}.csv'.format(economy, 'passenger_only')) & ONLY_PASSENGER_VEHICLES:
+            #     e = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters_{}.csv'.format(economy, 'passenger_only'))
+            if os.path.exists(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters.csv'.format(economy)):
+                e = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters.csv'.format(economy))
             else:
                 continue
             #calc mean while ignoring date and scenario
@@ -183,23 +179,23 @@ def calculate_vehicles_per_stock_parameters(model_data,ECONOMY_ID, car_base_amou
     
     #save for later use
     # if ONLY_PASSENGER_VEHICLES:
-    #     vehicles_per_stock_parameters.to_csv(root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters_{}_{}.csv'.format(ECONOMY_ID, 'passenger_only'), index=False)
+    #     vehicles_per_stock_parameters.to_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters_{}_{}.csv'.format(ECONOMY_ID, 'passenger_only'), index=False)
     # else:
-    vehicles_per_stock_parameters.to_csv(root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters.csv'.format(ECONOMY_ID), index=False)
+    vehicles_per_stock_parameters.to_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters.csv'.format(ECONOMY_ID), index=False)
     
     return vehicles_per_stock_parameters
     
-def prepare_data_for_logistic_fitting(model_data, ECONOMY_ID):
+def prepare_data_for_logistic_fitting(config, model_data, ECONOMY_ID):
     # #extract the vehicles_per_stock_parameters:
-    # vehicles_per_stock_parameters = pd.read_excel(root_dir + '\\' + 'input_data\\parameters.xlsx', sheet_name='gompertz_vehicles_per_stock')
+    # vehicles_per_stock_parameters = pd.read_excel(config.root_dir + '\\' + 'input_data\\parameters.xlsx', sheet_name='gompertz_vehicles_per_stock')
     # #convert from regiosn to economies:
-    # vehicles_per_stock_regions = pd.read_excel(root_dir + '\\' + 'input_data\\parameters.xlsx', sheet_name='vehicles_per_stock_regions')
+    # vehicles_per_stock_regions = pd.read_excel(config.root_dir + '\\' + 'input_data\\parameters.xlsx', sheet_name='vehicles_per_stock_regions')
     # #join on region
     # vehicles_per_stock_parameters = vehicles_per_stock_parameters.merge(vehicles_per_stock_regions, on='Region', how='left')
     #dro regions
     # vehicles_per_stock_parameters.drop(columns=['Region'], inplace=True)
     breakpoint()
-    vehicles_per_stock_parameters = calculate_vehicles_per_stock_parameters(model_data, ECONOMY_ID)
+    vehicles_per_stock_parameters = calculate_vehicles_per_stock_parameters(config, model_data, ECONOMY_ID)
     #Convert some stocks to gompertz adjusted stocks by multiplying them by the vehicle_gompertz_factors. This is because you can expect some economies to have more or less of that vehicle type than others. These are very general estiamtes, and could be refined later.
     new_stocks = model_data.merge(vehicles_per_stock_parameters, on=['Vehicle Type','Transport Type','Scenario', 'Date', 'Economy'], how='left')
     new_stocks['Stocks'] = new_stocks['Stocks'] * new_stocks['gompertz_vehicles_per_stock']
@@ -238,7 +234,7 @@ def prepare_data_for_logistic_fitting(model_data, ECONOMY_ID):
     #test that activity is the same as before:
     new_model_data['Activity'] = new_model_data['Stocks'] * new_model_data['Occupancy_or_load'] * new_model_data['Travel_km']
     
-    plot_logistic_fitting_data.plot_aggregated_input_data_for_logisitc_fitting(ECONOMY_ID, new_model_data)
+    plot_logistic_fitting_data.plot_aggregated_input_data_for_logisitc_fitting(config, ECONOMY_ID, new_model_data)
         
     # if new_model_data['Activity'].sum() != model_data['Activity'].sum():
     #     breakpoint()
@@ -249,7 +245,7 @@ def prepare_data_for_logistic_fitting(model_data, ECONOMY_ID):
     return new_model_data
 
 
-def estimate_new_growth_rate(model_data_logistic_predictions, date_where_gamma_is_reached, APPLY_SMOOTHING_TO_GROWTH_RATE):
+def estimate_new_growth_rate(config, model_data_logistic_predictions, date_where_gamma_is_reached, APPLY_SMOOTHING_TO_GROWTH_RATE):
     #take in the activity data we just estiamted and then calcualte the growth rate of activity as the percentage change in activity from the previous year plus 1. 
     #also do some smoothing to make sure that the growth rate doesnt change too much from year to year
     activity_growth_estimates = model_data_logistic_predictions[['Date', 'Economy', 'Scenario', 'Activity', 'Transport Type']].drop_duplicates().groupby(['Date', 'Economy', 'Scenario', 'Transport Type'])['Activity'].sum().reset_index().copy()
@@ -343,7 +339,7 @@ def estimate_new_growth_rate(model_data_logistic_predictions, date_where_gamma_i
                     gradient = (y2-y1)/(x2-x1)
                     
                     # Get the linear function
-                    linear_func = linear_interpolation(x1, y1, x2, y2, gradient)
+                    linear_func = linear_interpolation(config, x1, y1, x2, y2, gradient)
                     
                     #fill na with linear function
                     nas = group_df.loc[group_df['Activity_growth'].isna(), 'Date'].values.tolist()
@@ -399,7 +395,7 @@ def estimate_new_growth_rate(model_data_logistic_predictions, date_where_gamma_i
         
     return activity_growth_estimates
 
-def linear_interpolation(x1, y1, x2, y2, gradient):
+def linear_interpolation(config, x1, y1, x2, y2, gradient):
     # Calculate the y-intercept b using y = mx + b
     b1 = y1 - gradient * x1
     b2 = y2 - gradient * x2
@@ -413,7 +409,7 @@ def linear_interpolation(x1, y1, x2, y2, gradient):
     return linear_function
 
 #CREATE NEW DATAFRAME WITH LOGISTIC FUNCTION PREDICTIONS
-def create_new_dataframe_with_logistic_predictions(new_model_data, new_stocks_per_capita_estimates, FIT_LOGISTIC_CURVE_TO_DATA):
+def create_new_dataframe_with_logistic_predictions(config, new_model_data, new_stocks_per_capita_estimates, FIT_LOGISTIC_CURVE_TO_DATA):
     """ Take in the model data and the parameters estimates and create a new dataframe with the logistic function predictions for the stocks, activity and mileage basedon the parameters and the gdp per cpita. This will first calcualte the stocks, then using mileage, calcualte the travel km, then calcualte activity based on the occupancy rate. Then later on the activity growth rate will be calcualted from this activity, which is the only new output we will use to run the road model again."""
     #breakpoint()
     #calculate new stocks:
@@ -442,7 +438,7 @@ def create_new_dataframe_with_logistic_predictions(new_model_data, new_stocks_pe
     #calculate new activity:
     model_data_logistic_predictions['New_Activity'] = model_data_logistic_predictions.apply(lambda row: row['New_Travel_km'] * row['Occupancy_or_load'], axis=1)
     
-    # model_data_logistic_predictions.to_csv(root_dir + '\\' + 'b.csv')
+    # model_data_logistic_predictions.to_csv(config.root_dir + '\\' + 'b.csv')
     #repalce Thousand_stocks_per_capita, Stocks_per_thousand_capita, stocks, activity and travel km with new values
     model_data_logistic_predictions['Stocks'] = model_data_logistic_predictions['New_Stocks']
     model_data_logistic_predictions['Activity'] = model_data_logistic_predictions['New_Activity']
@@ -455,9 +451,9 @@ def create_new_dataframe_with_logistic_predictions(new_model_data, new_stocks_pe
     
     return model_data_logistic_predictions
 
-def find_parameters_for_logistic_function(new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA, PROPORTION_BELOW_GAMMA, EXTRA_YEARS_TO_REACH_GAMMA, INTERPOLATE_ALL_DATES):
+def find_parameters_for_logistic_function(config, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA, PROPORTION_BELOW_GAMMA, EXTRA_YEARS_TO_REACH_GAMMA, INTERPOLATE_ALL_DATES):
     #load ECONOMIES_WITH_STOCKS_PER_CAPITA_REACHED from parameters.yml
-    ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED =  yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED']
+    ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED =  yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED']
     
     #loop through economies and transport types and perform the clacualtions ti find the parameters for the logistic function
     #create empty dataframe to store results
@@ -604,7 +600,7 @@ def find_parameters_for_logistic_function(new_model_data, show_plots, matplotlib
                         new_model_data_economy_scenario_ttype = new_model_data_economy_scenario_ttype[new_model_data_economy_scenario_ttype['Date'] <= max_date]
                 if FIT_LOGISTIC_CURVE_TO_DATA:
                     #fit a logistic curve to the stocks per capita data
-                    gamma, growth_rate, midpoint = logistic_fitting_function(new_model_data_economy_scenario_ttype, gamma, economy_ttype_scenario, show_plots,matplotlib_bool=matplotlib_bool, plotly_bool=plotly_bool)
+                    gamma, growth_rate, midpoint = logistic_fitting_function(config, new_model_data_economy_scenario_ttype, gamma, economy_ttype_scenario, show_plots,matplotlib_bool=matplotlib_bool, plotly_bool=plotly_bool)
                     
                     #note midpoint is alpha, growth is beta
                     params = pd.DataFrame({'Gompertz_beta':growth_rate, 'Gompertz_alpha':midpoint, 'Gompertz_gamma':gamma, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])
@@ -637,17 +633,17 @@ def find_parameters_for_logistic_function(new_model_data, show_plots, matplotlib
                     
     return parameters_estimates, new_stocks_per_capita_estimates, date_where_gamma_is_reached
 
-def logistic_function(gdp_per_capita,gamma, growth_rate, midpoint):
+def logistic_function(config, gdp_per_capita, gamma, growth_rate, midpoint):
     #gompertz funtion: gamma * np.exp(alpha * np.exp(beta * gdp_per_capita))
-    #note midpoint is alpha, growth is beta e.g.  logistic_function(gdp_per_capita,gamma, beta, alpha)
-    #original equation: logistic_function(x, L, k, x0): L / (1 + np.exp(-k * (x - x0)))
+    #note midpoint is alpha, growth is beta e.g.  logistic_function(config, gdp_per_capita,gamma, beta, alpha)
+    #original equation: logistic_function(config, x, L, k, x0): L / (1 + np.exp(-k * (x - x0)))
     # L is the maximum limit (in your case, this would be the gamma value),
     # k is the growth rate,
     # x0​ is the x-value of the sigmoid's midpoint,
     # x is the input to the function (in your case, this could be time or GDP per capita).
     return gamma / (1 + np.exp(-growth_rate * (gdp_per_capita - midpoint)))
     
-def logistic_fitting_function(new_model_data_economy_scenario_ttype, gamma, economy_ttype_scenario, show_plots, matplotlib_bool, plotly_bool):
+def logistic_fitting_function(config, new_model_data_economy_scenario_ttype, gamma, economy_ttype_scenario, show_plots, matplotlib_bool, plotly_bool):
     #grab data we need
     date = new_model_data_economy_scenario_ttype['Date']
     stocks_per_capita = new_model_data_economy_scenario_ttype['Stocks_per_thousand_capita']
@@ -657,7 +653,7 @@ def logistic_fitting_function(new_model_data_economy_scenario_ttype, gamma, econ
     def logistic_function_curve_fit(gdp_per_capita, growth_rate, midpoint):
         #need a new function so we can pass in gamma (i couldnt work out how to do it in curve fit function ): 
         #gompertz funtion: gamma * np.exp(alpha * np.exp(beta * gdp_per_capita))
-        #original equation: logistic_function(x, L, k, x0): L / (1 + np.exp(-k * (x - x0)))
+        #original equation: logistic_function(config, x, L, k, x0): L / (1 + np.exp(-k * (x - x0)))
         # L is the maximum limit (in your case, this would be the gamma value),
         # k is the growth rate,
         # x0​ is the x-value of the sigmoid's midpoint,
@@ -681,7 +677,7 @@ def logistic_fitting_function(new_model_data_economy_scenario_ttype, gamma, econ
 
     projected_growth = logistic_function_curve_fit(gdp_per_capita, growth_rate, midpoint)
 
-    plot_logistic_fitting_data.plot_logistic_fit(date, stocks_per_capita, gdp_per_capita, gamma, growth_rate, midpoint, economy_ttype_scenario,show_plots, matplotlib_bool=matplotlib_bool, plotly_bool=plotly_bool)
+    plot_logistic_fitting_data.plot_logistic_fit(config, date, stocks_per_capita, gdp_per_capita, gamma, growth_rate, midpoint, economy_ttype_scenario,show_plots, matplotlib_bool=matplotlib_bool, plotly_bool=plotly_bool)
 
     return gamma, growth_rate, midpoint
 
@@ -689,7 +685,7 @@ def logistic_fitting_function(new_model_data_economy_scenario_ttype, gamma, econ
 #theres a hance it may be better just to stop the stocks per cap from passing gamma, rather than applying a line too.
 # %%
 
-def average_out_growth_rate_using_cagr(new_growth_forecasts, economies_to_avg_growth_over_all_years_in_freight_for = ['19_THA']):
+def average_out_growth_rate_using_cagr(config, new_growth_forecasts, economies_to_avg_growth_over_all_years_in_freight_for = ['19_THA']):
 
     def calculate_cagr_from_factors(factors):
         # Multiply all factors together
@@ -720,7 +716,7 @@ def average_out_growth_rate_using_cagr(new_growth_forecasts, economies_to_avg_gr
     
     return new_growth_forecasts
 
-def custom_interpolate_bezier(x1, y1, x2, y2, initial_gradient, n_points=100):
+def custom_interpolate_bezier(config, x1, y1, x2, y2, initial_gradient, n_points=100):
     #this will use the bezier curve to plot a kind of logaritmic curve between the two points, but so that p2 and p3 are the same point, so that the curve has 0 gradient at the end also will Use the average gradient as the initial gradient
     m1 = initial_gradient 
     P0 = np.array([x1, y1])
@@ -741,7 +737,7 @@ def custom_interpolate_bezier(x1, y1, x2, y2, initial_gradient, n_points=100):
     return curve[:, 0], curve[:, 1]
 
 
-def piecewise_linear_interpolation(df, column_name, n_pieces, gradients_list):
+def piecewise_linear_interpolation(config, df, column_name, n_pieces, gradients_list):
     # Sort DataFrame by Date
     df.sort_values(['Date'], inplace=True)
     

@@ -9,7 +9,6 @@ sys.path.append(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\trans
 from runpy import run_path
 ###IMPORT GLOBAL VARIABLES FROM config.py
 sys.path.append("\\config")
-import config
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 
 import plotly
@@ -22,8 +21,8 @@ font_size = 20
 AUTO_OPEN_PLOTLY_GRAPHS = True
 #%%
 #laod output from 8th edition
-model_output_8th = pd.read_csv(root_dir + '\\' + 'intermediate_data\\activity_efficiency_energy_road_stocks.csv')
-model_8th_by_fuel = pd.read_csv(root_dir + '\\' + 'intermediate_data\\cleaned_input_data\\energy_with_fuel.csv')
+model_output_8th = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\activity_efficiency_energy_road_stocks.csv')
+model_8th_by_fuel = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\cleaned_input_data\\energy_with_fuel.csv')
 config.SCENARIO_OF_INTEREST = 'Reference'
 #change 'Carbon Neutral' Scenario to Carbon Neutrality
 model_output_8th.loc[model_output_8th['Scenario']=='Carbon Neutral','Scenario'] = 'Carbon Neutrality'
@@ -210,8 +209,8 @@ for vehicle_type in ['2w', 'ldv']:
         size=font_size
     ))
 
-    plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image(root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
+    plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(config.root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
 
 
 ################################################################################################################################################################
@@ -236,8 +235,8 @@ for scenario in model_output_8th_sum_no_economy['Scenario'].unique():
             font=dict(
             size=font_size
         ))
-        plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-        # fig.write_image(root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
+        plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+        # fig.write_image(config.root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
         model_output_8th_plot_df_copy = model_output_8th_plot_df.copy()
         ################################################################################################################################################################
 
@@ -257,7 +256,7 @@ for scenario in model_output_8th_sum_no_economy['Scenario'].unique():
             font=dict(
             size=font_size 
         ))
-        plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+        plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
 
 #%%
 ################################################################################################################################################################
@@ -274,8 +273,8 @@ fig.update_layout(
     font=dict(
     size=font_size
 ))
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image(root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(config.root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
 
 ################################################################################################################################################################
 #%%
@@ -291,8 +290,8 @@ fig = px.line(model_output_8th_sum_vtype, x="Date", y="Activity", color="Vehicle
             #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=True)
-# fig.write_image(root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=True)
+# fig.write_image(config.root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
 
 #%%
 ################################################################################################################################################################
@@ -309,8 +308,8 @@ model_output_with_fuels_plot = model_output_with_fuels_plot.loc[~model_output_wi
 #plot
 fig = px.line(model_output_with_fuels_plot, x="Date", y="Energy", color="Fuel", facet_col="Scenario", facet_col_wrap=7, title=title, category_orders={"Scenario":['Reference', 'Carbon Neutrality']})#, #facet_col="Economy",
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image(root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(config.root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
 
 #plot fuel use for for each Date, non-road
 title = 'Total fuel use for each Date (non-road)'
@@ -331,8 +330,8 @@ model_output_with_fuels_plot = model_output_with_fuels_plot.loc[~model_output_wi
 #plot
 fig = px.line(model_output_with_fuels_plot, x="Date", y="Energy", color="Fuel",  facet_col="Scenario", facet_col_wrap=7, title=title, category_orders={"Scenario":['Reference', 'Carbon Neutrality']})#, #facet_col="Economy",
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image(root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(config.root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
 
 ################################################################################
 #%%
@@ -342,7 +341,7 @@ model_8th_by_fuel_no_economy.loc[model_8th_by_fuel_no_economy['Fuel'].str.contai
  ################################################################################
 #%%
 #create region col by joining with region mapping and then summing by region
-region_mapping = pd.read_csv(root_dir + '\\' + 'config\\utilities\\region_economy_mapping.csv')
+region_mapping = pd.read_csv(config.root_dir + '\\' + 'config\\utilities\\region_economy_mapping.csv')
 model_8th_regions = model_output_8th_sum.merge(region_mapping, how='left', on='Economy')
 #plot activity each region for each Date, by scenario by tranport type.
 title = 'Total activity for each region by transport type, scenario'
@@ -354,8 +353,8 @@ fig = px.line(model_output_8th_sum_vtype, x="Date", y="Activity", color="Region"
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-# fig.write_image(root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+# fig.write_image(config.root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '.png', scale=1, width=2000, height=1500)
 
 #%%
 
@@ -385,7 +384,7 @@ for transport_type in model_output_8th_sum_eff['Transport Type'].unique():
 
     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-    plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+    plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
 #%%
 
 #create dataset where we have the following vehicle types: 
@@ -420,13 +419,13 @@ title = 'Energy use by vehicle type in 2050 to compare to IEA'
 fig = px.area(model_output_8th_sum_vtype, x="Date", y="Energy", color="Vehicle Type", title=title, facet_col="Scenario", facet_col_wrap=1, color_discrete_map={'Shipping and aviation':'yellow', 'Heavy trucks':'red', 'Light duty vehicles':'pink', 'Other':'grey'}, category_orders={"Scenario":['Reference', 'Carbon Neutrality'], "Vehicle Type":['Other', 'Shipping and aviation', 'Heavy trucks', 'Light duty vehicles']})#, #facet_col="Economy",
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
 #%%
 
 
 #now do the same as above buyt first import emissions factors, calc  emissions then do that:
 #import emissions factors
-emissions_factors = pd.read_csv(root_dir + '\\' + 'config\\utilities\\emission_factors_for_8th_edition_transport.csv')
+emissions_factors = pd.read_csv(config.root_dir + '\\' + 'config\\utilities\\emission_factors_for_8th_edition_transport.csv')
 
 #filter for only APEC in emissions factors data:
 emissions_factors = emissions_factors.loc[emissions_factors['Economy']=='00_APEC']
@@ -474,7 +473,7 @@ title = 'Emissions by vehicle type in 2050 to compare to IEA'
 fig = px.area(model_output_8th_sum_vtype, x="Date", y="Emissions", color="Vehicle Type", title=title, facet_col="Scenario", facet_col_wrap=1, color_discrete_map={'Shipping and aviation':'yellow', 'Heavy trucks':'red', 'Light duty vehicles':'pink', 'Other':'grey'}, category_orders={"Scenario":['Reference', 'Carbon Neutrality'], "Vehicle Type":['Light duty vehicles', 'Heavy trucks', 'Shipping and aviation', 'Other'] })#, #facet_col="Economy",
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
 #%%
 # reverse order of this list:
 # ['Other', 'Shipping and aviation', 'Heavy trucks', 'Light duty vehicles']
@@ -500,8 +499,8 @@ plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_editio
 #         fig = px.line(model_output_8th_sum_vtype_melt, x="Date", y="Efficiency", color="Drive", line_dash='Measure', facet_col="Economy", facet_col_wrap=7, title=title)#, #facet_col="Economy",
 
 #         fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-#         plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '_' + vehicle + '_' + transport_type + '.html',auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-#         fig.write_image(root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '_' + vehicle + '_' + transport_type + '.png', scale=1, width=2000, height=1500)
+#         plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\8th_edition\\' + title + '_' + vehicle + '_' + transport_type + '.html',auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+#         fig.write_image(config.root_dir + '\\' + "\\plotting_output\\8th_edition\\static\\" + title + '_' + vehicle + '_' + transport_type + '.png', scale=1, width=2000, height=1500)
 
 
 #%%

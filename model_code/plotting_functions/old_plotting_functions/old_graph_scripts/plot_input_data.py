@@ -12,18 +12,13 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}\\code")
-    import config
+    sys.path.append(f"{config.root_dir}\\code")
     import utility_functions
 else:
     # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
     from .. import utility_functions
-    from .. import config
 #################
 
 import pandas as pd 
@@ -54,7 +49,7 @@ import matplotlib.pyplot as plt
 plt.rcParams['figure.facecolor'] = 'w'
 #%%
 #load data in
-model_output_detailed = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\{}'.format(config.model_output_file_name))
+model_output_detailed = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}'.format(config.model_output_file_name))
 
 #FILTER FOR SCENARIO OF INTEREST
 model_output_detailed = model_output_detailed[model_output_detailed['Scenario']==config.SCENARIO_OF_INTEREST]
@@ -100,8 +95,8 @@ fig = px.line(model_output_occ, x="Date", y="Occupancy", color="Vehicle Type", l
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
 
 
 title = 'LOAD RATE by Date, transport type, vehicle type and economy'
@@ -113,8 +108,8 @@ fig = px.line(model_output_occ, x="Date", y="Load", color="Vehicle Type", line_d
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
 ################################################################################################################################################################
 #%%
 #plot the average Turnover RATE by Date, transport type and vehicel type 
@@ -152,8 +147,8 @@ fig = px.line(model_output_t, x="Date", y="Turnover_rate", color="Vehicle Type",
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 ################################################################################################################################################################
@@ -203,8 +198,8 @@ fig = px.line(model_output_v_eff, x="Date", y="New_vehicle_efficiency", color="T
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
 
 ################################################################################################################################################################
 
@@ -256,8 +251,8 @@ fig = px.line(model_output_sales, x="Date", y="Vehicle_sales_share", color="Tran
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
 
 ################################################################################################################################################################
 #%%
@@ -296,8 +291,8 @@ fig = px.line(model_output_trav_p_stock, x="Date", y="Travel_km_per_stock", colo
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
 
 
 ################################################################################################################################################################
@@ -315,8 +310,8 @@ title = 'Efficiency of new vehicles by drive type vs efficiency of current stock
 fig = px.line(model_output_detailed_eff_df, x="Date", y="Efficiency", color="Drive_Transport_Vehicle", line_dash='Measure', facet_col="Economy", facet_col_wrap=7, title=title)
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=800)
 
 #%%
 ################################################################################################################################################################
@@ -336,8 +331,8 @@ title = 'Box plot Efficiency of new vehicles by drive type vs efficiency of curr
 fig = px.box(model_output_detailed_eff_df, x="Drive", y="Efficiency", color="Measure", facet_col="Transport_Vehicle_Type", facet_col_wrap=6, title=title)
 fig.update_traces(quartilemethod="exclusive") # or "inclusive", or "linear" by default
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=1500)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\plot_input_data\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\plot_input_data\\static\\" + title + '.png', scale=1, width=2000, height=1500)
 #%%
 
 

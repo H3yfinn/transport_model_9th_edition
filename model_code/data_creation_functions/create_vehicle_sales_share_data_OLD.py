@@ -11,11 +11,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 from ..plotting_functions import plot_user_input_data
 from .. import archiving_scripts
 from . import user_input_creation_functions
@@ -41,7 +37,7 @@ from plotly.subplots import make_subplots
 X_ORDER = 'linear'#set me to linear or the order for the spline
 #%%
 
-def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA = False):
+def create_vehicle_sales_share_input(config, ECONOMY_ID, RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA = False):
     """_summary_
 
     Args:
@@ -60,15 +56,15 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
     """
     YEARS_TO_KEEP_AFTER_BASE_YEAR= 3
     
-    ECONOMIES_WITH_MODELLING_COMPLETE_DICT = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
+    ECONOMIES_WITH_MODELLING_COMPLETE_DICT = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
     SET_YEAR_WITH_MOST_VALUES_TO_BASE_YEAR = ECONOMIES_WITH_MODELLING_COMPLETE_DICT[ECONOMY_ID]
     #if we calculate using recalcualted input data we need to format the data differently*
     if RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA:
         
-        # road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-        # non_road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-        road_model_input_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-        non_road_model_input_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+        # road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+        # non_road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+        road_model_input_wide = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+        non_road_model_input_wide = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
         
         #reforma:
         #first make them tall
@@ -87,9 +83,9 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
         new_transport_data_system_df = new_transport_data_system_df.loc[new_transport_data_system_df['Date']==config.OUTLOOK_BASE_YEAR]
     else:
             
-        # new_sales_shares = pd.read_csv(root_dir + '\\' + 'input_data\\from_8th\\reformatted\\vehicle_stocks_change_share_normalised.csv')
+        # new_sales_shares = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\reformatted\\vehicle_stocks_change_share_normalised.csv')
         #load groomed data from transport data system
-        transport_data_system_df = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\transport_data_system_extract.csv')
+        transport_data_system_df = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\transport_data_system_extract.csv')
         #filter for ECONOMY_ID
         transport_data_system_df = transport_data_system_df.loc[transport_data_system_df['Economy']==ECONOMY_ID]
         new_transport_data_system_df = transport_data_system_df.copy() 
@@ -109,28 +105,28 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
     # if RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA:
     #     breakpoint()#div by 0 in following function.#it seems that the passenger sales share is being set to 0 here for ct and jp. not sure why.
     #     #why is there only passenger data for non road
-    sales = estimate_transport_data_system_sales_share_using_share_of_activity(ECONOMY_ID, new_transport_data_system_df,YEARS_TO_KEEP_AFTER_BASE_YEAR, SET_YEAR_WITH_MOST_VALUES_TO_BASE_YEAR)
+    sales = estimate_transport_data_system_sales_share_using_share_of_activity(config, ECONOMY_ID, new_transport_data_system_df,YEARS_TO_KEEP_AFTER_BASE_YEAR, SET_YEAR_WITH_MOST_VALUES_TO_BASE_YEAR)
     #drop 'road' for now (it wont work with the concordances)
     sales = sales.drop(columns=['road'])
     #extract dictionary from csv
     #for later, load in vehicle_type_growth_regions sheet and vehicle_type_growth sheet
-    vehicle_type_growth_regions = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='vehicle_type_growth_regions')
-    vehicle_type_growth = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='vehicle_type_growth').drop(columns=['Comment'])
+    vehicle_type_growth_regions = pd.read_excel(config.root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='vehicle_type_growth_regions')
+    vehicle_type_growth = pd.read_excel(config.root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='vehicle_type_growth').drop(columns=['Comment'])
 
-    passenger_drive_shares = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='passenger_drive_shares').drop(columns=['Comment'])
-    freight_drive_shares = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='freight_drive_shares').drop(columns=['Comment'])    
+    passenger_drive_shares = pd.read_excel(config.root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='passenger_drive_shares').drop(columns=['Comment'])
+    freight_drive_shares = pd.read_excel(config.root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='freight_drive_shares').drop(columns=['Comment'])    
     
-    regions_passenger = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='regions_passenger')
-    regions_freight = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='regions_freight')
+    regions_passenger = pd.read_excel(config.root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='regions_passenger')
+    regions_freight = pd.read_excel(config.root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx',sheet_name='regions_freight')
 
 
     ######################################
     #TESTING
     #check the regions in regions_passenger and regions_freight are the same as in passenger_drive_shares and freight_drive_shares, also check that the regions in vehicle_type_growth_regions are the same as in vehicle_type_growth
     
-    user_input_creation_functions.check_region(regions_passenger, passenger_drive_shares)
-    user_input_creation_functions.check_region(regions_freight, freight_drive_shares)
-    user_input_creation_functions.check_region(vehicle_type_growth_regions, vehicle_type_growth)
+    user_input_creation_functions.check_region(config, regions_passenger, passenger_drive_shares)
+    user_input_creation_functions.check_region(config, regions_freight, freight_drive_shares)
+    user_input_creation_functions.check_region(config, vehicle_type_growth_regions, vehicle_type_growth)
     #join regions
     passenger_drive_shares = pd.merge(passenger_drive_shares, regions_passenger, how='left', on='Region')
     freight_drive_shares = pd.merge(freight_drive_shares, regions_freight, how='left', on='Region')
@@ -158,7 +154,7 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
         raise ValueError('new_sales_shares_sum_dupes is not empty. This should not happen. Investigate')
         
     #now doulbe check we have therequired categories that are in the concordances
-    model_concordances_user_input_and_growth_rates = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))
+    model_concordances_user_input_and_growth_rates = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))
     #filter for ECONOMY_ID
     model_concordances_user_input_and_growth_rates = model_concordances_user_input_and_growth_rates.loc[model_concordances_user_input_and_growth_rates['Economy']==ECONOMY_ID]
     #drop all measures that are not vehicle sales share
@@ -310,12 +306,12 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
     passenger_drive_shares['road'] = passenger_drive_shares['Medium']=='road'
     freight_drive_shares['road'] = freight_drive_shares['Medium']=='road'
     ################################################################################
-    new_sales_shares_pre_interp = calcaulte_missing_drive_shares_from_manually_inputted_data(new_sales_shares_pre_interp, model_concordances_user_input_and_growth_rates, passenger_drive_shares, freight_drive_shares,YEARS_TO_KEEP_AFTER_BASE_YEAR)
+    new_sales_shares_pre_interp = calcaulte_missing_drive_shares_from_manually_inputted_data(config, new_sales_shares_pre_interp, model_concordances_user_input_and_growth_rates, passenger_drive_shares, freight_drive_shares,YEARS_TO_KEEP_AFTER_BASE_YEAR)
 
     #thewn plot the new sales shares before inteproaltions:
     plotting = False
     if plotting:
-        plot_user_input_data.plot_input_sales_shares_before_interpolation(new_sales_shares_pre_interp)
+        plot_user_input_data.plot_input_sales_shares_before_interpolation(config, new_sales_shares_pre_interp)
     
     ################################################################################################################################################################
     #TEST FOR MISSING DATA
@@ -377,7 +373,7 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
     new_sales_shares_concat_interp.loc[new_sales_shares_concat_interp['Drive_share']<0, 'Drive_share'] = 0
     
     #save the values at this point in time to use in the future if we need
-    new_sales_shares_concat_interp.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_new_sales_shares_concat_interp.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    new_sales_shares_concat_interp.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_new_sales_shares_concat_interp.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
     
     #now we just need to normalise by vehicle type so that the drive share for each vehicle type sums to 1
     new_sales_shares_concat_interp['Drive_sum'] = new_sales_shares_concat_interp.groupby(['Economy', 'Scenario','road', 'Transport Type','Medium', 'Vehicle Type', 'Date'])['Drive_share'].transform('sum')
@@ -424,7 +420,7 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
     plotting = False
     
     if plotting:
-        plot_user_input_data.plot_new_sales_shares(new_sales_shares_all,ECONOMY_ID)
+        plot_user_input_data.plot_new_sales_shares(config, new_sales_shares_all,ECONOMY_ID)
     
     ################################################################################################################################################################
     #APPLY VEHICLE TYPE GROWTH RATES TO SALES SHARES TO FIND SALES SHARE WITHIN EACH TRANSPORT TYPE
@@ -434,8 +430,8 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
     # first calcualte teh compound gorwth rate from the xlsx sheet=vehicle_type_growth, (it should be the growth rate . cumprod()) 
     # times that by each Transport_type_share to adjust them for the growth rate
     #then normalise all to 1 by transport type
-    vehicle_type_growth_regions = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx', sheet_name='vehicle_type_growth_regions')
-    vehicle_type_growth = pd.read_excel(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx', sheet_name='vehicle_type_growth').drop_duplicates().drop(columns=['Comment'])
+    vehicle_type_growth_regions = pd.read_excel(config.root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx', sheet_name='vehicle_type_growth_regions')
+    vehicle_type_growth = pd.read_excel(config.root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx', sheet_name='vehicle_type_growth').drop_duplicates().drop(columns=['Comment'])
     vehicle_type_growth['road'] = vehicle_type_growth['Medium']=='road'
     new_sales_shares_all_new= new_sales_shares_all.copy()
     #use vehicle_type_growth_regions to merge regions to econmy
@@ -455,7 +451,7 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
 
     plotting = False
     if plotting:
-        plot_user_input_data.plot_new_sales_shares_normalised_by_transport_type(new_sales_shares_all, new_sales_shares_sum,new_sales_shares_all_new)
+        plot_user_input_data.plot_new_sales_shares_normalised_by_transport_type(config, new_sales_shares_all, new_sales_shares_sum,new_sales_shares_all_new)
 
     #check that the sumof transport type share is 1 for road=False, transport type = freight
     test = new_sales_shares_all_new.loc[(new_sales_shares_all_new['Economy']==ECONOMY_ID)&(new_sales_shares_all_new['road']==False)&(new_sales_shares_all_new['Transport Type']=='freight')&(new_sales_shares_all_new['Date']==2023)&(new_sales_shares_all_new['Scenario']=='Reference')].copy()
@@ -482,9 +478,9 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
     ###########################################################################
     
     #archive previous results:
-    archiving_folder = archiving_scripts.create_archiving_folder_for_FILE_DATE_ID()
+    archiving_folder = archiving_scripts.create_archiving_folder_for_FILE_DATE_ID(config)
     #save the variables we used to calculate the data by savinbg the 'input_data\\vehicle_sales_share_inputs.xlsx' file
-    shutil.copy(root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx', archiving_folder + '\\vehicle_sales_share_inputs.xlsx')
+    shutil.copy(config.root_dir + '\\' + 'input_data\\vehicle_sales_share_inputs.xlsx', archiving_folder + '\\vehicle_sales_share_inputs.xlsx')
 
     
     #before saving data to user input spreadsheety we will do some formatting:
@@ -515,12 +511,12 @@ def create_vehicle_sales_share_input(ECONOMY_ID,RECALCULATE_SALES_SHARES_USING_R
             new_sales_shares_all_new.loc[(new_sales_shares_all_new['Economy']=='17_SGP')&(new_sales_shares_all_new['Medium']!='road')&(new_sales_shares_all_new['Transport Type']=='freight'), 'Value'] = 0
             
     #save data so it can be used for plotting and such:
-    new_sales_shares_all_new.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_vehicle_sales_share.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index = False)
+    new_sales_shares_all_new.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_vehicle_sales_share.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index = False)
     return new_sales_shares_all_new
 
 
 
-def estimate_transport_data_system_sales_share(ECONOMY_ID, new_transport_data_system_df, YEARS_TO_KEEP_AFTER_BASE_YEAR):
+def estimate_transport_data_system_sales_share(config, ECONOMY_ID, new_transport_data_system_df, YEARS_TO_KEEP_AFTER_BASE_YEAR):
     
     sales = new_transport_data_system_df.copy()
     #filter for Stocks in Measutre
@@ -564,7 +560,7 @@ def estimate_transport_data_system_sales_share(ECONOMY_ID, new_transport_data_sy
     # sales = sales.loc[sales['Date']==max_year]
     plotting = False
     if plotting:
-        plot_user_input_data.plot_estimated_data_system_sales_share(sales,ECONOMY_ID, YEARS_TO_KEEP_AFTER_BASE_YEAR)
+        plot_user_input_data.plot_estimated_data_system_sales_share(config, sales,ECONOMY_ID, YEARS_TO_KEEP_AFTER_BASE_YEAR)
         
     #drop Total Stocks column and Value column
     sales = sales.drop(columns=['Total Stocks', 'Value'])
@@ -592,7 +588,7 @@ def estimate_transport_data_system_sales_share(ECONOMY_ID, new_transport_data_sy
     return new_sales_years
 
 
-def estimate_transport_data_system_sales_share_using_share_of_activity(ECONOMY_ID, new_transport_data_system_df, YEARS_TO_KEEP_AFTER_BASE_YEAR,SET_YEAR_WITH_MOST_VALUES_TO_BASE_YEAR):
+def estimate_transport_data_system_sales_share_using_share_of_activity(config, ECONOMY_ID, new_transport_data_system_df, YEARS_TO_KEEP_AFTER_BASE_YEAR, SET_YEAR_WITH_MOST_VALUES_TO_BASE_YEAR):
     """since vehicle sales share is really the share of new actiivty taken up by that vehicle and drive type within its transport type (rahter than sshare of new stocks, since stocks use a different amount of acitvity based on their vehicle type), we will estimate it by taking the share of transport type activity for each vehicle and drive type and then normalising it to 1. This will be done for each year and each scenario.
     
     """
@@ -648,7 +644,7 @@ def estimate_transport_data_system_sales_share_using_share_of_activity(ECONOMY_I
     # sales = sales.loc[sales['Date']==max_year]
     plotting = False
     if plotting:
-        plot_user_input_data.plot_estimated_data_system_sales_share(sales,ECONOMY_ID, YEARS_TO_KEEP_AFTER_BASE_YEAR)
+        plot_user_input_data.plot_estimated_data_system_sales_share(config, sales,ECONOMY_ID, YEARS_TO_KEEP_AFTER_BASE_YEAR)
     
     #drop Total Stocks column and Value column
     sales = sales.drop(columns=['Value'])
@@ -680,7 +676,7 @@ def estimate_transport_data_system_sales_share_using_share_of_activity(ECONOMY_I
     
     return new_sales_years
 
-def calcaulte_missing_drive_shares_from_manually_inputted_data(new_sales_shares_pre_interp, model_concordances_user_input_and_growth_rates, passenger_drive_shares, freight_drive_shares,YEARS_TO_KEEP_AFTER_BASE_YEAR):
+def calcaulte_missing_drive_shares_from_manually_inputted_data(config, new_sales_shares_pre_interp, model_concordances_user_input_and_growth_rates, passenger_drive_shares, freight_drive_shares, YEARS_TO_KEEP_AFTER_BASE_YEAR):
     #we are now only taking in data from the most important drives, to reduce the amount of time we need to spend manually writing out the drive share targets. So the follwoign funciton should take in those targets and the Base year data, and calcualte the remaining drive shares for the missing drives using the base year data's shares as a reference. 
     #the base year datas shares, for the missing drives, will be normalised to 1 so we can just times them by 1-x where x is the sum of the manully inputted shares, in each year we ahve them for. In missing years (the years we will interpoalte later), we will leave all as nan, so that we can interpolate between the values we have set and the base year values.
     #the input files for this will be:
@@ -743,7 +739,7 @@ def calcaulte_missing_drive_shares_from_manually_inputted_data(new_sales_shares_
 
 
 #%%
-# a = create_vehicle_sales_share_input('02_BD', RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA=True)
+# a = create_vehicle_sales_share_input(config, '02_BD', RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA=True)
 
-# create_vehicle_sales_share_input('20_USA', RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA=False)
+# create_vehicle_sales_share_input(config, '20_USA', RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA=False)
 #%%

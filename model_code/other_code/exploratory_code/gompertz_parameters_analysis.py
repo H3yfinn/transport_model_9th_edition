@@ -14,18 +14,13 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}\\code")
-    import config
+    sys.path.append(f"{config.root_dir}\\code")
     import utility_functions
 else:
     # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
     from .. import utility_functions
-    from .. import config
 #################
 
 import pandas as pd 
@@ -61,7 +56,7 @@ test_params = False
 if test_params:
     from plotly.subplots import make_subplots
 
-    def gompertz_stocks(gdp_per_capita, gamma, beta, alpha):
+    def gompertz_stocks(config, gdp_per_capita, gamma, beta, alpha):
         return gamma * np.exp(alpha * np.exp(beta * gdp_per_capita))
 
     # Define GDP per capita range
@@ -101,7 +96,7 @@ if test_params:
         for j, beta in enumerate(beta_values):
             for k, alpha in enumerate(alpha_values):
                 # Calculate vehicle ownership rates
-                vehicle_ownership_rates = gompertz_stocks(gdp_per_capita, gamma, beta, alpha)
+                vehicle_ownership_rates = gompertz_stocks(config, gdp_per_capita, gamma, beta, alpha)
                 
                 # Add a line to the appropriate subplot
                 fig.add_trace(go.Scatter(x=gdp_per_capita, y=vehicle_ownership_rates, mode='lines', name=f'gamma={gamma}'), row=j+1, col=k+1)
@@ -111,14 +106,14 @@ if test_params:
     #drop legend
     # fig.update_layout(showlegend=False)
     # Show the plot
-    fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\gompertz_curve_test_{gamma}.html', auto_open=True)
+    fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\gompertz_curve_test_{gamma}.html', auto_open=True)
 #%%
 #https://www.mdpi.com/2071-1050/6/8/4877
 test_params = False
 if test_params:
     from plotly.subplots import make_subplots
 
-    def gompertz_stocks(gdp_per_capita, gamma, beta, alpha):
+    def gompertz_stocks(config, gdp_per_capita, gamma, beta, alpha):
         return gamma * np.exp(alpha * np.exp(beta * gdp_per_capita))
 
 
@@ -163,7 +158,7 @@ if test_params:
         for j, beta in enumerate(beta_values):
             for k, alpha in enumerate(alpha_values):
                 # Calculate vehicle ownership rates
-                vehicle_ownership_rates = gompertz_stocks(gdp_per_capita, gamma, beta, alpha)
+                vehicle_ownership_rates = gompertz_stocks(config, gdp_per_capita, gamma, beta, alpha)
                 
                 # Add a line to the appropriate subplot
                 fig.add_trace(go.Scatter(x=gdp_per_capita, y=vehicle_ownership_rates, mode='lines', name=f'gamma={gamma}'), row=j+1, col=k+1)
@@ -173,7 +168,7 @@ if test_params:
     #drop legend
     # fig.update_layout(showlegend=False)
     # Show the plot
-    fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\gompertz_curve_test_{gamma}.html', auto_open=True)
+    fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\gompertz_curve_test_{gamma}.html', auto_open=True)
 #%%
 
 #save data as pickle to be analysed seprartely )we want to see if we can estimate beter paramter vlaues to aovid stocks per cpita estiamtes being equal to the gamma value (theoretical amximum for stocks per capita)
@@ -186,7 +181,7 @@ if analyse_this:
     
     from plotly.subplots import make_subplots
 
-    def gompertz_stocks(gdp_per_capita, gamma, beta, alpha):
+    def gompertz_stocks(config, gdp_per_capita, gamma, beta, alpha):
         return gamma * np.exp(alpha * np.exp(beta * gdp_per_capita))
 
     #grab parameter value and create a range that is plus or minus 200% of the value
@@ -249,7 +244,7 @@ if analyse_this:
         #drop legend for all but the first plot
         fig.update_layout(showlegend=True)
         # Show the plot
-        fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\01aus_gompertz_curve_test_{gamma}.html', auto_open=True)
+        fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\01aus_gompertz_curve_test_{gamma}.html', auto_open=True)
 #%%
 
 
@@ -260,7 +255,7 @@ gompertz_parameters = gompertz_parameters[(gompertz_parameters['Economy'] == '01
 def gompertz_stocks(gdp_per_capita, gamma, beta, alpha):
     return gamma * np.exp(alpha * np.exp(beta * gdp_per_capita))
 
-def log_func(x, a, b):
+def log_func(config, x, a, b):
     return a + b * np.log(x + 1)  # Add 1 to x to avoid taking the log of zero
 import numpy as np
 from scipy.optimize import curve_fit
@@ -303,7 +298,7 @@ if analyse_this:
     params_log[1] = 1
     # Generate data for the fitted function:
     x_fit = gompertz_parameters['Gdp_per_capita']
-    gompertz_parameters['Fitted_log_stocks_per_thousand_capita'] = log_func(gompertz_parameters['Gdp_per_capita'], params_log[0], params_log[1])
+    gompertz_parameters['Fitted_log_stocks_per_thousand_capita'] = log_func(config, gompertz_parameters['Gdp_per_capita'], params_log[0], params_log[1])
     y_fit = gompertz_parameters['Fitted_log_stocks_per_thousand_capita']
 
     # Use curve_fit to find the best parameters
@@ -317,7 +312,7 @@ if analyse_this:
     # params[1] = -100
 
     # Generate data for the fitted function
-    vehicle_ownership_rates_fit = gompertz_stocks(x_fit, gamma, params[0], params[1])
+    vehicle_ownership_rates_fit = gompertz_stocks(config, x_fit, gamma, params[0], params[1])
 
     # Create a plot
     fig = go.Figure()
@@ -339,7 +334,7 @@ if analyse_this:
                     yaxis_title='Vehicle Ownership Rates')
 
     # save plot as html
-    fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\01aus_gompertz_curve_log_fit.html', auto_open=True)
+    fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\01aus_gompertz_curve_log_fit.html', auto_open=True)
 
 
 #%%
@@ -349,9 +344,9 @@ import numpy as np
 import plotly.graph_objects as go
 
 # Define the log function
-def log_func(x, a, b):
+def log_func(config, x, a, b):
     return a + b * np.log(x + 1)  # Add 1 to x to avoid taking the log of zero
-def gompertz_stocks(gdp_per_capita, gamma, beta, alpha):
+def gompertz_stocks(config, gdp_per_capita, gamma, beta, alpha):
     return gamma * np.exp(alpha * np.exp(beta * gdp_per_capita))
 
 # # Define your GDP per capita and vehicle ownership rates data
@@ -414,9 +409,9 @@ fig.add_trace(go.Scatter(x=gdp_per_capita_data, y=vehicle_ownership_rates_data, 
 for a in a_values:
     for b in b_values:
         # Calculate vehicle ownership rates for the fitted function
-        vehicle_ownership_rates_fit = log_func(gdp_per_capita_fit, a, b)
+        vehicle_ownership_rates_fit = log_func(config, gdp_per_capita_fit, a, b)
         # Calculate vehicle ownership rates for the fitted function at the specific GDP per capita values
-        vehicle_ownership_rates_fit_specific = log_func(gdp_per_capita_data, a, b)
+        vehicle_ownership_rates_fit_specific = log_func(config, gdp_per_capita_data, a, b)
         # Check if the current alpha/beta pair intercepts the two data points
         if np.isclose(vehicle_ownership_rates_fit_specific, vehicle_ownership_rates_data,rtol=0.1).all():
             # Add the fitted function to the plot
@@ -426,9 +421,9 @@ for a in a_values:
 for alpha in alpha_values:
     for beta in beta_values:
         # Calculate vehicle ownership rates for the fitted function
-        vehicle_ownership_rates_fit = gompertz_stocks(gdp_per_capita_fit, gamma, beta, alpha)
+        vehicle_ownership_rates_fit = gompertz_stocks(config, gdp_per_capita_fit, gamma, beta, alpha)
         # Calculate vehicle ownership rates for the fitted function at the specific GDP per capita values
-        vehicle_ownership_rates_fit_specific = gompertz_stocks(gdp_per_capita_data, gamma, beta, alpha)
+        vehicle_ownership_rates_fit_specific = gompertz_stocks(config, gdp_per_capita_data, gamma, beta, alpha)
         # Check if the current alpha/beta pair intercepts the two data points
         if np.isclose(vehicle_ownership_rates_fit_specific, vehicle_ownership_rates_data,rtol=0.1).all():
             # Add the fitted function to the plot
@@ -441,7 +436,7 @@ fig.update_layout(title='Vehicle Ownership Rates',
                 yaxis_title='Vehicle Ownership Rates')
 
 # write the plot
-fig.write_html(root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\01aus_gompertz_curve_log_fit.html', auto_open=True)
+fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\gompertz\\01aus_gompertz_curve_log_fit.html', auto_open=True)
 
 
 #%%
@@ -473,7 +468,7 @@ if run_this_section == True:
 
     #SETUP THE GOMPERTZ CURVE
     #define the function    
-    def gompertz_stocks(gdp_per_capita, gamma, beta, alpha):
+    def gompertz_stocks(config, gdp_per_capita, gamma, beta, alpha):
         #orioginal equation, just for reference
         return gamma * np.exp(alpha * np.exp(beta * gdp_per_capita))
 
@@ -483,8 +478,8 @@ if run_this_section == True:
     #Estimate Gdp per capita
     def solve_for_gdp_per_capita(stocks_per_capita, current_Gdp_per_capita,gamma, beta, alpha):
         # Define the function for which we want to find the root
-        #the "root" is the value of gdp_per_capita that makes the function gompertz_stocks(gdp_per_capita, gamma, beta, alpha) - stocks_per_capita equal to zero
-        func = lambda gdp_per_capita: gompertz_stocks(gdp_per_capita, gamma, beta, alpha) - stocks_per_capita
+        #the "root" is the value of gdp_per_capita that makes the function gompertz_stocks(config, gdp_per_capita, gamma, beta, alpha) - stocks_per_capita equal to zero
+        func = lambda gdp_per_capita: gompertz_stocks(config, gdp_per_capita, gamma, beta, alpha) - stocks_per_capita
         # Initial guess for the root
         initial_guess = current_Gdp_per_capita
         # Use the Newton-Raphson method to find the root

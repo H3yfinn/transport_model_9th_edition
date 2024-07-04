@@ -18,7 +18,7 @@ import warnings
 warnings.filterwarnings('ignore', message='Calling int on a single element Series is deprecated')#from line ~190
 
 #%%
-def plot_multiplicative_timeseries(data_title, extra_identifier, structure_variables_list,activity_variable,energy_variable='Energy', emissions_variable='Emissions',emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25,AUTO_OPEN=False, hierarchical=False,output_data_folder='output_data',plotting_output_folder='\\plotting_output\\', INCLUDE_EXTRA_FACTORS_AT_END = False):
+def plot_multiplicative_timeseries(config, data_title, extra_identifier, structure_variables_list, activity_variable, energy_variable='Energy', emissions_variable='Emissions', emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25, AUTO_OPEN=False, hierarchical=False, output_data_folder='output_data', plotting_output_folder='\\plotting_output\\', INCLUDE_EXTRA_FACTORS_AT_END = False):
     """
     data used by this function:
         
@@ -72,7 +72,7 @@ def plot_multiplicative_timeseries(data_title, extra_identifier, structure_varia
             )
         )
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_multiplicative_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
 
     elif emissions_divisia == True and hierarchical == False:
         
@@ -120,7 +120,7 @@ def plot_multiplicative_timeseries(data_title, extra_identifier, structure_varia
             )
         )
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_multiplicative_timeseries.html',auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
     
     elif emissions_divisia == False and hierarchical == True:
                 
@@ -165,7 +165,7 @@ def plot_multiplicative_timeseries(data_title, extra_identifier, structure_varia
         fig.update_yaxes(title_text='Proportional effect on energy use')
 
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_multiplicative_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
         
     elif emissions_divisia == True and hierarchical == True:
                 
@@ -210,10 +210,10 @@ def plot_multiplicative_timeseries(data_title, extra_identifier, structure_varia
         fig.update_yaxes(title_text='Proportional effect on emissions use')
 
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_multiplicative_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
 
 
-def plot_additive_timeseries(data_title, extra_identifier, structure_variables_list,activity_variable,energy_variable='Energy', emissions_variable='Emissions',emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25,AUTO_OPEN=False, hierarchical=False,output_data_folder='output_data',plotting_output_folder='\\plotting_output\\', INCLUDE_EXTRA_FACTORS_AT_END = False):
+def plot_additive_timeseries(config, data_title, extra_identifier, structure_variables_list, activity_variable, energy_variable='Energy', emissions_variable='Emissions', emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25, AUTO_OPEN=False, hierarchical=False, output_data_folder='output_data', plotting_output_folder='\\plotting_output\\', INCLUDE_EXTRA_FACTORS_AT_END = False):
     """
     data used by this function:
         
@@ -268,7 +268,7 @@ def plot_additive_timeseries(data_title, extra_identifier, structure_variables_l
             )
         )
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'additive_timeseries.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'additive_timeseries.png')
 
     elif emissions_divisia == True and hierarchical == False:
         
@@ -315,7 +315,7 @@ def plot_additive_timeseries(data_title, extra_identifier, structure_variables_l
             )
         )
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html',auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'additive_timeseries.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'additive_timeseries.png')
     
     elif emissions_divisia == False and hierarchical == True:
                 
@@ -365,7 +365,7 @@ def plot_additive_timeseries(data_title, extra_identifier, structure_variables_l
         fig.update_yaxes(title_text='Proportional effect on energy use')
 
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'additive_timeseries.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'additive_timeseries.png')
     
     elif emissions_divisia == True and hierarchical == True:
                 
@@ -415,7 +415,7 @@ def plot_additive_timeseries(data_title, extra_identifier, structure_variables_l
         fig.update_yaxes(title_text='Proportional effect on emissions')
 
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'additive_timeseries.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'additive_timeseries.png')
 
 
     
@@ -424,7 +424,7 @@ def plot_additive_timeseries(data_title, extra_identifier, structure_variables_l
 ######################################################
 
             
-def plot_additive_waterfall(data_title, extra_identifier, structure_variables_list, activity_variable,energy_variable='Energy', emissions_variable='Emissions',emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25,y_axis_min_percent_decrease=0.9,AUTO_OPEN=False, hierarchical=False, output_data_folder='output_data', plotting_output_folder='plotting_output', INCLUDE_TEXT = False, INCLUDE_EXTRA_FACTORS_AT_END = False, PLOT_CUMULATIVE_VERSION=False):
+def plot_additive_waterfall(config, data_title, extra_identifier, structure_variables_list, activity_variable, energy_variable='Energy', emissions_variable='Emissions', emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25, y_axis_min_percent_decrease=0.9, AUTO_OPEN=False, hierarchical=False, output_data_folder='output_data', plotting_output_folder='plotting_output', INCLUDE_TEXT = False, INCLUDE_EXTRA_FACTORS_AT_END = False, PLOT_CUMULATIVE_VERSION=False):
     """
     data used by this function:
         
@@ -543,7 +543,7 @@ def plot_additive_waterfall(data_title, extra_identifier, structure_variables_li
         fig.update_xaxes(tickangle=25)
         
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '.html',auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + '.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + '.png')
 
     elif emissions_divisia  == True and hierarchical == False:
         #this is for emissions plot:
@@ -632,7 +632,7 @@ def plot_additive_waterfall(data_title, extra_identifier, structure_variables_li
         fig.update_yaxes(title_text='MtCO2')
         
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '.html',auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + '.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + '.png')
 
     elif emissions_divisia == False and hierarchical == True: 
         lmdi_output_additive = pd.read_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier))
@@ -731,7 +731,7 @@ def plot_additive_waterfall(data_title, extra_identifier, structure_variables_li
         fig.update_xaxes(tickangle=25)
         
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier +'_additive_hierarchical.html',auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + '.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + '.png')
     
     
     elif emissions_divisia == True and hierarchical == True: 
@@ -838,10 +838,10 @@ def plot_additive_waterfall(data_title, extra_identifier, structure_variables_li
         fig.update_xaxes(tickangle=25)
         
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier +'_additive_hierarchical.html',auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + '.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + '.png')
         
         
-def concat_waterfall_inputs(data_title,new_extra_identifier, extra_identifiers,activity_variables, new_activity_variable,time_variable='Year',  hierarchical=False, output_data_folder='output_data'):
+def concat_waterfall_inputs(config, data_title, new_extra_identifier, extra_identifiers, activity_variables, new_activity_variable, time_variable='Year', hierarchical=False, output_data_folder='output_data'):
     """
     This will take in a list of the data titles, extra identifiers, and activity variables and will create a dataframe with all the data in it. The effects will be concatenated together, and the total energy/emissions will be added together. This will then be used to create a waterfall plot. It is important that the number of columns in each dataset is the same.
     
@@ -904,7 +904,7 @@ def concat_waterfall_inputs(data_title,new_extra_identifier, extra_identifiers,a
         #save with new id so we can plot it
         lmdi_output_additive.to_csv('{}\\{}{}_concatenated_additive.csv'.format(output_data_folder,data_title, new_extra_identifier), index=False)
         
-def plot_combined_waterfalls(data_title,graph_titles,extra_identifiers, new_extra_identifier, structure_variables_list, activity_variables,energy_variable='Energy', emissions_variable='Emissions',emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25,y_axis_min_percent_decrease=0.9,AUTO_OPEN=False, hierarchical=False, output_data_folder='output_data', plotting_output_folder='plotting_output', INCLUDE_TEXT = False):  
+def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers, new_extra_identifier, structure_variables_list, activity_variables, energy_variable='Energy', emissions_variable='Emissions', emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25, y_axis_min_percent_decrease=0.9, AUTO_OPEN=False, hierarchical=False, output_data_folder='output_data', plotting_output_folder='plotting_output', INCLUDE_TEXT = False):
     """
     data used by this function:
         
@@ -1278,10 +1278,10 @@ def plot_combined_waterfalls(data_title,graph_titles,extra_identifiers, new_extr
 #         )
 
 #         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_multiplicative_waterfall.html',auto_open=AUTO_OPEN)
-#         #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_waterfall.png')
+#         #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_waterfall.png')
 
 
-def plot_additive_timeseries_WEIRD_COPY(data_title, extra_identifier, structure_variables_list,activity_variable,energy_variable='Energy', emissions_variable='Emissions',emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25,AUTO_OPEN=False, hierarchical=False,output_data_folder='output_data',plotting_output_folder='\\plotting_output\\', INCLUDE_EXTRA_FACTORS_AT_END = False):#cant work out why this was here?
+def plot_additive_timeseries_WEIRD_COPY(config, data_title, extra_identifier, structure_variables_list, activity_variable, energy_variable='Energy', emissions_variable='Emissions', emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25, AUTO_OPEN=False, hierarchical=False, output_data_folder='output_data', plotting_output_folder='\\plotting_output\\', INCLUDE_EXTRA_FACTORS_AT_END = False):
     """
     data used by this function:
         
@@ -1338,7 +1338,7 @@ def plot_additive_timeseries_WEIRD_COPY(data_title, extra_identifier, structure_
             )
         )
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'Additive_timeseries.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'Additive_timeseries.png')
 
     elif emissions_divisia == True and hierarchical == False:
         
@@ -1388,7 +1388,7 @@ def plot_additive_timeseries_WEIRD_COPY(data_title, extra_identifier, structure_
             )
         )
         plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html',auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'Additive_timeseries.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'Additive_timeseries.png')
     
     elif emissions_divisia == False and hierarchical == True:
         print('Not plotting timeseries of hierarchical additive data yet. Code not completed')
@@ -1440,7 +1440,7 @@ def plot_additive_timeseries_WEIRD_COPY(data_title, extra_identifier, structure_
         # fig.update_yaxes(title_text='Effect on energy use')
 
         # plotly.offline.plot(fig, filename=plotting_output_folder + data_title + extra_identifier + '_additive_timeseries.html', auto_open=AUTO_OPEN)
-        #fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
+        #fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + data_title + extra_identifier + 'multiplicative_timeseries.png')
 
 
 

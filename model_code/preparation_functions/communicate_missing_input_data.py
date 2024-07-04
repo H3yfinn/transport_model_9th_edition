@@ -7,11 +7,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 #################
 
 import pandas as pd 
@@ -34,8 +30,8 @@ from plotly.subplots import make_subplots
 #%%
 #load in the transport dataset that contains all data and plot the data coverage usinga  kind of scatterplot. 
 #this will allow the user to understand where data is missing and where it is present so that if any errors occur they can find out with ease
-def communicate_missing_input_data():
-    aggregated_model_data = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\aggregated_model_data.csv'.format(config.FILE_DATE_ID))
+def communicate_missing_input_data(config):
+    aggregated_model_data = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\aggregated_model_data.csv'.format(config.FILE_DATE_ID))
 
     #now plot the data available column to see what data is available and what is not using the data coverage plotting style;
     #%%
@@ -80,7 +76,7 @@ def communicate_missing_input_data():
         plt.title('Colors to use')
         for i, color in enumerate(colors_to_use):
             plt.plot([i], [i], 'o', color=color)
-        plt.savefig(root_dir + '\\' + 'plotting_output\\plot_data_coverage\\{}_colors_to_use.png'.format(config.FILE_DATE_ID))
+        plt.savefig(config.root_dir + '\\' + 'plotting_output\\plot_data_coverage\\{}_colors_to_use.png'.format(config.FILE_DATE_ID))
         plt.close()
 
     #assign each color to a unique index row
@@ -194,9 +190,9 @@ def communicate_missing_input_data():
 
                 #save the plot with id for the date and the measure. Make the plot really high resolution so that it can be zoomed in on
                 if number_of_values == 0:
-                    plt.savefig(root_dir + '\\' + 'plotting_output\\plot_data_coverage\\NOVALUES_{}_{}_{}_{}_plot.png'.format(config.FILE_DATE_ID, measure, transport_type, scenario))
+                    plt.savefig(config.root_dir + '\\' + 'plotting_output\\plot_data_coverage\\NOVALUES_{}_{}_{}_{}_plot.png'.format(config.FILE_DATE_ID, measure, transport_type, scenario))
                 else:
-                    plt.savefig(root_dir + '\\' + 'plotting_output\\plot_data_coverage\\{}_{}_{}_{}_plot.png'.format(config.FILE_DATE_ID, measure, transport_type, scenario))
+                    plt.savefig(config.root_dir + '\\' + 'plotting_output\\plot_data_coverage\\{}_{}_{}_{}_plot.png'.format(config.FILE_DATE_ID, measure, transport_type, scenario))
 
     #%%
 
@@ -207,7 +203,7 @@ def communicate_missing_input_data():
     # %matplotlib inline
     #%%
     #plot the user input measures vs other measures
-    user_input = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\user_inputs_and_growth_rates.csv')
+    user_input = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\user_inputs_and_growth_rates.csv')
     #loop through the measures
     user_input_measures = user_input.Measure.unique()
     non_user_input_measures = [measure for measure in aggregated_model_data.Measure.unique() if measure not in user_input_measures]

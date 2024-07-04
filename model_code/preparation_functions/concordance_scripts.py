@@ -20,11 +20,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 #################
 import pandas as pd 
 import numpy as np
@@ -52,10 +48,10 @@ from plotly.subplots import make_subplots
 
 ################################################################################################################################################################
 
-def create_all_concordances():
+def create_all_concordances(config):
     #create set of categories of data that will be output by the model. 
     #update this with the transport categories you want to use in the transport model and they should flow through so that the inputs and outputs of the model need to be like that.
-    manually_defined_transport_categories = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\manually_defined_transport_categories.csv')
+    manually_defined_transport_categories = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\manually_defined_transport_categories.csv')
     
     #drop duplicates
     manually_defined_transport_categories.drop_duplicates(inplace=True)
@@ -79,9 +75,9 @@ def create_all_concordances():
     model_concordances['Frequency'] = 'Yearly'
     #save model_concordances with date
     #check the folder exists
-    # if not os.path.exists(root_dir + '\\' + 'config\\concordances_and_config_data\\computer_generated_concordances'):
+    # if not os.path.exists(config.root_dir + '\\' + 'config\\concordances_and_config_data\\computer_generated_concordances'):
         # os.makedirs('config\\concordances_and_config_data\\computer_generated_concordances')
-    model_concordances.to_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name), index=False)
+    model_concordances.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name), index=False)
 
     ################################################################################################################################################################
     
@@ -91,7 +87,7 @@ def create_all_concordances():
 
     #thsi is important to keep up to date because it will be used to create the user input spreadsheet for the demand side fuel mixing (involving removing the biofuels as they will be stated in the supply sdide fuel mixing)
     #load csv of drive_type_to_fuel
-    drive_type_to_fuel_df = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\drive_type_to_fuel.csv')
+    drive_type_to_fuel_df = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\drive_type_to_fuel.csv')
 
     #make a version of the df with no biofuels
     drive_type_to_fuel_df_NO_BIOFUELS = drive_type_to_fuel_df[~drive_type_to_fuel_df['Fuel'].str.contains('bio')]
@@ -102,8 +98,8 @@ def create_all_concordances():
     model_concordances_fuels_NO_BIOFUELS = pd.merge(model_concordances_fuels_NO_BIOFUELS, drive_type_to_fuel_df_NO_BIOFUELS, how='left', on=['Drive'])
 
     #save
-    model_concordances_fuels.to_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels), index=False)
-    model_concordances_fuels_NO_BIOFUELS.to_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels_NO_BIOFUELS), index=False)
+    model_concordances_fuels.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels), index=False)
+    model_concordances_fuels_NO_BIOFUELS.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels_NO_BIOFUELS), index=False)
 
     ########################################################################################################################################################################
     
@@ -147,7 +143,7 @@ def create_all_concordances():
     # #TEMP Over
     
     #now save
-    model_concordances_BASE_YEAR_measures.to_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_base_year_measures_file_name), index=False)
+    model_concordances_BASE_YEAR_measures.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_base_year_measures_file_name), index=False)
 
     ########################################################################################################################################################################
     #create a model concordance for growth rates and user defined inputs 
@@ -214,16 +210,16 @@ def create_all_concordances():
     ##########################
     #now save
     
-    model_concordances_user_input_and_growth_rates.to_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_user_input_and_growth_rates_file_name), index=False)
+    model_concordances_user_input_and_growth_rates.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_user_input_and_growth_rates_file_name), index=False)
 
-    #run create_fuel_mixing_concordances() to create the fuel mixing concordances. It is seperate because occasionally it will need to be done right after creating new fuel mixing inputs
-    create_fuel_mixing_concordances(model_concordances_fuels)
+    #run create_fuel_mixing_concordances(config) to create the fuel mixing concordances. It is seperate because occasionally it will need to be done right after creating new fuel mixing inputs
+    create_fuel_mixing_concordances(config, model_concordances_fuels)
 
     
 ########################################################################################################################################################
 
 #create concordances for fuel mixxing measures. These are kept separate from the others because the tables they are in are different. this is from inputs into the model
-def create_fuel_mixing_concordances(model_concordances_fuels):
+def create_fuel_mixing_concordances(config, model_concordances_fuels):
     #load drive_type_to_fuel and use the fuel mixing vcolumns to idenitfy what fuels should be mixed together and whether they are original or new fuels, also whether they are on the demand and/or supply side., The belwo are just simeple examples of what the data looks like. The actual data is in the drive_type_to_fuel.csv file
     # Drive	Fuel	Supply_side_fuel_mixing	Demand_side_fuel_mixing
     # rail_coal	01_coal	FALSE	FALSE
@@ -239,11 +235,11 @@ def create_fuel_mixing_concordances(model_concordances_fuels):
     #     Medium	Transport Type	Vehicle Type	Drive	Date	Economy	Scenario	Frequency	Fuel	New_fuel	Supply_side_fuel_share
     # air	freight	all	air_av_gas	2017	01_AUS	Reference	Yearly	07_02_aviation_gasoline	16_07_bio_jet_kerosene	0
     
-    drive_type_to_fuel_df = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\drive_type_to_fuel.csv')
+    drive_type_to_fuel_df = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\drive_type_to_fuel.csv')
     
     #load in concordances and then keep only data that is in the drive_type_to_fuel_df:
     
-    # model_concordances_fuels = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
+    # model_concordances_fuels = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
     
     #first do demand side fuel mixing:
     drive_type_to_fuel_df_demand = drive_type_to_fuel_df[drive_type_to_fuel_df['Demand_side_fuel_mixing'].isin(['Original fuel', 'New fuel'])].copy()
@@ -305,10 +301,10 @@ def create_fuel_mixing_concordances(model_concordances_fuels):
         raise ValueError('There are duplicates in the supply side fuel mixing. Please check the drive_type_to_fuel_df and model_concordances_fuels')
 
     #save
-    demand.to_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_demand_side_fuel_mixing_file_name), index=False)
-    supply.to_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_supply_side_fuel_mixing_file_name), index=False)
+    demand.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_demand_side_fuel_mixing_file_name), index=False)
+    supply.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_supply_side_fuel_mixing_file_name), index=False)
 
 #%%
 #%%
-# create_all_concordances()
+# create_all_concordances(config)
 #%%

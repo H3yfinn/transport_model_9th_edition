@@ -8,11 +8,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 from ..plotting_functions import plot_charging_graphs
 #################
 
@@ -33,10 +29,10 @@ import matplotlib.pyplot as plt
 ####usae this to load libraries and set variables. Feel free to edit that file as you need
 #%%
 
-def prepare_inputs_for_estimating_charging_requirements(ECONOMY_ID):
+def prepare_inputs_for_estimating_charging_requirements(config, ECONOMY_ID):
     ##############################################
 
-    df = pd.read_csv(root_dir + '\\' + 'output_data\\model_output\\{}_{}'.format(ECONOMY_ID,config.model_output_file_name))
+    df = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output\\{}_{}'.format(ECONOMY_ID,config.model_output_file_name))
     #reaple any nan values with 0
     df = df.fillna(0)#bit of a temp measure, but will do for now
     ##############################################
@@ -63,7 +59,7 @@ def prepare_inputs_for_estimating_charging_requirements(ECONOMY_ID):
     return df, parameters, colors_dict, INCORPORATE_UTILISATION_RATE
 #%%
 ##############################################
-def estimate_kwh_of_ev_battery_capacity(df, parameters):
+def estimate_kwh_of_ev_battery_capacity(config, df, parameters):
     #take in the number of evs for each vehicle type in an economy and calcualte the total kwh of battery capacity for that economy, given the number of evs and the average kwh of battery capacity for each vehicle type
     evs = df.loc[(df['Drive']=='bev')].copy()
     evs['sum_of_stocks'] = evs.groupby(['Economy','Date','Scenario'])['Stocks'].transform('sum')
@@ -79,7 +75,7 @@ def estimate_kwh_of_ev_battery_capacity(df, parameters):
     
     return evs[['Economy','Date','Scenario','Vehicle Type','Stocks', 'sum_of_stocks','kwh_of_battery_capacity','sum_of_kwh_of_battery_capacity','average_kwh_of_battery_capacity_by_vehicle_type']].drop_duplicates()
 
-def incorporate_utilisation_rate(total_kwh_of_battery_capacity, parameters):
+def incorporate_utilisation_rate(config, total_kwh_of_battery_capacity, parameters):
     """ note that this function will not change the total number of chargers, it will just change the number of chargers for each vehicle type, as it distributes the chargers based on the utilisation rate."""
     total_kwh_of_battery_capacity['public_charger_utilisation_rate'] = total_kwh_of_battery_capacity['Vehicle Type'].map(parameters['public_charger_utilisation_rate'])
     
@@ -111,21 +107,21 @@ def incorporate_utilisation_rate(total_kwh_of_battery_capacity, parameters):
 
 ################################################################
 
-def estimate_kw_of_required_chargers(ECONOMY_ID):
+def estimate_kw_of_required_chargers(config, ECONOMY_ID):
     #MAIN FUNCTION
-    df, parameters, colors_dict, INCORPORATE_UTILISATION_RATE = prepare_inputs_for_estimating_charging_requirements(ECONOMY_ID)
+    df, parameters, colors_dict, INCORPORATE_UTILISATION_RATE = prepare_inputs_for_estimating_charging_requirements(config, ECONOMY_ID)
     
-    total_kwh_of_battery_capacity = estimate_kwh_of_ev_battery_capacity(df, parameters)
+    total_kwh_of_battery_capacity = estimate_kwh_of_ev_battery_capacity(config, df, parameters)
     #now we can use this to estimate the number of chargers required given the expected number of chargers per kw of kwh of ev battery capacity
 
-    # total_kwh_of_battery_capacity = estimate_kw_of_required_chargers(total_kwh_of_battery_capacity, parameters)
+    # total_kwh_of_battery_capacity = estimate_kw_of_required_chargers(config, total_kwh_of_battery_capacity, parameters)
     #calcualte this for each vehicle type and then sum as a total for each economy, date and scenario
     #do this using the number of kwh of battery capacity needed per kw of charger capacity
     
     #by vehicle type: (will use a public_charger_utilisation_rate for each vehicle type)    
     if INCORPORATE_UTILISATION_RATE:
         #note that the utilisation rate wont change the total chargers, it jsut changes what vehicles use the chargers.
-        total_kwh_of_battery_capacity = incorporate_utilisation_rate(total_kwh_of_battery_capacity, parameters)
+        total_kwh_of_battery_capacity = incorporate_utilisation_rate(config, total_kwh_of_battery_capacity, parameters)
     else:
         total_kwh_of_battery_capacity['expected_kw_of_chargers'] = total_kwh_of_battery_capacity['kwh_of_battery_capacity']*parameters['expected_kw_of_chargers_per_kwh_of_battery']
     
@@ -158,13 +154,13 @@ def estimate_kw_of_required_chargers(ECONOMY_ID):
     
     #rename stocks to stocks_{stocks_magnitude_name}
     total_kwh_of_battery_capacity.rename(columns={'Stocks':'Stocks_'+parameters['stocks_magnitude_name']}, inplace=True)
-    #save data to csv for use in \output_data\for_other_modellers/charging
+    #save data to csv for use in \\output_data\\for_other_modellers/charging
     total_kwh_of_battery_capacity.to_csv(f'output_data\\for_other_modellers\\charging\\{ECONOMY_ID}_estimated_number_of_chargers.csv', index=False)
     
 # return total_kwh_of_battery_capacity
 #%%
 #%%
-def estimate_ev_stocks_given_chargers(df, economy, date, scenario, parameters,number_of_non_fast_chargers=0,number_of_fast_chargers=0, number_of_chargers=0):
+def estimate_ev_stocks_given_chargers(config, df, economy, date, scenario, parameters, number_of_non_fast_chargers=0, number_of_fast_chargers=0, number_of_chargers=0):
     #use a value for the number of chargers for a specified economy, date and scenario to estimate the number of evs in that economy, date and scenario.
     #we can use the previous forecasts to estimate the portion of evs in each vehicle type too.
     
@@ -243,11 +239,11 @@ if calculate_evs_given_chargers:
     number_of_non_fast_chargers = 150000 - number_of_fast_chargers
     number_of_chargers = 0
     
-    df, parameters, colors_dict, INCORPORATE_UTILISATION_RATE = prepare_inputs_for_estimating_charging_requirements(ECONOMY_ID=economy)
+    df, parameters, colors_dict, INCORPORATE_UTILISATION_RATE = prepare_inputs_for_estimating_charging_requirements(config, ECONOMY_ID=economy)
     
-    ev_stocks_and_chargers = estimate_ev_stocks_given_chargers(df, economy, date, scenario, parameters, number_of_non_fast_chargers=number_of_non_fast_chargers, number_of_fast_chargers=number_of_fast_chargers, number_of_chargers=number_of_chargers)
+    ev_stocks_and_chargers = estimate_ev_stocks_given_chargers(config, df, economy, date, scenario, parameters, number_of_non_fast_chargers=number_of_non_fast_chargers, number_of_fast_chargers=number_of_fast_chargers, number_of_chargers=number_of_chargers)
     
-    plot_charging_graphs.plot_required_evs(ev_stocks_and_chargers,colors_dict, economy, date, scenario)
+    plot_charging_graphs.plot_required_evs(config, ev_stocks_and_chargers,colors_dict, economy, date, scenario)
      
         
 

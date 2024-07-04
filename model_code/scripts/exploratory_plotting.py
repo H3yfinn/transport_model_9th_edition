@@ -4,11 +4,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 from ..calculation_functions import road_model_functions
 #################
 
@@ -34,7 +30,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 #USE THIS FILE TO DO PLOTS THAT MAY ONLY BE USED ONCE OR HAVE PROCESSES THAT DONT REALLY FIT INTO THE SYSTEM FLOW OF THE MODEL.
 
-# def compare_values_between_projections_using_two_files(projection_filename1, projection_filename2, measure, title, filter_dict, grouping, graph_type, save_folder):
+# def compare_values_between_projections_using_two_files(config, projection_filename1, projection_filename2, measure, title, filter_dict, grouping, graph_type, save_folder):
 #     #this was first created to analyse difference in passenger energy use and cumulative emissions when using high hevs vs not. this just takes two files and will filter for the set of columns and items to filter for in filter_dict.(e.g. transport_types, mediums, drives, economies, fuels, last_date) and sum all by grouping (except date) and then compare the measure. 
 #     # if the measure is cumulative emissions this will calcualte those from emissions too.
 #     #the final graph can be a timeseries or a waterfall based on the final year 
@@ -59,7 +55,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 #     return
 
 
-def calculate_emissions_from_energy_col(emissions_factors,model_output_with_fuels, USE_AVG_GENERATION_EMISSIONS_FACTOR=False):
+def calculate_emissions_from_energy_col(config, emissions_factors, model_output_with_fuels, USE_AVG_GENERATION_EMISSIONS_FACTOR=False):
             
     #rename fuel_code to fuel in emissions_factors
     emissions_factors = emissions_factors.rename(columns={'fuel_code':'Fuel'})
@@ -69,7 +65,7 @@ def calculate_emissions_from_energy_col(emissions_factors,model_output_with_fuel
     if USE_AVG_GENERATION_EMISSIONS_FACTOR:
         gen='_gen'
         #pull in the 8th outlook emissions factors by year, then use that to claculate the emissions for electricity.
-        emissions_factor_elec = pd.read_csv(root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
+        emissions_factor_elec = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
         #extract the emissions factor for elctricity for each economy
         emissions_factor_elec = emissions_factor_elec[emissions_factor_elec.fuel_code=='17_electricity'].copy()
         #rename Carbon Neutral Scenario to Target
@@ -108,7 +104,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.io as pio
 
-def compare_values_between_projections_using_two_files(projection_filename1, projection_filename2, measure, title, filter_dict, grouping, graph_type, save_folder, emissions_factors=None, font_size=24):
+def compare_values_between_projections_using_two_files(config, projection_filename1, projection_filename2, measure, title, filter_dict, grouping, graph_type, save_folder, emissions_factors=None, font_size=24):
     # Load data
     if projection_filename1.endswith('.csv'):
         df1 = pd.read_csv(projection_filename1)
@@ -126,8 +122,8 @@ def compare_values_between_projections_using_two_files(projection_filename1, pro
     
     if 'emissions' in measure or 'Emissions' in measure:
         #we will have to calcualte emissions from the energy column
-        df1 = calculate_emissions_from_energy_col(emissions_factors,df1, USE_AVG_GENERATION_EMISSIONS_FACTOR=False)
-        df2 = calculate_emissions_from_energy_col(emissions_factors,df2, USE_AVG_GENERATION_EMISSIONS_FACTOR=False)
+        df1 = calculate_emissions_from_energy_col(config, emissions_factors,df1, USE_AVG_GENERATION_EMISSIONS_FACTOR=False)
+        df2 = calculate_emissions_from_energy_col(config, emissions_factors,df2, USE_AVG_GENERATION_EMISSIONS_FACTOR=False)
         
     # Calculate cumulative emissions if necessary
     if measure == 'cumulative_emissions':
@@ -247,7 +243,7 @@ def compare_values_between_projections_using_two_files(projection_filename1, pro
     
     # Save figures
     for name, fig in figs.items():
-        fig.write_html(root_dir + '\\' +f'{save_folder}\\{title}_{name}.html')
+        fig.write_html(config.root_dir + '\\' +f'{save_folder}\\{title}_{name}.html')
 
     #save data
     df1.to_csv(f'{save_folder}\\{title}_{name}_df1.csv', index=False)
@@ -261,26 +257,26 @@ def compare_values_between_projections_using_two_files(projection_filename1, pro
 
 
 #%%
-emissions_factors = pd.read_csv(root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
+emissions_factors = pd.read_csv(config.root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
 filter_dict = {'Scenario':['Reference'], 'Economy':['03_CDA'], 'Transport Type': ['passenger'], 'Medium':['road']}
-df1_ref_cum, df2_ref_cum, difference_ref_cum, difference_percent_ref_cum = compare_values_between_projections_using_two_files( root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327.csv','plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327_HEV.csv', measure='cumulative_emissions', title='Canada cumulative emissions comparison (REF)', filter_dict=filter_dict, grouping=['Date', 'Fuel'], graph_type='timeseries_proportion', save_folder=root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons', emissions_factors=emissions_factors,font_size=24)
+df1_ref_cum, df2_ref_cum, difference_ref_cum, difference_percent_ref_cum = compare_values_between_projections_using_two_files(config,  config.root_dir + '\\' +'plotting_output\experimental\Nanjing_comparisons\03_CDA_model_output20240327.csv','plotting_output\experimental\Nanjing_comparisons\03_CDA_model_output20240327_HEV.csv', measure='cumulative_emissions', title='Canada cumulative emissions comparison (REF)', filter_dict=filter_dict, grouping=['Date', 'Fuel'], graph_type='timeseries_proportion', save_folder=config.root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons', emissions_factors=emissions_factors,font_size=24)
 
-emissions_factors = pd.read_csv(root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
+emissions_factors = pd.read_csv(config.root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
 filter_dict = {'Scenario':['Target'], 'Economy':['03_CDA'], 'Medium':['road'],'Transport Type': ['passenger']}
-df1_tgt_cum, df2_tgt_cum, difference_tgt_cum, difference_percent_tgt_cum = compare_values_between_projections_using_two_files( root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327.csv','plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327_HEV.csv', measure='cumulative_emissions', title='Canada cumulative emissions comparison (TGT)', filter_dict=filter_dict, grouping=['Date', 'Fuel'], graph_type='timeseries_proportion', save_folder=root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons', emissions_factors=emissions_factors,font_size=24)
+df1_tgt_cum, df2_tgt_cum, difference_tgt_cum, difference_percent_tgt_cum = compare_values_between_projections_using_two_files(config,  config.root_dir + '\\' +'plotting_output\experimental\Nanjing_comparisons\03_CDA_model_output20240327.csv','plotting_output\experimental\Nanjing_comparisons\03_CDA_model_output20240327_HEV.csv', measure='cumulative_emissions', title='Canada cumulative emissions comparison (TGT)', filter_dict=filter_dict, grouping=['Date', 'Fuel'], graph_type='timeseries_proportion', save_folder=config.root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons', emissions_factors=emissions_factors,font_size=24)
 
 #%%
-emissions_factors = pd.read_csv(root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
+emissions_factors = pd.read_csv(config.root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
 filter_dict = {'Scenario':['Reference'], 'Economy':['03_CDA'], 'Transport Type': ['passenger'], 'Medium':['road']}
-df1_ref_abs, df2_ref_abs, difference_ref_abs, difference_percent_ref_abs = compare_values_between_projections_using_two_files(root_dir + '\\' + 'plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327.csv','plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327_HEV.csv', measure='Emissions', title='Canada emissions comparison (REF)', filter_dict=filter_dict, grouping=['Date', 'Fuel'], graph_type='timeseries_proportion', save_folder=root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons', emissions_factors=emissions_factors,font_size=24)
+df1_ref_abs, df2_ref_abs, difference_ref_abs, difference_percent_ref_abs = compare_values_between_projections_using_two_files(config, config.root_dir + '\\' + 'plotting_output\experimental\Nanjing_comparisons\03_CDA_model_output20240327.csv','plotting_output\experimental\Nanjing_comparisons\03_CDA_model_output20240327_HEV.csv', measure='Emissions', title='Canada emissions comparison (REF)', filter_dict=filter_dict, grouping=['Date', 'Fuel'], graph_type='timeseries_proportion', save_folder=config.root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons', emissions_factors=emissions_factors,font_size=24)
 
-emissions_factors = pd.read_csv(root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
+emissions_factors = pd.read_csv(config.root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
 filter_dict = {'Scenario':['Target'], 'Economy':['03_CDA'], 'Medium':['road'],'Transport Type': ['passenger']}
-df1_tgt_abs, df2_tgt_abs, difference_tgt_abs, difference_percent_tgt_abs = compare_values_between_projections_using_two_files(root_dir + '\\' + 'plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327.csv','plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327_HEV.csv', measure='Emissions', title='Canada emissions comparison (TGT)', filter_dict=filter_dict, grouping=['Date', 'Fuel'], graph_type='timeseries_proportion', save_folder=root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons', emissions_factors=emissions_factors,font_size=24)
+df1_tgt_abs, df2_tgt_abs, difference_tgt_abs, difference_percent_tgt_abs = compare_values_between_projections_using_two_files(config, config.root_dir + '\\' + 'plotting_output\experimental\Nanjing_comparisons\03_CDA_model_output20240327.csv','plotting_output\experimental\Nanjing_comparisons\03_CDA_model_output20240327_HEV.csv', measure='Emissions', title='Canada emissions comparison (TGT)', filter_dict=filter_dict, grouping=['Date', 'Fuel'], graph_type='timeseries_proportion', save_folder=config.root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons', emissions_factors=emissions_factors,font_size=24)
 
 #%%
 
-def plot_comparison_ref_vs_tgt(difference_percent_ref_filename, difference_percent_tgt_filename, measure, title, save_folder, font_size=24):
+def plot_comparison_ref_vs_tgt(config, difference_percent_ref_filename, difference_percent_tgt_filename, measure, title, save_folder, font_size=24):
     """
     This function reads the saved difference_percent CSVs, and plots the percent difference
     in difference_tgt_abs against difference_ref_abs.
@@ -332,27 +328,27 @@ def plot_comparison_ref_vs_tgt(difference_percent_ref_filename, difference_perce
         legend=dict(font=dict(size=font_size))
     )
     # Save the figure
-    fig.write_html(root_dir + '\\' +f'{save_folder}\\{title}_Percentage_Difference_Comparison.html')
+    fig.write_html(config.root_dir + '\\' +f'{save_folder}\\{title}_Percentage_Difference_Comparison.html')
 
     # Display the plot
     fig.show()
 
 # Example usage
 plot_comparison_ref_vs_tgt(
-    difference_percent_ref_filename=root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons\\Canada cumulative emissions comparison (REF)_difference_percent_difference_percent.csv',
-    difference_percent_tgt_filename=root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons\\Canada cumulative emissions comparison (TGT)_difference_percent_difference_percent.csv',
+    difference_percent_ref_filename=config.root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons\\Canada cumulative emissions comparison (REF)_difference_percent_difference_percent.csv',
+    difference_percent_tgt_filename=config.root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons\\Canada cumulative emissions comparison (TGT)_difference_percent_difference_percent.csv',
     measure='cumulative_emissions_percent',
     title='Canada Cumulative Emissions Reductions Comparison',
-    save_folder=root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons',
+    save_folder=config.root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons',
     font_size=24
 )
 
 plot_comparison_ref_vs_tgt(
-    difference_percent_ref_filename=root_dir + '\\' + 'plotting_output\\experimental\\Nanjing_comparisons\\Canada emissions comparison (REF)_difference_percent_difference_percent.csv',
-    difference_percent_tgt_filename=root_dir + '\\' + 'plotting_output\\experimental\\Nanjing_comparisons\\Canada emissions comparison (TGT)_difference_percent_difference_percent.csv',
+    difference_percent_ref_filename=config.root_dir + '\\' + 'plotting_output\\experimental\\Nanjing_comparisons\\Canada emissions comparison (REF)_difference_percent_difference_percent.csv',
+    difference_percent_tgt_filename=config.root_dir + '\\' + 'plotting_output\\experimental\\Nanjing_comparisons\\Canada emissions comparison (TGT)_difference_percent_difference_percent.csv',
     measure='Emissions_percent',
     title='Canada Emissions Reductions Comparison',
-    save_folder=root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons',
+    save_folder=config.root_dir + '\\' +'plotting_output\\experimental\\Nanjing_comparisons',
     font_size=24
 )
 

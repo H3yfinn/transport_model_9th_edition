@@ -10,11 +10,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 from . import road_model_functions
 #################
 
@@ -35,12 +31,12 @@ import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 
-def calculate_turnover_rate(df, k, L, x0):
+def calculate_turnover_rate(config, df, k, L, x0):
     df['Turnover_rate'] = L / (1 + np.exp(-k * (df['Average_age'] - x0)))
     df['Turnover_rate'].fillna(0, inplace=True)
     return df
 
-def load_non_road_model_data(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD):
+def load_non_road_model_data(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD):
     """
     Loads the non-road model data for the specified economy.
 
@@ -53,24 +49,24 @@ def load_non_road_model_data(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_
     """
     #load all data except activity data (which is calcualteed separately to other calcualted inputs)
     if USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD:
-        growth_forecasts = pd.read_pickle(root_dir + '\\' + f'intermediate_data\\road_model\\{ECONOMY_ID}_final_road_growth_forecasts.pkl')
+        growth_forecasts = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\road_model\\{ECONOMY_ID}_final_road_growth_forecasts.pkl')
     else:
-        growth_forecasts = pd.read_csv(root_dir + '\\' +f'intermediate_data\\model_inputs\\{config.FILE_DATE_ID}\\{ECONOMY_ID}_growth_forecasts_wide.csv')
+        growth_forecasts = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\model_inputs\\{config.FILE_DATE_ID}\\{ECONOMY_ID}_growth_forecasts_wide.csv')
     #load all other data
-    non_road_model_input = pd.read_csv(root_dir + '\\' +f'intermediate_data\\model_inputs\\{config.FILE_DATE_ID}\\{ECONOMY_ID}_non_road_model_input_wide.csv')
+    non_road_model_input = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\model_inputs\\{config.FILE_DATE_ID}\\{ECONOMY_ID}_non_road_model_input_wide.csv')
 
     #Merge growth forecasts with non_road_model_input:
     non_road_model_input.drop(columns=['Activity_growth'], inplace=True)
     non_road_model_input = non_road_model_input.merge(growth_forecasts[['Date', 'Economy','Scenario','Transport Type','Activity_growth']].drop_duplicates(), on=['Date', 'Economy','Scenario','Transport Type'], how='left')
     
     #load the parameters from the config file
-    turnover_rate_parameters_dict = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['turnover_rate_parameters_dict']
+    turnover_rate_parameters_dict = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['turnover_rate_parameters_dict']
     turnover_rate_steepness = turnover_rate_parameters_dict['turnover_rate_steepness_non_road']
     turnover_rate_max_value = turnover_rate_parameters_dict['turnover_rate_max_value_non_road']
     turnover_rate_midpoint = turnover_rate_parameters_dict['turnover_rate_midpoint_non_road']
         
-    turnover_rate_midpoint_mult_adjustment_road_reference = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_NON_ROAD_REFERENCE']
-    turnover_rate_midpoint_mult_adjustment_road_target = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET']
+    turnover_rate_midpoint_mult_adjustment_road_reference = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_NON_ROAD_REFERENCE']
+    turnover_rate_midpoint_mult_adjustment_road_target = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET']
     
     #extract the value for the economy, if it exists
     if ECONOMY_ID in turnover_rate_midpoint_mult_adjustment_road_reference.keys():
@@ -88,10 +84,10 @@ def load_non_road_model_data(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_
     return non_road_model_input, turnover_rate_steepness, turnover_rate_midpoint_reference, turnover_rate_midpoint_target, turnover_rate_max_value
     
 
-def run_non_road_model(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD = True, USE_COVID_RELATED_MILEAGE_CHANGE = True):
+def run_non_road_model(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD = True, USE_COVID_RELATED_MILEAGE_CHANGE = True):
     output_file_name = 'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name)
     
-    non_road_model_input, turnover_rate_steepness, turnover_rate_midpoint_reference, turnover_rate_midpoint_target, turnover_rate_max_value = load_non_road_model_data(ECONOMY_ID,USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD)
+    non_road_model_input, turnover_rate_steepness, turnover_rate_midpoint_reference, turnover_rate_midpoint_target, turnover_rate_max_value = load_non_road_model_data(config, ECONOMY_ID,USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD)
     
     non_road_model_input.sort_values(by=['Economy', 'Scenario','Transport Type','Date', 'Medium', 'Vehicle Type', 'Drive'])
 
@@ -111,7 +107,7 @@ def run_non_road_model(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD =
         elif scenario == 'Target':
             turnover_rate_midpoint = turnover_rate_midpoint_target
             
-        previous_year = calculate_turnover_rate(previous_year, turnover_rate_steepness, turnover_rate_max_value, turnover_rate_midpoint)
+        previous_year = calculate_turnover_rate(config, previous_year, turnover_rate_steepness, turnover_rate_max_value, turnover_rate_midpoint)
         
         output_df = pd.concat([output_df,previous_year])
         
@@ -154,7 +150,7 @@ def run_non_road_model(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD =
                     pass#breakpoint()
                 if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
                     print('WARNING: COVID-19 related mileage changes have not been implemented in a way that lends to 100% confidence for non-road transport. This will be implemented in a future version.')
-                current_year = road_model_functions.adjust_mileage_to_account_for_covid(ECONOMY_ID, current_year, transport_type, i, measure_column='Stocks_previous')#'Activity') #MAYBE WE INCREASE STOCKS HERE??? WOULD SEPARATE IT BY MEDIUM THEN, I THINK. going TO TRY CHEATING IT BY ADJUSTING STOCKS. IT MIGHT HAVE WEIRD FLOW ON EFFECTS SO BE CAREFUL
+                current_year = road_model_functions.adjust_mileage_to_account_for_covid(config, ECONOMY_ID, current_year, transport_type, i, measure_column='Stocks_previous')#'Activity') #MAYBE WE INCREASE STOCKS HERE??? WOULD SEPARATE IT BY MEDIUM THEN, I THINK. going TO TRY CHEATING IT BY ADJUSTING STOCKS. IT MIGHT HAVE WEIRD FLOW ON EFFECTS SO BE CAREFUL
                 if i<=2025 and transport_type == 'passenger':
                     
                     # print('1.a sum of value after increase in year {}: {}'.format(i, current_year.loc[(current_year['Economy'] == ECONOMY_ID) & (current_year['Transport Type'] == transport_type) & (current_year['Medium']=='air'), 'Activity'].sum()))
@@ -164,7 +160,7 @@ def run_non_road_model(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD =
             #     breakpoint()
             total_new_stocks_for_activity = ((current_year['Activity'] - current_year['Activity_previous']) / current_year['Activity_per_Stock']).sum()
             
-            current_year = calculate_turnover_rate(current_year, turnover_rate_steepness, turnover_rate_max_value, turnover_rate_midpoint)
+            current_year = calculate_turnover_rate(config, current_year, turnover_rate_steepness, turnover_rate_max_value, turnover_rate_midpoint)
             current_year['Stock_turnover'] = (current_year['Stocks_previous'] * current_year['Turnover_rate']) 
             
             # if 'passenger' in _:
@@ -211,10 +207,10 @@ def run_non_road_model(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD =
             # current_year['Surplus_stocks_used']  = surplus_stocks_used
             # current_year['Stock_turnover'] = stock_turnover
             try:
-                current_year = road_model_functions.recalculate_age_distribution(current_year)
+                current_year = road_model_functions.recalculate_age_distribution(config, current_year)
             except:
                 breakpoint()
-                current_year = road_model_functions.recalculate_age_distribution(current_year)
+                current_year = road_model_functions.recalculate_age_distribution(config, current_year)
             current_year.drop(columns=['Surplus_stocks_used'], inplace=True)
             #check for any types of stocks that have stopped being used
             current_year['Average_age'] = np.where(current_year['Stocks'] > 0, current_year['Average_age'], np.nan)
@@ -239,7 +235,7 @@ def run_non_road_model(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD =
         output_df.drop(columns=diff_cols, inplace=True)
         # raise ValueError("The columns in the output_df are not what we expect. {} are the extra cols. Please check the config file or any changes made to run_non_road_model.py".format(diff_cols))
     
-    # output_df.to_csv(root_dir + '\\' + 'a.csv', index=False)
+    # output_df.to_csv(config.root_dir + '\\' + 'a.csv', index=False)
     output_df.to_csv(output_file_name, index=False)
     
     
@@ -254,10 +250,10 @@ def run_non_road_model(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD =
             
 #         if transport_type =='passenger':
 #             #load ECONOMIES_WITH_STOCKS_PER_CAPITA_REACHED from parameters.yml
-#             EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER =  yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER']
+#             EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER =  yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER']
 #             X = EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER[economy]
 #         elif transport_type =='freight':
-#             EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT =  yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT']
+#             EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT =  yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT']
 #             X = EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT[economy]
         
 #         #now revert decreaing mileage by a factor of 1-X
@@ -265,5 +261,5 @@ def run_non_road_model(ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD =
 #     return current_year
     
 #%%
-# run_non_road_model('01_AUS', USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD = True, USE_COVID_RELATED_MILEAGE_CHANGE = True)
+# run_non_road_model(config, '01_AUS', USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD = True, USE_COVID_RELATED_MILEAGE_CHANGE = True)
 #%%

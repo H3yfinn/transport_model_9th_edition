@@ -9,7 +9,7 @@ import re
 ##########################################################################################################################################################
 
 
-def Mult(driver_input_data, energy_data, drivers_list, structure_variables_list,energy_variable,time_variable,extra_identifier):#driver_input_data, energy):
+def Mult(config, driver_input_data, energy_data, drivers_list, structure_variables_list, energy_variable, time_variable, extra_identifier):
     #This will carry out the LMDI-I formula for the multiplicative case. The formula is: exp(sum((log(energy_t/energy_base_year)/log(sum(energy_t)/sum(energy_base_year))) * log(mean(energy_t/energy_base_year)) * log(driver_t/driver_base_year)))
     #note that where the word energy is used in names, it can be swapped out for emissions. Although any changes to columns names occurs outside this function.
     
@@ -51,9 +51,9 @@ def Mult(driver_input_data, energy_data, drivers_list, structure_variables_list,
         #drop unneeded columns
         driver_df = driver_df.drop(columns=['{}_base_year'.format(driver), driver])
 
-    #find the log means using the log_mean_func()
-    log_mean_top = log_mean_func(energy_df_top, energy_variable)
-    log_mean_bot = log_mean_func(energy_df_bot, energy_variable)
+    #find the log means using the log_mean_func(config)
+    log_mean_top = log_mean_func(config, energy_df_top, energy_variable)
+    log_mean_bot = log_mean_func(config, energy_df_bot, energy_variable)
 
     #keep only the important cols
     log_mean_top = log_mean_top[structure_variables_list+[time_variable,'log_mean','Change in {}'.format(energy_variable)]]
@@ -123,7 +123,7 @@ def Mult(driver_input_data, energy_data, drivers_list, structure_variables_list,
 ###############################################
 ###############################################
 
-def Add(driver_input_data, energy_data, drivers_list, structure_variables_list,energy_variable,time_variable,extra_identifier):
+def Add(config, driver_input_data, energy_data, drivers_list, structure_variables_list, energy_variable, time_variable, extra_identifier):
     #This will carry out the LMDI-I formula for the additive case. The formula is: sum(log(energy_t/energy_base_year) * log(mean(energy_t/energy_base_year)) * log(driver_t/driver_base_year))
     #note that where the word energy is used in names, it can be swapped out for emissions. Although any changes to columns names occurs outside this function.
 
@@ -157,8 +157,8 @@ def Add(driver_input_data, energy_data, drivers_list, structure_variables_list,e
         #drop unneeded columns
         driver_df = driver_df.drop(columns=['{}_base_year'.format(driver), driver])
 
-    #find the log mean which is the weighting factor using the log_mean_func()
-    log_mean = log_mean_func(energy_df, energy_variable)
+    #find the log mean which is the weighting factor using the log_mean_func(config)
+    log_mean = log_mean_func(config, energy_df, energy_variable)
 
     #keep only the important cols
     log_mean = log_mean[structure_variables_list+[time_variable,'log_mean','Change in {}'.format(energy_variable)]]
@@ -221,7 +221,7 @@ def Add(driver_input_data, energy_data, drivers_list, structure_variables_list,e
 ##########################################################################################################################################################
 
 
-def log_mean_func(energy_df, energy_variable):
+def log_mean_func(config, energy_df, energy_variable):
     ##Find the weighting for the divisia function using the log mean function on the energy data. This will calcualte the log mean when comparing the base year to the other years
     #fyi the log mean function is this: L(E_t,E_0) = (E_t-E_0)/(ln(E_t)-ln(E_0)) where E_t is the energy in the year t and E_0 is the energy in the base year
     #note that where the word energy is used in names, it can be swapped out for emissions. Although any changes to columns names occurs outside this function.
@@ -247,7 +247,7 @@ def log_mean_func(energy_df, energy_variable):
 
 
 
-def hierarchical_LMDI(energy_data, activity_data, energy_variable, activity_variable, structure_variables_list, time_variable,extra_identifier):
+def hierarchical_LMDI(config, energy_data, activity_data, energy_variable, activity_variable, structure_variables_list, time_variable, extra_identifier):
     
     #This is the function for lmdi hierarchical multiple structural effects.
 
@@ -383,7 +383,7 @@ def hierarchical_LMDI(energy_data, activity_data, energy_variable, activity_vari
         calc_df = pd.merge(other_years_df, base_year_df, on=hierarchy_list, suffixes=('', '_base_year'))
 
         #calc log mean
-        calc_df = log_mean_func(calc_df, 'intersectoral_intensity_'+structure_variable)
+        calc_df = log_mean_func(config, calc_df, 'intersectoral_intensity_'+structure_variable)
 
         #name the log mean value column
         calc_df.rename(columns={'log_mean':'intensity_log_mean_top_'+structure_variable}, inplace=True)#NOTE THIS IS CHANGED FROM 'log_mean_'+structure_variable
@@ -428,7 +428,7 @@ def hierarchical_LMDI(energy_data, activity_data, energy_variable, activity_vari
         calc_df = pd.merge(other_years_df, base_year_df, on=hierarchy_list, suffixes=('', '_base_year'))
 
         #calc log mean
-        calc_df = log_mean_func(calc_df, 'intersectoral_intensity_'+structure_variable)
+        calc_df = log_mean_func(config, calc_df, 'intersectoral_intensity_'+structure_variable)
 
         #name the log mean value column
         calc_df.rename(columns={'log_mean':'log_mean_'+structure_variable}, inplace=True)
@@ -453,7 +453,7 @@ def hierarchical_LMDI(energy_data, activity_data, energy_variable, activity_vari
         #merge the data
         intensity_df_bot = pd.merge(other_years_df, base_year_df, on=hierarchy_list, suffixes=('', '_base_year'))
         #calc log mean
-        intensity_df_bot = log_mean_func(intensity_df_bot, 'intensity_'+previous_structure_variable)
+        intensity_df_bot = log_mean_func(config, intensity_df_bot, 'intensity_'+previous_structure_variable)
 
         #rename the log mean value column
         intensity_df_bot.rename(columns={'log_mean':'intensity_log_mean_bot_{}'.format(structure_variable)}, inplace=True)
@@ -498,7 +498,7 @@ def hierarchical_LMDI(energy_data, activity_data, energy_variable, activity_vari
     #merge the data
     weighting_df_top = pd.merge(other_years_df, base_year_df, on=[first_structure_variable], suffixes=('', '_base_year'))
     #calc log mean
-    weighting_df_top = log_mean_func(weighting_df_top, energy_variable)
+    weighting_df_top = log_mean_func(config, weighting_df_top, energy_variable)
     #clean
     weighting_df_top.drop(columns=['log_{}_base_year'.format(energy_variable), 'log_{}'.format(energy_variable), 'log_{}_diff'.format(energy_variable),'Change in {}'.format(energy_variable)], inplace=True)
     weighting_df_top.rename(columns={'log_mean':'weighting_log_mean_top'}, inplace=True)
@@ -515,7 +515,7 @@ def hierarchical_LMDI(energy_data, activity_data, energy_variable, activity_vari
     weighting_df_bot = other_years_df.copy()
     weighting_df_bot[energy_variable + '_total'+'_base_year'] = base_year_df[energy_variable + '_total'].values[0]
     #calc log mean
-    weighting_df_bot = log_mean_func(weighting_df_bot, energy_variable + '_total')
+    weighting_df_bot = log_mean_func(config, weighting_df_bot, energy_variable + '_total')
     #clean
     weighting_df_bot.drop(columns=['log_{}_base_year'.format(energy_variable + '_total'), 'log_{}'.format(energy_variable + '_total'), 'log_{}_diff'.format(energy_variable + '_total'),'Change in {}'.format(energy_variable + '_total')], inplace=True)
     weighting_df_bot.rename(columns={'log_mean':'weighting_log_mean_bot'}, inplace=True)
@@ -695,7 +695,7 @@ def hierarchical_LMDI(energy_data, activity_data, energy_variable, activity_vari
     return drivers_df
 
 
-# def convert_multiplicative_to_additive(multiplicative_output, energy_data,energy_variable, time_variable, extra_identifier):
+# def convert_multiplicative_to_additive(config, multiplicative_output, energy_data,energy_variable, time_variable, extra_identifier):
 #     #take in the multiplicative output and convert it to additive by timesing the effects by the energy data in the base year:
 #     additive_output = multiplicative_output.copy()
 #     drivers_list = additive_output.columns.tolist()
@@ -729,7 +729,7 @@ def hierarchical_LMDI(energy_data, activity_data, energy_variable, activity_vari
     
 #     return additive_output
     
-def multiplicative_to_additive(base_value, multiplicative_effects):
+def multiplicative_to_additive(config, base_value, multiplicative_effects):
     additive_effects = []
     current_value = base_value
 
@@ -741,7 +741,7 @@ def multiplicative_to_additive(base_value, multiplicative_effects):
 
     return additive_effects
 
-def convert_multiplicative_to_additive(multiplicative_output, energy_data, activity_data, activity_variable, energy_variable, time_variable, extra_identifier):
+def convert_multiplicative_to_additive(config, multiplicative_output, energy_data, activity_data, activity_variable, energy_variable, time_variable, extra_identifier):
     additive_output = multiplicative_output.copy()
     drivers_list = additive_output.columns.tolist()
     drivers_list.remove('Multiplicative change in {}'.format(energy_variable))
@@ -757,7 +757,7 @@ def convert_multiplicative_to_additive(multiplicative_output, energy_data, activ
     
     for index, row in additive_output.iterrows():
         multiplicative_effects = row[drivers_list].values
-        additive_effects = multiplicative_to_additive(energy_base_year, multiplicative_effects)
+        additive_effects = multiplicative_to_additive(config, energy_base_year, multiplicative_effects)
         for driver, additive_effect in zip(drivers_list, additive_effects):
             additive_output.at[index, driver] = additive_effect
     
@@ -779,7 +779,7 @@ def convert_multiplicative_to_additive(multiplicative_output, energy_data, activ
 
 
 
-# def convert_multiplicative_to_additive(multiplicative_output, energy_data,activity_data,activity_variable, energy_variable, time_variable, extra_identifier):
+# def convert_multiplicative_to_additive(config, multiplicative_output, energy_data,activity_data,activity_variable, energy_variable, time_variable, extra_identifier):
 #     # Deep copy to ensure the original dataframe is not modified
 #     additive_output = multiplicative_output.copy()
 
@@ -835,7 +835,7 @@ def convert_multiplicative_to_additive(multiplicative_output, energy_data, activ
 
 
 
-def hierarchical_LMDI_emissions(energy_data, emissions_data, activity_data, energy_variable, emissions_variable, activity_variable, structure_variables_list, time_variable,extra_identifier):
+def hierarchical_LMDI_emissions(config, energy_data, emissions_data, activity_data, energy_variable, emissions_variable, activity_variable, structure_variables_list, time_variable, extra_identifier):
     
     #PLEASE NOTE THAT THE BELOW FUNCTION IS EXPERIEMENTAL AND HAS NOT BEEN PROVEN. BUT IT SEEMS TO DO WHAT IS EXPECTED.
     #save all the inputs and load them in again so we can easily test this function
@@ -1001,7 +1001,7 @@ def hierarchical_LMDI_emissions(energy_data, emissions_data, activity_data, ener
         other_years_df = calc_df[calc_df[time_variable] != base_year]
         calc_df = pd.merge(other_years_df, base_year_df, on=hierarchy_list, suffixes=('', '_base_year'))
         #calc log mean
-        calc_df = log_mean_func(calc_df, 'intersectoral_emissions_intensity_'+structure_variable)
+        calc_df = log_mean_func(config, calc_df, 'intersectoral_emissions_intensity_'+structure_variable)
 
         #name the log mean value column
         calc_df.rename(columns={'log_mean':'emissions_intensity_log_mean_top_'+structure_variable}, inplace=True)#NOTE THIS IS CHANGED FROM 'log_mean_'+structure_variable
@@ -1046,7 +1046,7 @@ def hierarchical_LMDI_emissions(energy_data, emissions_data, activity_data, ener
         calc_df = pd.merge(other_years_df, base_year_df, on=hierarchy_list, suffixes=('', '_base_year'))
 
         #calc log mean
-        calc_df = log_mean_func(calc_df, 'intersectoral_emissions_intensity_'+structure_variable)
+        calc_df = log_mean_func(config, calc_df, 'intersectoral_emissions_intensity_'+structure_variable)
 
         #name the log mean value column
         calc_df.rename(columns={'log_mean':'log_mean_'+structure_variable}, inplace=True)
@@ -1071,7 +1071,7 @@ def hierarchical_LMDI_emissions(energy_data, emissions_data, activity_data, ener
         #merge the data
         intensity_df_bot = pd.merge(other_years_df, base_year_df, on=hierarchy_list, suffixes=('', '_base_year'))
         #calc log mean
-        intensity_df_bot = log_mean_func(intensity_df_bot, 'emissions_intensity_'+previous_structure_variable)
+        intensity_df_bot = log_mean_func(config, intensity_df_bot, 'emissions_intensity_'+previous_structure_variable)
 
         #rename the log mean value column
         intensity_df_bot.rename(columns={'log_mean':'emissions_intensity_log_mean_bot_{}'.format(structure_variable)}, inplace=True)
@@ -1116,7 +1116,7 @@ def hierarchical_LMDI_emissions(energy_data, emissions_data, activity_data, ener
     #merge the data
     weighting_df_top = pd.merge(other_years_df, base_year_df, on=[first_structure_variable], suffixes=('', '_base_year'))
     #calc log mean
-    weighting_df_top = log_mean_func(weighting_df_top, emissions_variable)
+    weighting_df_top = log_mean_func(config, weighting_df_top, emissions_variable)
     #clean
     weighting_df_top.drop(columns=['log_{}_base_year'.format(emissions_variable), 'log_{}'.format(emissions_variable), 'log_{}_diff'.format(emissions_variable),'Change in {}'.format(emissions_variable)], inplace=True)
     weighting_df_top.rename(columns={'log_mean':'weighting_log_mean_top'}, inplace=True)
@@ -1133,7 +1133,7 @@ def hierarchical_LMDI_emissions(energy_data, emissions_data, activity_data, ener
     weighting_df_bot = other_years_df.copy()
     weighting_df_bot[emissions_variable + '_total'+'_base_year'] = base_year_df[emissions_variable + '_total'].values[0]
     #calc log mean
-    weighting_df_bot = log_mean_func(weighting_df_bot, emissions_variable + '_total')
+    weighting_df_bot = log_mean_func(config, weighting_df_bot, emissions_variable + '_total')
     #clean
     weighting_df_bot.drop(columns=['log_{}_base_year'.format(emissions_variable + '_total'), 'log_{}'.format(emissions_variable + '_total'), 'log_{}_diff'.format(emissions_variable + '_total'),'Change in {}'.format(emissions_variable + '_total')], inplace=True)
     weighting_df_bot.rename(columns={'log_mean':'weighting_log_mean_bot'}, inplace=True)
@@ -1321,7 +1321,7 @@ def hierarchical_LMDI_emissions(energy_data, emissions_data, activity_data, ener
     #now we are done. return drivers_df
     return drivers_df
 
-def convert_multiplicative_to_additive_emissions(multiplicative_output, emissions_data, activity_data, activity_variable, energy_variable,emissions_variable, time_variable, extra_identifier):
+def convert_multiplicative_to_additive_emissions(config, multiplicative_output, emissions_data, activity_data, activity_variable, energy_variable, emissions_variable, time_variable, extra_identifier):
     additive_output = multiplicative_output.copy()
     drivers_list = additive_output.columns.tolist()
     drivers_list.remove('Multiplicative change in {}'.format(emissions_variable))
@@ -1337,7 +1337,7 @@ def convert_multiplicative_to_additive_emissions(multiplicative_output, emission
     
     for index, row in additive_output.iterrows():
         multiplicative_effects = row[drivers_list].values
-        additive_effects = multiplicative_to_additive(emissions_base_year, multiplicative_effects)
+        additive_effects = multiplicative_to_additive(config, emissions_base_year, multiplicative_effects)
         for driver, additive_effect in zip(drivers_list, additive_effects):
             additive_output.at[index, driver] = additive_effect
     

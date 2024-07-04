@@ -6,13 +6,6 @@
 import os
 import sys
 import re
-#################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
-from . import config
-#################
-
 import pandas as pd 
 import numpy as np
 import yaml
@@ -31,7 +24,7 @@ from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 import glob
      
-def copy_required_output_files_to_one_folder(ECONOMY_ID='all', output_folder_path='output_data\\for_other_modellers'):
+def copy_required_output_files_to_one_folder(config, ECONOMY_ID='all', output_folder_path='output_data\\for_other_modellers'):
     #to make it easier to give the output to others use ths function to make it a bit easier to group the files that people find useful together, so i can quickly send them.
     useful_file_paths = []
     output_file_paths = []
@@ -40,38 +33,38 @@ def copy_required_output_files_to_one_folder(ECONOMY_ID='all', output_folder_pat
     for economy in config.ECONOMY_LIST:
         if economy == ECONOMY_ID or ECONOMY_ID == 'all':
             for scenario in config.SCENARIOS_LIST:
-                useful_file_paths.append(root_dir + '\\' +'plotting_output\\dashboards\\' + economy + f'\\{economy}_{scenario}_dashboard_results.html')
-                output_file_paths.append(root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_{scenario}_{config.FILE_DATE_ID}_dashboard_results.html')
+                useful_file_paths.append(config.root_dir + '\\' +'plotting_output\\dashboards\\' + economy + f'\\{economy}_{scenario}_dashboard_results.html')
+                output_file_paths.append(config.root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_{scenario}_{config.FILE_DATE_ID}_dashboard_results.html')
                 
-                useful_file_paths.append(root_dir + '\\' +root_dir + '\\' +'plotting_output\\dashboards\\' + economy + f'\\{economy}_{scenario}_dashboard_assumptions.html')
-                output_file_paths.append(root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_{scenario}_{config.FILE_DATE_ID}_dashboard_assumptions.html')
+                useful_file_paths.append(config.root_dir + '\\' +config.root_dir + '\\' +'plotting_output\\dashboards\\' + economy + f'\\{economy}_{scenario}_dashboard_assumptions.html')
+                output_file_paths.append(config.root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_{scenario}_{config.FILE_DATE_ID}_dashboard_assumptions.html')
                 
-                useful_file_paths.append(root_dir + '\\' +'plotting_output\\dashboards\\' + economy + f'\\{economy}_{scenario}_dashboard_assumptions_extra.html')
-                output_file_paths.append(root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_{scenario}_{config.FILE_DATE_ID}_dashboard_assumptions_extra.html')
+                useful_file_paths.append(config.root_dir + '\\' +'plotting_output\\dashboards\\' + economy + f'\\{economy}_{scenario}_dashboard_assumptions_extra.html')
+                output_file_paths.append(config.root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_{scenario}_{config.FILE_DATE_ID}_dashboard_assumptions_extra.html')
                 
-                useful_file_paths.append(root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_{config.FILE_DATE_ID}_transport_energy_use.csv')
-                output_file_paths.append(root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_{config.FILE_DATE_ID}_transport_energy_use.csv')
-                useful_file_paths.append(root_dir + '\\' + f'output_data\\for_other_modellers\\cost_estimation\\{config.FILE_DATE_ID}_{economy}_cost_inputs.csv')
-                output_file_paths.append(root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{config.FILE_DATE_ID}_{economy}_cost_inputs.csv')
+                useful_file_paths.append(config.root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_{config.FILE_DATE_ID}_transport_energy_use.csv')
+                output_file_paths.append(config.root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_{config.FILE_DATE_ID}_transport_energy_use.csv')
+                useful_file_paths.append(config.root_dir + '\\' + f'output_data\\for_other_modellers\\cost_estimation\\{config.FILE_DATE_ID}_{economy}_cost_inputs.csv')
+                output_file_paths.append(config.root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{config.FILE_DATE_ID}_{economy}_cost_inputs.csv')
                 
-                useful_file_paths.append(root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_{config.FILE_DATE_ID}_transport_stocks.csv')
-                output_file_paths.append(root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{config.FILE_DATE_ID}_{economy}_transport_stocks.csv')
+                useful_file_paths.append(config.root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_{config.FILE_DATE_ID}_transport_stocks.csv')
+                output_file_paths.append(config.root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{config.FILE_DATE_ID}_{economy}_transport_stocks.csv')
                 
-                useful_file_paths.append(root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_{config.FILE_DATE_ID}_transport_activity.csv')
-                output_file_paths.append(root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{config.FILE_DATE_ID}_{economy}_transport_activity.csv')
+                useful_file_paths.append(config.root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_{config.FILE_DATE_ID}_transport_activity.csv')
+                output_file_paths.append(config.root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{config.FILE_DATE_ID}_{economy}_transport_activity.csv')
                 
-                useful_file_paths.append(root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_{config.FILE_DATE_ID}_transport_stock_shares.csv')
-                output_file_paths.append(root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{config.FILE_DATE_ID}_{economy}_transport_stock_shares.csv')
-                # output_data\for_other_modellers\charging
+                useful_file_paths.append(config.root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_{config.FILE_DATE_ID}_transport_stock_shares.csv')
+                output_file_paths.append(config.root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{config.FILE_DATE_ID}_{economy}_transport_stock_shares.csv')
+                # output_data\\for_other_modellers\\charging
                 
-                useful_file_paths.append(root_dir + '\\' + f'output_data\\for_other_modellers\\charging\\{economy}_estimated_number_of_chargers.csv')
-                output_file_paths.append(root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_{config.FILE_DATE_ID}_estimated_number_of_chargers.csv')
+                useful_file_paths.append(config.root_dir + '\\' + f'output_data\\for_other_modellers\\charging\\{economy}_estimated_number_of_chargers.csv')
+                output_file_paths.append(config.root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_{config.FILE_DATE_ID}_estimated_number_of_chargers.csv')
                 
-                useful_file_paths.append(root_dir + '\\' + f'output_data\\model_output_detailed\\{economy}_NON_ROAD_DETAILED_model_output{config.FILE_DATE_ID}.csv')
-                output_file_paths.append(root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{config.FILE_DATE_ID}_{economy}_detailed_incl_non_road.csv')
+                useful_file_paths.append(config.root_dir + '\\' + f'output_data\\model_output_detailed\\{economy}_NON_ROAD_DETAILED_model_output{config.FILE_DATE_ID}.csv')
+                output_file_paths.append(config.root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{config.FILE_DATE_ID}_{economy}_detailed_incl_non_road.csv')
             
-                useful_file_paths.append(root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv')
-                output_file_paths.append(root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv')
+                useful_file_paths.append(config.root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv')
+                output_file_paths.append(config.root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv')
     
     #go through the files output_file_paths and put them in a list but repalce the dateid with a wildcard
     for file in output_file_paths:
@@ -87,11 +80,11 @@ def copy_required_output_files_to_one_folder(ECONOMY_ID='all', output_folder_pat
     #find file in output_folder_path + '\\' + economy. if there is one, remove it
     # if f'{economy}_{scenario}__dashboard_results.html' in files_in_output_folder:
     #     file_paths_to_remove.append(output_folder_path + '\\' + economy + f'\\{economy}_{scenario}_dashboard_results.html')
-    # chargers: output_data\for_other_modellers\estimated_number_of_chargers.csv
+    # chargers: output_data\\for_other_modellers\\estimated_number_of_chargers.csv
     #this one si already put there automatically so ignore it
     # useful_file_paths.append('output_data\\' + 'for_other_modellers' + '\\estimated_number_of_chargers.csv')
     # Energy use:
-    # output_data\for_other_modellers\transport_energy_use{config.FILE_DATE_ID}.csv
+    # output_data\\for_other_modellers\\transport_energy_use{config.FILE_DATE_ID}.csv
 
     # for filename in os.listdir(output_folder_path + '\\' + economy):
     #     file_path = os.path.join(output_folder_path, economy, filename)
@@ -120,7 +113,7 @@ def copy_required_output_files_to_one_folder(ECONOMY_ID='all', output_folder_pat
         except Exception as e:
             print('Error: ' + str(e))
             breakpoint()
-            raise e
+            raise e 
     
 def get_latest_date_for_data_file(data_folder_path, file_name_start, file_name_end=None, EXCLUDE_DATE_STR_START=False):
     """Note that if file_name_end is not specified then it will just take the first file that matches the file_name_start, eben if that matches the end if the file name as well. This is because the file_name_end is not always needed, and this cahnge was made post hoc, so we want to keep the old functionality.
@@ -164,7 +157,7 @@ def get_latest_date_for_data_file(data_folder_path, file_name_start, file_name_e
     latest_date = latest_date.strftime('%Y%m%d')
     return latest_date
 
-def find_latest_folder_via_regex(directory, pattern=r"^\d{4}((0[1-9])|(1[0-2]))((0[1-9])|([12]\d)|(3[01]))$"):
+def find_latest_folder_via_regex(config, directory, pattern=r"^\d{4}((0[1-9])|(1[0-2]))((0[1-9])|([12]\d)|(3[01]))$"):
     # List all folders in the given directory
     folders = [name for name in os.listdir(directory) if os.path.isdir(os.path.join(directory, name))]
     
@@ -186,19 +179,19 @@ def find_latest_folder_via_regex(directory, pattern=r"^\d{4}((0[1-9])|(1[0-2]))(
     return latest_folder
 
 
-def produce_data_system_data_for_others():
+def produce_data_system_data_for_others(config):
     #take in data from the transport datasystem and clean it up a bit so others can use it.
     #most importantly just set the units to what tey shoud be
     unit_to_adj_unit_concordance_dict = config.measure_to_unit_concordance.set_index('Unit').to_dict()['Magnitude_adjusted_unit']
     #join to the transport data system
-    transport_data_system_extract = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\transport_data_system_extract.csv')
+    transport_data_system_extract = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\transport_data_system_extract.csv')
     
     transport_data_system_extract['Unit'] = transport_data_system_extract['Measure'].map(unit_to_adj_unit_concordance_dict)
 
 
 
 #create a glossary which is a dictionary which defines the different categories and units for differernt values within the dfs:
-def create_glossary():
+def create_glossary(config):
     glossary_dict = {}
     glossary_dict['Stocks'] = 'Number of vehicles (millions)'
     glossary_dict['Stocks_share'] = 'Share of vehicles (%)'
@@ -244,12 +237,12 @@ def create_glossary():
     glossary_dict['ship'] = 'A vehicle that travels on water. For example, a boat, a ship, a submarine, etc.'
     
     #now print to a text file in a nice format:
-    with open(root_dir + '\\' + 'plotting_output\\glossary.txt', 'w') as f:
+    with open(config.root_dir + '\\' + 'plotting_output\\glossary.txt', 'w') as f:
         for key, value in glossary_dict.items():
             f.write(f'{key}: {value}\n')
             
 #%%
-def compare_versions_of_input_spreadsheets(file_name1, file_name2, sheet1_name, sheet2_name, value_cols= ['Target', 'Reference'], key_cols=['Region', 'Medium', 'Vehicle Type', 'Drive', 'Date']):
+def compare_versions_of_input_spreadsheets(config, file_name1, file_name2, sheet1_name, sheet2_name, value_cols= ['Target', 'Reference'], key_cols=['Region', 'Medium', 'Vehicle Type', 'Drive', 'Date']):
     #as we create more versions of the input spreadsheets, we need to compare them to make sure that they are the same. This function does that.
     #e.g. import from input_data/vehicle_sales_share_inputs.xlsx and input_data/vehicle_sales_share_inputs phevs.xlsx and compare them to make sure they are the same.
     a= pd.read_excel(file_name1, sheet_name=sheet1_name)
@@ -292,13 +285,13 @@ def compare_versions_of_input_spreadsheets(file_name1, file_name2, sheet1_name, 
     #add the non matching rows to the non matching values
     non_matching_values = pd.concat([non_matching_values, non_matching_rows])
     #save the non matching values to a csv
-    non_matching_values.to_csv(root_dir + '\\' + 'plotting_output\\non_matching_values.csv')
+    non_matching_values.to_csv(config.root_dir + '\\' + 'plotting_output\\non_matching_values.csv')
     
 #%%
-# compare_versions_of_input_spreadsheets('input_data\\vehicle_sales_share_inputs.xlsx', 'input_data\\vehicle_sales_share_inputs phevs.xlsx', 'freight_drive_shares', 'freight_drive_shares')
+# compare_versions_of_input_spreadsheets(config, 'input_data\\vehicle_sales_share_inputs.xlsx', 'input_data\\vehicle_sales_share_inputs phevs.xlsx', 'freight_drive_shares', 'freight_drive_shares')
 #%%
 
-def replicate_data_from_fuel_mixing_for_new_fuel_for_all_economys():
+def replicate_data_from_fuel_mixing_for_new_fuel_for_all_economys(config):
     #quick function from chatgpt. saving it in case it comes in useful again. 
     # This is the base pattern to be replicated for each country.
     # It's extracted from the provided screenshot.
@@ -322,11 +315,11 @@ def replicate_data_from_fuel_mixing_for_new_fuel_for_all_economys():
     replicated_data = pd.concat([base_pattern.assign(country=country) for country in countries], ignore_index=True)
 
     # Here you can export the dataframe to a CSV file
-    replicated_data.to_csv(root_dir + '\\' + 'replicated_data.csv', index=False)
+    replicated_data.to_csv(config.root_dir + '\\' + 'replicated_data.csv', index=False)
     
 #######################################
 #following are for dealing with issue that windows has, where it can't handle long file paths (past 260 characters - which is a lot but can happen with long file names and deep folder structures)
-def get_extended_length_path(path):
+def get_extended_length_path(config, path):
     path = os.path.abspath(path)
     if not path.startswith("\\\\?\\"):
         path = "\\\\?\\" + path

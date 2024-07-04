@@ -7,11 +7,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 #################
 
 import pandas as pd 
@@ -31,7 +27,7 @@ import matplotlib.pyplot as plt
 ###
 
 #%%
-def create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=None, FILE_DATE_ID=None):
+def create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=None, FILE_DATE_ID=None):
     """_summary_
 
     Args:
@@ -52,11 +48,11 @@ def create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=Non
         model_output_file_name = config.model_output_file_name
     if FILE_DATE_ID == None:
         FILE_DATE_ID = config.FILE_DATE_ID
-    model_output_all_with_fuels_df = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name))
-    stocks_df = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name))[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Stocks']]
-    activity_df = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name))[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Activity']]
+    model_output_all_with_fuels_df = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name))
+    stocks_df = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name))[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Stocks']]
+    activity_df = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name))[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Activity']]
     
-    stock_shares_df = convert_stocks_to_stock_shares(stocks_df)
+    stock_shares_df = convert_stocks_to_stock_shares(config, stocks_df)
     
     #create output dict which provides the df, their value column and the name of the indended output file
     outputs_dict = {'model_output_all_with_fuels_df': {'value_col':'Energy', 'output_file_name':'transport_energy_use', 'df':model_output_all_with_fuels_df}, 'stocks_df': {'value_col':'Stocks', 'output_file_name':'transport_stocks', 'df':stocks_df},
@@ -474,7 +470,7 @@ def create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=Non
         #save this file to output_data\for_other_modellers
         new_final_df.to_csv(f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{ECONOMY_ID}_{FILE_DATE_ID}_{output_file_name}.csv', index=False)
         
-def concatenate_outlook_data_system_outputs():
+def concatenate_outlook_data_system_outputs(config):
     #take in all outlook data system outputs for teh same FILE DATE ID and concatenate them into one file. if an economy is missing throw an error
     #load in all files:    
     for file_ending in ['transport_energy_use', 'transport_stocks']:
@@ -484,7 +480,7 @@ def concatenate_outlook_data_system_outputs():
                 #double check its not {config.FILE_DATE_ID}_transport_energy_use.csv' since that is the file we are creating
                 if file == '{}_{}.csv'.format(config.FILE_DATE_ID, file_ending):
                     continue
-                df = pd.read_csv(root_dir + '\\' +f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{file}')
+                df = pd.read_csv(config.root_dir + '\\' +f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{file}')
                 final_df = pd.concat([final_df, df])
         #check that all economies are there:
         if len(final_df['economy'].unique()) != len(config.ECONOMY_LIST):
@@ -497,7 +493,7 @@ def concatenate_outlook_data_system_outputs():
         #save the final df:
         final_df.to_csv(f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{config.FILE_DATE_ID}_{file_ending}.csv', index=False)
    
-def convert_stocks_to_stock_shares(stocks_df):
+def convert_stocks_to_stock_shares(config, stocks_df):
     #convert stocks to stock shares
     #first get the total stocks for each economy, scenario, date, and vehicle type
     total_stocks = stocks_df.groupby(['Economy', 'Scenario', 'Date', 'Transport Type', 'Medium'])['Stocks'].sum().reset_index()
@@ -521,58 +517,58 @@ def convert_stocks_to_stock_shares(stocks_df):
 model_output_file_name = 'model_output20240117.csv'
 FILE_DATE_ID = '20240117'
 ECONOMY_ID = '09_ROK'
-# create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
+# create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
 
 # model_output_file_name = 'model_output20240612.csv'
 # FILE_DATE_ID = '20240612'
 # ECONOMY_ID = '01_AUS'
-# create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
+# create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
 
 # model_output_file_name = 'model_output20240327.csv'
 # FILE_DATE_ID = '20240327'
 # ECONOMY_ID = '05_PRC'
-# create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
+# create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
 
 # model_output_file_name = 'model_output20240613.csv'
 # FILE_DATE_ID = '20240613'
 # ECONOMY_ID = '07_INA'
-# create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
+# create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
 
 # model_output_file_name = 'model_output20240617.csv'
 # FILE_DATE_ID = '20240617'
 # ECONOMY_ID = '10_MAS'
-# create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
+# create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
 
 
 # model_output_file_name = 'model_output20240618.csv'
 # FILE_DATE_ID = '20240618'
 # ECONOMY_ID = '12_NZ'
-# create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
+# create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
 
 # model_output_file_name = 'model_output20240618.csv'
 # FILE_DATE_ID = '20240618'
 # ECONOMY_ID = '13_PNG'
-# create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
+# create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
 
 # model_output_file_name = 'model_output20240618.csv'
 # FILE_DATE_ID = '20240618'
 # ECONOMY_ID = '15_PHL'
-# create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
+# create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
 
 # model_output_file_name = 'model_output20240618.csv'
 # FILE_DATE_ID = '20240618'
 # ECONOMY_ID = '16_RUS'
-# create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
+# create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
 
 # model_output_file_name = 'model_output20240108.csv'
 # FILE_DATE_ID = '20240108'
 # ECONOMY_ID = '17_SGP'
-# create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
+# create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
 
 # model_output_file_name = 'model_output20240117.csv'
 # FILE_DATE_ID = '20240117'
 # ECONOMY_ID = '18_CT'
-# create_output_for_outlook_data_system(ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
+# create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
 
 
 
@@ -584,8 +580,8 @@ ECONOMY_ID = '09_ROK'
 
 
 # ECONOMY_ID = '09_ROK'
-# create_output_for_outlook_data_system('08_JPN', model_output_file_name='model_output20231101.csv', FILE_DATE_ID='20231101')
-# create_output_for_outlook_data_system('20_USA', model_output_file_name='model_output20231101.csv', FILE_DATE_ID='20231101')
-# create_output_for_outlook_data_system('19_THA', model_output_file_name='model_output20231101.csv', FILE_DATE_ID='20231101')
-# create_output_for_outlook_data_system('03_CDA', model_output_file_name='model_output20231101.csv', FILE_DATE_ID='20231101')
+# create_output_for_outlook_data_system(config, '08_JPN', model_output_file_name='model_output20231101.csv', FILE_DATE_ID='20231101')
+# create_output_for_outlook_data_system(config, '20_USA', model_output_file_name='model_output20231101.csv', FILE_DATE_ID='20231101')
+# create_output_for_outlook_data_system(config, '19_THA', model_output_file_name='model_output20231101.csv', FILE_DATE_ID='20231101')
+# create_output_for_outlook_data_system(config, '03_CDA', model_output_file_name='model_output20231101.csv', FILE_DATE_ID='20231101')
 #%%

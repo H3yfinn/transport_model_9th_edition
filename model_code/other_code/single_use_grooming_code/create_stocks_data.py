@@ -116,18 +116,13 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}\\code")
-    import config
+    sys.path.append(f"{config.root_dir}\\code")
     import utility_functions
 else:
     # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
     from .. import utility_functions
-    from .. import config
 #################
 
 import pandas as pd 
@@ -152,11 +147,11 @@ from plotly.subplots import make_subplots
 FILE_DATE_ID2 = 'DATE20230126'
 
 transport_data_system_folder = '..\\transport_data_system'
-transport_data_system_df_original = pd.read_csv(root_dir + '\\' + '{}\\output_data\\{}_interpolated_combined_data.csv'.format(transport_data_system_folder,FILE_DATE_ID2))
+transport_data_system_df_original = pd.read_csv(config.root_dir + '\\' + '{}\\output_data\\{}_interpolated_combined_data.csv'.format(transport_data_system_folder,FILE_DATE_ID2))
 
 #laod estimated ldv data
 # '\\input_data\\calculated\\ldv_data.csv'
-ldv_data = pd.read_csv(root_dir + '\\' + 'input_data\\calculated\\ldv_data.csv')
+ldv_data = pd.read_csv(config.root_dir + '\\' + 'input_data\\calculated\\ldv_data.csv')
 
 #stack ldv data onto transport data system
 transport_data_system_df_original = pd.concat([transport_data_system_df_original,ldv_data],sort=False)
@@ -240,7 +235,7 @@ merged_data = merged_data[merged_data['Vehicle Type'].isin(['ldv','bus'])]
 # levels = ['Transport Type','Medium', 'Vehicle Type','Drive']#this is like the hierarchy of the data.
 # non_level_index_cols = ['Measure', 'Date', 'Scope','Frequency', 'Fuel_Type','Dataset', 'Unit']
 
-def convert_to_proportions(levels,non_level_index_cols, df):
+def convert_to_proportions(config, levels, non_level_index_cols, df):
        #intention is to create a proportion of total value for each level of the hierarchy given one column of values for all levels
        # Levels is a list that is in order of the hierarchy within the dataframe
        #each proportion for each level is calculated by dividing the value of the level by the total value of the level above it
@@ -314,7 +309,7 @@ def convert_to_proportions(levels,non_level_index_cols, df):
 
 
 #one could argue that economy is a level, but it is not a level that we want to calculate proportions for.
-def insert_new_proportions(proportions_df, new_proportions_df, levels, non_level_index_cols):
+def insert_new_proportions(config, proportions_df, new_proportions_df, levels, non_level_index_cols):
        """
        This will take new_proportions_df which has new values for the proportions we want to replace. Its columns will be for all index cols and then the levels up to and including the level we want to replace. For example if we want to replace buses as a proportion of total road stocks within the passenger transport type then the columns will be:
        Index cols: ['Measure', 'Date', 'Scope','Frequency', 'Fuel_Type','Dataset', 'Unit', 'Economy'] 
@@ -378,9 +373,9 @@ new_proportions_df = new_proportions_df[new_proportions_df['Drive_proportion'].n
 levels = ['Transport Type','Medium', 'Vehicle Type','Drive']#this is like the hierarchy of the data.
 non_level_index_cols = ['Measure', 'Date', 'Scope','Frequency', 'Fuel_Type','Dataset', 'Unit', 'Source']
 
-# transport_data_system_df_original_proportions = convert_to_proportions(levels,non_level_index_cols, transport_data_system_df_original)
+# transport_data_system_df_original_proportions = convert_to_proportions(config, levels,non_level_index_cols, transport_data_system_df_original)
 
-# new_proportions_df2 = insert_new_proportions(transport_data_system_df_original_proportions, new_proportions_df, levels, non_level_index_cols)
+# new_proportions_df2 = insert_new_proportions(config, transport_data_system_df_original_proportions, new_proportions_df, levels, non_level_index_cols)
 #%%
 #extract the index row for ldv's
 
@@ -388,7 +383,7 @@ levels = ['Transport Type','Medium', 'Vehicle Type','Drive']#this is like the hi
 non_level_index_cols = ['Economy', 'Measure', 'Date', 'Scope','Frequency', 'Fuel_Type', 'Unit']#'Dataset', 'Source'
 
 #proportions_df, new_proportions_df, levels, non_level_index_cols)
-proportions_df = convert_to_proportions(levels,non_level_index_cols, transport_data_system_df_original)
+proportions_df = convert_to_proportions(config, levels,non_level_index_cols, transport_data_system_df_original)
 
 #%%
 # proportions_df, new_proportions_df, levels, non_level_index_cols)
@@ -428,7 +423,7 @@ return proportions_df
 
 # #%%
 
-# def insert_new_proportions(proportions_df, new_value_list, categories_list,index_row_without_categories,level):
+# def insert_new_proportions(config, proportions_df, new_value_list, categories_list,index_row_without_categories,level):
 #        """
 #        proportions_df: dataframe with proportions
 #        new_value_list: list of new values to insert

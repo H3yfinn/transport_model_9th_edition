@@ -3,18 +3,14 @@
 #as such, this will merge a fuel mixing dataframe onto the model output, by the Drive column, and apply the shares by doing that, resulting in a fuel column.
 #this means that the supply side fuel mixing needs to occur after this script, because it will be merging on the fuel column.
 
-#this script also contains the function transfer_growth_between_mediums(model_output_all, ECONOMY_ID) which is pretty important
+#this script also contains the function transfer_growth_between_mediums(config, model_output_all, ECONOMY_ID) which is pretty important
 #%%
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 #################
 
 import pandas as pd 
@@ -34,10 +30,10 @@ import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 #%%
-def concatenate_model_output(ECONOMY_ID, SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_NON_ROAD=True):
+def concatenate_model_output(config, ECONOMY_ID, SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_NON_ROAD=True):
     #load model output
-    road_model_output = pd.read_csv(root_dir + '\\' + 'intermediate_data\\road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name))#TODO WHY IS MEASURE A COLUMN IN HERE?
-    non_road_model_output = pd.read_csv(root_dir + '\\' + 'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    road_model_output = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name))#TODO WHY IS MEASURE A COLUMN IN HERE?
+    non_road_model_output = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name))
     
     # check if there are any NA's in any columns in the output dataframes. If there are, print them out
     if road_model_output.isnull().values.any():
@@ -63,14 +59,14 @@ def concatenate_model_output(ECONOMY_ID, SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_N
     model_output_all = pd.concat([road_model_output, non_road_model_output])
     
     #save
-    model_output_all.to_csv(root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    model_output_all.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
 
     if SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_NON_ROAD:
-        model_output_all = transfer_growth_between_mediums(model_output_all, ECONOMY_ID)
+        model_output_all = transfer_growth_between_mediums(config, model_output_all, ECONOMY_ID)
                             
     return model_output_all
 
-def transfer_growth_between_mediums(model_output_all, ECONOMY_ID):
+def transfer_growth_between_mediums(config, model_output_all, ECONOMY_ID):
     #some economies have plans to shift a significant portion of growth to rail or ship ior even are just expected to see above expected growth, such as air in china apparently. other examples are: chinese freight to rail or aussie passenger to rail. we dont have any interaction between the road and non road model, and also no way to shift growth to a specific medium (i.e. rail), so we will adjust the output post-hoc to account for this. Note that it will ahve weird interactions with the stocks per capita threshold we are using for passenger transport but for now we will just ignore that. (i figure im going to rewrite that part of the model anyway).
     #also, it will just assume the same makeup of drive types in the different mediums. This makes the calc easy. However if the values were large it wouldnt make sense because it should really be applied to growth and therefore new vehicles. But for now we will just assume the same makeup of drive types in the different mediums.
     #so, we will take the values from SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT, extract the transport type, medium and economy for each adjustment, and apply the shift for that subset. eg. if SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT['passenger']['road_to_rail']['01_AUS'] = 0.01, then we will take all the passenger road values for AUS and passenger rail values for aus, calcaulte the cumulative product of the growth rate over the outlook period, decrease all activity for passenger road by that amount. Calculate the effective change in passenger km and increase all activity for passenger rail by that passenger km amount.
@@ -83,7 +79,7 @@ def transfer_growth_between_mediums(model_output_all, ECONOMY_ID):
     #         road_to_rail:
     #             05_PRC: 0.01
     
-    SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml', 'r'), Loader=yaml.FullLoader)['SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT']
+    SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml', 'r'), Loader=yaml.FullLoader)['SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT']
     #create emptycsv for  _road_to_non_road_activity_change_for_plotting. it will get updated if SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_NON_ROAD is true for this economy
     activity_change_for_plotting_all = pd.DataFrame(columns=config.INDEX_COLS_NO_MEASURE + ['Change_in_activity', 'New_activity', 'Original_activity', 'FROM_or_TO', 'medium_to_medium_shift'])
     for transport_type in SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT.keys():
@@ -100,11 +96,11 @@ def transfer_growth_between_mediums(model_output_all, ECONOMY_ID):
                 if economy!=ECONOMY_ID:
                     continue
                 
-                growth_rate_df = find_cumulative_product_of_growth_rate(SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT[transport_type][medium_to_medium_shift][economy],model_output_all)
+                growth_rate_df = find_cumulative_product_of_growth_rate(config, SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT[transport_type][medium_to_medium_shift][economy],model_output_all)
                 #apply the growth rate to the road model output    
-                model_output_all, change_in_activity = apply_growth_rate_to_FROM_medium(growth_rate_df, model_output_all, economy, transport_type, from_medium)
+                model_output_all, change_in_activity = apply_growth_rate_to_FROM_medium(config, growth_rate_df, model_output_all, economy, transport_type, from_medium)
                 #and now applu the change in activity to the non road model output
-                model_output_all, activity_change = apply_change_in_activity_TO_medium(change_in_activity, model_output_all, economy, transport_type, to_medium)
+                model_output_all, activity_change = apply_change_in_activity_TO_medium(config, change_in_activity, model_output_all, economy, transport_type, to_medium)
                 
                 #stack activity_change_for_plotting and change in activity so we have the shift in activity from and to each medium. and create label to indicate which is a movement from and to which medium
                 
@@ -115,10 +111,10 @@ def transfer_growth_between_mediums(model_output_all, ECONOMY_ID):
                 
                 activity_change_for_plotting_all = pd.concat([activity_change_for_plotting_all, activity_change_for_plotting])
     #save activity_change_for_plotting to file
-    activity_change_for_plotting_all.to_csv(root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_medium_to_medium_activity_change_for_plotting{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID), index=False)
+    activity_change_for_plotting_all.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_medium_to_medium_activity_change_for_plotting{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID), index=False)
     return model_output_all
 
-def fill_missing_output_cols_with_nans(ECONOMY_ID, road_model_input_wide, non_road_model_input_wide):
+def fill_missing_output_cols_with_nans(config, ECONOMY_ID, road_model_input_wide, non_road_model_input_wide):
     for col in config.ROAD_MODEL_OUTPUT_COLS:
         if col not in road_model_input_wide.columns:
             road_model_input_wide[col] = np.nan
@@ -127,11 +123,11 @@ def fill_missing_output_cols_with_nans(ECONOMY_ID, road_model_input_wide, non_ro
             non_road_model_input_wide[col] = np.nan
             
     #save to file
-    road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
-    non_road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    non_road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
 
 
-def find_cumulative_product_of_growth_rate(growth_rate,model_output_all):
+def find_cumulative_product_of_growth_rate(config, growth_rate, model_output_all):
     # growth_rate: SHIFTED_YEARLY_GROWTH_RATE_FROM_MEDIUM_TO_MEDIUM_DICT[transport_type][medium][economy]
     #this will find the cumulative product of the growth rate over the outlook period
     breakpoint()#think that the growth rate should be 1 in the first year. not sure its happning.
@@ -145,7 +141,7 @@ def find_cumulative_product_of_growth_rate(growth_rate,model_output_all):
     growth_rate_df.loc[growth_rate_df['Date']==config.OUTLOOK_BASE_YEAR, 'cumulative_product_of_growth_rate'] = 1
     return growth_rate_df
                         
-def apply_growth_rate_to_FROM_medium(growth_rate_df, model_output_all, economy, transport_type, medium):
+def apply_growth_rate_to_FROM_medium(config, growth_rate_df, model_output_all, economy, transport_type, medium):
     #this will apply the growth rate to the non_road_model_output
     #first, find the model_output for the economy, transport type and medium
     model_output = model_output_all[(model_output_all['Economy']==economy)&(model_output_all['Transport Type']==transport_type)&(model_output_all['Medium']==medium)].copy()
@@ -188,7 +184,7 @@ def apply_growth_rate_to_FROM_medium(growth_rate_df, model_output_all, economy, 
     return model_output_all, change_in_activity
 
 
-def apply_change_in_activity_TO_medium(change_in_activity, model_output_all, economy, transport_type, medium):
+def apply_change_in_activity_TO_medium(config, change_in_activity, model_output_all, economy, transport_type, medium):
     model_output = model_output_all.loc[(model_output_all['Economy']==economy)&(model_output_all['Transport Type']==transport_type)&(model_output_all['Medium']==medium)].copy()                            
     model_output = pd.merge(model_output, change_in_activity[['Date', 'Change_in_activity', 'GROWTH_RATE_TOO_HIGH']].groupby(['Date', 'GROWTH_RATE_TOO_HIGH']).sum(numeric_only=True).reset_index(), on='Date', how='left')
     
@@ -231,6 +227,6 @@ def apply_change_in_activity_TO_medium(change_in_activity, model_output_all, eco
     return model_output_all, activity_change
 
 #%%
-# a = concatenate_model_output('05_PRC')#dont think its working aye
+# a = concatenate_model_output(config, '05_PRC')#dont think its working aye
 
 #%%

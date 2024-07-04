@@ -10,11 +10,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 from . import assumptions_dashboard_plotting_scripts
 #################
 
@@ -165,7 +161,7 @@ colors_dict = {
     
 }
 
-def prepare_fig_dict_and_subfolders(ECONOMY_IDs, plots, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR):
+def prepare_fig_dict_and_subfolders(config, ECONOMY_IDs, plots, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR):
     """
     Prepares a dictionary of figures and creates subfolders for each economy.
 
@@ -186,11 +182,11 @@ def prepare_fig_dict_and_subfolders(ECONOMY_IDs, plots, ADVANCE_BASE_YEAR_TO_OUT
     for economy in config.economy_scenario_concordance['Economy'].unique():
         if economy in ECONOMY_IDs:
 
-            if not ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR and not os.path.exists(root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}'.format(economy,config.OUTLOOK_BASE_YEAR)):#put plots in a subfolder if we are projecting to the outlook base year
-                os.makedirs(root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}'.format(economy,config.OUTLOOK_BASE_YEAR))
+            if not ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR and not os.path.exists(config.root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}'.format(economy,config.OUTLOOK_BASE_YEAR)):#put plots in a subfolder if we are projecting to the outlook base year
+                os.makedirs(config.root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}'.format(economy,config.OUTLOOK_BASE_YEAR))
             #create economy folder in plotting_output/dashboards too
-            elif ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR and not os.path.exists(root_dir + '\\' + 'plotting_output\\dashboards\\{}'.format(economy)):
-                os.makedirs(root_dir + '\\' + 'plotting_output\\dashboards\\{}'.format(economy))
+            elif ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR and not os.path.exists(config.root_dir + '\\' + 'plotting_output\\dashboards\\{}'.format(economy)):
+                os.makedirs(config.root_dir + '\\' + 'plotting_output\\dashboards\\{}'.format(economy))
 
             fig_dict[economy] = {}
             for scenario in config.economy_scenario_concordance['Scenario'].unique():
@@ -199,7 +195,7 @@ def prepare_fig_dict_and_subfolders(ECONOMY_IDs, plots, ADVANCE_BASE_YEAR_TO_OUT
                     fig_dict[economy][scenario][plot] = None
     return fig_dict
 
-def create_dashboard(ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id, hidden_legend_names, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS, CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=None,PRODUCE_AS_SINGLE_POTS=False, PREVIOUS_PROJECTION_FILE_DATE_ID=None, WRITE_INDIVIDUAL_HTMLS=False):
+def create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id, hidden_legend_names, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS, CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=None, PRODUCE_AS_SINGLE_POTS=False, PREVIOUS_PROJECTION_FILE_DATE_ID=None, WRITE_INDIVIDUAL_HTMLS=False):
     """
     Creates an assumptions dashboard for the specified economies and plots.
 
@@ -217,19 +213,19 @@ def create_dashboard(ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, d
         None
     """
     color_preparation_list = []
-    fig_dict = prepare_fig_dict_and_subfolders(ECONOMY_IDs, plots,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
+    fig_dict = prepare_fig_dict_and_subfolders(config, ECONOMY_IDs, plots,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
 
     #get the plots:
-    fig_dict, color_preparation_list = plotting_handler(ECONOMY_IDs, plots, fig_dict,  color_preparation_list, colors_dict, DROP_NON_ROAD_TRANSPORT,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
+    fig_dict, color_preparation_list = plotting_handler(config, ECONOMY_IDs, plots, fig_dict,  color_preparation_list, colors_dict, DROP_NON_ROAD_TRANSPORT,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
 
-    check_colors_in_color_preparation_list(color_preparation_list, colors_dict)
+    check_colors_in_color_preparation_list(config, color_preparation_list, colors_dict)
     #now create the dashboards:
     for economy in fig_dict.keys():
             
         if PRODUCE_AS_SINGLE_POTS:
             #check that there is a folder with the name of the dashboard_name_id to put the single plots in
-            if not os.path.exists(root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}'.format(economy, dashboard_name_id)):
-                os.makedirs(root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}'.format(economy, dashboard_name_id))
+            if not os.path.exists(config.root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}'.format(economy, dashboard_name_id)):
+                os.makedirs(config.root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}'.format(economy, dashboard_name_id))
                 
         for scenario in fig_dict[economy].keys():
             #extract titles:
@@ -261,7 +257,7 @@ def create_dashboard(ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, d
             
             # rows = int(np.ceil(np.sqrt(len(fig_dict_new[economy][scenario].keys()))))
             # cols = int(np.ceil(len(fig_dict_new[economy][scenario].keys())/rows))
-            rows, cols = find_best_grid(len(fig_dict_new[economy][scenario].keys()))
+            rows, cols = find_best_grid(config, len(fig_dict_new[economy][scenario].keys()))
             fig_dict = fig_dict_new.copy()
             fig  = make_subplots(
                 rows=rows, cols=cols,
@@ -298,16 +294,16 @@ def create_dashboard(ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, d
             fig.update_layout(title_text=f"Dashboard for {economy} {scenario} - {dashboard_name_id}")
             if ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR:
                 if ARCHIVE_PREVIOUS_DASHBOARDS:
-                    archive_previous_dashboards_before_saving(economy, scenario, dashboard_name_id,config.GRAPHING_END_YEAR)
-                pio.write_html(fig, root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}_{}_dashboard_{}.html'.format(economy, economy, scenario,dashboard_name_id))
+                    archive_previous_dashboards_before_saving(config, economy, scenario, dashboard_name_id,config.GRAPHING_END_YEAR)
+                pio.write_html(fig, config.root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}_{}_dashboard_{}.html'.format(economy, economy, scenario,dashboard_name_id))
             else:
                 if ARCHIVE_PREVIOUS_DASHBOARDS:
-                    archive_previous_dashboards_before_saving(economy, scenario,dashboard_name_id, config.OUTLOOK_BASE_YEAR)
-                pio.write_html(fig, root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}\\{}_{}_dashboard_{}.html'.format(economy,config.OUTLOOK_BASE_YEAR,economy,  scenario,dashboard_name_id))
+                    archive_previous_dashboards_before_saving(config, economy, scenario,dashboard_name_id, config.OUTLOOK_BASE_YEAR)
+                pio.write_html(fig, config.root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}\\{}_{}_dashboard_{}.html'.format(economy,config.OUTLOOK_BASE_YEAR,economy,  scenario,dashboard_name_id))
 
     return fig_dict
        
-def find_best_grid(num_plots, max_diff=2):
+def find_best_grid(config, num_plots, max_diff=2):
     if num_plots <= 0:
         raise ValueError("Number of plots must be greater than 0.")
     
@@ -333,7 +329,7 @@ def find_best_grid(num_plots, max_diff=2):
     return best_pair
 
 
-def archive_previous_dashboards_before_saving(economy, scenario, dashboard_name_id, end_year):
+def archive_previous_dashboards_before_saving(config, economy, scenario, dashboard_name_id, end_year):
     """
     Archives the previous dashboards before saving a new one.
 
@@ -348,21 +344,21 @@ def archive_previous_dashboards_before_saving(economy, scenario, dashboard_name_
     """
     if end_year == config.GRAPHING_END_YEAR:
         #archive previous dashboards:
-        if os.path.exists(root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}_{}_dashboard_{}.html'.format(economy,economy,  scenario,dashboard_name_id)):
+        if os.path.exists(config.root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}_{}_dashboard_{}.html'.format(economy,economy,  scenario,dashboard_name_id)):
             #create dir:
-            if not os.path.exists(root_dir + '\\' + 'plotting_output\\dashboards\\archive\\{}\\{}'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy)):
-                os.makedirs(root_dir + '\\' + 'plotting_output\\dashboards\\archive\\{}\\{}'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy))
-            shutil.move(root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}_{}_dashboard_{}.html'.format(economy,economy,  scenario,dashboard_name_id), root_dir + '\\' + 'plotting_output\\dashboards\\archive\\{}\\{}\\{}_{}_{}_dashboard_{}.html'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy,config.GRAPHING_END_YEAR, economy, scenario,dashboard_name_id))
+            if not os.path.exists(config.root_dir + '\\' + 'plotting_output\\dashboards\\archive\\{}\\{}'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy)):
+                os.makedirs(config.root_dir + '\\' + 'plotting_output\\dashboards\\archive\\{}\\{}'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy))
+            shutil.move(config.root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}_{}_dashboard_{}.html'.format(economy,economy,  scenario,dashboard_name_id), config.root_dir + '\\' + 'plotting_output\\dashboards\\archive\\{}\\{}\\{}_{}_{}_dashboard_{}.html'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy,config.GRAPHING_END_YEAR, economy, scenario,dashboard_name_id))
 
     elif end_year == config.OUTLOOK_BASE_YEAR:
-        if os.path.exists(root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}\\{}_{}_dashboard_{}.html'.format(economy,config.OUTLOOK_BASE_YEAR,economy,  scenario,dashboard_name_id)):
+        if os.path.exists(config.root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}\\{}_{}_dashboard_{}.html'.format(economy,config.OUTLOOK_BASE_YEAR,economy,  scenario,dashboard_name_id)):
             #create dir:
-            if not os.path.exists(root_dir + '\\' + 'plotting_output\\dashboards\\archive\\{}\\{}'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy)):
-                os.makedirs(root_dir + '\\' + 'plotting_output\\dashboards\\archive\\{}\\{}'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy))
-            shutil.move(root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}\\{}_{}_dashboard_{}.html'.format(economy,config.OUTLOOK_BASE_YEAR, economy, scenario,dashboard_name_id), root_dir + '\\' + 'plotting_output\\dashboards\\archive\\{}\\{}\\{}_{}_{}_dashboard_{}.html'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy,config.OUTLOOK_BASE_YEAR, economy, scenario,dashboard_name_id))
+            if not os.path.exists(config.root_dir + '\\' + 'plotting_output\\dashboards\\archive\\{}\\{}'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy)):
+                os.makedirs(config.root_dir + '\\' + 'plotting_output\\dashboards\\archive\\{}\\{}'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy))
+            shutil.move(config.root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}\\{}_{}_dashboard_{}.html'.format(economy,config.OUTLOOK_BASE_YEAR, economy, scenario,dashboard_name_id), config.root_dir + '\\' + 'plotting_output\\dashboards\\archive\\{}\\{}\\{}_{}_{}_dashboard_{}.html'.format(datetime.datetime.now().strftime("%Y%m%d_%H"), economy,config.OUTLOOK_BASE_YEAR, economy, scenario,dashboard_name_id))
 
 
-def load_and_format_input_data(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_IDs, PREVIOUS_PROJECTION_FILE_DATE_ID):
+def load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_IDs, PREVIOUS_PROJECTION_FILE_DATE_ID):
     """
     Loads and formats the input data for the specified economies.
 
@@ -396,10 +392,10 @@ def load_and_format_input_data(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_I
         #in some cases we dont have the data for the file date id that is stated in the config.py file so this will first check that we have the data for the file date id, and if not, it will assign the latest file date id that we do have data for.
         ECONOMY_IDs_dict = {}
         for economy in ECONOMY_IDs:
-            if os.path.exists(root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_{}'.format(economy, config.model_output_file_name)):
+            if os.path.exists(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_{}'.format(economy, config.model_output_file_name)):
                 ECONOMY_IDs_dict[economy] = config.FILE_DATE_ID
             else:
-                date_id = utility_functions.get_latest_date_for_data_file(root_dir + '\\' + 'output_data\\model_output_with_fuels', '{}_'.format(economy))
+                date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + 'output_data\\model_output_with_fuels', '{}_'.format(economy))
                 ECONOMY_IDs_dict[economy] = date_id
         return ECONOMY_IDs_dict
     
@@ -411,27 +407,27 @@ def load_and_format_input_data(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_I
         if date_id == None:
             continue
         model_output_file_name = 'model_output{}.csv'.format(date_id)
-        model_output_with_fuels_ = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_{}'.format(economy, model_output_file_name))
-        model_output_detailed_ = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\{}_{}'.format(economy, model_output_file_name))
-        energy_output_for_outlook_data_system_ = pd.read_csv(root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_{date_id}_transport_energy_use.csv')
-        chargers_ = pd.read_csv(root_dir + '\\' + 'output_data\\for_other_modellers\\charging\\{}_estimated_number_of_chargers.csv'.format(economy))
-        supply_side_fuel_mixing_ = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_supply_side_fuel_mixing.csv'.format(date_id, economy))
-        demand_side_fuel_mixing_ = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_demand_side_fuel_mixing.csv'.format(date_id, economy))
-        road_model_input_ = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_road_model_input_wide.csv'.format(date_id, economy))
-        model_output_detailed_detailed_non_road_drives_ = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(economy, model_output_file_name))
-        growth_forecasts_ = pd.read_csv(root_dir + '\\' +f'intermediate_data\\model_inputs\\{date_id}\\{economy}_growth_forecasts_wide.csv')
-        first_road_model_run_data_ = pd.read_csv(root_dir + '\\' + 'intermediate_data\\road_model\\first_run_{}_{}'.format(economy, model_output_file_name))
-        new_sales_shares_all_plot_drive_shares_ = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_vehicle_sales_share.csv'.format(date_id, economy))
-        gompertz_parameters_df_ = pd.read_csv(root_dir + '\\' + 'intermediate_data\\road_model\\{}_parameters_estimates_{}.csv'.format(economy, date_id)) 
-        activity_change_for_plotting_ = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_medium_to_medium_activity_change_for_plotting{}.csv'.format(economy, date_id))
-        bunkers_data_ = pd.read_csv(root_dir + '\\' +f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_international_bunker_energy_use_{date_id}.csv'.format(economy))
+        model_output_with_fuels_ = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_{}'.format(economy, model_output_file_name))
+        model_output_detailed_ = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_{}'.format(economy, model_output_file_name))
+        energy_output_for_outlook_data_system_ = pd.read_csv(config.root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_{date_id}_transport_energy_use.csv')
+        chargers_ = pd.read_csv(config.root_dir + '\\' + 'output_data\\for_other_modellers\\charging\\{}_estimated_number_of_chargers.csv'.format(economy))
+        supply_side_fuel_mixing_ = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_supply_side_fuel_mixing.csv'.format(date_id, economy))
+        demand_side_fuel_mixing_ = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_demand_side_fuel_mixing.csv'.format(date_id, economy))
+        road_model_input_ = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_road_model_input_wide.csv'.format(date_id, economy))
+        model_output_detailed_detailed_non_road_drives_ = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(economy, model_output_file_name))
+        growth_forecasts_ = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\model_inputs\\{date_id}\\{economy}_growth_forecasts_wide.csv')
+        first_road_model_run_data_ = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\first_run_{}_{}'.format(economy, model_output_file_name))
+        new_sales_shares_all_plot_drive_shares_ = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_vehicle_sales_share.csv'.format(date_id, economy))
+        gompertz_parameters_df_ = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_parameters_estimates_{}.csv'.format(economy, date_id)) 
+        activity_change_for_plotting_ = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_medium_to_medium_activity_change_for_plotting{}.csv'.format(economy, date_id))
+        bunkers_data_ = pd.read_csv(config.root_dir + '\\' +f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_international_bunker_energy_use_{date_id}.csv'.format(economy))
                 
         ##################
         #NOTE THAT WITH THE PREVIOUS_PROJECTION_FILE_DATE_ID THE FILE SHOULD BE SAVED IN C:\Users\finbar.maunsell\OneDrive - APERC\outlook 9th\Modelling\Sector models\Transport - results only\01_AUS/01_AUS_20240327_transport_energy_use.csv SO YOU CAN ALWAYS GRAB THAT AND PUT IT IN C:\Users\finbar.maunsell\github\transport_model_9th_edition\output_data\for_other_modellers\output_for_outlook_data_system IF YOU WANT TO MAKE SURE YOU'RE USING THAT FILE AND NOT A DIFFERENT VERSION WITH SAME DATE ID
 
         if PREVIOUS_PROJECTION_FILE_DATE_ID!=None:
-            previous_projection_energy_output_for_outlook_data_system_ = pd.read_csv(root_dir + '\\' +f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_{PREVIOUS_PROJECTION_FILE_DATE_ID}_transport_energy_use.csv')
-            previous_bunkers_data_ = pd.read_csv(root_dir + '\\' +f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_international_bunker_energy_use_{PREVIOUS_PROJECTION_FILE_DATE_ID}.csv'.format(economy))
+            previous_projection_energy_output_for_outlook_data_system_ = pd.read_csv(config.root_dir + '\\' +f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_{PREVIOUS_PROJECTION_FILE_DATE_ID}_transport_energy_use.csv')
+            previous_bunkers_data_ = pd.read_csv(config.root_dir + '\\' +f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_international_bunker_energy_use_{PREVIOUS_PROJECTION_FILE_DATE_ID}.csv'.format(economy))
         ##################
         model_output_with_fuels = pd.concat([model_output_with_fuels, model_output_with_fuels_])
         model_output_detailed = pd.concat([model_output_detailed, model_output_detailed_])
@@ -472,12 +468,12 @@ def load_and_format_input_data(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_I
         previous_bunkers_data['Date'] = previous_bunkers_data['Date'].astype(int)
     ###########
 
-    original_model_output_8th = pd.read_csv(root_dir + '\\' + 'input_data\\from_8th\\reformatted\\activity_energy_road_stocks.csv').rename(columns={'Year':'Date'})
-    emissions_factors = pd.read_csv(root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
-    date_id = utility_functions.get_latest_date_for_data_file(root_dir + '\\' + 'input_data\\9th_model_inputs', 'model_df_wide_')
-    energy_use_esto = pd.read_csv(root_dir + '\\' +f'input_data\\9th_model_inputs\\model_df_wide_{date_id}.csv')
-    data_8th = pd.read_csv(root_dir + '\\' + 'input_data\\from_8th\\reformatted\\activity_energy_road_stocks.csv')
-    energy_8th = pd.read_csv(root_dir + '\\' + 'input_data\\from_8th\\reformatted\\8th_energy_by_fuel.csv')
+    original_model_output_8th = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\reformatted\\activity_energy_road_stocks.csv').rename(columns={'Year':'Date'})
+    emissions_factors = pd.read_csv(config.root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
+    date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + 'input_data\9th_model_inputs', 'model_df_wide_')
+    energy_use_esto = pd.read_csv(config.root_dir + '\\' +f'input_data\\9th_model_inputs\\model_df_wide_{date_id}.csv')
+    data_8th = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\reformatted\\activity_energy_road_stocks.csv')
+    energy_8th = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\reformatted\\8th_energy_by_fuel.csv')
     
     if ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR:
         def filter_between_outlook_BASE_YEAR_and_end_year(df):
@@ -521,15 +517,15 @@ def load_and_format_input_data(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_I
 
     #Format stocks data specifically, since we use it a lot:
     stocks = model_output_detailed.loc[(model_output_detailed['Medium']=='road')][config.INDEX_COLS_NO_MEASURE+['Stocks']].rename(columns={'Stocks':'Value'}).copy()
-    energy_output_for_outlook_data_system = format_energy_output_for_outlook_data_system_for_plotting(energy_output_for_outlook_data_system)
-    bunkers_data = format_energy_output_for_outlook_data_system_for_plotting(bunkers_data)
+    energy_output_for_outlook_data_system = format_energy_output_for_outlook_data_system_for_plotting(config, energy_output_for_outlook_data_system)
+    bunkers_data = format_energy_output_for_outlook_data_system_for_plotting(config, bunkers_data)
     
-    energy_use_esto,esto_bunkers_data = format_esto_data_for_plotting(energy_use_esto,ECONOMY_IDs)
-    energy_8th, data_8th = format_8th_data_for_plotting(energy_8th, data_8th, ECONOMY_IDs)
+    energy_use_esto,esto_bunkers_data = format_esto_data_for_plotting(config, energy_use_esto,ECONOMY_IDs)
+    energy_8th, data_8th = format_8th_data_for_plotting(config, energy_8th, data_8th, ECONOMY_IDs)
     
     if PREVIOUS_PROJECTION_FILE_DATE_ID!=None:
-        previous_projection_energy_output_for_outlook_data_system = format_energy_output_for_outlook_data_system_for_plotting(previous_projection_energy_output_for_outlook_data_system)
-        previous_bunkers_data = format_energy_output_for_outlook_data_system_for_plotting(previous_bunkers_data)
+        previous_projection_energy_output_for_outlook_data_system = format_energy_output_for_outlook_data_system_for_plotting(config, previous_projection_energy_output_for_outlook_data_system)
+        previous_bunkers_data = format_energy_output_for_outlook_data_system_for_plotting(config, previous_bunkers_data)
 
     # energy_use_esto = extract_and_clean_esto_data(energy_output_for_outlook_data_system, ECONOMY_IDs)
     # #filter for ECONOMY_IDs
@@ -543,7 +539,7 @@ def load_and_format_input_data(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_I
 
     return new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing,demand_side_fuel_mixing, stocks, road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting, model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data
 
-def format_energy_output_for_outlook_data_system_for_plotting(energy_output_for_outlook_data_system):
+def format_energy_output_for_outlook_data_system_for_plotting(config, energy_output_for_outlook_data_system):
 
     #where energy_output_for_outlook_data_system not contians x in subfuels, set fuels to subfuels
     energy_output_for_outlook_data_system.loc[energy_output_for_outlook_data_system['subfuels']!='x', 'fuels'] = energy_output_for_outlook_data_system.loc[energy_output_for_outlook_data_system['subfuels']!='x', 'subfuels']
@@ -573,7 +569,7 @@ def format_energy_output_for_outlook_data_system_for_plotting(energy_output_for_
     energy_output_for_outlook_data_system = energy_output_for_outlook_data_system.loc[~energy_output_for_outlook_data_system['Energy'].isna()].copy()
     return energy_output_for_outlook_data_system
 
-def format_esto_data_for_plotting(energy_use_esto_df, ECONOMY_IDs):
+def format_esto_data_for_plotting(config, energy_use_esto_df, ECONOMY_IDs):
 
     #want to include post  and pre 2020 data from esto. that way we can show the difference between outlook and esto on a line graph
     energy_use_esto = energy_use_esto_df.copy()
@@ -587,7 +583,7 @@ def format_esto_data_for_plotting(energy_use_esto_df, ECONOMY_IDs):
     energy_use_esto.loc[energy_use_esto['sectors'].isin(['04_international_marine_bunkers', '05_international_aviation_bunkers']), 'sub1sectors'] = energy_use_esto.loc[energy_use_esto['sectors'].isin(['04_international_marine_bunkers', '05_international_aviation_bunkers']), 'sectors']
     
     #FORMAT THE DATA:
-    #this is the same process as used in format_energy_output_for_outlook_data_system_for_plotting()
+    #this is the same process as used in format_energy_output_for_outlook_data_system_for_plotting(config)
     #mlet the data:
     energy_use_esto = pd.melt(energy_use_esto, id_vars=['economy', 'scenarios', 'fuels', 'subfuels', 'sectors', 'sub1sectors', 'sub2sectors', 'sub3sectors', 'sub4sectors'], var_name='Date', value_name='Energy')
     #make date into int
@@ -635,7 +631,7 @@ def format_esto_data_for_plotting(energy_use_esto_df, ECONOMY_IDs):
     return energy_use_esto,esto_bunkers_data
 
 
-def format_8th_data_for_plotting(energy_8th, data_8th,  ECONOMY_IDs):
+def format_8th_data_for_plotting(config, energy_8th, data_8th, ECONOMY_IDs):
     #take in transport data form the 8th edition and format it so we cna make it as similar as possibe to 8th:cosl: Medium	Transport Type	Vehicle Type	Drive	Year	Economy	Scenario	Activity	Energy	Stocks
     #fitler for same economies
     data_8th = data_8th.loc[data_8th['Economy'].isin(ECONOMY_IDs)].copy()
@@ -652,7 +648,7 @@ def format_8th_data_for_plotting(energy_8th, data_8th,  ECONOMY_IDs):
     energy_8th['Drive'] = energy_8th['Drive'].replace({'d':'ice_d', 'g':'ice_g', 'phevg':'phev_g', 'phevd':'phev_d'})
 
     #map fuels to 9th version of the fuels:
-    fuels_mapping = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\8th_to_9th_fuels.csv')
+    fuels_mapping = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\8th_to_9th_fuels.csv')
     energy_8th['New Fuel'] = energy_8th['Fuel'].map(dict(zip(fuels_mapping['8th_fuel'], fuels_mapping['9th_fuel'])))
     #where New Fuel is not nan, set Fuel to New Fuel. then drop new fuel
     energy_8th.loc[~energy_8th['New Fuel'].isna(), 'Fuel'] = energy_8th.loc[~energy_8th['New Fuel'].isna(), 'New Fuel']
@@ -667,7 +663,7 @@ def format_8th_data_for_plotting(energy_8th, data_8th,  ECONOMY_IDs):
     energy_8th = energy_8th.loc[energy_8th['Date']<=2050].copy()
     return  energy_8th, data_8th
 
-def create_single_transport_type_medium_plot(datasets_tuple, transport_type, mediums):
+def create_single_transport_type_medium_plot(config, datasets_tuple, transport_type, mediums):
     #in all of the datasets filter for the transport type and medium
     new_datasets_tuple = ()
     for dataset in datasets_tuple:
@@ -680,7 +676,7 @@ def create_single_transport_type_medium_plot(datasets_tuple, transport_type, med
     return new_datasets_tuple
         
     
-def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, colors_dict, DROP_NON_ROAD_TRANSPORT, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PREVIOUS_PROJECTION_FILE_DATE_ID, WRITE_INDIVIDUAL_HTMLS):
+def plotting_handler(config, ECONOMY_IDs, plots, fig_dict, color_preparation_list, colors_dict, DROP_NON_ROAD_TRANSPORT, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PREVIOUS_PROJECTION_FILE_DATE_ID, WRITE_INDIVIDUAL_HTMLS):
     """
     Handles the creation of plots for the specified economies and plots.
 
@@ -697,11 +693,11 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
         None
     """
     #breakpoint()
-    new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing,demand_side_fuel_mixing, stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting,model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data = load_and_format_input_data(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR,ECONOMY_IDs, PREVIOUS_PROJECTION_FILE_DATE_ID)
+    new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing,demand_side_fuel_mixing, stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting,model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data = load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR,ECONOMY_IDs, PREVIOUS_PROJECTION_FILE_DATE_ID)
     
     #CREATE EXPERIMENTAL DATASETS TO PLOT. 
     if CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT is not None:
-        new_datasets_tuple = create_single_transport_type_medium_plot((new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing,demand_side_fuel_mixing,  stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting, model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data), transport_type=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT['transport_type'], mediums=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT['mediums']) 
+        new_datasets_tuple = create_single_transport_type_medium_plot(config, (new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing,demand_side_fuel_mixing,  stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting, model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data), transport_type=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT['transport_type'], mediums=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT['mediums']) 
         new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing, demand_side_fuel_mixing, stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting,model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data = new_datasets_tuple
     
     #breakpoint()
@@ -709,7 +705,7 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
     share_transport_types = ['passenger', 'freight', 'all']
     for transport_type in share_transport_types:
         if f'share_of_transport_type_{transport_type}' in plots:
-            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_share_of_transport_type(ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict,share_of_transport_type_type=transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_share_of_transport_type(config, ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict,share_of_transport_type_type=transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     # Share of Vehicle Type by Transport Type
     share_vehicle_types = ['passenger', 'freight', 'all']
@@ -718,19 +714,19 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
         for drive_type in INCLUDE_GENERAL_DRIVE_TYPES_list:
             if f'share_of_vehicle_type_by_transport_type_{share_of_transport_type_type}_{drive_type}' in plots:
                 INCLUDE_GENERAL_DRIVE_TYPES = True if drive_type == 'True' else False
-                fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_share_of_vehicle_type_by_transport_type(ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, INCLUDE_GENERAL_DRIVE_TYPES=INCLUDE_GENERAL_DRIVE_TYPES, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+                fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_share_of_vehicle_type_by_transport_type(config, ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, INCLUDE_GENERAL_DRIVE_TYPES=INCLUDE_GENERAL_DRIVE_TYPES, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     # Sum of Vehicle Types by Transport Type
     sum_vehicle_types = ['passenger', 'freight', 'all']
     for share_of_transport_type_type in sum_vehicle_types:
         if f'sum_of_vehicle_types_by_transport_type_{share_of_transport_type_type}' in plots:
-            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.share_of_sum_of_vehicle_types_by_transport_type(ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     # Sum of Vehicle Types by Transport Type
     sum_vehicle_types = ['passenger', 'freight', 'all']
     for share_of_transport_type_type in sum_vehicle_types:
         if f'INTENSITY_ANALYSIS_sales_share_by_transport_type_{share_of_transport_type_type}' in plots:
-            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     # Energy Use by Fuel Type
     energy_use_by_fuel_type_titles = [p for p in plots if 'energy_use_by_fuel_type' in p]
@@ -747,13 +743,13 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
             medium = 'road'
         else:
             medium = 'all'
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.energy_use_by_fuel_type(ECONOMY_IDs,energy_output_for_outlook_data_system,fig_dict,color_preparation_list, colors_dict,transport_type, medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.energy_use_by_fuel_type(config, ECONOMY_IDs,energy_output_for_outlook_data_system,fig_dict,color_preparation_list, colors_dict,transport_type, medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     #Non road energy Use by Fuel Type
     energy_transport_types = [p.split('_')[-1] for p in plots if 'non_road_energy_use_by_fuel_type' in p]
     for transport_type in energy_transport_types:
         if f'non_road_energy_use_by_fuel_type_{transport_type}' in plots:
-            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_non_road_energy_use(ECONOMY_IDs,energy_output_for_outlook_data_system,fig_dict, color_preparation_list, colors_dict,transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_non_road_energy_use(config, ECONOMY_IDs,energy_output_for_outlook_data_system,fig_dict, color_preparation_list, colors_dict,transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
             
     titles = [p for p in plots if 'line_energy_use_by_' in p]
     for title in titles:
@@ -767,26 +763,26 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
         elif 'all' in title.split('_')[-2]:
             medium = 'all'
         if f'line_energy_use_by_{medium}_{transport_type}' in plots:
-            assumptions_dashboard_plotting_scripts.line_energy_use_by_transport_type(ECONOMY_IDs,model_output_detailed,fig_dict,medium, color_preparation_list, colors_dict, transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+            assumptions_dashboard_plotting_scripts.line_energy_use_by_transport_type(config, ECONOMY_IDs,model_output_detailed,fig_dict,medium, color_preparation_list, colors_dict, transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
             
     #breakpoint()
     non_road_activity_types = [p.split('_')[-1] for p in plots if 'non_road_activity_by_drive' in p]
     for transport_type in non_road_activity_types:
         if f'non_road_activity_by_drive_{transport_type}' in plots:
-            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.non_road_activity_by_drive_type(ECONOMY_IDs,model_output_detailed_detailed_non_road_drives,fig_dict,color_preparation_list, colors_dict,transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.non_road_activity_by_drive_type(config, ECONOMY_IDs,model_output_detailed_detailed_non_road_drives,fig_dict,color_preparation_list, colors_dict,transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     non_road_stocks_types = [p.split('_')[-1] for p in plots if 'non_road_stocks_by_drive' in p]
     for transport_type in non_road_stocks_types:
         if f'non_road_stocks_by_drive_{transport_type}' in plots:
-            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.non_road_stocks_by_drive_type(ECONOMY_IDs,model_output_detailed_detailed_non_road_drives, fig_dict,color_preparation_list, colors_dict,transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS) 
-    # road_stocks_by_drive_type(ECONOMY_IDs,model_output_detailed_df, fig_dict, color_preparation_list, colors_dict,transport_type)
+            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.non_road_stocks_by_drive_type(config, ECONOMY_IDs,model_output_detailed_detailed_non_road_drives, fig_dict,color_preparation_list, colors_dict,transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS) 
+    # road_stocks_by_drive_type(config, ECONOMY_IDs,model_output_detailed_df, fig_dict, color_preparation_list, colors_dict,transport_type)
     road_stocks_types = [p.split('_')[-1] for p in plots if 'road_stocks_by_drive' in p and 'non_road' not in p]
     for transport_type in road_stocks_types:
         if f'road_stocks_by_drive_{transport_type}' in plots:
-            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.road_stocks_by_drive_type(ECONOMY_IDs,model_output_detailed, fig_dict, color_preparation_list, colors_dict,transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.road_stocks_by_drive_type(config, ECONOMY_IDs,model_output_detailed, fig_dict, color_preparation_list, colors_dict,transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
             
     if 'road_sales_by_drive_vehicle' in plots:
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.road_sales_by_drive_vehicle(ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.road_sales_by_drive_vehicle(config, ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     # Emissions by Fuel Type
     
@@ -803,22 +799,22 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
         else:
             USE_CUM_SUM_OF_EMISSIONS = False
         transport_type = plot.split('_')[-1]
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.emissions_by_fuel_type(ECONOMY_IDs, emissions_factors, energy_output_for_outlook_data_system, fig_dict, color_preparation_list, colors_dict,transport_type, USE_AVG_GENERATION_EMISSIONS_FACTOR=USE_AVG_GENERATION_EMISSIONS_FACTOR, USE_CUM_SUM_OF_EMISSIONS=USE_CUM_SUM_OF_EMISSIONS, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.emissions_by_fuel_type(config, ECONOMY_IDs, emissions_factors, energy_output_for_outlook_data_system, fig_dict, color_preparation_list, colors_dict,transport_type, USE_AVG_GENERATION_EMISSIONS_FACTOR=USE_AVG_GENERATION_EMISSIONS_FACTOR, USE_CUM_SUM_OF_EMISSIONS=USE_CUM_SUM_OF_EMISSIONS, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'turnover_rate_age_curve' in plots:
-        fig_dict = assumptions_dashboard_plotting_scripts.plot_turnover_rate_age_curve(ECONOMY_IDs,model_output_detailed,fig_dict, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict = assumptions_dashboard_plotting_scripts.plot_turnover_rate_age_curve(config, ECONOMY_IDs,model_output_detailed,fig_dict, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     turnover_rate_types = [p.split('_')[-1] for p in plots if 'sales_and_turnover_lines_' in p]
     for transport_type in turnover_rate_types:
         if f'sales_and_turnover_lines_{transport_type}' in plots:
-            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.sales_and_turnover_lines(ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.sales_and_turnover_lines(config, ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     # turnover_rate_by_drive_type(fig_dict,DROP_NON_ROAD_TRANSPORT,  color_preparation_list, colors_dict,transport_type)
     turnover_rate_types = [p.split('_')[-1] for p in plots if 'turnover_rate_by_drive' in p]
     for transport_type in turnover_rate_types:
         if f'box_turnover_rate_by_drive_{transport_type}' in plots:
             
-            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.turnover_rate_by_drive_type_box(ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict,transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.turnover_rate_by_drive_type_box(config, ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict,transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
 
     #breakpoint()
     turnover_rate_types = [p for p in plots if 'line_turnover_rate_by_vtype' in p]
@@ -836,26 +832,26 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
         else:
             transport_type = 'all'
         # breakpoint()
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.turnover_rate_by_vehicle_type_line(ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict,transport_type, medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.turnover_rate_by_vehicle_type_line(config, ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict,transport_type, medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     mileage_types = [p.split('_')[-1] for p in plots if 'mileage_timeseries_' in p]
     for transport_type in mileage_types:
         if f'mileage_timeseries_{transport_type}' in plots:
-            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_mileage_timeseries(ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_mileage_timeseries(config, ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     share_of_vehicle_type_activity_ttypes = [p.split('_')[-1] for p in plots if 'share_of_vehicle_type_activity_' in p]
     for transport_type in share_of_vehicle_type_activity_ttypes:
         if f'share_of_vehicle_type_activity_{transport_type}' in plots:
-            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_share_of_vehicle_type_activity(ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)    
+            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_share_of_vehicle_type_activity(config, ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, transport_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)    
     #breakpoint()
     if 'mileage_strip' in plots:
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_mileage_strip(ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_mileage_strip(config, ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     avg_age_types = [p for p in plots if 'avg_age' in p]
     for title in avg_age_types:
         #could be avg_age_nonroad, avg_age_road, avg_age_all
         medium = title.split('_')[-1]
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_average_age_by_simplified_drive_type(ECONOMY_IDs,model_output_detailed_detailed_non_road_drives,fig_dict, color_preparation_list, colors_dict, medium, title, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_average_age_by_simplified_drive_type(config, ECONOMY_IDs,model_output_detailed_detailed_non_road_drives,fig_dict, color_preparation_list, colors_dict, medium, title, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     age_distributions_titles = [p for p in plots if 'age_distribution' in p]
     for title in age_distributions_titles:
@@ -874,7 +870,7 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
             BY_VEHICLE_TYPE = True
         else:
             BY_VEHICLE_TYPE = False
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_age_distributions(ECONOMY_IDs,model_output_detailed_detailed_non_road_drives,fig_dict, color_preparation_list, colors_dict, medium, BY_DRIVE, BY_VEHICLE_TYPE, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_age_distributions(config, ECONOMY_IDs,model_output_detailed_detailed_non_road_drives,fig_dict, color_preparation_list, colors_dict, medium, BY_DRIVE, BY_VEHICLE_TYPE, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     lmdi_types = [p for p in plots if 'lmdi' in p]
     for title in lmdi_types:
@@ -887,9 +883,9 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
         elif 'all' in title:
             medium = 'all'
         if 'additive' in title:
-            fig_dict= assumptions_dashboard_plotting_scripts.produce_LMDI_additive_plot(ECONOMY_IDs,fig_dict, colors_dict, medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+            fig_dict= assumptions_dashboard_plotting_scripts.produce_LMDI_additive_plot(config, ECONOMY_IDs,fig_dict, colors_dict, medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
         else:
-            fig_dict = assumptions_dashboard_plotting_scripts.prodcue_LMDI_mutliplicative_plot(ECONOMY_IDs,fig_dict,  colors_dict, transport_type = transport_type, medium=medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+            fig_dict = assumptions_dashboard_plotting_scripts.prodcue_LMDI_mutliplicative_plot(config, ECONOMY_IDs,fig_dict,  colors_dict, transport_type = transport_type, medium=medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     freight_tonne_km_titles = [p for p in plots if 'freight_tonne_km_by_drive' in p]
     
@@ -898,7 +894,7 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
             medium = 'road'
         elif 'all' in title:
             medium = 'all'
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.freight_tonne_km_by_drive(ECONOMY_IDs,model_output_detailed,fig_dict,color_preparation_list, colors_dict, medium=medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.freight_tonne_km_by_drive(config, ECONOMY_IDs,model_output_detailed,fig_dict,color_preparation_list, colors_dict, medium=medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     passenger_km_titles = [p for p in plots if 'passenger_km_by_drive' in p]
     for title in passenger_km_titles:
@@ -907,7 +903,7 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
         elif 'all' in title:
             medium = 'all'
         #create passenger km by drive plots
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.passenger_km_by_drive(ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, medium=medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.passenger_km_by_drive(config, ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, medium=medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     measures = [p for p in plots if '8th_9th_stocks' in p]
     for title in measures:
@@ -923,7 +919,7 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
             measure = 'turnover'
         elif title == '8th_9th_stocks_change_in_stocks':
             measure = 'change_in_stocks'
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.compare_8th_and_9th_stocks_sales(ECONOMY_IDs,data_8th, model_output_detailed,fig_dict, color_preparation_list, colors_dict, measure, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.compare_8th_and_9th_stocks_sales(config, ECONOMY_IDs,data_8th, model_output_detailed,fig_dict, color_preparation_list, colors_dict, measure, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     mapping_types = [p for p in plots if 'compare_energy1' in p]
     for title in mapping_types:
@@ -943,7 +939,7 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
             ONLY_BUNKERS=True
         else:
             ONLY_BUNKERS=False
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_comparison_of_energy_by_dataset(ECONOMY_IDs,energy_output_for_outlook_data_system, bunkers_data, energy_use_esto, esto_bunkers_data, energy_8th, fig_dict, color_preparation_list, colors_dict, mapping_type, INCLUDE_8TH, INCLUDE_BUNKERS,ONLY_BUNKERS, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_comparison_of_energy_by_dataset(config, ECONOMY_IDs,energy_output_for_outlook_data_system, bunkers_data, energy_use_esto, esto_bunkers_data, energy_8th, fig_dict, color_preparation_list, colors_dict, mapping_type, INCLUDE_8TH, INCLUDE_BUNKERS,ONLY_BUNKERS, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     
     mapping_types = [p for p in plots if 'compare_energy_vs_previous_' in p]
     for title in mapping_types:
@@ -959,7 +955,7 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
             ONLY_BUNKERS=True
         else:
             ONLY_BUNKERS=False
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_comparison_of_energy_to_previous_9th_projection(ECONOMY_IDs,energy_output_for_outlook_data_system, bunkers_data, previous_projection_energy_output_for_outlook_data_system,previous_bunkers_data, PREVIOUS_PROJECTION_FILE_DATE_ID, fig_dict, color_preparation_list, colors_dict, mapping_type, title, energy_use_esto, esto_bunkers_data, energy_8th, INCLUDE_BUNKERS,ONLY_BUNKERS, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_comparison_of_energy_to_previous_9th_projection(config, ECONOMY_IDs,energy_output_for_outlook_data_system, bunkers_data, previous_projection_energy_output_for_outlook_data_system,previous_bunkers_data, PREVIOUS_PROJECTION_FILE_DATE_ID, fig_dict, color_preparation_list, colors_dict, mapping_type, title, energy_use_esto, esto_bunkers_data, energy_8th, INCLUDE_BUNKERS,ONLY_BUNKERS, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     mapping_types = [p for p in plots if 'compare_energy2' in p]
     for title in mapping_types:
@@ -975,7 +971,7 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
             INCLUDE_BUNKERS=True
         else:
             INCLUDE_BUNKERS=False
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_pct_comparison_of_energy_compared_to_8th(ECONOMY_IDs,energy_output_for_outlook_data_system, bunkers_data,  energy_8th, fig_dict, color_preparation_list, colors_dict, mapping_type,measure,INCLUDE_BUNKERS, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_pct_comparison_of_energy_compared_to_8th(config, ECONOMY_IDs,energy_output_for_outlook_data_system, bunkers_data,  energy_8th, fig_dict, color_preparation_list, colors_dict, mapping_type,measure,INCLUDE_BUNKERS, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     mediums = [p for p in plots if 'energy_intensity_timeseries' in p]
     for medium in mediums:
@@ -983,22 +979,22 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
             medium = 'all'
         elif 'non_road' in medium:
             medium = 'non_road'
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.    plot_energy_intensity_timeseries(ECONOMY_IDs,model_output_detailed_detailed_non_road_drives,fig_dict, color_preparation_list, colors_dict, medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.    plot_energy_intensity_timeseries(config, ECONOMY_IDs,model_output_detailed_detailed_non_road_drives,fig_dict, color_preparation_list, colors_dict, medium, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'energy_efficiency_road_strip' in plots:
         DROP_NON_ROAD_TRANSPORT=True
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_energy_efficiency_strip(ECONOMY_IDs,model_output_detailed,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_energy_efficiency_strip(config, ECONOMY_IDs,model_output_detailed,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'energy_efficiency_all_strip' in plots:
         DROP_NON_ROAD_TRANSPORT=False
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_energy_efficiency_strip(ECONOMY_IDs,model_output_detailed_detailed_non_road_drives,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_energy_efficiency_strip(config, ECONOMY_IDs,model_output_detailed_detailed_non_road_drives,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'INTENSITY_ANALYSIS_timeseries_passenger' in plots:
         DROP_NON_ROAD_TRANSPORT=True
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_intensity_timeseries_INTENSITY_ANALYSIS(ECONOMY_IDs,model_output_detailed,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, transport_type = 'passenger', WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_intensity_timeseries_INTENSITY_ANALYSIS(config, ECONOMY_IDs,model_output_detailed,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, transport_type = 'passenger', WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'share_of_vehicle_type_by_transport_type_passenger_INTENSITY_ANALYSIS' in plots:
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.    INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.    INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     new_vehicle_efficiency_timeseries = [p for p in plots if 'new_vehicle_efficiency_timeseries_' in p]
     for plot in new_vehicle_efficiency_timeseries:
@@ -1008,7 +1004,7 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
             transport_type = 'freight'
         else:
             transport_type = 'all'
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_new_vehicle_efficiency_by_vehicle_type(fig_dict, ECONOMY_IDs, model_output_detailed, colors_dict, color_preparation_list, DROP_NON_ROAD_TRANSPORT=True, transport_type=transport_type, extra_ice_line=True, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_new_vehicle_efficiency_by_vehicle_type(config, fig_dict, ECONOMY_IDs, model_output_detailed, colors_dict, color_preparation_list, DROP_NON_ROAD_TRANSPORT=True, transport_type=transport_type, extra_ice_line=True, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
         
     new_vehicle_efficiency_timeseries = [p for p in plots if 'new_vehicle_emissions_intensity_timeseries_' in p]
     for plot in new_vehicle_efficiency_timeseries:
@@ -1018,11 +1014,11 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
             transport_type = 'freight'
         else:
             transport_type = 'all'
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_new_vehicle_emissions_intensity_by_vehicle_type(fig_dict, ECONOMY_IDs, model_output_detailed, emissions_factors, colors_dict, color_preparation_list, DROP_NON_ROAD_TRANSPORT=True, transport_type='all', extra_ice_line=True, extra_bev_line=True, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS, vehicle_type_grouping='simplified', USE_AVG_GENERATION_EMISSIONS_FACTOR=False)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_new_vehicle_emissions_intensity_by_vehicle_type(config, fig_dict, ECONOMY_IDs, model_output_detailed, emissions_factors, colors_dict, color_preparation_list, DROP_NON_ROAD_TRANSPORT=True, transport_type='all', extra_ice_line=True, extra_bev_line=True, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS, vehicle_type_grouping='simplified', USE_AVG_GENERATION_EMISSIONS_FACTOR=False)
     
     if 'energy_efficiency_timeseries_freight' in plots:
         DROP_NON_ROAD_TRANSPORT=True
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_energy_efficiency_timeseries(ECONOMY_IDs,model_output_detailed,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, transport_type = 'freight', WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_energy_efficiency_timeseries(config, ECONOMY_IDs,model_output_detailed,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, transport_type = 'freight', WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'energy_efficiency_timeseries_passenger' in plots:
         DROP_NON_ROAD_TRANSPORT=True
@@ -1036,62 +1032,62 @@ def plotting_handler(ECONOMY_IDs, plots, fig_dict, color_preparation_list, color
         transport_type = 'all', WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'energy_intensity_strip' in plots:
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.        plot_energy_intensity_strip(ECONOMY_IDs,model_output_detailed_detailed_non_road_drives,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.        plot_energy_intensity_strip(config, ECONOMY_IDs,model_output_detailed_detailed_non_road_drives,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'activity_and_macro_growth_lines' in plots:
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.activity_and_macro_growth_lines(ECONOMY_IDs,original_model_output_8th,model_output_detailed, growth_forecasts, fig_dict, color_preparation_list, colors_dict, indexed=False, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.activity_and_macro_growth_lines(config, ECONOMY_IDs,original_model_output_8th,model_output_detailed, growth_forecasts, fig_dict, color_preparation_list, colors_dict, indexed=False, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
             
     measures = [p for p in plots if 'macro_lines' in p]
     for measure in measures:
         #grab the words after macro_lines_ and join them with an underscore
         measure = '_'.join(measure.split('_')[2:])
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.macro_lines(ECONOMY_IDs, growth_forecasts, fig_dict, color_preparation_list, colors_dict, measure=measure, indexed=False, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.macro_lines(config, ECONOMY_IDs, growth_forecasts, fig_dict, color_preparation_list, colors_dict, measure=measure, indexed=False, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'supply_side_fuel_mixing' in plots:
         #insertt fuel mixing plots
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_supply_side_fuel_mixing(ECONOMY_IDs,supply_side_fuel_mixing,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_supply_side_fuel_mixing(config, ECONOMY_IDs,supply_side_fuel_mixing,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     if 'demand_side_fuel_mixing' in plots:
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_demand_side_fuel_mixing(ECONOMY_IDs,demand_side_fuel_mixing,model_output_detailed,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_demand_side_fuel_mixing(config, ECONOMY_IDs,demand_side_fuel_mixing,model_output_detailed,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'charging' in plots:
         #charging:
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.create_charging_plot(ECONOMY_IDs,chargers,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.create_charging_plot(config, ECONOMY_IDs,chargers,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'vehicle_type_stocks' in plots:
         #vehicle_type_stocks
-        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.create_vehicle_type_stocks_plot(ECONOMY_IDs,stocks,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.create_vehicle_type_stocks_plot(config, ECONOMY_IDs,stocks,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'stocks_per_capita' in plots:
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_stocks_per_capita(ECONOMY_IDs,gompertz_parameters_df,model_output_detailed, first_road_model_run_data, fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_stocks_per_capita(config, ECONOMY_IDs,gompertz_parameters_df,model_output_detailed, first_road_model_run_data, fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     
     if 'non_road_share_of_transport_type' in plots:
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_share_of_transport_type_non_road(ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_share_of_transport_type_non_road(config, ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'activity_growth' in plots:
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.activity_growth(ECONOMY_IDs,model_output_detailed,fig_dict,  color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.activity_growth(config, ECONOMY_IDs,model_output_detailed,fig_dict,  color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'compare_ev_8th_and_9th_stocks_sales' in plots:
         fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.compare_ev_8th_and_9th_stocks_sales(ECONOMY_IDs,data_8th, model_output_detailed,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     if 'decrease_in_activity_from_activity_efficiency' in plots:
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_decrease_in_activity_from_activity_efficiency(ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_decrease_in_activity_from_activity_efficiency(config, ECONOMY_IDs,model_output_detailed,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     
     if 'shifted_activity_from_medium_to_medium' in plots:
-        assumptions_dashboard_plotting_scripts.plot_shifted_activity_from_medium_to_medium(ECONOMY_IDs,activity_change_for_plotting,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        assumptions_dashboard_plotting_scripts.plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs,activity_change_for_plotting,fig_dict, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
         
     if 'lifecycle_emissions_of_cars' in plots:
-        assumptions_dashboard_plotting_scripts.plot_lifecycle_emissions_of_cars(fig_dict,ECONOMY_IDs, model_output_detailed,colors_dict,color_preparation_list, model_output_with_fuels, ACCUMULATED=False, ONLY_CARS=True, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)    
+        assumptions_dashboard_plotting_scripts.plot_lifecycle_emissions_of_cars(config, fig_dict,ECONOMY_IDs, model_output_detailed,colors_dict,color_preparation_list, model_output_with_fuels, ACCUMULATED=False, ONLY_CARS=True, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)    
     
     if 'share_of_emissions_by_vehicle_type' in plots:
-        assumptions_dashboard_plotting_scripts.share_of_emissions_by_vehicle_type(fig_dict, ECONOMY_IDs, emissions_factors, model_output_with_fuels, colors_dict, color_preparation_list, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        assumptions_dashboard_plotting_scripts.share_of_emissions_by_vehicle_type(config, fig_dict, ECONOMY_IDs, emissions_factors, model_output_with_fuels, colors_dict, color_preparation_list, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
         
     return fig_dict, color_preparation_list
 
-def check_colors_in_color_preparation_list(color_preparation_list, colors_dict):
+def check_colors_in_color_preparation_list(config, color_preparation_list, colors_dict):
     """
     Checks that all colors in the color preparation list are present in the colors dictionary.
 
@@ -1116,18 +1112,18 @@ def check_colors_in_color_preparation_list(color_preparation_list, colors_dict):
         if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
             print(f'The following colors are missing from the colors_dict: \n {missing_colors}')
     #save them to a csv so we can add them to the colors_dict later too
-    pd.DataFrame(missing_colors).to_csv(root_dir + '\\' + 'plotting_output\\dashboards\\missing_colors.csv')
+    pd.DataFrame(missing_colors).to_csv(config.root_dir + '\\' + 'plotting_output\\dashboards\\missing_colors.csv')
 
-def remove_old_dashboards(ECONOMIES_TO_SKIP, dashboard_name_id):
+def remove_old_dashboards(config, ECONOMIES_TO_SKIP, dashboard_name_id):
     #quick function TO RMEOVE files from plotting_output/dashboards that are not in the ECONOMIES_TO_SKIP list. will search for the dashboard_name_id in the file name and if it is not in the ECONOMIES_TO_SKIP list then it will be removed.
     for economy in config.economy_scenario_concordance['Economy'].unique().tolist():
         if economy not in ECONOMIES_TO_SKIP:
-            for file in os.listdir(root_dir + '\\' + f'plotting_output\\dashboards\\{economy}\\'):
+            for file in os.listdir(config.root_dir + '\\' + f'plotting_output\\dashboards\\{economy}\\'):
                 if dashboard_name_id in file:
-                    os.remove(root_dir + '\\' + f'plotting_output\\dashboards\\{economy}\\{file}')
+                    os.remove(config.root_dir + '\\' + f'plotting_output\\dashboards\\{economy}\\{file}')
                     print(f'removed {file}')
                     
-def dashboard_creation_handler(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID=None, ARCHIVE_PREVIOUS_DASHBOARDS=False, PREVIOUS_PROJECTION_FILE_DATE_ID=None, WRITE_INDIVIDUAL_HTMLS=True):
+def dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID=None, ARCHIVE_PREVIOUS_DASHBOARDS=False, PREVIOUS_PROJECTION_FILE_DATE_ID=None, WRITE_INDIVIDUAL_HTMLS=True):
     """
     Handles the creation of assumptions dashboards for the specified economies.
 
@@ -1222,19 +1218,19 @@ def dashboard_creation_handler(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_I
     if PREVIOUS_PROJECTION_FILE_DATE_ID != None:
         #replce  'emissions_by_fuel_type_all_gen' with 'compare_energy_vs_previous_all_ESTO' and replace stocks with emissions_by_fuel_type_all_gen
         # plots.remove('vehicle_type_stocks')
-        # plots.append(root_dir + '\\' + f'compare_energy_vs_previous_all_ESTO')
+        # plots.append(config.root_dir + '\\' + f'compare_energy_vs_previous_all_ESTO')
         plots = ['compare_energy_vs_previous_all_ESTO_simplified' if x == 'compare_energy1_all_8th' else x for x in plots]
         # plots = ['emissions_by_fuel_type_all_gen' if x == 'vehicle_type_stocks' else x for x in plots]
     #, 'charging']#activity_growth# 'charging',
     breakpoint()
     try:
-        create_dashboard(ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'results',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
+        create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'results',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
     except Exception as e:
         print(f'Error in creating results dashboard: {e}')
         breakpoint()
     #create a presentation dashboard:
     # plots = ['energy_use_by_fuel_type_all','passenger_km_by_drive', 'freight_tonne_km_by_drive', 'share_of_transport_type_passenger']#activity_growth
-    # create_dashboard(ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'presentation',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
+    # create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'presentation',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
     
     #Create assumptions/major inputs dashboard to go along side a results dashboard:
     plots = ['energy_use_by_fuel_type_passenger_road', 'energy_use_by_fuel_type_freight_road', 'non_road_activity_by_drive_all','share_of_vehicle_type_by_transport_type_all_False','stocks_per_capita', 'supply_side_fuel_mixing', 'vehicle_type_stocks','lmdi_additive_road','compare_energy1_all_onlybunkers']#activity_growth
@@ -1242,74 +1238,74 @@ def dashboard_creation_handler(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_I
     if PREVIOUS_PROJECTION_FILE_DATE_ID != None:
         #replce  'emissions_by_fuel_type_all_gen' with 'compare_energy_vs_previous_all_ESTO' and replace stocks with emissions_by_fuel_type_all_gen
         # plots.remove('vehicle_type_stocks')
-        # plots.append(root_dir + '\\' + f'compare_energy_vs_previous_all_ESTO')
+        # plots.append(config.root_dir + '\\' + f'compare_energy_vs_previous_all_ESTO')
         plots = ['compare_energy_vs_previous_all_ESTO_onlybunkers' if x == 'compare_energy1_all_onlybunkers' else x for x in plots]
     breakpoint()
-    create_dashboard(ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'assumptions',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID,  WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
+    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'assumptions',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID,  WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
     #CREATE ASSUMPTIONS 2, WHICH IS THE EXTRA DATA THAT PROBABLY NOONE WILL WANT TO SEE, BUT AVAILABLE IF NEEDED:
     plots = ['macro_lines_population', 'macro_lines_gdp', 'energy_efficiency_timeseries_all', 'non_road_share_of_transport_type','share_of_vehicle_type_activity_all', 'energy_intensity_timeseries_non_road', 'mileage_timeseries_all',  'demand_side_fuel_mixing', 'share_of_emissions_by_vehicle_type', 'new_vehicle_efficiency_timeseries_all', 'charging','avg_age_road','decrease_in_activity_from_activity_efficiency', 'shifted_activity_from_medium_to_medium','energy_intensity_strip']#activity_growth
     #'energy_efficiency_timeseries_freight', 'energy_efficiency_road_strip','energy_efficiency_timeseries_passenger']#activity_growth #'road_sales_by_drive_vehicle','share_of_vehicle_type_by_transport_type_all_True',
     
     # if PREVIOUS_PROJECTION_FILE_DATE_ID != None:
     #     #since for results we drop stocks and include compare_energy_vs_previous_all, we will add stocks here instead
-    #     plots.append(root_dir + '\\' + f'vehicle_type_stocks')
+    #     plots.append(config.root_dir + '\\' + f'vehicle_type_stocks')
         
-    create_dashboard(ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'assumptions_extra',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID,  WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
+    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'assumptions_extra',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID,  WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
    
     plots = ['energy_use_by_fuel_type_all_all', 'emissions_by_fuel_type_all_gen','passenger_km_by_drive_road','freight_tonne_km_by_drive_road', 'share_of_vehicle_type_by_transport_type_all','share_of_vehicle_type_activity_all', 'line_turnover_rate_by_vtype_all_road','avg_age_road',  'lmdi_freight_road',  'lmdi_passenger_road', 'energy_efficiency_timeseries_all','INTENSITY_ANALYSIS_timeseries_freight','INTENSITY_ANALYSIS_timeseries_passenger', 'share_of_vehicle_type_by_transport_type_freight_INTENSITY_ANALYSIS', 'share_of_vehicle_type_by_transport_type_passenger_INTENSITY_ANALYSIS', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_all', 'lifecycle_emissions_of_cars']
     
     CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT = {'transport_type':'all', 'mediums':['road']}
-    create_dashboard(ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'transport_type_intensity_analysis',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS,CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PRODUCE_AS_SINGLE_POTS=True, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
+    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'transport_type_intensity_analysis',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS,CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PRODUCE_AS_SINGLE_POTS=True, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
     
     
     
     # #Create assumptions/major inputs dashboard to go along side a results dashboard:
     # plots = ['energy_use_by_fuel_type_all_all', 'emissions_by_fuel_type_all_gen','activity_growth',  'supply_side_fuel_mixing','sum_of_vehicle_types_by_transport_type_all','stocks_per_capita','avg_age_road',  'lmdi_freight_road', 'lmdi_passenger_road']#activity_growth
     # #'energy_efficiency_timeseries_freight', 'energy_efficiency_road_strip','energy_efficiency_timeseries_passenger']#activity_growth
-    # create_dashboard(ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'presentation',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
+    # create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'presentation',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
     
     # #create a dashboard to compare against the 8th version of the model:
     if '16_RUS' in ECONOMY_IDs:
         
         plots = ['8th_9th_stocks_stocks_share', '8th_9th_sales_share']
-        create_dashboard(ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'compare_8th',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS,  WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
+        create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'compare_8th',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS,  WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
     # #create an extras dashboard:
     # plots = ['energy_use_by_fuel_type_all','passenger_km_by_drive', 'freight_tonne_km_by_drive', 'share_of_transport_type_passenger']#activity_growth
-    # create_dashboard(ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'presentation',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
+    # create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'presentation',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
     
     
     # plots = ['energy_use_by_fuel_type_all_all', 'emissions_by_fuel_type_all_gen','activity_growth', 'stocks_per_capita', 'supply_side_fuel_mixing','share_of_vehicle_type_by_transport_type_all_False','sum_of_vehicle_types_by_transport_type_all','non_road_share_of_transport_type',  'energy_intensity_strip','energy_intensity_timeseries_non_road',  'mileage_timeseries_all', 'energy_efficiency_timeseries_all','turnover_rate_age_curve','line_turnover_rate_by_vtype_all_non_road', 'line_turnover_rate_by_vtype_all_road','avg_age_road', 'avg_age_nonroad', 'age_distribution_all','age_distribution_all_by_drive', 'decrease_in_activity_from_activity_efficiency']
     # #activity_growth
     # #'energy_efficiency_timeseries_freight', 'energy_efficiency_road_strip','energy_efficiency_timeseries_passenger']#activity_growth
-    # create_dashboard(ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'development',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
+    # create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'development',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
     
-def plot_multi_economy_plots(ECONOMY_IDs, economy_grouping_name, plots, colors_dict, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True, PREVIOUS_PROJECTION_FILE_DATE_ID=None):
+def plot_multi_economy_plots(config, ECONOMY_IDs, economy_grouping_name, plots, colors_dict, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True, PREVIOUS_PROJECTION_FILE_DATE_ID=None):
     config.FILE_DATE_ID = '20240327'
-    new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing, demand_side_fuel_mixing, stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting,model_output_with_fuels,previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data = load_and_format_input_data(ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR,ECONOMY_IDs, PREVIOUS_PROJECTION_FILE_DATE_ID)    
+    new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing, demand_side_fuel_mixing, stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting,model_output_with_fuels,previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data = load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR,ECONOMY_IDs, PREVIOUS_PROJECTION_FILE_DATE_ID)    
     sum_vehicle_types = ['passenger', 'freight', 'all']
     INDEPENDENT_AXIS_list = [True, False]
     SUM_OF_ALL_ECONOMIES = True
     SALES_list = [True, False]
     for transport_type in sum_vehicle_types:
         if f'plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES_{transport_type}' in plots:
-            assumptions_dashboard_plotting_scripts.plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(economy_grouping_name, new_sales_shares_all_plot_drive_shares,stocks, colors_dict, transport_type)
+            assumptions_dashboard_plotting_scripts.plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, new_sales_shares_all_plot_drive_shares,stocks, colors_dict, transport_type)
         if f'plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES_{transport_type}' in plots:
             for SALES in SALES_list:
-                assumptions_dashboard_plotting_scripts.plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES(economy_grouping_name, model_output_detailed, colors_dict, transport_type, SALES, SUM_OF_ALL_ECONOMIES = SUM_OF_ALL_ECONOMIES)
+                assumptions_dashboard_plotting_scripts.plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, model_output_detailed, colors_dict, transport_type, SALES, SUM_OF_ALL_ECONOMIES = SUM_OF_ALL_ECONOMIES)
         if f'plot_emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES_{transport_type}' in plots:
             for INDEPENDENT_AXIS in INDEPENDENT_AXIS_list:
-                assumptions_dashboard_plotting_scripts.emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES(economy_grouping_name, emissions_factors, model_output_with_fuels, colors_dict,transport_type=transport_type, SUM_OF_ALL_ECONOMIES=INDEPENDENT_AXIS, INDEPENDENT_AXIS=INDEPENDENT_AXIS, USE_AVG_GENERATION_EMISSIONS_FACTOR=True)
+                assumptions_dashboard_plotting_scripts.emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, emissions_factors, model_output_with_fuels, colors_dict,transport_type=transport_type, SUM_OF_ALL_ECONOMIES=INDEPENDENT_AXIS, INDEPENDENT_AXIS=INDEPENDENT_AXIS, USE_AVG_GENERATION_EMISSIONS_FACTOR=True)
             
         for medium in ['road', 'all']:
             if f'energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES_{medium}_{transport_type}' in plots:
                 for INDEPENDENT_AXIS in INDEPENDENT_AXIS_list:
-                    assumptions_dashboard_plotting_scripts.energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES(economy_grouping_name, energy_output_for_outlook_data_system, colors_dict,transport_type, medium,SUM_OF_ALL_ECONOMIES=INDEPENDENT_AXIS, INDEPENDENT_AXIS=INDEPENDENT_AXIS)
+                    assumptions_dashboard_plotting_scripts.energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, energy_output_for_outlook_data_system, colors_dict,transport_type, medium,SUM_OF_ALL_ECONOMIES=INDEPENDENT_AXIS, INDEPENDENT_AXIS=INDEPENDENT_AXIS)
     if f'plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES' in plots:
-        assumptions_dashboard_plotting_scripts.plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES(economy_grouping_name, supply_side_fuel_mixing, colors_dict)
+        assumptions_dashboard_plotting_scripts.plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, supply_side_fuel_mixing, colors_dict)
     if 'share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES' in plots:
         assumptions_dashboard_plotting_scripts.compare_8th_and_9th_stocks_salesshare_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES(economy_grouping_name, emissions_factors, model_output_with_fuels, colors_dict, SUM_OF_ALL_ECONOMIES=SUM_OF_ALL_ECONOMIES)
     
-def setup_and_run_multi_economy_plots():
+def setup_and_run_multi_economy_plots(config):
     """helper function to run the multi economy plots.cuts down on setup and amount of code where we dont need it"""
     ECONOMY_IDs = config.economy_scenario_concordance['Economy'].unique().tolist()
     #drop png and bd from economy since they are not in the model yet
@@ -1330,33 +1326,33 @@ def setup_and_run_multi_economy_plots():
     # 'plot_emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES_passenger',
     # 'plot_emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES_freight'
     ]
-    plot_multi_economy_plots(ECONOMY_IDs, economy_grouping_name, plots, colors_dict,  ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True)
+    plot_multi_economy_plots(config, ECONOMY_IDs, economy_grouping_name, plots, colors_dict,  ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True)
 #%%
 #NOTE THAT WITH THE PREVIOUS_PROJECTION_FILE_DATE_ID THE FILE SHOULD BE SAVED IN C:\Users\finbar.maunsell\OneDrive - APERC\outlook 9th\Modelling\Sector models\Transport - results only\01_AUS/01_AUS_20240327_transport_energy_use.csv SO YOU CAN ALWAYS GRAB THAT AND PUT IT IN C:\Users\finbar.maunsell\github\transport_model_9th_edition\output_data\for_other_modellers\output_for_outlook_data_system IF YOU WANT TO MAKE SURE YOU'RE USING THAT FILE AND NOT A DIFFERENT VERSION WITH SAME DATE ID
 
-# dashboard_creation_handler(True,'05_PRC', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
-# dashboard_creation_handler(True,'20_USA')
-# dashboard_creation_handler(True,'15_PHL', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
-# dashboard_creation_handler(True,'03_CDA')#, 
-# dashboard_creation_handler(True,'07_INA')#, PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
-# dashboard_creation_handler(True,'09_ROK', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
-# dashboard_creation_handler(True,'18_CT', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
-# remove_old_dashboards(ECONOMIES_TO_SKIP=[], dashboard_name_id=' - high evs')
+# dashboard_creation_handler(config, True,'05_PRC', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
+# dashboard_creation_handler(config, True,'20_USA')
+# dashboard_creation_handler(config, True,'15_PHL', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
+# dashboard_creation_handler(config, True,'03_CDA')#, 
+# dashboard_creation_handler(config, True,'07_INA')#, PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
+# dashboard_creation_handler(config, True,'09_ROK', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
+# dashboard_creation_handler(config, True,'18_CT', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
+# remove_old_dashboards(config, ECONOMIES_TO_SKIP=[], dashboard_name_id=' - high evs')
 
-# setup_and_run_multi_economy_plots()
+# setup_and_run_multi_economy_plots(config)
 #'03_CDA','09_ROK', '18_CT', '05_PRC', '17_SGP', '21_VN', '15_PHL', '01_AUS', '10_MAS', '07_INA', '20_USA', '19_THA', '08_JPN'
 # do for these once ive run it all
-# dashboard_creation_handler(True,'03_CDA', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
-# dashboard_creation_handler(True,'09_ROK', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
-# dashboard_creation_handler(True,'18_CT', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
-# dashboard_creation_handler(True,'05_PRC', PREVIOUS_PROJECTION_FILE_DATE_ID='20240315')
-# dashboard_creation_handler(True,'17_SGP', PREVIOUS_PROJECTION_FILE_DATE_ID='20240108')
-# dashboard_creation_handler(True,'21_VN', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
-# dashboard_creation_handler(True,'15_PHL', PREVIOUS_PROJECTION_FILE_DATE_ID='20240529')
-# # dashboard_creation_handler(True,'01_AUS', PREVIOUS_PROJECTION_FILE_DATE_ID='20240529')
-# dashboard_creation_handler(True,'10_MAS', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
-# dashboard_creation_handler(True,'07_INA', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
-# # dashboard_creation_handler(True,'20_USA', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
-# dashboard_creation_handler(True,'19_THA', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
-# dashboard_creation_handler(True,'08_JPN', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
+# dashboard_creation_handler(config, True,'03_CDA', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
+# dashboard_creation_handler(config, True,'09_ROK', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
+# dashboard_creation_handler(config, True,'18_CT', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
+# dashboard_creation_handler(config, True,'05_PRC', PREVIOUS_PROJECTION_FILE_DATE_ID='20240315')
+# dashboard_creation_handler(config, True,'17_SGP', PREVIOUS_PROJECTION_FILE_DATE_ID='20240108')
+# dashboard_creation_handler(config, True,'21_VN', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
+# dashboard_creation_handler(config, True,'15_PHL', PREVIOUS_PROJECTION_FILE_DATE_ID='20240529')
+# # dashboard_creation_handler(config, True,'01_AUS', PREVIOUS_PROJECTION_FILE_DATE_ID='20240529')
+# dashboard_creation_handler(config, True,'10_MAS', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
+# dashboard_creation_handler(config, True,'07_INA', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
+# # dashboard_creation_handler(config, True,'20_USA', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
+# dashboard_creation_handler(config, True,'19_THA', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
+# dashboard_creation_handler(config, True,'08_JPN', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
 #%%

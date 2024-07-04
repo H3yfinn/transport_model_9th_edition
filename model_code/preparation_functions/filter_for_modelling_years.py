@@ -4,11 +4,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 #################
 
 import pandas as pd 
@@ -28,13 +24,13 @@ import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 
-def filter_for_modelling_years(BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=False,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=False):
+def filter_for_modelling_years(config, BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=False, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=False):
     ###############################
-    supply_side_fuel_mixing = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID,ECONOMY_ID))
-    demand_side_fuel_mixing = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-    road_model_input_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-    non_road_model_input_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-    growth_forecasts_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    supply_side_fuel_mixing = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID,ECONOMY_ID))
+    demand_side_fuel_mixing = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    road_model_input_wide = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    non_road_model_input_wide = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    growth_forecasts_wide = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
     #check for vehicle type = car, rive = bev, date = 2020, scenario = target
     # road_model_input_wide[(road_model_input_wide['Vehicle Type']=='car') & (road_model_input_wide['Drive']=='bev') & (road_model_input_wide['Date']==2020) & (road_model_input_wide['Scenario']=='Target')]
     
@@ -58,9 +54,9 @@ def filter_for_modelling_years(BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BA
         #apply growth rates up to the outlook base year for all the growth rates that are in the model
         growth_columns_dict = {'New_vehicle_efficiency_growth':'New_vehicle_efficiency', 
         'Occupancy_or_load_growth':'Occupancy_or_load'}
-        road_model_input_wide = apply_growth_up_to_outlook_BASE_YEAR(BASE_YEAR, road_model_input_wide,growth_columns_dict)
+        road_model_input_wide = apply_growth_up_to_outlook_BASE_YEAR(config, BASE_YEAR, road_model_input_wide,growth_columns_dict)
         growth_columns_dict = {'Non_road_intensity_improvement':'Intensity'}
-        non_road_model_input_wide = apply_growth_up_to_outlook_BASE_YEAR(BASE_YEAR, non_road_model_input_wide,growth_columns_dict)
+        non_road_model_input_wide = apply_growth_up_to_outlook_BASE_YEAR(config, BASE_YEAR, non_road_model_input_wide,growth_columns_dict)
         
         # demand_side_fuel_mixing = demand_side_fuel_mixing[demand_side_fuel_mixing['Date'] >= config.OUTLOOK_BASE_YEAR]
         # supply_side_fuel_mixing = supply_side_fuel_mixing[supply_side_fuel_mixing['Date'] >= config.OUTLOOK_BASE_YEAR]
@@ -75,7 +71,7 @@ def filter_for_modelling_years(BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BA
 
 #%%
 
-def apply_growth_up_to_outlook_BASE_YEAR(BASE_YEAR, model_input_wide,growth_columns_dict):
+def apply_growth_up_to_outlook_BASE_YEAR(config, BASE_YEAR, model_input_wide, growth_columns_dict):
     #calcualte values from BASE YEAR up to OUTLOOK BASE YEAR just in case they are needed. that is, calcualte New Vehicle Efficienecy as the prodcut of the New Vehicle Efficienecy Growth of range(BASE_YEAR, config.OUTLOOK_BASE_YEAR-1) * the New Vehicle Efficienecy in the BASE_YEAR. Do this for all the other growth rates too.
 
     for growth, value in growth_columns_dict.items():
@@ -109,5 +105,5 @@ def apply_growth_up_to_outlook_BASE_YEAR(BASE_YEAR, model_input_wide,growth_colu
     return model_input_wide
 
 #%%
-# supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years(2020, '19_THA')
+# supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years(config, 2020, '19_THA')
 # %%

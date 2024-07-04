@@ -5,11 +5,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 from ..calculation_functions import road_model_functions
 #################
 
@@ -34,12 +30,12 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 #%%
 # Function to calculate emissions from energy columns
-def calculate_emissions_from_energy_col(emissions_factors, model_output_with_fuels, USE_AVG_GENERATION_EMISSIONS_FACTOR=False):
+def calculate_emissions_from_energy_col(config, emissions_factors, model_output_with_fuels, USE_AVG_GENERATION_EMISSIONS_FACTOR=False):
     emissions_factors = emissions_factors.rename(columns={'fuel_code': 'Fuel'})
     model_output_with_fuels = model_output_with_fuels.merge(emissions_factors, how='left', on='Fuel')
 
     if USE_AVG_GENERATION_EMISSIONS_FACTOR:
-        emissions_factor_elec = pd.read_csv(root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')
+        emissions_factor_elec = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')
         emissions_factor_elec = emissions_factor_elec[emissions_factor_elec.fuel_code == '17_electricity'].copy()
         emissions_factor_elec['Scenario'] = emissions_factor_elec['Scenario'].replace('Carbon Neutral', 'Target')
         emissions_factor_elec.columns = [x.capitalize() for x in emissions_factor_elec.columns]
@@ -60,7 +56,7 @@ def calculate_emissions_from_energy_col(emissions_factors, model_output_with_fue
     return model_output_with_fuels
 
 # Function to compare values between projections using two files
-def compare_values_between_projections_using_two_files(projection_filename1, projection_filename2, measure, title, filter_dict, grouping, graph_type, save_folder, emissions_factors=None, font_size=24):
+def compare_values_between_projections_using_two_files(config, projection_filename1, projection_filename2, measure, title, filter_dict, grouping, graph_type, save_folder, emissions_factors=None, font_size=24):
     if projection_filename1.endswith('.csv'):
         df1 = pd.read_csv(projection_filename1)
         df2 = pd.read_csv(projection_filename2)
@@ -75,8 +71,8 @@ def compare_values_between_projections_using_two_files(projection_filename1, pro
     grouping_no_date = [x for x in grouping if x != 'Date']
 
     if 'emissions' in measure.lower():
-        df1 = calculate_emissions_from_energy_col(emissions_factors, df1, USE_AVG_GENERATION_EMISSIONS_FACTOR=False)
-        df2 = calculate_emissions_from_energy_col(emissions_factors, df2, USE_AVG_GENERATION_EMISSIONS_FACTOR=False)
+        df1 = calculate_emissions_from_energy_col(config, emissions_factors, df1, USE_AVG_GENERATION_EMISSIONS_FACTOR=False)
+        df2 = calculate_emissions_from_energy_col(config, emissions_factors, df2, USE_AVG_GENERATION_EMISSIONS_FACTOR=False)
 
     if measure == 'cumulative_emissions':
         df1 = df1.groupby(grouping)['Emissions'].sum().reset_index()
@@ -129,12 +125,12 @@ def compare_values_between_projections_using_two_files(projection_filename1, pro
         raise ValueError('Graph type not recognised')
 
     for name, fig in figs.items():
-        fig.write_html(root_dir + '\\' +f'{save_folder}\\{title}_{name}.html')
+        fig.write_html(config.root_dir + '\\' +f'{save_folder}\\{title}_{name}.html')
 
     return
 #%%
 # Example usage
-emissions_factors = pd.read_csv(root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
+emissions_factors = pd.read_csv(config.root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
 filter_dict = {'Scenario': ['Reference'], 'Economy': ['03_CDA'], 'Transport Type': ['passenger'], 'Medium': ['road']}
 compare_values_between_projections_using_two_files(
     'plotting_output\\experimental\\Nanjing_comparisons\\03_CDA_model_output20240327.csv',

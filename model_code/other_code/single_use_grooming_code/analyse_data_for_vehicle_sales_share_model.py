@@ -13,18 +13,13 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}\\code")
-    import config
+    sys.path.append(f"{config.root_dir}\\code")
     import utility_functions
 else:
     # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
     from .. import utility_functions
-    from .. import config
 #################
 
 import pandas as pd 
@@ -55,17 +50,17 @@ import plotly.io as pio
 # PLEASE NOTE THAT CURRENTLY THE DATAA IS NOT FORMATTED FOR USE WITH THE GRAPHS BELOW.\
 #load data.
 #we will load the vehicle sales shares that we INTEND  to use
-Vehicle_sales_share = pd.read_csv(root_dir + '\\' + 'intermediate_data\\non_aggregated_input_data\\Vehicle_sales_share.csv')
+Vehicle_sales_share = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\non_aggregated_input_data\\Vehicle_sales_share.csv')
 
 # #we will load the vehicle sales shares in the input data folder of 8th edition, whoch it seems hugh projected.
-vehicle_sales_share_normalised = pd.read_csv(root_dir + '\\' + 'input_data\\from_8th\\reformatted\\vehicle_sales_share_normalised.csv')
+vehicle_sales_share_normalised = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\reformatted\\vehicle_sales_share_normalised.csv')
 
 #we will merge a regions dataframe so that we can treat data wrt regions if need be
-# regions = pd.read_csv(root_dir + '\\' + 'intermediate_data\\non_aggregated_input_data\\regions.csv')
+# regions = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\non_aggregated_input_data\\regions.csv')
 
 #we will also load the output stocks data from hughs model and calcualte a vehicle sales share for each year from that. This will be used to test the model works like the 8th edition. it might also be better than the vehicle sales shares that were in the input data folder of 8th edition 
 #load 8th edition data
-road_stocks= pd.read_csv(root_dir + '\\' + 'intermediate_data\\non_aggregated_input_data\\road_stocks.csv')
+road_stocks= pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\non_aggregated_input_data\\road_stocks.csv')
 
 
 ################################################################################################################################################################
@@ -216,8 +211,8 @@ fig = px.line(new_road_vehicle_stocks_ref, x="Year", y="Vehicle_sales_share", co
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
-fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\archive\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\archive\\" + title + '.png', scale=1, width=2000, height=800)
 
 #filter for cn scen
 new_road_vehicle_stocks_cn = new_road_vehicle_stocks[new_road_vehicle_stocks['Scenario']=='Carbon Neutral']
@@ -228,8 +223,8 @@ fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove '
 
 title = '8th vehicle_sales_share by vehicle type within transport type by economy in CN'
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
-fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\archive" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\archive" + title + '.png', scale=1, width=2000, height=800)
 
 
 ################################################################################################################################################################
@@ -245,8 +240,8 @@ fig = px.line(new_road_drive_stocks_ref, x="Year", y="Vehicle_sales_share", colo
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
-fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\archive\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\archive\\" + title + '.png', scale=1, width=2000, height=800)
 
 #filter for cn scen
 new_road_drive_stocks_cn = new_road_drive_stocks[new_road_drive_stocks['Scenario']=='Carbon Neutral']
@@ -257,8 +252,8 @@ fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove '
 
 title = '8th vehicle_sales_share by drive within vehicle type by economy in CN'
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
-fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\archive" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\archive" + title + '.png', scale=1, width=2000, height=800)
 
 
 
@@ -276,8 +271,8 @@ fig = px.line(new_sales_shares_ref, x="Year", y="Vehicle_sales_share", color="Tr
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
-fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\archive\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\archive\\" + title + '.png', scale=1, width=2000, height=800)
 
 #filter for cn scen
 new_sales_shares_cn = new_sales_shares[new_sales_shares['Scenario']=='Carbon Neutral']
@@ -287,8 +282,8 @@ fig = px.line(new_sales_shares_cn, x="Year", y="Vehicle_sales_share", color="Tra
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
-fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\archive" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\archive" + title + '.png', scale=1, width=2000, height=800)
 
 ################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################
 # %%
@@ -306,8 +301,8 @@ fig = px.line(vehicle_sales_share_ref, x="Year", y="Vehicle_sales_share", color=
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
-fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\archive\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\archive\\" + title + '.png', scale=1, width=2000, height=800)
 
 #filter for cn scen
 vehicle_sales_share_cn = Vehicle_sales_share[Vehicle_sales_share['Scenario']=='Carbon Neutral']
@@ -317,8 +312,8 @@ fig = px.line(vehicle_sales_share_cn, x="Year", y="Vehicle_sales_share", color="
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
-fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\archive" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\archive" + title + '.png', scale=1, width=2000, height=800)
 
 
 #%%
@@ -342,8 +337,8 @@ fig = px.line(vehicle_sales_share_ref, x="Year", y="Value", color="Transport_Veh
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
-fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\archive\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\archive\\" + title + '.png', scale=1, width=2000, height=800)
 
 #filter for cn scen
 vehicle_sales_share_cn = vehicle_sales_share_normalised[vehicle_sales_share_normalised['Scenario']=='Carbon Neutral']
@@ -354,8 +349,8 @@ fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove '
 
 title = 'Hughs vehicle_sales_share by year, transport type, vehicle type and economy in CN'
 
-plotly.offline.plot(fig, filename=root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
-fig.write_image(root_dir + '\\' + "\\plotting_output\\static\\archive" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\archive\\' + title + '.html')
+fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\archive" + title + '.png', scale=1, width=2000, height=800)
 
 # %%
 

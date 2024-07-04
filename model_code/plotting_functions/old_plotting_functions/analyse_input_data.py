@@ -9,18 +9,13 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{root_dir}\\code")
-    import config
+    sys.path.append(f"{config.root_dir}\\code")
     import utility_functions
 else:
     # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
     from .. import utility_functions
-    from .. import config
 #################
 
 import pandas as pd 
@@ -49,15 +44,15 @@ save_fig=False
 
 #%%
 #laod data from 
-# road_model_input = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\road_model_input_wide.csv')
+# road_model_input = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\road_model_input_wide.csv')
 
-# growth_forecasts = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\growth_forecasts.csv')
+# growth_forecasts = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\growth_forecasts.csv')
 
-# non_road_model_input = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\non_road_model_input_wide.csv')
+# non_road_model_input = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\non_road_model_input_wide.csv')
 
-road_model_input_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\road_model_input_wide.csv')
-growth_forecasts = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\growth_forecasts.csv')
-non_road_model_input_wide = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\non_road_model_input_wide.csv')
+road_model_input_wide = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\road_model_input_wide.csv')
+growth_forecasts = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\growth_forecasts.csv')
+non_road_model_input_wide = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\non_road_model_input_wide.csv')
 
 #%%
 ################################################################################################################################################################

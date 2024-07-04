@@ -4,11 +4,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 #################
 
 import pandas as pd 
@@ -35,13 +31,13 @@ if do_this:
 
     #Load user input from 'input_data\\user_input_spreadsheet.xlsx' by looping through the sheets in the excel file and then concat them together
     #first load the sheets
-    user_input_file = pd.ExcelFile(root_dir + '\\' + 'input_data\\user_input_spreadsheet.xlsx', engine='openpyxl')
+    user_input_file = pd.ExcelFile(config.root_dir + '\\' + 'input_data\\user_input_spreadsheet.xlsx', engine='openpyxl')
     for sheet in user_input_file.sheet_names:
         print('Importing user input sheet: {}'.format(sheet))
         if sheet == user_input_file.sheet_names[0]:
-            user_input = pd.read_excel(root_dir + '\\' + 'input_data\\user_input_spreadsheet.xlsx', sheet_name=sheet)
+            user_input = pd.read_excel(config.root_dir + '\\' + 'input_data\\user_input_spreadsheet.xlsx', sheet_name=sheet)
         else:
-            user_input = pd.concat([user_input, pd.read_excel(root_dir + '\\' + 'input_data\\user_input_spreadsheet.xlsx', sheet_name=sheet)])
+            user_input = pd.concat([user_input, pd.read_excel(config.root_dir + '\\' + 'input_data\\user_input_spreadsheet.xlsx', sheet_name=sheet)])
 
 
 
@@ -113,7 +109,7 @@ if do_this:
 
     #Latly make sure that everything matches our concordances. eg. units match what is in config.measure_to_unit_concordance and the transport categories match what is in manually_defined_transport_categories
     #import measure to unit concordance
-    config.measure_to_unit_concordance = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\config.measure_to_unit_concordance.csv')
+    config.measure_to_unit_concordance = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\config.measure_to_unit_concordance.csv')
 
     #join to user input on the measure col an check that the units match
     user_input = user_input.merge(config.measure_to_unit_concordance, on='Measure', how='left')
@@ -125,7 +121,7 @@ if do_this:
 
 
     #import manually_defined_transport_categories
-    transport_categories = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\manually_defined_transport_categories.csv')
+    transport_categories = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\manually_defined_transport_categories.csv')
     #create dummy col which is just all cols added together
     transport_categories['dummy'] =  transport_categories['Medium'] + transport_categories['Transport Type'] + transport_categories['Vehicle Type'] + transport_categories['Drive']
     #join to user input on the Medium	Transport Type	Vehicle Type	Drive cols and if there are any that do not match then raise an error
@@ -164,7 +160,7 @@ if do_this:
 #         gompertz_inputs[gompertz_inputs.Measure == sheet].to_excel('input_data\\user_input_spreadsheet.xlsx', sheet_name=sheet, index=False)
 #%%
 # #load in input_data/user_input_spreadsheet/activity_efficiency_improvement and remove duplicates
-# activity_efficiency_improvement = pd.read_csv(root_dir + '\\' + 'input_data\\user_input_spreadsheets\\activity_efficiency_improvement.csv')
+# activity_efficiency_improvement = pd.read_csv(config.root_dir + '\\' + 'input_data\\user_input_spreadsheets\\activity_efficiency_improvement.csv')
 # activity_efficiency_improvement = activity_efficiency_improvement.drop_duplicates()
-# activity_efficiency_improvement.to_csv(root_dir + '\\' + 'input_data\\user_input_spreadsheets\\activity_efficiency_improvement.csv', index=False)
+# activity_efficiency_improvement.to_csv(config.root_dir + '\\' + 'input_data\\user_input_spreadsheets\\activity_efficiency_improvement.csv', index=False)
 # %%

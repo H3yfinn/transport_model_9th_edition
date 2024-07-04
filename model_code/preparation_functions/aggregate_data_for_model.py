@@ -9,11 +9,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 #################
 
 import pandas as pd 
@@ -33,11 +29,11 @@ import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 #%%
-def aggregate_data_for_model(ECONOMY_ID, REPLACE_ZEROS_WITH_AVGS_FROM_DIFFERENT_DATES_FOR_FACTOR_MEASURES=True, REPLACE_NAS_WITH_ZEROS=True, REPLACE_ZEROS_WITH_ONES_IN_GROWTH_VALUES=True):
+def aggregate_data_for_model(config, ECONOMY_ID, REPLACE_ZEROS_WITH_AVGS_FROM_DIFFERENT_DATES_FOR_FACTOR_MEASURES=True, REPLACE_NAS_WITH_ZEROS=True, REPLACE_ZEROS_WITH_ONES_IN_GROWTH_VALUES=True):
     #load data from transport datasystem
-    new_transport_dataset = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\transport_data_system_extract.csv')
-    user_input = pd.read_csv(root_dir + '\\' +f'intermediate_data\\model_inputs\\{ECONOMY_ID}_user_inputs_and_growth_rates.csv')
-    growth = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\regression_based_growth_estimates.csv')
+    new_transport_dataset = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\transport_data_system_extract.csv')
+    user_input = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\model_inputs\\{ECONOMY_ID}_user_inputs_and_growth_rates.csv')
+    growth = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\regression_based_growth_estimates.csv')
     
     # #drop age from new_transport_dataset
     # new_transport_dataset = new_transport_dataset.loc[new_transport_dataset['Measure']!='Average_age']
@@ -117,7 +113,7 @@ def aggregate_data_for_model(ECONOMY_ID, REPLACE_ZEROS_WITH_AVGS_FROM_DIFFERENT_
     road_model_input_wide = road_model_input_wide.merge(growth_forecasts_wide[['Date', 'Economy','Transport Type', 'Population', 'Gdp','Gdp_per_capita', 'Activity_growth']].drop_duplicates(), on=['Date','Transport Type', 'Economy'], how='left')
     non_road_model_input_wide = non_road_model_input_wide.merge(growth_forecasts_wide[['Date', 'Economy','Transport Type', 'Population', 'Gdp','Gdp_per_capita', 'Activity_growth']].drop_duplicates(), on=['Date', 'Transport Type','Economy'], how='left')
     ###############################
-    road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = check_na_and_zero_values(road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide, REPLACE_NAS_WITH_ZEROS, REPLACE_ZEROS_WITH_AVGS_FROM_DIFFERENT_DATES_FOR_FACTOR_MEASURES, REPLACE_ZEROS_WITH_ONES_IN_GROWTH_VALUES)
+    road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = check_na_and_zero_values(config, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide, REPLACE_NAS_WITH_ZEROS, REPLACE_ZEROS_WITH_AVGS_FROM_DIFFERENT_DATES_FOR_FACTOR_MEASURES, REPLACE_ZEROS_WITH_ONES_IN_GROWTH_VALUES)
     ###############################
     #extrract gompertz data from road model input wide and put it in a separate df:
     stocks_per_capita_threshold = road_model_input_wide[['Economy','Scenario','Date', 'Transport Type','Vehicle Type', 'Gompertz_gamma']].drop_duplicates().dropna().copy()
@@ -126,19 +122,19 @@ def aggregate_data_for_model(ECONOMY_ID, REPLACE_ZEROS_WITH_AVGS_FROM_DIFFERENT_
         breakpoint()#get rid of it
     
     #save data    
-    road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    non_road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID,ECONOMY_ID), index=False)
-    growth_forecasts_wide.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID,ECONOMY_ID), index=False)
+    road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    non_road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID,ECONOMY_ID), index=False)
+    growth_forecasts_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID,ECONOMY_ID), index=False)
 
-    stocks_per_capita_threshold.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_stocks_per_capita_threshold.csv'.format(config.FILE_DATE_ID,ECONOMY_ID), index=False)
+    stocks_per_capita_threshold.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_stocks_per_capita_threshold.csv'.format(config.FILE_DATE_ID,ECONOMY_ID), index=False)
     
     #lastly resave these files before they get changed in the modelling process
-    supply_side_fuel_mixing = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID,ECONOMY_ID))
-    demand_side_fuel_mixing = pd.read_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
-    supply_side_fuel_mixing.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    demand_side_fuel_mixing.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    supply_side_fuel_mixing = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID,ECONOMY_ID))
+    demand_side_fuel_mixing = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+    supply_side_fuel_mixing.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    demand_side_fuel_mixing.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
 
-def replace_zeros_with_avgs_from_different_dates(df, measure):
+def replace_zeros_with_avgs_from_different_dates(config, df, measure):
     #requires a df with a date col, a measure col and a value col so that we can group by everything except the value and date col to calcualte the avcerage. note that we will exclude the effect of 0s and nans on teh aavg
     df_measure_no_date_avgs = df.loc[df['Measure']==measure].copy()
     df_measure_no_date_avgs['Value'] = df_measure_no_date_avgs['Value'].replace(0, np.nan)
@@ -154,7 +150,7 @@ def replace_zeros_with_avgs_from_different_dates(df, measure):
     df.drop(columns=['Value_avg'], inplace=True)
     return df
 
-def check_na_and_zero_values(road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide, REPLACE_NAS_WITH_ZEROS, REPLACE_ZEROS_WITH_AVGS_FROM_DIFFERENT_DATES_FOR_FACTOR_MEASURES, REPLACE_ZEROS_WITH_ONES_IN_GROWTH_VALUES):
+def check_na_and_zero_values(config, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide, REPLACE_NAS_WITH_ZEROS, REPLACE_ZEROS_WITH_AVGS_FROM_DIFFERENT_DATES_FOR_FACTOR_MEASURES, REPLACE_ZEROS_WITH_ONES_IN_GROWTH_VALUES):
     #CHECK FOR NAS IN ALL MEASURES AND ALSO 0'S IN config.FACTOR_MEASURES and config.GROWTH_MEASURES. If REPLACE_NAS_WITH_ZEROS is true then replace all nans with 0's, 
     #IF REPLACE_ZEROS_WITH_AVGS_FROM_DIFFERENT_DATES_FOR_FACTOR_MEASURES is true then try to replace 0's (including what we might have just set to 0) for config.FACTOR_MEASURES with the average of the same rows in other dates, and if that cant be done, throw an error with clear instructions on how to fix the data.
     #IF REPLACE_ZEROS_WITH_ONES_IN_GROWTH_VALUES is true then try to replace 0's (including what we might have just set to 0) for config.GROWTH_MEASURES with 1's
@@ -192,7 +188,7 @@ def check_na_and_zero_values(road_model_input_wide, non_road_model_input_wide, g
                 if len(road_model_input_wide.loc[(road_model_input_wide[measure]==0), 'Date'].unique())>0:
                     print('WARNING: There are zeros in the {} measure in the road_model_input_wide data. We will try to replace these with averages from other dates. Either wway, it would be best to fix the data'.format(measure))
                 road_model_input_tall = road_model_input_wide.melt(id_vars=config.INDEX_COLS_NO_MEASURE, var_name='Measure', value_name='Value')
-                road_model_input_tall = replace_zeros_with_avgs_from_different_dates(road_model_input_tall, measure)
+                road_model_input_tall = replace_zeros_with_avgs_from_different_dates(config, road_model_input_tall, measure)
                 #m,ake wide again
                 road_model_input_wide = road_model_input_tall.pivot(index=config.INDEX_COLS_NO_MEASURE, columns='Measure', values='Value').reset_index()
                 
@@ -201,7 +197,7 @@ def check_na_and_zero_values(road_model_input_wide, non_road_model_input_wide, g
                     print('WARNING: There are zeros in the {} measure in the non_road_model_input_wide data. We will try to replace these with averages from other dates. Either wway, it would be best to fix the data'.format(measure))
                 non_road_model_input_tall = non_road_model_input_wide.melt(id_vars=config.INDEX_COLS_NO_MEASURE, var_name='Measure', value_name='Value')
                 #replace zeros with averages
-                non_road_model_input_tall = replace_zeros_with_avgs_from_different_dates(non_road_model_input_tall, measure)
+                non_road_model_input_tall = replace_zeros_with_avgs_from_different_dates(config, non_road_model_input_tall, measure)
                 non_road_model_input_wide = non_road_model_input_tall.pivot(index=config.INDEX_COLS_NO_MEASURE, columns='Measure', values='Value').reset_index()
 
         if REPLACE_ZEROS_WITH_ONES_IN_GROWTH_VALUES:#TODO IS IT RIGHT TO BE REPALCING WITH 1S ? OR SHOULD THEY ALSO BE 0S?
@@ -221,6 +217,6 @@ def check_na_and_zero_values(road_model_input_wide, non_road_model_input_wide, g
     
     return road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide
 #%%
-# aggregate_data_for_model('08_JPN')
+# aggregate_data_for_model(config, '08_JPN')
 
 # %%

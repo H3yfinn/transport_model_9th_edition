@@ -38,17 +38,13 @@ import matplotlib.pyplot as plt
 ###
 
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 from . import apply_fuel_mix_demand_side, apply_fuel_mix_supply_side, optimise_to_calculate_base_data
 #################
 
 from scipy.optimize import minimize
 
-def adjust_data_to_match_esto_handler(BASE_YEAR, ECONOMY_ID, road_model_input_wide,non_road_model_input_wide,supply_side_fuel_mixing, demand_side_fuel_mixing,USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT,USE_SAVED_OPT_PARAMATERS, TESTING=False):
+def adjust_data_to_match_esto_handler(config, BASE_YEAR, ECONOMY_ID, road_model_input_wide, non_road_model_input_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT, USE_SAVED_OPT_PARAMATERS, TESTING=False):
     """this function is a handler for the code in this file. It will run the code in this file to adjust the data to match the ESTO energy data. This is quite a complicated process, especially the use of the optimisation functions to find the best balance of changes to make the data we have in road_model_input_wide equate to match the energy from ESTO. 
 
     Args:
@@ -67,22 +63,22 @@ def adjust_data_to_match_esto_handler(BASE_YEAR, ECONOMY_ID, road_model_input_wi
     Returns:
         _type_: _description_
     """    
-    energy_use_esto = format_9th_input_energy_from_esto(ECONOMY_ID)#Economy missing in here
+    energy_use_esto = format_9th_input_energy_from_esto(config, ECONOMY_ID)#Economy missing in here
     
     #move electricity use in road to rail. This is based on the parameters the user has set. It should generally default to False unless the user things that Elec use in road is overexaggerated.
-    ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR = yaml.load(open(root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR']
+    ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR']
     if ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR[ECONOMY_ID]:
         USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=True
-        energy_use_esto = move_electricity_use_in_road_to_rail_esto(energy_use_esto, ECONOMY_ID)
+        energy_use_esto = move_electricity_use_in_road_to_rail_esto(config, energy_use_esto, ECONOMY_ID)
     else:
         USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=False 
             
-    input_data_based_on_previous_model_run = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
-    energy_use_output = pd.read_csv(root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    input_data_based_on_previous_model_run = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    energy_use_output = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
     
     #save them for archiving because they will be overwritten later
-    input_data_based_on_previous_model_run.to_csv(root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_input_data_based_on_previous_model_run_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
-    energy_use_output.to_csv(root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_energy_use_output_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    input_data_based_on_previous_model_run.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_input_data_based_on_previous_model_run_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    energy_use_output.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_energy_use_output_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
     
     #double check that the max and min dates for the input data match the BASEYEAR AND config.OUTLOOK_BASE_YEAR, OTHERWISE THE USER NEEDS TO RUN THE MODEL WITH ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR SET TO FALSE AGAIN:
     if input_data_based_on_previous_model_run['Date'].max() != config.OUTLOOK_BASE_YEAR or input_data_based_on_previous_model_run['Date'].min() != BASE_YEAR:
@@ -104,14 +100,14 @@ def adjust_data_to_match_esto_handler(BASE_YEAR, ECONOMY_ID, road_model_input_wi
     #replace any nas with 0
     energy_use_output['Energy'] = energy_use_output['Energy'].fillna(0)
     if TESTING:
-        road_model_input_wide, non_road_model_input_wide, supply_side_fuel_mixing, input_data_based_on_previous_model_run, energy_use_output, energy_use_esto = filter_for_testing_data_only(road_model_input_wide, non_road_model_input_wide, supply_side_fuel_mixing, input_data_based_on_previous_model_run, energy_use_output, energy_use_esto)
+        road_model_input_wide, non_road_model_input_wide, supply_side_fuel_mixing, input_data_based_on_previous_model_run, energy_use_output, energy_use_esto = filter_for_testing_data_only(config, road_model_input_wide, non_road_model_input_wide, supply_side_fuel_mixing, input_data_based_on_previous_model_run, energy_use_output, energy_use_esto)
         
-    energy_use_output_no_drive, energy_use_esto, energy_use_esto_pipeline = format_energy_use_for_rescaling(energy_use_esto, energy_use_output, SPREAD_NON_SPECIFIED_AND_SEPARATE_PIPELINE = False, REMOVE_ANNOYING_FUELS = False)
-    energy_use_merged = merge_and_find_ratio_between_esto_and_input_data(energy_use_esto, energy_use_output_no_drive)
+    energy_use_output_no_drive, energy_use_esto, energy_use_esto_pipeline = format_energy_use_for_rescaling(config, energy_use_esto, energy_use_output, SPREAD_NON_SPECIFIED_AND_SEPARATE_PIPELINE = False, REMOVE_ANNOYING_FUELS = False)
+    energy_use_merged = merge_and_find_ratio_between_esto_and_input_data(config, energy_use_esto, energy_use_output_no_drive)
 
-    supply_side_fuel_mixing = adjust_supply_side_fuel_share(energy_use_esto,supply_side_fuel_mixing)
+    supply_side_fuel_mixing = adjust_supply_side_fuel_share(config, energy_use_esto,supply_side_fuel_mixing)
     
-    required_energy_use_by_drive = calculate_required_energy_use_by_drive(input_data_based_on_previous_model_run,energy_use_merged,energy_use_output)
+    required_energy_use_by_drive = calculate_required_energy_use_by_drive(config, input_data_based_on_previous_model_run,energy_use_merged,energy_use_output)
     #############################
     #OPTIMISATION STEP: (use optimisation to find the best balance of changes to make the data we have in input_data_new_road equate to match the energy from ESTO.)
     input_data_new_road = required_energy_use_by_drive.loc[required_energy_use_by_drive['Medium'] == 'road'].copy()  
@@ -129,20 +125,20 @@ def adjust_data_to_match_esto_handler(BASE_YEAR, ECONOMY_ID, road_model_input_wi
         # if ECONOMY_ID == '04_CHL':
         #     breakpoint()#try work out why japan isnt calcualting well. 
         #     input_data_new_road.to_pickle('chl_input_to_optimisation.pkl')
-        #     optimised_data = optimise_to_calculate_base_data.optimisation_handler(input_data_new_road, SAVE_ALL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=False, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='ALL2')
+        #     optimised_data = optimise_to_calculate_base_data.optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=False, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='ALL2')
         # else:
-        optimised_data = optimise_to_calculate_base_data.optimisation_handler(input_data_new_road, SAVE_ALL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=False, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='ALL')
+        optimised_data = optimise_to_calculate_base_data.optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=False, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='ALL')
         
-    input_data_new_road_recalculated = reformat_optimised_results(optimised_data, input_data_new_road)
-    input_data_new_road_recalculated = match_optimised_results_to_required_energy_use_exactly(input_data_new_road_recalculated, input_data_new_road)
+    input_data_new_road_recalculated = reformat_optimised_results(config, optimised_data, input_data_new_road)
+    input_data_new_road_recalculated = match_optimised_results_to_required_energy_use_exactly(config, input_data_new_road_recalculated, input_data_new_road)
     #############################
     
-    input_data_new_non_road = calculate_required_values_by_measure_for_non_road(required_energy_use_by_drive,non_road_model_input_wide)
+    input_data_new_non_road = calculate_required_values_by_measure_for_non_road(config, required_energy_use_by_drive,non_road_model_input_wide)
     
-    road_all_wide, non_road_all_wide = merge_and_replace_old_input_data_with_new_input_data(input_data_new_road_recalculated, input_data_new_non_road, road_model_input_wide, non_road_model_input_wide)
+    road_all_wide, non_road_all_wide = merge_and_replace_old_input_data_with_new_input_data(config, input_data_new_road_recalculated, input_data_new_non_road, road_model_input_wide, non_road_model_input_wide)
     #now do tests to check data matches expectations:
     #test that the total road enegry use matches the total energy use in the esto data:
-    test_output_matches_expectations(ECONOMY_ID, supply_side_fuel_mixing,demand_side_fuel_mixing, road_all_wide, non_road_all_wide, energy_use_merged, BASE_YEAR,  ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True)
+    test_output_matches_expectations(config, ECONOMY_ID, supply_side_fuel_mixing,demand_side_fuel_mixing, road_all_wide, non_road_all_wide, energy_use_merged, BASE_YEAR,  ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True)
     
     #make sure data is all after config.OUTLOOK_BASE_YEAR. Since we merged it with the ESTO data we ended up with some data before config.OUTLOOK_BASE_YEAR:
     road_all_wide = road_all_wide.loc[road_all_wide['Date'] >= config.OUTLOOK_BASE_YEAR].copy()
@@ -152,7 +148,7 @@ def adjust_data_to_match_esto_handler(BASE_YEAR, ECONOMY_ID, road_model_input_wi
     return road_all_wide, non_road_all_wide, supply_side_fuel_mixing
 
 
-def adjust_supply_side_fuel_share(energy_use_esto,supply_side_fuel_mixing):
+def adjust_supply_side_fuel_share(config, energy_use_esto, supply_side_fuel_mixing):
     #find portion of '16_06_biodiesel', '16_05_biogasoline', '16_07_bio_jet_kerosene' out of the toal '07_07_gas_diesel_oil', '07_01_motor_gasoline', '07_x_jet_fuel' in the esto data so we can change the supply side fuel mixing to match:
     energy_use_esto_wide = energy_use_esto.groupby(['Economy', 'Date', 'Fuel']).sum(numeric_only=True).reset_index()
     energy_use_esto_wide = energy_use_esto_wide.pivot(index=['Economy', 'Date'], columns='Fuel', values='Energy').reset_index()
@@ -222,7 +218,7 @@ def adjust_supply_side_fuel_share(energy_use_esto,supply_side_fuel_mixing):
 #make energy_use_esto match the format of energy_use_output for ref scenario
 #drop any aggregate fuels from energy_use_esto
 
-def spread_non_specified_and_separate_pipeline_from_esto_transport_energy(energy_use_esto, REMOVE_ANNOYING_FUELS = False):
+def spread_non_specified_and_separate_pipeline_from_esto_transport_energy(config, energy_use_esto, REMOVE_ANNOYING_FUELS = False):
     #separate pipeline and nonspecified mediums in energy use esto and then spread it among all the other transport mediums. This is because the model doesnt have any way to deal with them.. they are intended to be dealt with by the transport model at a later date
     energy_use_esto_pipeline = energy_use_esto.loc[energy_use_esto['Medium'] == 'pipeline'].copy()
     energy_use_esto_nonspecified = energy_use_esto.loc[energy_use_esto['Medium'] == 'nonspecified'].copy()
@@ -247,7 +243,7 @@ def spread_non_specified_and_separate_pipeline_from_esto_transport_energy(energy
     
     return energy_use_esto, energy_use_esto_pipeline, energy_use_esto_nonspecified
 
-def format_energy_use_for_rescaling(energy_use_esto, energy_use_output, SPREAD_NON_SPECIFIED_AND_SEPARATE_PIPELINE = False, REMOVE_ANNOYING_FUELS=False):
+def format_energy_use_for_rescaling(config, energy_use_esto, energy_use_output, SPREAD_NON_SPECIFIED_AND_SEPARATE_PIPELINE = False, REMOVE_ANNOYING_FUELS=False):
     """this function formats the energy use data from the esto data set so that it can be compared to the energy use data from the model. 
     frist, if  SPREAD_NON_SPECIFIED_AND_SEPARATE_PIPELINE it will remove the pipeline and nonspecified mediums in energy_use_esto, as we dont want to consider those. they might be dealt with by the transport model at a later date... It also adds Fuel 07_08_fuel_oil and 07_06_kerosene use in road to the non specified amount and spread it with nonspecifieds energy use. This is because we dont have any info on these uses and they are minmimal so mimght as well drop them in with the nonspecifieds. It also spreads energy_use_esto_nonspecified among all mediums for that fuel, eocnomy and date. Use the % of each energy use to the total energy use for that fuel, economy and date to do this. It also calculates the total energy use for each fuel, scenario, medium, economy and date in energy_use_output (so it can be compared to the esto data).
 
@@ -263,7 +259,7 @@ def format_energy_use_for_rescaling(energy_use_esto, energy_use_output, SPREAD_N
     
     #for now ignoring this as pipeline is managed by supply model.. non specified seems unnecessary
     if SPREAD_NON_SPECIFIED_AND_SEPARATE_PIPELINE:
-        spread_non_specified_and_separate_pipeline_from_esto_transport_energy(energy_use_esto, REMOVE_ANNOYING_FUELS = REMOVE_ANNOYING_FUELS)
+        spread_non_specified_and_separate_pipeline_from_esto_transport_energy(config, energy_use_esto, REMOVE_ANNOYING_FUELS = REMOVE_ANNOYING_FUELS)
     else:
         energy_use_esto_pipeline = pd.DataFrame()
     
@@ -276,7 +272,7 @@ def format_energy_use_for_rescaling(energy_use_esto, energy_use_output, SPREAD_N
     
     return energy_use_output_no_drive, energy_use_esto, energy_use_esto_pipeline
 
-def merge_and_find_ratio_between_esto_and_input_data(energy_use_esto, energy_use_output_no_drive):
+def merge_and_find_ratio_between_esto_and_input_data(config, energy_use_esto, energy_use_output_no_drive):
     #NOW find the ratio between energy use in the model and energy use in the esto data. This will be used to adjust energy to be the same as in ESTO. 
 
     # So merge the dfs and then find it.
@@ -314,7 +310,7 @@ def merge_and_find_ratio_between_esto_and_input_data(energy_use_esto, energy_use
 
 
 #####################    
-def calculate_required_energy_use_by_drive( input_data_based_on_previous_model_run,energy_use_merged,energy_use_output):
+def calculate_required_energy_use_by_drive(config, input_data_based_on_previous_model_run, energy_use_merged, energy_use_output):
     """Times energy use in the model by the ratio between the energy use in the model and the energy use in the esto data. This will be used to adjust energy to be the same as in ESTO. Then add any additions to the Energy. this is where the ratio was inf because the model had 0 energy use but the esto data had >0. so we will add the esto data energy use to the model data energy use and just times by a ratio of 1. Then we can calcualte requried stocks for this energy use. Later when we double check that we've gfot the right energy use, we will do the mixing calcualtions to split drive into its mixed types, so we can tell if the calcualtions are correct for each fuel type.
 
     Args:
@@ -353,11 +349,11 @@ def calculate_required_energy_use_by_drive( input_data_based_on_previous_model_r
     #now need to add any additions to the Energy. this is where the ratio was inf because the model had 0 energy use but the esto data had >0. so we will add the esto data energy use to the model data energy use and just times by a ratio of 1
     required_energy_use_by_drive_and_fuel['Energy_new'] = required_energy_use_by_drive_and_fuel['Energy_new'] + required_energy_use_by_drive_and_fuel['addition'].replace(np.nan, 0)
     #in a lot of cases the electricity use for road will be 0 but because phevs need elec to have been beiong used, we should add their primary fuel use to toher drives if  there is no road elec use. so lets do that now:
-    required_energy_use_by_drive_and_fuel = replace_zero_elec_phevs(required_energy_use_by_drive_and_fuel)
+    required_energy_use_by_drive_and_fuel = replace_zero_elec_phevs(config, required_energy_use_by_drive_and_fuel)
     #####################################
     #INCORPORATE FUEL MIXING:
     #####################################
-    required_energy_use_by_drive_and_fuel = incorporate_fuel_mixing_before_recalculating_stocks(required_energy_use_by_drive_and_fuel)
+    required_energy_use_by_drive_and_fuel = incorporate_fuel_mixing_before_recalculating_stocks(config, required_energy_use_by_drive_and_fuel)
     #now we have the total energy use for each drive, rather than fuel. now we can calcualte requried stocks for this energy use. Later when we double check that we've gfot the right energy use, we will do the mixing calcualions to split drive into its mixed types, so we can tell if the calcualtions are correct for each fuel type.
     #####################################
     #CALCUALTE STOCKS AND OTEHR INPUTS FROM ENERGY USE:
@@ -370,7 +366,7 @@ def calculate_required_energy_use_by_drive( input_data_based_on_previous_model_r
     
     return required_energy_use_by_drive
 
-def calculate_required_values_by_measure_for_non_road(required_energy_use_by_drive,non_road_model_input_wide):
+def calculate_required_values_by_measure_for_non_road(config, required_energy_use_by_drive, non_road_model_input_wide):
     
     input_data_new_non_road = required_energy_use_by_drive.loc[required_energy_use_by_drive['Medium'] != 'road'].copy()
     input_data_new_non_road['Activity'] = input_data_new_non_road['Energy_new'] / input_data_new_non_road['Intensity']
@@ -388,7 +384,7 @@ def calculate_required_values_by_measure_for_non_road(required_energy_use_by_dri
     
     return input_data_new_non_road
 
-def merge_and_replace_old_input_data_with_new_input_data(input_data_new_road_recalculated, input_data_new_non_road, road_model_input_wide, non_road_model_input_wide):
+def merge_and_replace_old_input_data_with_new_input_data(config, input_data_new_road_recalculated, input_data_new_non_road, road_model_input_wide, non_road_model_input_wide):
     ###################################
     #NOW MERGE AND REPLACE THE OLD INPUT DATA WITH THE NEW INPUT DATA
     #merge and add tehse missing cols back on usaing the original input data 
@@ -417,7 +413,7 @@ def merge_and_replace_old_input_data_with_new_input_data(input_data_new_road_rec
     return road_all_wide, non_road_all_wide
 
 
-def replace_zero_elec_phevs(required_energy_use_by_drive_and_fuel):
+def replace_zero_elec_phevs(config, required_energy_use_by_drive_and_fuel):
     #PLEASE NOTE I TOOK SOME SHORTCUTS WHILE MAKING THIS FUNCTION BECAUSE I FIGURED THAT THERE ARENT MANY PHEVS ON THE ROADS YET. hOWEVER AS TIME GOES ON IT WILL BECOME MORE IMPORTANT TO DO THIS PROPERLY. SO PLEASE REVISIT THIS FUNCTION AND MAKE SURE IT IS CORRECT. TODO
     #in a lot of cases the electricity use for road will be 0 but because phevs need elec to have been beiong used, we should add their primary fuel use to toher drives if  there is no road elec use. so lets do that now:
     phev_energy_use = required_energy_use_by_drive_and_fuel.loc[(required_energy_use_by_drive_and_fuel['Drive'].isin(['phev_d', 'phev_g']))].copy()
@@ -446,7 +442,7 @@ def replace_zero_elec_phevs(required_energy_use_by_drive_and_fuel):
     required_energy_use_by_drive_and_fuel = required_energy_use_by_drive_and_fuel.groupby(['Economy', 'Date', 'Medium', 'Vehicle Type', 'Transport Type', 'Drive', 'Scenario', 'Fuel']).sum(numeric_only=True).reset_index()   
     return required_energy_use_by_drive_and_fuel   
 
-def incorporate_fuel_mixing_before_recalculating_stocks(required_energy_use_by_drive_and_fuel):
+def incorporate_fuel_mixing_before_recalculating_stocks(config, required_energy_use_by_drive_and_fuel):
     """
     #since the fuel mixing fuels have had their energy use caslcualted, we will add their energy use to their corresponding drive types other fuels, so that when we recalcualte the required stocks we will get the stocks requried for their main fuels energy use plus the mixed fuels energy use. otherwise we'd be missing that. We will do this for demand and supply side fuel mixing: 
 
@@ -466,7 +462,7 @@ def incorporate_fuel_mixing_before_recalculating_stocks(required_energy_use_by_d
     required_energy_use_by_drive_and_fuel = required_energy_use_by_drive_and_fuel.drop(columns=['ratio','addition','proportion_of_group', 'Energy_esto', 'Energy_model'])
     
     
-    drive_type_to_fuel = pd.read_csv(root_dir + '\\' + 'config\\concordances_and_config_data\\drive_type_to_fuel.csv')
+    drive_type_to_fuel = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\drive_type_to_fuel.csv')
     #first supply side so we dont mix any biofuels with electricity which came from demand side fuel mixing:
     supply_side_fuel_mixing_drives = drive_type_to_fuel.loc[drive_type_to_fuel['Supply_side_fuel_mixing'] != False][['Drive','Fuel','Supply_side_fuel_mixing']].drop_duplicates()
     
@@ -521,7 +517,7 @@ def incorporate_fuel_mixing_before_recalculating_stocks(required_energy_use_by_d
     return required_energy_use_by_drive_and_fuel
 
 #why is ratio so high in places? maybe need to fix.
-def test_output_matches_expectations(ECONOMY_ID, supply_side_fuel_mixing, demand_side_fuel_mixing, road_all_wide, non_road_all_wide, energy_use_merged,BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True):
+def test_output_matches_expectations(config, ECONOMY_ID, supply_side_fuel_mixing, demand_side_fuel_mixing, road_all_wide, non_road_all_wide, energy_use_merged, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True):
 
     
         
@@ -531,8 +527,8 @@ def test_output_matches_expectations(ECONOMY_ID, supply_side_fuel_mixing, demand
     #since we want to make sure that toal energy use for each fuel is the same then we will ahve to calcualte this first. this will involve fuel mixing calcs too:
     #first concat road and non road together
     energy_for_model_all  = pd.concat([road_all_wide, non_road_all_wide], axis=0)
-    model_output_with_fuel_mixing = apply_fuel_mix_demand_side.apply_fuel_mix_demand_side(energy_for_model_all, ECONOMY_ID,  demand_side_fuel_mixing=demand_side_fuel_mixing,supply_side_fuel_mixing=supply_side_fuel_mixing)
-    model_output_with_fuel_mixing = apply_fuel_mix_supply_side.apply_fuel_mix_supply_side(model_output_with_fuel_mixing, ECONOMY_ID, supply_side_fuel_mixing=supply_side_fuel_mixing)
+    model_output_with_fuel_mixing = apply_fuel_mix_demand_side.apply_fuel_mix_demand_side(config, energy_for_model_all, ECONOMY_ID,  demand_side_fuel_mixing=demand_side_fuel_mixing,supply_side_fuel_mixing=supply_side_fuel_mixing)
+    model_output_with_fuel_mixing = apply_fuel_mix_supply_side.apply_fuel_mix_supply_side(config, model_output_with_fuel_mixing, ECONOMY_ID, supply_side_fuel_mixing=supply_side_fuel_mixing)
     #double check the diff in enegry use is 0 between the two (since it shoudl be!)
     energy_diff = energy_for_model_all.Energy.sum(numeric_only=True) - model_output_with_fuel_mixing.Energy.sum(numeric_only=True)
     if abs(energy_diff) > 0.01:
@@ -573,12 +569,12 @@ def test_output_matches_expectations(ECONOMY_ID, supply_side_fuel_mixing, demand
     if diff_percent > 1.01 or diff_percent < 0.99:
         breakpoint()
         #saev output to csv
-        # diff_percent.to_csv(root_dir + '\\' + 'intermediate_data\\errors\\ajust_data_to_match_esto_energy_use_diff.csv')
+        # diff_percent.to_csv(config.root_dir + '\\' + 'intermediate_data\\errors\\ajust_data_to_match_esto_energy_use_diff.csv')
         # raise ValueError('energy use does not match esto, proportion difference is  {}'.format(diff_percent))
         print('energy use does not match esto, proportion difference is  {}'.format(diff_percent))
         
     
-def filter_for_testing_data_only(road_model_input_wide, non_road_model_input_wide, supply_side_fuel_mixing, input_data_based_on_previous_model_run, energy_use_output, energy_use_esto):
+def filter_for_testing_data_only(config, road_model_input_wide, non_road_model_input_wide, supply_side_fuel_mixing, input_data_based_on_previous_model_run, energy_use_output, energy_use_esto):
     
     #filter for only 01_AUS and year <= 2025 to make it run faster
     road_model_input_wide = road_model_input_wide[(road_model_input_wide['Date'] <= 2025)]
@@ -593,7 +589,7 @@ def filter_for_testing_data_only(road_model_input_wide, non_road_model_input_wid
     
     return road_model_input_wide, non_road_model_input_wide, supply_side_fuel_mixing, input_data_based_on_previous_model_run, energy_use_output, energy_use_esto
 
-def move_electricity_use_in_road_to_rail_esto(energy_use_esto, ECONOMY_ID):
+def move_electricity_use_in_road_to_rail_esto(config, energy_use_esto, ECONOMY_ID):
     """In almost all cases that there is electricity use in road in the esto data it is likely this is a mistake > it is a lot more than i think there should be and results in having to allocate a large amount of ev stocks to the road sector. So lets move it to rail instead. This is a bit of a hack but it will do for now. We can revisit it later if we have time.
     
     We will only do this for specific economies, as specified in parameters.yml, which is because these economies have a significant amount of evs already, so people will want to see the results including them
@@ -622,11 +618,11 @@ def move_electricity_use_in_road_to_rail_esto(energy_use_esto, ECONOMY_ID):
     energy_use_esto = pd.concat([energy_use_esto, rail_elec])
     return energy_use_esto
     
-def format_9th_input_energy_from_esto(ECONOMY_ID=None):
+def format_9th_input_energy_from_esto(config, ECONOMY_ID=None):
     #take in data from the EBT system of 9th and format it so that it can be used to create the energy data to whcih the model will be rescaled:
     #load the 9th data
-    date_id = utility_functions.get_latest_date_for_data_file(root_dir + '\\' + 'input_data\\9th_model_inputs', 'model_df_wide_')
-    energy_use_esto = pd.read_csv(root_dir + '\\' +f'input_data\\9th_model_inputs\\model_df_wide_{date_id}.csv')
+    date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + 'input_data\\9th_model_inputs', 'model_df_wide_')
+    energy_use_esto = pd.read_csv(config.root_dir + '\\' +f'input_data\\9th_model_inputs\\model_df_wide_{date_id}.csv')
     #just quickly, if it contains '15_PHL', '17_SGP', then change them and resave it. this should be sorted out later but for now its okay desu.
     # if len(energy_use_esto.loc[energy_use_esto['economy'].isin(['15_PHL', '17_SGP'])]) > 0:
     #     energy_use_esto['economy'] = energy_use_esto['economy'].replace({'15_PHL': '15_PHL', '17_SIN': '17_SGP'})
@@ -726,7 +722,7 @@ def format_9th_input_energy_from_esto(ECONOMY_ID=None):
             energy_use_esto.loc[(energy_use_esto['Medium'] == medium) & (energy_use_esto['Fuel'] == fuel), 'Fuel'] = new_fuel_and_medium[0]
             energy_use_esto.loc[(energy_use_esto['Medium'] == medium) & (energy_use_esto['Fuel'] == fuel), 'Medium'] = new_fuel_and_medium[1]
     
-    concordances_fuels = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
+    concordances_fuels = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
     concordances_fuels = concordances_fuels[['Fuel', 'Medium']].drop_duplicates()
     energy_use_esto_fuel_medium = energy_use_esto[['Fuel', 'Medium']].drop_duplicates()
     #drop nonspecified and pipeline from energy_use_esto_fuel_medium
@@ -768,9 +764,9 @@ def format_9th_input_energy_from_esto(ECONOMY_ID=None):
 
 #%%
 
-# format_9th_input_energy_from_esto('15_PHL')
+# format_9th_input_energy_from_esto(config, '15_PHL')
 #%%
-def plot_optimised_results(input_data_new_road_copy, new_measures_cols, original_measures_cols, id='', only_2020=True, transport_type=''):
+def plot_optimised_results(config, input_data_new_road_copy, new_measures_cols, original_measures_cols, id='', only_2020=True, transport_type=''):
     #plot results to double check:
     plotting_df = input_data_new_road_copy[['Economy', 'Date', 'Medium', 'Vehicle Type', 'Transport Type', 'Drive', 'Scenario']+original_measures_cols+new_measures_cols+['Energy_new', 'Energy_old']].copy()
     if only_2020:
@@ -801,11 +797,11 @@ def plot_optimised_results(input_data_new_road_copy, new_measures_cols, original
     #and sort by them so 
     fig = px.strip(plotting_df, x='Vehicle Type', y='% change', color='Drive', title=title, facet_col='Transport Type', facet_row='Measure', hover_data=['New', 'Old'])
     #write to html in plotting_output/input_exploration/esto_reestimations
-    fig.write_html(root_dir + '\\' + 'plotting_output\\input_exploration\\esto_reestimations\\{}_{}_{}.html'.format(id, economy, title), auto_open=False)
+    fig.write_html(config.root_dir + '\\' + 'plotting_output\\input_exploration\\esto_reestimations\\{}_{}_{}.html'.format(id, economy, title), auto_open=False)
     #remember to set input_data_new_road_copy to input_data_new_road once we are happy with the results 
     
 
-def reformat_optimised_results(input_data_new_road_recalculated, input_data_new_road):
+def reformat_optimised_results(config, input_data_new_road_recalculated, input_data_new_road):
                 
     #get input_data_new_road_recalculated ready for use:
     #make wide
@@ -829,7 +825,7 @@ def reformat_optimised_results(input_data_new_road_recalculated, input_data_new_
     return input_data_new_road_recalculated 
     
 
-def match_optimised_results_to_required_energy_use_exactly(input_data_new_road_recalculated, input_data_new_road):
+def match_optimised_results_to_required_energy_use_exactly(config, input_data_new_road_recalculated, input_data_new_road):
     #need energy_use to be in a sum by drive, as each drive represents a fuel type currently (or at least a mix fuel typ with the supply side fuel mixing inherently considered as a set % of the energy use of the drive, plus the major fuel type for that drive!).
     #so just grab input_data_new_road and drop vehicle type and transport type cols then sum energy use by drive, then merge with optimised data, summed in the same way, and calcualte ratio between the two. Then times the optimised data by the ratio to get the new energy use. Then recalcualte the other measures from this new energy use! (the same process we use before but without considering a fuel column)
     input_data_new_road = input_data_new_road.drop(columns=['Vehicle Type', 'Transport Type']).groupby(['Economy', 'Date', 'Medium', 'Drive', 'Scenario']).sum(numeric_only=True).reset_index()
@@ -840,7 +836,7 @@ def match_optimised_results_to_required_energy_use_exactly(input_data_new_road_r
     input_data_new_road_recalculated_no_vtype_ttype['ratio'] = input_data_new_road_recalculated_no_vtype_ttype['Energy_new']/input_data_new_road_recalculated_no_vtype_ttype['Energy_new_required']#replace nas with 1
     input_data_new_road_recalculated_no_vtype_ttype['ratio'] = input_data_new_road_recalculated_no_vtype_ttype['ratio'].fillna(1)
     
-    #identify any infs. it seems that as a result of adding the new function move_electricity_use_in_road_to_rail_esto() we started getting infs for phevs because we were removing elec use in road but somewhere along the line (probably in the phev fucntion:replace_zero_elec_phevs()) we set the energy use by phevs to somethign where it shouldnt be anything (because we moved all elec use in road to rail). Anyway, its such a small amount, we will just set the inf to 1 and leave it. but make sureits noted for future reference:
+    #identify any infs. it seems that as a result of adding the new function move_electricity_use_in_road_to_rail_esto(config) we started getting infs for phevs because we were removing elec use in road but somewhere along the line (probably in the phev fucntion:replace_zero_elec_phevs()) we set the energy use by phevs to somethign where it shouldnt be anything (because we moved all elec use in road to rail). Anyway, its such a small amount, we will just set the inf to 1 and leave it. but make sureits noted for future reference:
     if len(input_data_new_road_recalculated_no_vtype_ttype.loc[input_data_new_road_recalculated_no_vtype_ttype['ratio'] == np.inf]) > 0:
         if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
             print('###############################\n')

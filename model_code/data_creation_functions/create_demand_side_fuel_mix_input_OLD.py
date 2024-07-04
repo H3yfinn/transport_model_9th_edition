@@ -9,11 +9,7 @@ import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 from ..plotting_functions import plot_user_input_data
 from .. import archiving_scripts
 #################
@@ -38,10 +34,10 @@ from plotly.subplots import make_subplots
 
 #create fake user input for demand side fuel mixes using model concordances
 
-def create_demand_side_fuel_mixing_input(ECONOMY_ID):
+def create_demand_side_fuel_mixing_input(config, ECONOMY_ID):
     """Could do with some fixing up but for now it works"""
     #load model concordances for filling in 
-    model_concordances_fuels = pd.read_csv(root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
+    model_concordances_fuels = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
     #filter for the Economy id
     model_concordances_fuels = model_concordances_fuels[model_concordances_fuels['Economy'] == ECONOMY_ID]
 
@@ -120,10 +116,10 @@ def create_demand_side_fuel_mixing_input(ECONOMY_ID):
     #####################
     #save as user input csv
     
-    demand_side_fuel_mixing.to_csv(root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    plot_user_input_data.plot_demand_side_fuel_mixing(demand_side_fuel_mixing,ECONOMY_ID)
+    demand_side_fuel_mixing.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    plot_user_input_data.plot_demand_side_fuel_mixing(config, demand_side_fuel_mixing,ECONOMY_ID)
 #%%
 
-# create_demand_side_fuel_mixing_input()
+# create_demand_side_fuel_mixing_input(config)
 
 #%%

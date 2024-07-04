@@ -3,18 +3,14 @@
 #as such, this will merge a fuel mixing dataframe onto the model output, by the Drive column, and apply the shares by doing that, resulting in a fuel column.
 #this means that the supply side fuel mixing needs to occur after this script, because it will be merging on the fuel column.
 
-#this script also contains the function transfer_growth_between_mediums(model_output_all, ECONOMY_ID) which is pretty important
+#this script also contains the function transfer_growth_between_mediums(config, model_output_all, ECONOMY_ID) which is pretty important
 #%%
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
 import sys
 import re
 #################
-current_working_dir = os.getcwd()
-script_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 from .. import utility_functions
-from .. import config
 #################
 
 import pandas as pd 
@@ -34,10 +30,10 @@ import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 #%%
-def concatenate_model_output(ECONOMY_ID, SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_NON_ROAD=True, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=False):
+def concatenate_model_output(config, ECONOMY_ID, SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_NON_ROAD=True, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=False):
     #load model output
-    road_model_output = pd.read_csv(root_dir + '\\' + 'intermediate_data\\road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name))#TODO WHY IS MEASURE A COLUMN IN HERE?
-    non_road_model_output = pd.read_csv(root_dir + '\\' + 'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    road_model_output = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name))#TODO WHY IS MEASURE A COLUMN IN HERE?
+    non_road_model_output = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name))
     
     # check if there are any NA's in any columns in the output dataframes. If there are, print them out
     if road_model_output.isnull().values.any():
@@ -63,16 +59,16 @@ def concatenate_model_output(ECONOMY_ID, SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_N
     model_output_all = pd.concat([road_model_output, non_road_model_output])
     
     #save
-    model_output_all.to_csv(root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    model_output_all.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
     # breakpoint()
     if SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_NON_ROAD and not PROJECT_TO_JUST_OUTLOOK_BASE_YEAR:
         #no point in doing this if we are projecting to just the outlook base year (i.e. creating input data)
-        df_adjustments = pd.read_excel(root_dir + '\\' + 'input_data\\post_hoc_adjustments\\growth_rate_adjustments.xlsx')
-        model_output_all = transfer_growth_between_mediums(model_output_all, df_adjustments, ECONOMY_ID)               
+        df_adjustments = pd.read_excel(config.root_dir + '\\' + 'input_data\\post_hoc_adjustments\\growth_rate_adjustments.xlsx')
+        model_output_all = transfer_growth_between_mediums(config, model_output_all, df_adjustments, ECONOMY_ID)               
     return model_output_all
 
 
-def find_cumulative_product_of_activity_adjustment_to_FROM_medium(df_economy_adjustments, model_output_all):
+def find_cumulative_product_of_activity_adjustment_to_FROM_medium(config, df_economy_adjustments, model_output_all):
     #this will find the cumulative product of the adjustment to activity over the outlook period, for each group of the columns: Date	Economy	Scenario	Transport Type	To_medium	From_medium
     #HOWEVER one complication is that we need to add all the dates after the last date of each group, so that the cumulative product is applied to all future years. as otherwise the activity in years after the last year of the adjustment will see a jump to what it was originally, where it shouldactually be adjusted by the same amount as the last year of the adjustment.
     final_year = model_output_all['Date'].max()
@@ -95,7 +91,7 @@ def find_cumulative_product_of_activity_adjustment_to_FROM_medium(df_economy_adj
         new_economy_adjustments = pd.concat([new_economy_adjustments, adjustments]) 
     return new_economy_adjustments
           
-def transfer_growth_between_mediums(model_output_all, df_adjustments, ECONOMY_ID):
+def transfer_growth_between_mediums(config, model_output_all, df_adjustments, ECONOMY_ID):
     # Filter adjustments for the specific ECONOMY_ID
     df_economy_adjustments = df_adjustments[df_adjustments['Economy'] == ECONOMY_ID]
     #set a flag so we can more quikcly identify changed rows
@@ -103,21 +99,21 @@ def transfer_growth_between_mediums(model_output_all, df_adjustments, ECONOMY_ID
     very_original_activity = model_output_all[['Date', 'Scenario', 'Economy', 'Transport Type', 'Medium', 'Activity']].groupby(['Date', 'Scenario', 'Economy', 'Transport Type', 'Medium']).sum().reset_index().copy()
     very_original_activity.rename(columns={'Activity': 'Very_original_activity'}, inplace=True)
     
-    df_economy_adjustments = find_cumulative_product_of_activity_adjustment_to_FROM_medium(df_economy_adjustments, model_output_all)
+    df_economy_adjustments = find_cumulative_product_of_activity_adjustment_to_FROM_medium(config, df_economy_adjustments, model_output_all)
     
     # Apply adjustments to the 'from' medium and get the updated model output along with the changes in activity
-    model_output_all, activity_change_all = apply_adjustment_to_FROM_medium(model_output_all, df_economy_adjustments, very_original_activity)
+    model_output_all, activity_change_all = apply_adjustment_to_FROM_medium(config, model_output_all, df_economy_adjustments, very_original_activity)
 
     # Now, apply the change in activity to the 'to' medium where applicable
     # Note: The apply_change_in_activity_TO_medium function will check if 'To_medium' is NA and skip those cases
-    model_output_all, activity_change_all = apply_change_in_activity_TO_medium(model_output_all, activity_change_all,  very_original_activity)
+    model_output_all, activity_change_all = apply_change_in_activity_TO_medium(config, model_output_all, activity_change_all,  very_original_activity)
     
-    model_output_all = recalculate_metrics(model_output_all)
-    activity_change_all.to_csv(root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_medium_to_medium_activity_change_for_plotting{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID), index=False)
+    model_output_all = recalculate_metrics(config, model_output_all)
+    activity_change_all.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_medium_to_medium_activity_change_for_plotting{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID), index=False)
     return model_output_all
 
 
-def update_activity_change_df(model_output, activity_change_all, very_original_activity, to_medium, from_medium, TO_or_FROM):
+def update_activity_change_df(config, model_output, activity_change_all, very_original_activity, to_medium, from_medium, TO_or_FROM):
     activity_change = model_output[['Scenario', 'Date', 'Economy', 'Transport Type', 'Medium', 'Original_activity', 'Activity', 'Change_in_activity']].groupby(['Scenario', 'Date', 'Economy', 'Transport Type', 'Medium']).sum().reset_index()
     #set very original activity to be the original activity before any adjustments for this grouping 
     activity_change= activity_change.merge(very_original_activity[['Date', 'Scenario', 'Economy', 'Transport Type', 'Medium', 'Very_original_activity']], on=['Date', 'Scenario', 'Economy', 'Transport Type', 'Medium'], how='left')
@@ -130,7 +126,7 @@ def update_activity_change_df(model_output, activity_change_all, very_original_a
     activity_change_all = pd.concat([activity_change_all, activity_change])
     return activity_change_all
 
-def apply_adjustment_to_FROM_medium(model_output_all, df_economy_adjustments, very_original_activity):
+def apply_adjustment_to_FROM_medium(config, model_output_all, df_economy_adjustments, very_original_activity):
     # Initialize an empty DataFrame to collect changes in activity
     activity_change_all = pd.DataFrame(columns=['Date', 'Scenario', 'Economy', 'Transport Type', 'Original_activity','New_activity', 'Very_original_activity', 'Change_in_activity','To_medium','From_medium', 'TO_or_FROM'])
     model_output_all.reset_index(drop=True, inplace=True)
@@ -158,10 +154,10 @@ def apply_adjustment_to_FROM_medium(model_output_all, df_economy_adjustments, ve
             model_output['Adjusted'] =True
             model_output_all.update(model_output[['Activity', 'Adjusted']])
             
-            activity_change_all = update_activity_change_df(model_output, activity_change_all, very_original_activity, to_medium, from_medium, TO_or_FROM='FROM')
+            activity_change_all = update_activity_change_df(config, model_output, activity_change_all, very_original_activity, to_medium, from_medium, TO_or_FROM='FROM')
     return model_output_all, activity_change_all
 
-def apply_change_in_activity_TO_medium(model_output_all, activity_change_all, very_original_activity):
+def apply_change_in_activity_TO_medium(config, model_output_all, activity_change_all, very_original_activity):
     activity_changes_iterator = activity_change_all[['Scenario', 'Date', 'Economy', 'Transport Type', 'To_medium','From_medium', 'Change_in_activity']].copy()
     #to be safe,reset the index, to help with the update function
     model_output_all = model_output_all.reset_index(drop=True)
@@ -196,11 +192,11 @@ def apply_change_in_activity_TO_medium(model_output_all, activity_change_all, ve
             # Update the main model_output_all DataFrame
             model_output_all.update(model_output_to_medium[['Activity', 'Adjusted']])
             #TODO TEST THAT UPDATE WORKS OK HERE. NOT SURE IF INDEX GETS MUCKED UP
-            activity_change_all = update_activity_change_df(model_output_to_medium, activity_change_all, very_original_activity, to_medium, from_medium, TO_or_FROM='TO')
+            activity_change_all = update_activity_change_df(config, model_output_to_medium, activity_change_all, very_original_activity, to_medium, from_medium, TO_or_FROM='TO')
             
     return model_output_all, activity_change_all
 
-def recalculate_metrics(model_output_all):
+def recalculate_metrics(config, model_output_all):
     # Apply different calculation methods based on the medium. But only do it to rows that were actually changed (to cut down on iterations)
     #grab the rows which have Adjusted=True
     model_output_all_old = model_output_all.copy()
@@ -241,7 +237,7 @@ def recalculate_metrics(model_output_all):
     return model_output_all
 
 
-def fill_missing_output_cols_with_nans(ECONOMY_ID, road_model_input_wide, non_road_model_input_wide):
+def fill_missing_output_cols_with_nans(config, ECONOMY_ID, road_model_input_wide, non_road_model_input_wide):
     for col in config.ROAD_MODEL_OUTPUT_COLS:
         if col not in road_model_input_wide.columns:
             road_model_input_wide[col] = np.nan
@@ -250,11 +246,11 @@ def fill_missing_output_cols_with_nans(ECONOMY_ID, road_model_input_wide, non_ro
             non_road_model_input_wide[col] = np.nan
             
     #save to file
-    road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
-    non_road_model_input_wide.to_csv(root_dir + '\\' + 'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    non_road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
 
 
 #%%
-# a = concatenate_model_output('05_PRC')#dont think its working aye
+# a = concatenate_model_output(config, '05_PRC')#dont think its working aye
 
 #%%
