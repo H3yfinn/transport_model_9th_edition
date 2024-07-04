@@ -102,7 +102,7 @@ def plot_new_sales_shares(config, new_sales_shares_all, ECONOMY_ID):
                 # #write to html in plotting_output\input_exploration\vehicle_sales_shares
                 # fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\vehicle_sales_shares\\{Vehicle_Transport}_{scenario}Transport_type_share_pre_vehicke_share_adj.html', auto_open=False)
     #save vehicels sales share data for use in plotting our asumtions. we will save it as an excel file to be read in by the plotting assumptions script
-    new_sales_shares_all_plot.to_csv(f'output_data\\assumptions_outputs\\vehicle_sales_shares_{ECONOMY_ID}_{config.FILE_DATE_ID}.csv', index=False)
+    new_sales_shares_all_plot.to_csv(config.root_dir + '\\' + f'output_data\\assumptions_outputs\\vehicle_sales_shares_{ECONOMY_ID}_{config.FILE_DATE_ID}.csv', index=False)
 
 
 def plot_new_sales_shares_normalised_by_transport_type(config, new_sales_shares_all, new_sales_shares_sum, new_sales_shares_all_new):

@@ -99,8 +99,8 @@ def save_bunkers_data(config, new_esto_data, international_bunker_outputs, ECONO
     
     #save it to csv in output
     if ECONOMY_ID=='all':
-        new_esto_data.to_csv(f'output_data\\for_other_modellers\\output_for_outlook_data_system\\international_bunker_energy_use_{config.FILE_DATE_ID}.csv', index=False)
-        international_bunker_outputs.to_csv(f'output_data\\international_energy_use\\international_bunker_outputs_{config.FILE_DATE_ID}.csv', index=False)
+        new_esto_data.to_csv(config.root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\international_bunker_energy_use_{config.FILE_DATE_ID}.csv', index=False)
+        international_bunker_outputs.to_csv(config.root_dir + '\\' + f'output_data\\international_energy_use\\international_bunker_outputs_{config.FILE_DATE_ID}.csv', index=False)
     #split newesto data into ecnomies and put them all in the output folder:
     for econ in new_esto_data.economy.unique():
         # if econ == '15_PHL':
@@ -111,9 +111,9 @@ def save_bunkers_data(config, new_esto_data, international_bunker_outputs, ECONO
         econ2 = econ
             
         new_esto_data_econ = new_esto_data.loc[new_esto_data['economy'] == econ].copy()
-        new_esto_data_econ.to_csv(f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{econ2}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv', index=False)
+        new_esto_data_econ.to_csv(config.root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{econ2}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv', index=False)
         
-        new_esto_data_econ.to_csv(f'output_data\\for_other_modellers\\{econ2}\\{econ2}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv', index=False)
+        new_esto_data_econ.to_csv(config.root_dir + '\\' + f'output_data\\for_other_modellers\\{econ2}\\{econ2}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv', index=False)
     
 def remap_to_esto_mapping(config, international_bunker_outputs, energy_use_esto_mapping):
     #first check for duplicates when we ignore Energy col
@@ -486,7 +486,7 @@ def extract_non_road_modelled_data(config):
         if ECONOMIES_WITH_MODELLING_COMPLETE_DICT[economy]:
             #since we are often only running the model for one economy each day, just do a try, except here:
             try:
-                latest_date = utility_functions.get_latest_date_for_data_file(f'output_data\\model_output_detailed\\', f'{economy}_NON_ROAD_DETAILED_model_output')
+                latest_date = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + f'output_data\\model_output_detailed\\', f'{economy}_NON_ROAD_DETAILED_model_output')
                 
                 #load data for that economy and concat it onto non_road
                 model_output_detailed_ = pd.read_csv(config.root_dir + '\\' +f'output_data\\model_output_detailed\\{economy}_NON_ROAD_DETAILED_model_output{latest_date}.csv')

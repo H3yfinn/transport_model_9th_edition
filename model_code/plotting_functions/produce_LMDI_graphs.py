@@ -652,7 +652,7 @@ def plot_lca_bars(config, lca, numeric_cols=[], SIMPLE=True):
         fig = px.bar(lca, x='drive', y='non-use lifecycle emissions', color='source', barmode='group', color_discrete_map={'bev':'green', 'ice_g':'purple'})
         #make text bigger
         fig.update_layout(font_size=35)
-        fig.write_html(f'plotting_output\\lifecycle_emissions\\lifecycle_emissions_by_source_SIMPLE.html')
+        fig.write_html(config.root_dir + '\\' + f'plotting_output\\lifecycle_emissions\\lifecycle_emissions_by_source_SIMPLE.html')
         
         
         lca = lca.drop(columns=['source'])

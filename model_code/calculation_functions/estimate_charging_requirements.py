@@ -155,7 +155,7 @@ def estimate_kw_of_required_chargers(config, ECONOMY_ID):
     #rename stocks to stocks_{stocks_magnitude_name}
     total_kwh_of_battery_capacity.rename(columns={'Stocks':'Stocks_'+parameters['stocks_magnitude_name']}, inplace=True)
     #save data to csv for use in \\output_data\\for_other_modellers/charging
-    total_kwh_of_battery_capacity.to_csv(f'output_data\\for_other_modellers\\charging\\{ECONOMY_ID}_estimated_number_of_chargers.csv', index=False)
+    total_kwh_of_battery_capacity.to_csv(config.root_dir + '\\' + f'output_data\\for_other_modellers\\charging\\{ECONOMY_ID}_estimated_number_of_chargers.csv', index=False)
     
 # return total_kwh_of_battery_capacity
 #%%

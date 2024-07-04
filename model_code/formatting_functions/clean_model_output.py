@@ -209,7 +209,7 @@ def create_output_for_cost_modelling(config, model_output_detailed, ECONOMY_ID):
     model_output_detailed = model_output_detailed.rename(columns={'New_stocks_needed':'Sales'})
     
     #save
-    model_output_detailed.to_csv(f'output_data\\for_other_modellers\\cost_estimation\\{config.FILE_DATE_ID}_{ECONOMY_ID}_cost_inputs.csv', index=False)
+    model_output_detailed.to_csv(config.root_dir + '\\' + f'output_data\\for_other_modellers\\cost_estimation\\{config.FILE_DATE_ID}_{ECONOMY_ID}_cost_inputs.csv', index=False)
     return
 
 def create_output_for_cost_modelling_from_old_data(config, model_output_detailed, ECONOMY_ID):
@@ -244,7 +244,7 @@ def create_output_for_cost_modelling_from_old_data(config, model_output_detailed
     #and sum up
     stocks_9th = stocks_9th.groupby(index_cols+['Date']).sum().reset_index()
     
-    stocks_9th.to_csv(f'output_data\\for_other_modellers\\cost_estimation\\{config.FILE_DATE_ID}_{ECONOMY_ID}_cost_inputs_BASED_ON_OLD_DATA.csv', index=False)
+    stocks_9th.to_csv(config.root_dir + '\\' + f'output_data\\for_other_modellers\\cost_estimation\\{config.FILE_DATE_ID}_{ECONOMY_ID}_cost_inputs_BASED_ON_OLD_DATA.csv', index=False)
     
     return stocks_9th
     

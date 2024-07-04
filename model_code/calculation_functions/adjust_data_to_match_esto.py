@@ -113,9 +113,9 @@ def adjust_data_to_match_esto_handler(config, BASE_YEAR, ECONOMY_ID, road_model_
     input_data_new_road = required_energy_use_by_drive.loc[required_energy_use_by_drive['Medium'] == 'road'].copy()  
     #find the latest LATEST_FILE_DATE_ID for this file f'intermediate_data\\input_data_optimisations\\optimised_data_{ECONOMY_ID}_{LATEST_FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.pkl'
     
-    date_id = utility_functions.get_latest_date_for_data_file(f'intermediate_data\\input_data_optimisations\\', f'optimised_data_{ECONOMY_ID}_', file_name_end=f'_{config.transport_data_system_FILE_DATE_ID}.pkl') 
+    date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + f'intermediate_data\\input_data_optimisations\\', f'optimised_data_{ECONOMY_ID}_', file_name_end=f'_{config.transport_data_system_FILE_DATE_ID}.pkl') 
     if USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT and date_id is not None:
-        filename = f'intermediate_data\\input_data_optimisations\\optimised_data_{ECONOMY_ID}_{date_id}_{config.transport_data_system_FILE_DATE_ID}.pkl'
+        filename = config.root_dir + '\\' + f'intermediate_data\\input_data_optimisations\\optimised_data_{ECONOMY_ID}_{date_id}_{config.transport_data_system_FILE_DATE_ID}.pkl'
         #LOAD PREVIOUS OPT RESULTS INSTEAD OF RECALCULATING. THIS HELPS TO KEEP CONSISETNCY BETWEEN THE RESULTS AS WELL AS REDUCING RUN TIME
         optimised_data = pd.read_pickle(filename)
     else:

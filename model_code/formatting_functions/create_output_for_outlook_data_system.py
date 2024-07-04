@@ -468,7 +468,7 @@ def create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_
         # new_final_df['economy'] = new_final_df['economy'].replace({'15_RP':'15_PHL', '17_SIN':'17_SGP'})
 
         #save this file to output_data\for_other_modellers
-        new_final_df.to_csv(f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{ECONOMY_ID}_{FILE_DATE_ID}_{output_file_name}.csv', index=False)
+        new_final_df.to_csv(config.root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{ECONOMY_ID}_{FILE_DATE_ID}_{output_file_name}.csv', index=False)
         
 def concatenate_outlook_data_system_outputs(config):
     #take in all outlook data system outputs for teh same FILE DATE ID and concatenate them into one file. if an economy is missing throw an error
@@ -491,7 +491,7 @@ def concatenate_outlook_data_system_outputs(config):
             else:
                 print(f'The following economies are missing from the outlook data system outputs: {missing_economies}')
         #save the final df:
-        final_df.to_csv(f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{config.FILE_DATE_ID}_{file_ending}.csv', index=False)
+        final_df.to_csv(config.root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{config.FILE_DATE_ID}_{file_ending}.csv', index=False)
    
 def convert_stocks_to_stock_shares(config, stocks_df):
     #convert stocks to stock shares

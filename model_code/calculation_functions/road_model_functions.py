@@ -636,7 +636,7 @@ def join_and_save_road_model_outputs(config, ECONOMY_ID, main_dataframe, low_ram
 
 
     #save dataframe
-    change_dataframe_aggregation.to_csv(f'intermediate_data\\road_model\\change_dataframe_aggregation_{ECONOMY_ID}.csv', index=False)
+    change_dataframe_aggregation.to_csv(config.root_dir + '\\' + f'intermediate_data\\road_model\\change_dataframe_aggregation_{ECONOMY_ID}.csv', index=False)
 
     return main_dataframe
 
