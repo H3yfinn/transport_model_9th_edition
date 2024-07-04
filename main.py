@@ -106,11 +106,11 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     # Your long-running code here
     try:
         #Things to do once a day:
-        do_these_once_a_day = False
+        do_these_once_a_day = True
         if do_these_once_a_day:
             create_all_concordances(config)
         
-        PREPARE_DATA = False
+        PREPARE_DATA = True
         if PREPARE_DATA:
             import_macro_data(config, UPDATE_INDUSTRY_VALUES=False)
             import_transport_system_data(config)
@@ -165,11 +165,12 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             progress += increment
             update_progress(progress)
             MODEL_RUN_2  = True
+            #below are required for MODEL_RUN_2. only chasnge them if you just want to run the model for the base year and not the whole period
+            PROJECT_TO_JUST_OUTLOOK_BASE_YEAR = False
+            ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR = True
             if MODEL_RUN_2:
                 print('\nDoing 2nd model run for {}\n'.format(economy))
                 #MODEL RUN 1: (RUN MODEL FOR DATA BETWEEN  AND INCLUDIONG BASE YEAR AND config.OUTLOOK_BASE_YEAR)
-                PROJECT_TO_JUST_OUTLOOK_BASE_YEAR = False
-                ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR = True
                 #perform final filtering of data (eg for one economy only)
                 supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years(config, BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
                 calculate_inputs_for_model(config, road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS)

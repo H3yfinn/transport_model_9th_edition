@@ -143,7 +143,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             aggregate_data_for_model(config, ECONOMY_ID)
             progress += increment
             update_progress(progress)
-            MODEL_RUN_1  = False
+            MODEL_RUN_1  = True
             if MODEL_RUN_1:   
                 print('\nDoing first model run for {}\n'.format(economy))   
                 #MODEL RUN 1: (RUN MODEL FOR DATA BETWEEN AND INCLUDIONG BASE YEAR AND config.OUTLOOK_BASE_YEAR. This is important because we often dont have the data up to OUTLOOK_BASE_YEAR, so we have to model it. But its also important the data in the OUTLOOK_BASE_YEAR matches the energy use from ESTO. Otherwise we'd just model it all in one go)).
@@ -167,7 +167,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             
             progress += increment
             update_progress(progress)
-            MODEL_RUN_2  = False
+            MODEL_RUN_2  = True
             #below are required for MODEL_RUN_2. only chasnge them if you just want to run the model for the base year and not the whole period
             PROJECT_TO_JUST_OUTLOOK_BASE_YEAR = False
             ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR = True

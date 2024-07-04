@@ -3953,7 +3953,7 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
                 # CREATE_INDIVIDUAL_HTML_FILES=True
                 if CREATE_INDIVIDUAL_HTML_FILES:   
                     breakpoint()
-                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger_{scenario}.html', graph_type='line', plot_data=plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Sales Share', color='Transport Type', title=f'Light private vehicle shares - {economy} - {scenario}', font_size=30, line_width=10, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Sales Share', color='Transport Type', title=f'Light private vehicle shares - {economy} - {scenario}', font_size=30, line_width=10, colors_dict=colors_dict)
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger'] = [fig, title, PLOTTED]
                 #############
@@ -3964,7 +3964,7 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
                 #prodcue individual graph
                 if CREATE_INDIVIDUAL_HTML_FILES:  
                     
-                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight_{scenario}.html', graph_type='line', plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Sales Share', color='Transport Type', title='Freight vehicle shares', font_size=30, line_width=10, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Sales Share', color='Transport Type', title='Freight vehicle shares', font_size=30, line_width=10, colors_dict=colors_dict)
                 
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_freight'] = [fig, title, PLOTTED]
@@ -3978,7 +3978,7 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
                 if CREATE_INDIVIDUAL_HTML_FILES:    
                     #make line thicker
                     
-                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_all_{scenario}.html', graph_type='line', plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Sales Share', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_all_{scenario}.html', graph_type='line',economy=economy, plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Sales Share', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
                     
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_all'] = [fig, title, PLOTTED]
@@ -4031,7 +4031,7 @@ def plot_decrease_in_activity_from_activity_efficiency(config, ECONOMY_IDs, mode
             fig_dict[economy][scenario]['decrease_in_activity_from_activity_efficiency'] = [fig, title, True]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'decrease_in_activity_from_activity_efficiency_{scenario}_{economy}.html', graph_type='line', plot_data=activity_efficiency_improvement_scenario_economy, x='Date', y='Activity', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=f'decrease_in_activity_from_activity_efficiency_{scenario}_{economy}.html', graph_type='line', economy=economy,plot_data=activity_efficiency_improvement_scenario_economy, x='Date', y='Activity', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
     
     return fig_dict, color_preparation_list
 
@@ -4245,7 +4245,7 @@ def plot_lifecycle_emissions_of_cars(config, fig_dict, ECONOMY_IDs, model_output
                 # #make lines slightly thicker
                 # fig.update_traces(line=dict(width=10))
                 # fig.write_html(config.root_dir + '\\' +f'plotting_output\\lifecycle_emissions\\lifecycle_emissions_of_cars_{scenario}_{economy}.html')
-                write_graph_to_html(config, filename=f'lifecycle_emissions_of_cars_{scenario}_{economy}.html', graph_type='line', plot_data=lca_economy, x='Date', y='Emissions', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=f'lifecycle_emissions_of_cars_{scenario}_{economy}.html', graph_type='line', plot_data=lca_economy,economy=economy, x='Date', y='Emissions', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
             #add fig to dictionary for scenario and economy:
             fig_dict[economy][scenario]['lifecycle_emissions_of_cars'] = [fig, title, True]
             
