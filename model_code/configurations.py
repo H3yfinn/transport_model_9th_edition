@@ -3,6 +3,7 @@ import re
 import datetime
 import pandas as pd
 import plotly.express as px
+from . import utility_functions
 
 class Config:
     def __init__(self, root_dir):
@@ -275,7 +276,7 @@ class Config:
         if self.USE_LATEST_OUTPUT_DATE_ID:
             data_folder_path = '\\output_data\\model_output\\'
             file_name = 'model_output_years_'
-            FILE_DATE_ID = self.get_latest_date_for_data_file(root_dir, data_folder_path, file_name)
+            FILE_DATE_ID = utility_functions.get_latest_date_for_data_file(root_dir, data_folder_path, file_name)
         else:
             FILE_DATE_ID = datetime.datetime.now().strftime("%Y%m%d")
         return FILE_DATE_ID
@@ -306,45 +307,46 @@ class Config:
             else:
                 raise AttributeError(f"{key} is not a valid attribute of Config")
     
-    
-def get_latest_date_for_data_file(self, data_folder_path, file_name_start, file_name_end=None, EXCLUDE_DATE_STR_START=False):
-    """Note that if file_name_end is not specified then it will just take the first file that matches the file_name_start, eben if that matches the end if the file name as well. This is because the file_name_end is not always needed, and this cahnge was made post hoc, so we want to keep the old functionality.
+        
+    # def get_latest_date_for_data_file(self, data_folder_path, file_name_start, file_name_end=None, EXCLUDE_DATE_STR_START=False):
+    #     #note this is a copy of same function in utility_functions.py
+    #     """Note that if file_name_end is not specified then it will just take the first file that matches the file_name_start, eben if that matches the end if the file name as well. This is because the file_name_end is not always needed, and this cahnge was made post hoc, so we want to keep the old functionality.
 
-    Args:
-        data_folder_path (_type_): _description_
-        file_name_start (_type_): _description_
-        file_name_end (_type_, optional): _description_. Defaults to None.
-        EXCLUDE_DATE_STR_START if true, if there is DATE at th start of a file_date_id dont treat it as a date. Defaults to False.
+    #     Args:
+    #         data_folder_path (_type_): _description_
+    #         file_name_start (_type_): _description_
+    #         file_name_end (_type_, optional): _description_. Defaults to None.
+    #         EXCLUDE_DATE_STR_START if true, if there is DATE at th start of a file_date_id dont treat it as a date. Defaults to False.
 
-    Returns:
-        _type_: _description_
-    """
-    regex_pattern_date = r'\d{8}'
-    if EXCLUDE_DATE_STR_START:
-        regex_pattern_date = r'(?<!DATE)\d{8}'
-    
-    #get list of all files in the data folder
-    all_files = os.listdir(data_folder_path)
-    #filter for only the files with the correct file extension
-    if file_name_end is None:
-        all_files = [file for file in all_files if file_name_start in file]
-    else:
-        all_files = [file for file in all_files if file_name_start in file and file_name_end in file]
-    #drop any files with no date in the name
-    all_files = [file for file in all_files if re.search(regex_pattern_date, file)]
-    #get the date from the file name
-    all_files = [re.search(regex_pattern_date, file).group() for file in all_files]
-    #convert the dates to datetime objects
-    all_files = [datetime.datetime.strptime(date, '%Y%m%d') for date in all_files]
-    #get the latest date
-    if len(all_files) == 0:
-        print('No files found for ' + file_name_start + ' ' + file_name_end)
-        return None
-    # try:
-    latest_date = max(all_files)
-    # except ValueError:
-    #     print('No files found for ' + file_name_start + ' ' + file_name_end)
-    #     return None
-    #convert the latest date to a string
-    latest_date = latest_date.strftime('%Y%m%d')
-    return latest_date
+    #     Returns:
+    #         _type_: _description_
+    #     """
+    #     regex_pattern_date = r'\d{8}'
+    #     if EXCLUDE_DATE_STR_START:
+    #         regex_pattern_date = r'(?<!DATE)\d{8}'
+        
+    #     #get list of all files in the data folder
+    #     all_files = os.listdir(data_folder_path)
+    #     #filter for only the files with the correct file extension
+    #     if file_name_end is None:
+    #         all_files = [file for file in all_files if file_name_start in file]
+    #     else:
+    #         all_files = [file for file in all_files if file_name_start in file and file_name_end in file]
+    #     #drop any files with no date in the name
+    #     all_files = [file for file in all_files if re.search(regex_pattern_date, file)]
+    #     #get the date from the file name
+    #     all_files = [re.search(regex_pattern_date, file).group() for file in all_files]
+    #     #convert the dates to datetime objects
+    #     all_files = [datetime.datetime.strptime(date, '%Y%m%d') for date in all_files]
+    #     #get the latest date
+    #     if len(all_files) == 0:
+    #         print('No files found for ' + file_name_start + ' ' + file_name_end)
+    #         return None
+    #     # try:
+    #     latest_date = max(all_files)
+    #     # except ValueError:
+    #     #     print('No files found for ' + file_name_start + ' ' + file_name_end)
+    #     #     return None
+    #     #convert the latest date to a string
+    #     latest_date = latest_date.strftime('%Y%m%d')
+    #     return latest_date
