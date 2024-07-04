@@ -173,7 +173,7 @@ def create_supply_side_fuel_mixing_input(config, ECONOMY_ID, X_ORDER='linear', A
     archiving_folder = archiving_scripts.create_archiving_folder_for_FILE_DATE_ID(config)
     
     #save the variables we used to calculate the data by savinbg the 'input_data\\vehicle_sales_share_inputs.xlsx' file
-    shutil.copy('input_data\\fuel_mixing_assumptions.xlsx', archiving_folder + '\\fuel_mixing_assumptions.xlsx')
+    shutil.copy(config.root_dir + '\\' +  'input_data\\fuel_mixing_assumptions.xlsx', archiving_folder + '\\fuel_mixing_assumptions.xlsx')
 
     #save as user input csv
     supply_side_fuel_mixing.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
