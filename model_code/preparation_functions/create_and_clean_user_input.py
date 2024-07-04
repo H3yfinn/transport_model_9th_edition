@@ -219,7 +219,7 @@ def create_and_clean_user_input(config, ECONOMY_ID, ADVANCE_BASE_YEAR_TO_OUTLOOK
         user_input_new = pd.concat([user_input_new, economy_df])
         
     #save the new_user_inputs
-    user_input_new.to_csv(f'intermediate_data\\model_inputs\\{ECONOMY_ID}_user_inputs_and_growth_rates.csv', index=False)
+    user_input_new.to_csv(config.root_dir + '\\' +f'intermediate_data\\model_inputs\\{ECONOMY_ID}_user_inputs_and_growth_rates.csv', index=False)
 
 
 def extract_economy_data_from_user_input_spreadsheets(config, ECONOMY_ID):
