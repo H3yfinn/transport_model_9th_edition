@@ -72,6 +72,8 @@ def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_ca
         script_dir = os.path.dirname(os.path.abspath(__file__))
     if root_dir_param is not None:
         root_dir = root_dir_param
+        if "\\\\?\\" not in root_dir:
+            root_dir =  "\\\\?\\" + root_dir
     else:
         root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 
@@ -106,11 +108,11 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     # Your long-running code here
     try:
         #Things to do once a day:
-        do_these_once_a_day = True
+        do_these_once_a_day = False
         if do_these_once_a_day:
             create_all_concordances(config)
         
-        PREPARE_DATA = True
+        PREPARE_DATA = False
         if PREPARE_DATA:
             import_macro_data(config, UPDATE_INDUSTRY_VALUES=False)
             import_transport_system_data(config)
@@ -123,6 +125,10 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         update_progress(progress)
         FOUND = False
         for economy in ECONOMY_BASE_YEARS_DICT.keys():
+            
+            dashboard_creation_handler(config = config, ECONOMY_ID = economy)
+            # compare_esto_energy_to_data.compare_esto_energy_to_data(config)#UNDER DEVELOPMENT 
+            continue
             if economy_to_run == 'all':
                 pass
             elif economy in economy_to_run:
@@ -151,6 +157,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                 #perform final filtering of data (eg for one economy only)
                 supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years(config, BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
                 calculate_inputs_for_model(config, road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False)
+                
                 if BASE_YEAR == config.OUTLOOK_BASE_YEAR:
                     #since we wont run the model, just fill the input with requried output cols and put nans in them
                     fill_missing_output_cols_with_nans(config, ECONOMY_ID, road_model_input_wide, non_road_model_input_wide)
@@ -268,6 +275,21 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
 #%%
 
 if __name__ == "__main__":
-    main()  # python code/main.py > output.txt 2>&1
+    # sys.argv[0] is the script name, so arguments start from sys.argv[1]
+    #if theres more than 1 argument and we're runinng this from the command line (need to check that the second arg doesnt wend with .json, that is in there if we are running this through jupyter notebook i think)
+    if (len(sys.argv)) > 1 and (sys.argv[1][-5:] != '.json'):
+        for arg in sys.argv[1:]:
+            root_dir_param = sys.argv[2]
+            economy_to_run = sys.argv[1]
+            print('Running model for economy {}'.format(economy_to_run), 'in root directory {}'.format(root_dir_param))
+            main(economy_to_run=economy_to_run, root_dir_param=root_dir_param, script_dir_param=root_dir_param) #e.g. python transport_model_9th_edition/main.py all C:\Users\finbar.maunsell\github\transport_model_9th_edition
+                
+            # os.chdir('C:\\Users\\finbar.maunsell\\github')
+            # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
+    else:
+        # os.chdir('C:\\Users\\finbar.maunsell\\github')
+        # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
+        main() # root_dir_param=root_dir_param)
+    # root_dir_param = 
 #%%
 # %%

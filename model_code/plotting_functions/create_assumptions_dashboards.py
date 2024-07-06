@@ -1123,7 +1123,7 @@ def remove_old_dashboards(config, ECONOMIES_TO_SKIP, dashboard_name_id):
                     os.remove(config.root_dir + '\\' + f'plotting_output\\dashboards\\{economy}\\{file}')
                     print(f'removed {file}')
                     
-def dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID=None, ARCHIVE_PREVIOUS_DASHBOARDS=False, PREVIOUS_PROJECTION_FILE_DATE_ID=None, WRITE_INDIVIDUAL_HTMLS=True):
+def dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True, ECONOMY_ID=None, ARCHIVE_PREVIOUS_DASHBOARDS=False, PREVIOUS_PROJECTION_FILE_DATE_ID=None, WRITE_INDIVIDUAL_HTMLS=True):
     """
     Handles the creation of assumptions dashboards for the specified economies.
 
@@ -1222,12 +1222,7 @@ def dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, E
         plots = ['compare_energy_vs_previous_all_ESTO_simplified' if x == 'compare_energy1_all_8th' else x for x in plots]
         # plots = ['emissions_by_fuel_type_all_gen' if x == 'vehicle_type_stocks' else x for x in plots]
     #, 'charging']#activity_growth# 'charging',
-    breakpoint()
-    try:
-        create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'results',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
-    except Exception as e:
-        print(f'Error in creating results dashboard: {e}')
-        breakpoint()
+    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'results',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
     #create a presentation dashboard:
     # plots = ['energy_use_by_fuel_type_all','passenger_km_by_drive', 'freight_tonne_km_by_drive', 'share_of_transport_type_passenger']#activity_growth
     # create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'presentation',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
@@ -1240,7 +1235,7 @@ def dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, E
         # plots.remove('vehicle_type_stocks')
         # plots.append(config.root_dir + '\\' + f'compare_energy_vs_previous_all_ESTO')
         plots = ['compare_energy_vs_previous_all_ESTO_onlybunkers' if x == 'compare_energy1_all_onlybunkers' else x for x in plots]
-    breakpoint()
+    
     create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'assumptions',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID,  WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
     #CREATE ASSUMPTIONS 2, WHICH IS THE EXTRA DATA THAT PROBABLY NOONE WILL WANT TO SEE, BUT AVAILABLE IF NEEDED:
     plots = ['macro_lines_population', 'macro_lines_gdp', 'energy_efficiency_timeseries_all', 'non_road_share_of_transport_type','share_of_vehicle_type_activity_all', 'energy_intensity_timeseries_non_road', 'mileage_timeseries_all',  'demand_side_fuel_mixing', 'share_of_emissions_by_vehicle_type', 'new_vehicle_efficiency_timeseries_all', 'charging','avg_age_road','decrease_in_activity_from_activity_efficiency', 'shifted_activity_from_medium_to_medium','energy_intensity_strip']#activity_growth

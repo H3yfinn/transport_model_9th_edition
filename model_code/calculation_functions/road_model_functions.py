@@ -593,7 +593,7 @@ def prepare_road_model_inputs(config, road_model_input, ECONOMY_ID, low_ram_comp
         previous_10_year_block = road_model_input.Date.min()
         low_ram_computer_files_list = []
         #remove files from main_dataframe_10_year_blocks for previous runs
-        for file in glob.glob(os.path.join('intermediate_data\\main_dataframe_10_year_blocks\\', '*.csv')):
+        for file in glob.glob(os.path.join(config.root_dir + '\\' + 'intermediate_data\\main_dataframe_10_year_blocks\\', '*.csv')):
             os.remove(file)
     else:
         previous_10_year_block = None
@@ -605,10 +605,10 @@ def prepare_road_model_inputs(config, road_model_input, ECONOMY_ID, low_ram_comp
 
 def join_and_save_road_model_outputs(config, ECONOMY_ID, main_dataframe, low_ram_computer, low_ram_computer_files_list, change_dataframe_aggregation, first_model_run_bool):
     if first_model_run_bool:
-        new_output_file = 'intermediate_data\\road_model\\first_run_{}_{}'.format(ECONOMY_ID, config.model_output_file_name)
+        new_output_file = config.root_dir + '\\' + 'intermediate_data\\road_model\\first_run_{}_{}'.format(ECONOMY_ID, config.model_output_file_name)
     else:
         #this will be the name of the output file
-        new_output_file = 'intermediate_data\\road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name)
+        new_output_file = config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name)
 
     #now, we will save the main dataframe to a csv file. if the computer is low ram, we will create the file from the already saved 10 year block interval files
     if low_ram_computer == True:

@@ -85,7 +85,7 @@ def load_non_road_model_data(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_
     
 
 def run_non_road_model(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD = True, USE_COVID_RELATED_MILEAGE_CHANGE = True):
-    output_file_name = 'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name)
+    output_file_name = config.root_dir + '\\' +'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name)
     
     non_road_model_input, turnover_rate_steepness, turnover_rate_midpoint_reference, turnover_rate_midpoint_target, turnover_rate_max_value = load_non_road_model_data(config, ECONOMY_ID,USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD)
     
