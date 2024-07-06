@@ -99,7 +99,7 @@ def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_ca
 
 def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
     increment, progress, update_progress, config = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
-    
+
     # Prevent the system from going to sleep
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
     # To restore the original state, use:
@@ -108,11 +108,11 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     # Your long-running code here
     try:
         #Things to do once a day:
-        do_these_once_a_day = False
+        do_these_once_a_day = True
         if do_these_once_a_day:
             create_all_concordances(config)
         
-        PREPARE_DATA = False
+        PREPARE_DATA = True
         if PREPARE_DATA:
             import_macro_data(config, UPDATE_INDUSTRY_VALUES=False)
             import_transport_system_data(config)
@@ -125,10 +125,6 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         update_progress(progress)
         FOUND = False
         for economy in ECONOMY_BASE_YEARS_DICT.keys():
-            
-            dashboard_creation_handler(config = config, ECONOMY_ID = economy)
-            # compare_esto_energy_to_data.compare_esto_energy_to_data(config)#UNDER DEVELOPMENT 
-            continue
             if economy_to_run == 'all':
                 pass
             elif economy in economy_to_run:
@@ -222,19 +218,6 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                 progress += increment
                 update_progress(progress)
                 copy_required_output_files_to_one_folder(config, ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\\for_other_modellers')
-                    
-                    
-                    
-            # except Exception as e:#TRY EXCEPT TO SKIP ECONOMIES THAT CAUSE ERRORS
-                    
-            #     #add the economy to the txt of errors
-            #     print('Error for economy {} so skipping it'.format(economy))
-            #     #open txt file and add the error and economy and timestamp to it
-            #     with open(config.root_dir + '\\' + 'errors.txt', 'a') as f:
-            #         f.write('Error for economy {} so skipping it. Error is {}. Time is {}\\n'.format(economy, e, datetime.datetime.now()))
-                    
-                    
-                
                 
         # international_bunkers.international_bunker_share_calculation_handler(config)
         print('\nFinished running model for all economies, now doing final formatting\n')
@@ -265,11 +248,13 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         if UNARCHIVE_RESULTS:
             folder_name =None# 'output_data\\archived_runs\\20_USA_20230902_2331'
             # archiving_scripts.revert_to_previous_version_of_files(config, '03_CDA', 'output_dataarchived_runs03_CDA_20230902_1626', CURRENT_FILE_DATE_ID='20230902')
+        COMPLETED = True
     except Exception as e:
         print('Error in main()')
         print(e)
+        COMPLETED=False
     finally:
-        return config.FILE_DATE_ID
+        return config.FILE_DATE_ID, COMPLETED
     #     # Restore the original state
     #     ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
 #%%

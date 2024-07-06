@@ -3626,7 +3626,7 @@ def plot_age_distributions(config, ECONOMY_IDs, model_output_detailed_detailed_n
     return fig_dict, color_preparation_list
 
     
-def plot_intensity_timeseries_INTENSITY_ANALYSIS(config, ECONOMY_IDs, model_output_detailed, fig_dict, DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, transport_type):
+def plot_intensity_timeseries_INTENSITY_ANALYSIS(config, ECONOMY_IDs, model_output_detailed, fig_dict, DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, transport_type, WRITE_HTML=True):
     PLOTTED=True
 
     #to help with checking that the data is realistic, plot growth in energy efficiency here:
@@ -3681,6 +3681,10 @@ def plot_intensity_timeseries_INTENSITY_ANALYSIS(config, ECONOMY_IDs, model_outp
 
             #add fig to dictionary for scenario and economy:
             fig_dict[economy][scenario][f'INTENSITY_ANALYSIS_timeseries_{transport_type}'] = [fig, title, PLOTTED]
+            
+            if WRITE_HTML:
+                filename = f'INTENSITY_ANALYSIS_timeseries_{transport_type}_{scenario}_{economy}.html'
+                write_graph_to_html(config, filename=filename, graph_type='line', plot_data=energy_eff_by_scen_by_economy, economy=economy, x='Date', y='Intensity', color='Drive', title=title, y_axes_title='Intensity (Pj per Billion-km)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(energy_eff_by_scen_by_economy['Drive'].unique().tolist())
     
@@ -3868,7 +3872,7 @@ def line_energy_use_by_transport_type(config, ECONOMY_IDs, model_output_detailed
     
 # %%
 
-def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, CREATE_INDIVIDUAL_HTML_FILES=True, LPV_ONLY=True, SIMPLIFY_DRIVES=True):
+def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=True, LPV_ONLY=True, SIMPLIFY_DRIVES=True):
     PLOTTED=True
     #i think that maybe stocks % can be higher than sales % here because of turnvoer rates. hard to get it correct right now
     new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df.copy()
@@ -3950,10 +3954,10 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
                 title = f'Shares for passenger (%)'
                 fig = px.line(plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Share', color='Drive', title=title, line_dash=' ', color_discrete_map=colors_dict)                
                 #prodcue individual graph
-                # CREATE_INDIVIDUAL_HTML_FILES=True
-                if CREATE_INDIVIDUAL_HTML_FILES:   
+                # WRITE_HTML=True
+                if WRITE_HTML:   
                     breakpoint()
-                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Sales Share', color='Transport Type', title=f'Light private vehicle shares - {economy} - {scenario}', font_size=30, line_width=10, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger'] = [fig, title, PLOTTED]
                 #############
@@ -3962,9 +3966,9 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
 
                 fig = px.line(plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, line_dash=' ', color_discrete_map=colors_dict)             
                 #prodcue individual graph
-                if CREATE_INDIVIDUAL_HTML_FILES:  
+                if WRITE_HTML:  
                     
-                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Sales Share', color='Transport Type', title='Freight vehicle shares', font_size=30, line_width=10, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
                 
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_freight'] = [fig, title, PLOTTED]
@@ -3975,10 +3979,10 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
                 fig = px.line(plot_data, x='Date', y='Share', color='Drive', title=title, line_dash=' ', color_discrete_map=colors_dict)
                             
                 #prodcue individual graph
-                if CREATE_INDIVIDUAL_HTML_FILES:    
+                if WRITE_HTML:    
                     #make line thicker
                     
-                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_all_{scenario}.html', graph_type='line',economy=economy, plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Sales Share', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_all_{scenario}.html', graph_type='line',economy=economy, plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
                     
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_all'] = [fig, title, PLOTTED]
@@ -4158,10 +4162,13 @@ def plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs, activity_ch
             fig = px.line(activity_econ_scen, x='Date', y='Activity', color='Transport Type', line_dash='Activity_type', title=title, color_discrete_map=colors_dict, hover_data=['medium_to_medium', 'TO_or_FROM'])
             #add fig to dictionary for scenario and economy:
             fig_dict[economy][scenario]['shifted_activity_from_medium_to_medium'] = [fig, title, PLOTTED]
+            if WRITE_HTML:
+                write_graph_to_html(config, filename=f'shifted_activity_from_medium_to_medium_{scenario}_{economy}.html', graph_type='line', economy=economy,plot_data=activity_econ_scen, x='Date', y='Activity', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                                
     return fig_dict, color_preparation_list
 
 
-def plot_lifecycle_emissions_of_cars(config, fig_dict, ECONOMY_IDs, model_output_detailed_df, colors_dict, color_preparation_list, model_output_with_fuels_df, ACCUMULATED=False, ONLY_CARS=True, CREATE_SEPARATE_HTMLS=False, AREA=False):
+def plot_lifecycle_emissions_of_cars(config, fig_dict, ECONOMY_IDs, model_output_detailed_df, colors_dict, color_preparation_list, model_output_with_fuels_df, ACCUMULATED=False, ONLY_CARS=True, WRITE_HTML=False, AREA=False):
     #would liek to plot a area cahrt which shows the emissions from use of cars, with one color used for evs and then another for all others. Then different patterns will represent the emissions from fuel/electricity use, and then the other will represent the emissions from manufacturing and disposal. This will help to put into perspective how much the emissions from manufacturing and disposal are compared to the emissions from use, and whether they really matter in the grand scheme of things.
     #also offer to produce the accumulated version of this graph
     model_output_detailed = model_output_detailed_df.copy()
@@ -4240,7 +4247,7 @@ def plot_lifecycle_emissions_of_cars(config, fig_dict, ECONOMY_IDs, model_output
                 fig = px.line(lca_economy, x='Date', y='Emissions', color='Drive', title=title, color_discrete_map=colors_dict, line_dash='Emissions_source')
             # breakpoint()#save our own vertsion of the fig
             #make text a bit bigger 
-            if CREATE_SEPARATE_HTMLS:
+            if WRITE_HTML:
                 # fig.update_layout(font_size=30)#, title_x=0.5, title_y=0.9)
                 # #make lines slightly thicker
                 # fig.update_traces(line=dict(width=10))
@@ -4462,7 +4469,7 @@ def calculate_lifecycle_emissions_from_car_sales(config, sales, lca):
     lca = lca[['Economy', 'Date', 'Drive','Scenario', 'Lifecycle Emissions']]
     return lca
 
-def share_of_emissions_by_vehicle_type(config, fig_dict, ECONOMY_IDs, emissions_factors, model_output_with_fuels_df, colors_dict, color_preparation_list, USE_AVG_GENERATION_EMISSIONS_FACTOR=False):
+def share_of_emissions_by_vehicle_type(config, fig_dict, ECONOMY_IDs, emissions_factors, model_output_with_fuels_df, colors_dict, color_preparation_list, USE_AVG_GENERATION_EMISSIONS_FACTOR=False, WRITE_HTML=True):
     model_output_with_fuels = model_output_with_fuels_df.copy()
     # drop non road:
     model_output_with_fuels = model_output_with_fuels.loc[model_output_with_fuels['Medium']=='road'].copy()
@@ -4527,6 +4534,9 @@ def share_of_emissions_by_vehicle_type(config, fig_dict, ECONOMY_IDs, emissions_
             fig = px.line(emissions_by_vehicle_type_economy, x='Date', y='Share of emissions', color='Vehicle Type', title=title, color_discrete_map=colors_dict)
             #add fig to dictionary for scenario and economy:
             fig_dict[economy][scenario]['share_of_emissions_by_vehicle_type'] = [fig, title, True]
+            if WRITE_HTML:
+                write_graph_to_html(config, filename=f'share_of_emissions_by_vehicle_type_{scenario}_{economy}.html',graph_type='line', economy=economy,plot_data=emissions_by_vehicle_type_economy, x='Date', y='Share of emissions', color='Vehicle Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                                
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(emissions_by_vehicle_type['Vehicle Type'].unique().tolist())
     return fig_dict, color_preparation_list

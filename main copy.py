@@ -72,6 +72,8 @@ def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_ca
         script_dir = os.path.dirname(os.path.abspath(__file__))
     if root_dir_param is not None:
         root_dir = root_dir_param
+        if "\\\\?\\" not in root_dir:
+            root_dir =  "\\\\?\\" + root_dir
     else:
         root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 
@@ -97,6 +99,7 @@ def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_ca
 
 def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
     increment, progress, update_progress, config = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
+
     # Prevent the system from going to sleep
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
     # To restore the original state, use:
@@ -125,10 +128,6 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             if economy_to_run == 'all':
                 pass
             elif economy in economy_to_run:
-                # if economy == '04_CHL':
-                #     FOUND = True
-                # if not FOUND:
-                #     continue
                 pass
             elif economy == economy_to_run:
                 pass
@@ -154,6 +153,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                 #perform final filtering of data (eg for one economy only)
                 supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years(config, BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
                 calculate_inputs_for_model(config, road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False)
+                
                 if BASE_YEAR == config.OUTLOOK_BASE_YEAR:
                     #since we wont run the model, just fill the input with requried output cols and put nans in them
                     fill_missing_output_cols_with_nans(config, ECONOMY_ID, road_model_input_wide, non_road_model_input_wide)
@@ -191,45 +191,34 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                 #now concatenate all the model outputs together
                 create_output_for_outlook_data_system(config, ECONOMY_ID)
 
-            # exec(open(f"{config.root_dir}\\code\\6_create_osemosys_output.py").read())
-            # import create_osemosys_output
-            # create_osemosys_output.create_osemosys_output()
-            # ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True
-            ANALYSE_OUTPUT = True
-            ARCHIVE_PREVIOUS_DASHBOARDS = False
-            if ANALYSE_OUTPUT: 
-                estimate_kw_of_required_chargers(config, ECONOMY_ID)
-                plot_required_chargers(config, ECONOMY_ID)
-                calculate_and_plot_oil_displacement(config, ECONOMY_ID)   
-                # produce_LMDI_graphs.produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=False, END_DATE=2035)
-                # produce_LMDI_graphs.produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=False, END_DATE=2050)
-                ###################do bunkers calc for this economy###################
-                international_bunker_share_calculation_handler(config, ECONOMY_ID=ECONOMY_ID)
-                ###################do bunkers calc for this economy###################
-                try:
-                    produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
-                except:
-                    print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
-                    breakpoint()
-                    pass
-                dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
-                # compare_esto_energy_to_data.compare_esto_energy_to_data(config)#UNDER DEVELOPMENT   
+                # exec(open(f"{config.root_dir}\\code\\6_create_osemosys_output.py").read())
+                # import create_osemosys_output
+                # create_osemosys_output.create_osemosys_output()
+                # ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True
+                ANALYSE_OUTPUT = True
+                ARCHIVE_PREVIOUS_DASHBOARDS = False
+                if ANALYSE_OUTPUT: 
+                    estimate_kw_of_required_chargers(config, ECONOMY_ID)
+                    plot_required_chargers(config, ECONOMY_ID)
+                    calculate_and_plot_oil_displacement(config, ECONOMY_ID)   
+                    # produce_LMDI_graphs.produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=False, END_DATE=2035)
+                    # produce_LMDI_graphs.produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=False, END_DATE=2050)
+                    ###################do bunkers calc for this economy###################
+                    international_bunker_share_calculation_handler(config, ECONOMY_ID=ECONOMY_ID)
+                    ###################do bunkers calc for this economy###################
+                    try:
+                        produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
+                    except:
+                        print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
+                        breakpoint()
+                        pass
+                    dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
+                    # compare_esto_energy_to_data.compare_esto_energy_to_data(config)#UNDER DEVELOPMENT   
                 
                 progress += increment
                 update_progress(progress)
-                copy_required_output_files_to_one_folder(config, ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\for_other_modellers')
-                    
-                    
-                    
-            # except Exception as e:#TRY EXCEPT TO SKIP ECONOMIES THAT CAUSE ERRORS
-                    
-            #     #add the economy to the txt of errors
-            #     print('Error for economy {} so skipping it'.format(economy))
-            #     #open txt file and add the error and economy and timestamp to it
-            #     with open(config.root_dir + '\\' + 'errors.txt', 'a') as f:
-            #         f.write('Error for economy {} so skipping it. Error is {}. Time is {}\n'.format(economy, e, datetime.datetime.now()))
-                    
-
+                copy_required_output_files_to_one_folder(config, ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\\for_other_modellers')
+                
         # international_bunkers.international_bunker_share_calculation_handler(config)
         print('\nFinished running model for all economies, now doing final formatting\n')
         concatenate_outlook_data_system_outputs(config)
@@ -259,42 +248,33 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         if UNARCHIVE_RESULTS:
             folder_name =None# 'output_data\\archived_runs\\20_USA_20230902_2331'
             # archiving_scripts.revert_to_previous_version_of_files(config, '03_CDA', 'output_dataarchived_runs03_CDA_20230902_1626', CURRENT_FILE_DATE_ID='20230902')
+        COMPLETED = True
     except Exception as e:
         print('Error in main()')
         print(e)
+        COMPLETED=False
     finally:
-        return config.FILE_DATE_ID
+        return config.FILE_DATE_ID, COMPLETED
     #     # Restore the original state
     #     ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
-    
 #%%
+
 if __name__ == "__main__":
-    main(economy_to_run='02_BD')  # python code/main.py > output.txt 2>&1
+    # sys.argv[0] is the script name, so arguments start from sys.argv[1]
+    #if theres more than 1 argument and we're runinng this from the command line (need to check that the second arg doesnt wend with .json, that is in there if we are running this through jupyter notebook i think)
+    if (len(sys.argv)) > 1 and (sys.argv[1][-5:] != '.json'):
+        for arg in sys.argv[1:]:
+            root_dir_param = sys.argv[2]
+            economy_to_run = sys.argv[1]
+            print('Running model for economy {}'.format(economy_to_run), 'in root directory {}'.format(root_dir_param))
+            main(economy_to_run=economy_to_run, root_dir_param=root_dir_param, script_dir_param=root_dir_param) #e.g. python transport_model_9th_edition/main.py all C:\Users\finbar.maunsell\github\transport_model_9th_edition
+                
+            # os.chdir('C:\\Users\\finbar.maunsell\\github')
+            # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
+    else:
+        # os.chdir('C:\\Users\\finbar.maunsell\\github')
+        # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
+        main() # root_dir_param=root_dir_param)
+    # root_dir_param = 
 #%%
-
-# dashboard_creation_handler(config, '01_AUS')# dashboard_creation_handler(config, True,'20_USA')
-#%%
-# dashboard_creation_handler(config, True,'15_PHL', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
-# dashboard_creation_handler(config, True,'03_CDA')#, 
-# dashboard_creation_handler(config, True,'07_INA')#, PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
-# dashboard_creation_handler(config, True,'09_ROK', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
-# dashboard_creation_handler(config, True,'18_CT', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
-# remove_old_dashboards(config, ECONOMIES_TO_SKIP=[], dashboard_name_id=' - high evs')
-
-# setup_and_run_multi_economy_plots(config)
-#'03_CDA','09_ROK', '18_CT', '05_PRC', '17_SGP', '21_VN', '15_PHL', '01_AUS', '10_MAS', '07_INA', '20_USA', '19_THA', '08_JPN'
-# do for these once ive run it all
-# dashboard_creation_handler(config, True,'03_CDA', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
-# dashboard_creation_handler(config, True,'09_ROK', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
-# dashboard_creation_handler(config, True,'18_CT', PREVIOUS_PROJECTION_FILE_DATE_ID='20240117')
-# dashboard_creation_handler(config, True,'05_PRC', PREVIOUS_PROJECTION_FILE_DATE_ID='20240315')
-# dashboard_creation_handler(config, True,'17_SGP', PREVIOUS_PROJECTION_FILE_DATE_ID='20240108')
-# dashboard_creation_handler(config, True,'21_VN', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
-# dashboard_creation_handler(config, True,'15_PHL', PREVIOUS_PROJECTION_FILE_DATE_ID='20240529')
-# # dashboard_creation_handler(config, True,'01_AUS', PREVIOUS_PROJECTION_FILE_DATE_ID='20240529')
-# dashboard_creation_handler(config, True,'10_MAS', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
-# dashboard_creation_handler(config, True,'07_INA', PREVIOUS_PROJECTION_FILE_DATE_ID='20240327')
-# # dashboard_creation_handler(config, True,'20_USA', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
-# dashboard_creation_handler(config, True,'19_THA', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
-# dashboard_creation_handler(config, True,'08_JPN', PREVIOUS_PROJECTION_FILE_DATE_ID='20231101')
-#%%
+# %%
