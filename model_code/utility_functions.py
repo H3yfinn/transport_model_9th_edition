@@ -71,7 +71,8 @@ def copy_required_output_files_to_one_folder(config, ECONOMY_ID='all', output_fo
         files_in_output_folder.append(re.sub(config.FILE_DATE_ID, '*', file))
     #drop duplicates
     # files_in_output_folder = list(set(files_in_output_folder))
-    breakpoint()   #check if 20240618_21_VN_cost_inputs gets removed 
+    if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+        breakpoint()   #check if 20240618_21_VN_cost_inputs gets removed 
     
     # files_in_output_folder = os.listdir(output_folder_path + '\\' + economy)
     # #drop any dateids in the file names

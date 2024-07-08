@@ -43,6 +43,12 @@ def plot_multiplicative_timeseries(config, data_title, extra_identifier, structu
         lmdi_output_multiplicative.drop('Total_{}'.format(activity_variable), axis=1, inplace=True)
         lmdi_output_multiplicative.drop('Total {}'.format(energy_variable), axis=1, inplace=True)
 
+        driver_name_list = ['Multiplicative change in {}'.format(energy_variable), 'Activity']+structure_variables_list+[residual_variable1]
+        if INCLUDE_EXTRA_FACTORS_AT_END:
+            #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
+            cols_after_total_var = lmdi_output_multiplicative.columns.tolist()[lmdi_output_multiplicative.columns.tolist().index('Multiplicative change in {}'.format(energy_variable))+1:]
+            driver_name_list += cols_after_total_var
+            
         #rename the energy intensity column to residual_variable1
         lmdi_output_multiplicative.rename(columns={'{} intensity'.format(energy_variable):residual_variable1}, inplace=True)
         
@@ -58,11 +64,6 @@ def plot_multiplicative_timeseries(config, data_title, extra_identifier, structu
         else:
             title = graph_title
             
-        driver_name_list = ['Multiplicative change in {}'.format(energy_variable), 'Activity']+structure_variables_list+[residual_variable1]
-        if INCLUDE_EXTRA_FACTORS_AT_END:
-            #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
-            cols_after_total_var = lmdi_output_multiplicative.columns.tolist()[lmdi_output_multiplicative.columns.tolist().index('Multiplicative change in {}'.format(energy_variable))+1:]
-            driver_name_list += cols_after_total_var
         #plot
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash = 'Line type', title=title, category_orders={"Line type":['Multiplicative change in {}'.format(energy_variable), 'Driver'],"Driver":driver_name_list})#,
 
@@ -87,7 +88,13 @@ def plot_multiplicative_timeseries(config, data_title, extra_identifier, structu
         lmdi_output_multiplicative.drop('Total_{}'.format(activity_variable), axis=1, inplace=True)
         
         lmdi_output_multiplicative.drop('Total {}'.format(emissions_variable), axis=1, inplace=True)
-
+        
+        driver_name_list = ['Multiplicative change in {}'.format(emissions_variable), 'Activity']+structure_variables_list+[residual_variable1, residual_variable2]
+        if INCLUDE_EXTRA_FACTORS_AT_END:
+            #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
+            cols_after_total_var = lmdi_output_multiplicative.columns.tolist()[lmdi_output_multiplicative.columns.tolist().index('Multiplicative change in {}'.format(emissions_variable))+1:]
+            driver_name_list += cols_after_total_var
+            
         #rename the energy intensity column to residual_variable1
         lmdi_output_multiplicative.rename(columns={'{} intensity'.format(energy_variable):residual_variable1}, inplace=True)
         #rename the emissions intensity column to residual_variable2
@@ -104,12 +111,6 @@ def plot_multiplicative_timeseries(config, data_title, extra_identifier, structu
             title = '{}{} - Multiplicative LMDI decomposition of emissions'.format(data_title, extra_identifier)
         else:
             title = graph_title
-
-        driver_name_list = ['Multiplicative change in {}'.format(emissions_variable), 'Activity']+structure_variables_list+[residual_variable1, residual_variable2]
-        if INCLUDE_EXTRA_FACTORS_AT_END:
-            #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
-            cols_after_total_var = lmdi_output_multiplicative.columns.tolist()[lmdi_output_multiplicative.columns.tolist().index('Multiplicative change in {}'.format(emissions_variable))+1:]
-            driver_name_list += cols_after_total_var
             
         #plot
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash = 'Line type', title=title, category_orders={"Line type":['Change in {}'.format(emissions_variable), 'Driver'],"Driver":driver_name_list})
@@ -131,11 +132,19 @@ def plot_multiplicative_timeseries(config, data_title, extra_identifier, structu
         lmdi_output_multiplicative.drop('Total_{}'.format(activity_variable), axis=1, inplace=True)
         lmdi_output_multiplicative.drop('Total {}'.format(energy_variable), axis=1, inplace=True)
         
-        #Regardless of the column names, rename data in order of, 'Year', activity_variable, structure_variables_list, residual_variable1, 'Multiplicative change in {}'.format(energy_variable)
-        lmdi_output_multiplicative.columns = [time_variable, activity_variable] + structure_variables_list + [residual_variable1, 'Multiplicative change in {}'.format(energy_variable)]
-
         #create list of driver names in the order we want them to appear in the graph
         driver_list = [activity_variable] + structure_variables_list + [residual_variable1]
+        driver_name_list = ['Multiplicative change in {}'.format(energy_variable)]+driver_list
+        if INCLUDE_EXTRA_FACTORS_AT_END:
+            #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
+            cols_after_total_var = lmdi_output_multiplicative.columns.tolist()[lmdi_output_multiplicative.columns.tolist().index('Multiplicative change in {}'.format(energy_variable))+1:]
+            driver_name_list += cols_after_total_var
+            
+            #Regardless of the column names, rename data in order of, 'Year', activity_variable, structure_variables_list, residual_variable1, 'Multiplicative change in {}'.format(energy_variable)
+            lmdi_output_multiplicative.columns = [time_variable, activity_variable] + structure_variables_list + [residual_variable1, 'Multiplicative change in {}'.format(energy_variable)] + cols_after_total_var
+        else:
+            #Regardless of the column names, rename data in order of, 'Year', activity_variable, structure_variables_list, residual_variable1, 'Multiplicative change in {}'.format(energy_variable)
+            lmdi_output_multiplicative.columns = [time_variable, activity_variable] + structure_variables_list + [residual_variable1, 'Multiplicative change in {}'.format(energy_variable)]
 
         #need to make the data in long format so we have a driver column instead fo a column for each driver:
         mult_plot = pd.melt(lmdi_output_multiplicative, id_vars=[time_variable], var_name='Driver', value_name='Value')
@@ -149,11 +158,6 @@ def plot_multiplicative_timeseries(config, data_title, extra_identifier, structu
         else:
             title = graph_title
 
-        driver_name_list = ['Multiplicative change in {}'.format(energy_variable)]+driver_list
-        if INCLUDE_EXTRA_FACTORS_AT_END:
-            #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
-            cols_after_total_var = lmdi_output_multiplicative.columns.tolist()[lmdi_output_multiplicative.columns.tolist().index('Multiplicative change in {}'.format(energy_variable))+1:]
-            driver_name_list += cols_after_total_var
         #plot
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash = 'Line type',  category_orders={"Line type":['', ' '],"Driver":driver_name_list},title=title)#,
 
@@ -176,11 +180,18 @@ def plot_multiplicative_timeseries(config, data_title, extra_identifier, structu
         lmdi_output_multiplicative.drop('Total_{}'.format(activity_variable), axis=1, inplace=True)
         lmdi_output_multiplicative.drop('Total {}'.format(emissions_variable), axis=1, inplace=True)
         
-        #Regardless of the column names, rename data in order of, 'Year', activity_variable, structure_variables_list, residual_variable1, 'Multiplicative change in {}'.format(energy_variable)
-        lmdi_output_multiplicative.columns = [time_variable, activity_variable] + structure_variables_list + [residual_variable1,residual_variable2, 'Multiplicative change in {}'.format(emissions_variable)]
-
         #create list of driver names in the order we want them to appear in the graph
         driver_list = [activity_variable] + structure_variables_list + [residual_variable1, residual_variable2]
+        driver_name_list = ['Multiplicative change in {}'.format(emissions_variable)]+driver_list
+        if INCLUDE_EXTRA_FACTORS_AT_END:
+            #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
+            cols_after_total_var = lmdi_output_multiplicative.columns.tolist()[lmdi_output_multiplicative.columns.tolist().index('Multiplicative change in {}'.format(emissions_variable))+1:]
+            driver_name_list += cols_after_total_var
+                
+            #Regardless of the column names, rename data in order of, 'Year', activity_variable, structure_variables_list, residual_variable1, 'Multiplicative change in {}'.format(energy_variable)
+            lmdi_output_multiplicative.columns = [time_variable, activity_variable] + structure_variables_list + [residual_variable1,residual_variable2, 'Multiplicative change in {}'.format(emissions_variable)] + cols_after_total_var
+        else:
+            lmdi_output_multiplicative.columns = [time_variable, activity_variable] + structure_variables_list + [residual_variable1,residual_variable2, 'Multiplicative change in {}'.format(emissions_variable)]
 
         #need to make the data in long format so we have a driver column instead fo a column for each driver:
         mult_plot = pd.melt(lmdi_output_multiplicative, id_vars=[time_variable], var_name='Driver', value_name='Value')
@@ -194,11 +205,6 @@ def plot_multiplicative_timeseries(config, data_title, extra_identifier, structu
         else:
             title = graph_title
 
-        driver_name_list = ['Multiplicative change in {}'.format(emissions_variable)]+driver_list
-        if INCLUDE_EXTRA_FACTORS_AT_END:
-            #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
-            cols_after_total_var = lmdi_output_multiplicative.columns.tolist()[lmdi_output_multiplicative.columns.tolist().index('Multiplicative change in {}'.format(emissions_variable))+1:]
-            driver_name_list += cols_after_total_var
         #plot
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash = 'Line type',  category_orders={"Line type":['', ' '],"Driver":driver_name_list},title=title)#,
 
@@ -245,7 +251,7 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
         mult_plot = pd.melt(lmdi_output_additive, id_vars=[time_variable], var_name='Driver', value_name='Value')
 
         #create category based on whether data is driver or change in energy use
-        mult_plot['Line type'] = mult_plot['Driver'].apply(lambda i: i if i == 'additive change in {}'.format(energy_variable) else 'Driver')
+        mult_plot['Line type'] = mult_plot['Driver'].apply(lambda i: i if i == 'Additive change in {}'.format(energy_variable) else 'Driver')
         #set title
 
         if graph_title == '':
@@ -260,7 +266,7 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
             breakpoint()#will this work
             driver_name_list += cols_after_total_var
         #plot
-        fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash = 'Line type', title=title, category_orders={"Line type":['additive change in {}'.format(energy_variable), 'Driver'],"Driver":driver_name_list})#,
+        fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash = 'Line type', title=title, category_orders={"Line type":['Additive change in {}'.format(energy_variable), 'Driver'],"Driver":driver_name_list})#,
 
         fig.update_layout(
             font=dict(
@@ -292,7 +298,7 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
         mult_plot = pd.melt(lmdi_output_additive, id_vars=[time_variable], var_name='Driver', value_name='Value')
         
         #create category based on whether dfata is driver or change in erggy use
-        mult_plot['Line type'] = mult_plot['Driver'].apply(lambda i: i if i == 'additive change in {}'.format(emissions_variable) else 'Driver')
+        mult_plot['Line type'] = mult_plot['Driver'].apply(lambda i: i if i == 'Additive change in {}'.format(emissions_variable) else 'Driver')
 
         #set title
         if graph_title == '':
@@ -300,10 +306,10 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
         else:
             title = graph_title
 
-        driver_name_list = ['additive change in {}'.format(emissions_variable), 'Activity']+structure_variables_list+[residual_variable1, residual_variable2]
+        driver_name_list = ['Additive change in {}'.format(emissions_variable), 'Activity']+structure_variables_list+[residual_variable1, residual_variable2]
         if INCLUDE_EXTRA_FACTORS_AT_END:
             #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
-            cols_after_total_var = lmdi_output_additive.columns.tolist()[lmdi_output_additive.columns.tolist().index('additive change in {}'.format(emissions_variable))+1:]
+            cols_after_total_var = lmdi_output_additive.columns.tolist()[lmdi_output_additive.columns.tolist().index('Additive change in {}'.format(emissions_variable))+1:]
             driver_name_list += cols_after_total_var
             
         #plot
@@ -331,17 +337,25 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
         lmdi_output_additive.drop('Total_{}'.format(activity_variable), axis=1, inplace=True)
         lmdi_output_additive.drop('Total {}'.format(energy_variable), axis=1, inplace=True)
         
-        #Regardless of the column names, rename data in order of, 'Year', activity_variable, structure_variables_list, residual_variable1, 'additive change in {}'.format(energy_variable)
-        lmdi_output_additive.columns = [time_variable, activity_variable] + structure_variables_list + [residual_variable1, 'additive change in {}'.format(energy_variable)]
-
         #create list of driver names in the order we want them to appear in the graph
         driver_list = [activity_variable] + structure_variables_list + [residual_variable1]
+        driver_name_list = ['Additive change in {}'.format(energy_variable)]+driver_list
+        if INCLUDE_EXTRA_FACTORS_AT_END:
+            #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
+            cols_after_total_var = lmdi_output_additive.columns.tolist()[lmdi_output_additive.columns.tolist().index('Additive change in {}'.format(energy_variable))+1:]
+            driver_name_list += cols_after_total_var
+            
+            #Regardless of the column names, rename data in order of, 'Year', activity_variable, structure_variables_list, residual_variable1, 'Additive change in {}'.format(energy_variable)
+            lmdi_output_additive.columns = [time_variable, activity_variable] + structure_variables_list + [residual_variable1, 'Additive change in {}'.format(energy_variable)] + cols_after_total_var
+        else:
+            #Regardless of the column names, rename data in order of, 'Year', activity_variable, structure_variables_list, residual_variable1, 'Additive change in {}'.format(energy_variable)
+            lmdi_output_additive.columns = [time_variable, activity_variable] + structure_variables_list + [residual_variable1, 'Additive change in {}'.format(energy_variable)]
 
         #need to make the data in long format so we have a driver column instead fo a column for each driver:
         mult_plot = pd.melt(lmdi_output_additive, id_vars=[time_variable], var_name='Driver', value_name='Value')
 
         #create category based on whether data is driver or change in energy use. because we dont want it to show in the graph we will just make driver a double space, and the change in enegry a singel space
-        mult_plot['Line type'] = mult_plot['Driver'].apply(lambda i: '' if i == 'additive change in {}'.format(energy_variable) else ' ')
+        mult_plot['Line type'] = mult_plot['Driver'].apply(lambda i: '' if i == 'Additive change in {}'.format(energy_variable) else ' ')
 
         #set title
         if graph_title == '':
@@ -349,11 +363,6 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
         else:
             title = graph_title
 
-        driver_name_list = ['additive change in {}'.format(energy_variable)]+driver_list
-        if INCLUDE_EXTRA_FACTORS_AT_END:
-            #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
-            cols_after_total_var = lmdi_output_additive.columns.tolist()[lmdi_output_additive.columns.tolist().index('additive change in {}'.format(energy_variable))+1:]
-            driver_name_list += cols_after_total_var
         #plot
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash = 'Line type',  category_orders={"Line type":['', ' '],"Driver":driver_name_list},title=title)#,
 
@@ -381,17 +390,25 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
         lmdi_output_additive.drop('Total_{}'.format(activity_variable), axis=1, inplace=True)
         lmdi_output_additive.drop('Total {}'.format(emissions_variable), axis=1, inplace=True)
         
-        #Regardless of the column names, rename data in order of, 'Year', activity_variable, structure_variables_list, residual_variable1, 'additive change in {}'.format(emissions_variable)
-        lmdi_output_additive.columns = [time_variable, activity_variable] + structure_variables_list + [residual_variable1,residual_variable2, 'additive change in {}'.format(emissions_variable)]
-
         #create list of driver names in the order we want them to appear in the graph
         driver_list = [activity_variable] + structure_variables_list + [residual_variable1, residual_variable2]
+        driver_name_list = ['Additive change in {}'.format(emissions_variable)]+driver_list
+        if INCLUDE_EXTRA_FACTORS_AT_END:
+            #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
+            cols_after_total_var = lmdi_output_additive.columns.tolist()[lmdi_output_additive.columns.tolist().index('Additive change in {}'.format(emissions_variable))+1:]
+            driver_name_list += cols_after_total_var
+            
+            #Regardless of the column names, rename data in order of, 'Year', activity_variable, structure_variables_list, residual_variable1, 'Additive change in {}'.format(emissions_variable)
+            lmdi_output_additive.columns = [time_variable, activity_variable] + structure_variables_list + [residual_variable1,residual_variable2, 'Additive change in {}'.format(emissions_variable)] + cols_after_total_var
+        else:
+            #Regardless of the column names, rename data in order of, 'Year', activity_variable, structure_variables_list, residual_variable1, 'Additive change in {}'.format(emissions_variable)
+            lmdi_output_additive.columns = [time_variable, activity_variable] + structure_variables_list + [residual_variable1,residual_variable2, 'Additive change in {}'.format(emissions_variable)]
 
         #need to make the data in long format so we have a driver column instead fo a column for each driver:
         mult_plot = pd.melt(lmdi_output_additive, id_vars=[time_variable], var_name='Driver', value_name='Value')
 
         #create category based on whether data is driver or change in energy use. because we dont want it to show in the graph we will just make driver a double space, and the change in enegry a singel space
-        mult_plot['Line type'] = mult_plot['Driver'].apply(lambda i: '' if i == 'additive change in {}'.format(emissions_variable) else ' ')
+        mult_plot['Line type'] = mult_plot['Driver'].apply(lambda i: '' if i == 'Additive change in {}'.format(emissions_variable) else ' ')
 
         #set title
         if graph_title == '':
@@ -399,11 +416,6 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
         else:
             title = graph_title
 
-        driver_name_list = ['additive change in {}'.format(emissions_variable)]+driver_list
-        if INCLUDE_EXTRA_FACTORS_AT_END:
-            #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
-            cols_after_total_var = lmdi_output_additive.columns.tolist()[lmdi_output_additive.columns.tolist().index('additive change in {}'.format(emissions_variable))+1:]
-            driver_name_list += cols_after_total_var
         #plot
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash = 'Line type',  category_orders={"Line type":['', ' '],"Driver":driver_name_list},title=title)#,
 
@@ -642,7 +654,7 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
         
         #remove activity data from the dataset
         lmdi_output_additive.drop('Total_{}'.format(activity_variable), axis=1, inplace=True)
-        #drop additive change in energy from the dataset
+        #drop Additive change in energy from the dataset
         try:
             lmdi_output_additive.drop('Additive change in {}'.format(energy_variable), axis=1, inplace=True)
         except:
@@ -743,7 +755,7 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
         #remove activity data from the dataset
         lmdi_output_additive.drop('Total_{}'.format(activity_variable), axis=1, inplace=True)
         try:
-            #drop additive change in energy from the dataset
+            #drop Additive change in energy from the dataset
             lmdi_output_additive.drop('Additive change in {}'.format(emissions_variable), axis=1, inplace=True)
         except:
             breakpoint()

@@ -198,8 +198,9 @@ def run_non_road_model(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NO
             #set any negative stocks to 0. they wont go negative again after being set to 0
             current_year['Stocks'] = current_year['Stocks'].apply(lambda x: 0 if x < 0 else x)
             if i == 2024 and transport_type == 'passenger':
-                
-                breakpoint()#why is this causing activity to revert. ##29/may2024. what is this about?
+                if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                    print('Just check this out, i thnk its solved but need to check')
+                    breakpoint()#why is this causing activity to revert. ##29/may2024. what is this about?
             current_year['Activity'] = current_year['Stocks'] * current_year['Activity_per_Stock']
 
             #RECALCAULTE AGE DISTRIBUTION

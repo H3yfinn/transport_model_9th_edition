@@ -166,20 +166,20 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                                     graph_title = scenario_text# + ' 1.4% improvement in efficiency'
 
                                 combination_dict_list.append({'economy':economy,'scenario':scenario, 'transport_type':transport_type, 'medium':medium, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,
-                                'output_data_folder': f'\\intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'})
+                                'output_data_folder': f'intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'})
                                 
                                 extra_identifier_no_transport_type = extra_identifier.replace(f'{transport_type}_', '')
                                 graph_title = graph_title.replace(f'{transport_type} ', '')
                                 extra_identifier_no_scenario = extra_identifier.replace(f'{scenario}_', '')
                                 if extra_identifier_no_transport_type not in combined_transport_type_waterfall_inputs.keys():
-                                    combined_transport_type_waterfall_inputs[extra_identifier_no_transport_type] = [{'economy':economy, 'scenario':scenario, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'\\intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'}]
+                                    combined_transport_type_waterfall_inputs[extra_identifier_no_transport_type] = [{'economy':economy, 'scenario':scenario, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'}]
                                 else:
-                                    combined_transport_type_waterfall_inputs[extra_identifier_no_transport_type].append({'economy':economy, 'scenario':scenario, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'\\intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'})
+                                    combined_transport_type_waterfall_inputs[extra_identifier_no_transport_type].append({'economy':economy, 'scenario':scenario, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'})
                                 
                                 if extra_identifier_no_scenario not in combined_scenario_waterfall_inputs.keys():
-                                    combined_scenario_waterfall_inputs[extra_identifier_no_scenario] = [{'economy':economy,'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'\\intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'}]
+                                    combined_scenario_waterfall_inputs[extra_identifier_no_scenario] = [{'economy':economy,'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'}]
                                 else:
-                                    combined_scenario_waterfall_inputs[extra_identifier_no_scenario].append({'economy':economy,'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'\\intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'})
+                                    combined_scenario_waterfall_inputs[extra_identifier_no_scenario].append({'economy':economy,'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'})
     
     ###########################################################################
     # Do final data prep and then run the LMDI method and plot the results
@@ -200,130 +200,269 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
     # f'{economy}_{scenario}_{transport_type}_road_2_Emissions_Hierarchical_{END_DATE}'
     for combination_dict in combination_dict_list:
         
-        
-        if USE_LIST_OF_DATASETS_TO_PRODUCE and combination_dict['extra_identifier'] not in datasets_to_produce:
-            # if 
-            # print('skipping {}'.format(combination_dict['extra_identifier']))
-            continue
-        
-        i+=1
-        # print('\n\nRunning lmdi method for {}th iteration for '.format(i,combination_dict['extra_identifier']))
-        # if combination_dict['extra_identifier'] == '15_PHL_Reference_passenger_road_2_Energy use_Hierarchical':
-        #     breakpoint()
-        #create a dataframe for each combination
-        
-        activity_data, energy_data, emissions_data = prepare_data_for_divisia(config, combination_dict, all_data, END_DATE)
-        #set variables to input into the LMDI function
-        economy = combination_dict['economy']
-        activity_variable = combination_dict['activity_variable']
-        structure_variables_list = combination_dict['structure_variables_list']
-        graph_title = combination_dict['graph_title']
-        extra_identifier = combination_dict['extra_identifier']
-        data_title = ''
-        energy_variable = 'Energy use'
-        time_variable = 'Date'
-        font_size=35
-        INCLUDE_TEXT = True
-        y_axis_min_percent_decrease=0
-        residual_variable1=combination_dict['residual_variable1']
-        emissions_divisia = combination_dict['emissions_divisia']
-        hierarchical = combination_dict['hierarchical']
-        output_data_folder=combination_dict['output_data_folder']
-        plotting_output_folder=combination_dict['plotting_output_folder']
-
-        # if not emissions_divisia:
-        #     continue
-        # elif not hierarchical:
-        #     # print('plotting of hierarchical emissions divisia is not currently supported')
-        #     continue#currently we cannto do hierarchical for emissions
-
-        #check the folders exist:
-        if not os.path.exists(config.root_dir + '\\' + output_data_folder):
-            os.makedirs(config.root_dir + '\\' + output_data_folder)
-        if not os.path.exists(config.root_dir + '\\' + plotting_output_folder):
-            os.makedirs(config.root_dir + '\\' + plotting_output_folder)
-        #run LMDI
-        # if hierarchical:
-        #     breakpoint()
-        main_function.run_divisia(config, data_title, extra_identifier, activity_data, energy_data, structure_variables_list, activity_variable, emissions_variable = 'Emissions', energy_variable = energy_variable, emissions_divisia = emissions_divisia, emissions_data=emissions_data, time_variable=time_variable,hierarchical=hierarchical,output_data_folder=output_data_folder)
-        
-        if PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR and emissions_divisia:
-            extra_identifier2 = calculate_emissions_effect_from_additive_data(config, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict, PLOT_EMISSIONS_FACTORS=PLOT_EMISSIONS_FACTORS)
-            extra_identifier2 = calculate_emissions_effect_from_multiplicative_data(config, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict)
-            #now we can plot the additive and multiplicatve effecst of electricity emissions factor on the engine switching effect using the specially deisgiend INCLUDE_EXTRA_FACTORS_AT_END argument in the plotting functions
-            #TODO
-            if INCLUDE_LIFECYCLE_EMISSIONS:
-                attach_lifecycle_emissions_series(config, extra_identifier2, output_data_folder, combination_dict, stocks)  
-        if USE_LIST_OF_CHARTS_TO_PRODUCE and combination_dict['extra_identifier'] not in charts_to_produce:
-            continue
-        if PLOTTING:
-            #####################
-            # if energy_variable == 'Energy use' and combination_dict['hierarchical'] == True and combination_dict['emissions_divisia'] == False and combination_dict['residual_variable1'] == 'Vehicle efficiency' and combination_dict['scenario'] == 'Target':
-            #     breakpoint()
-            # else:
-            #     continue
-                    
-            #     print('plotting {}'.format(extra_identifier))
-            #     print('energy_variable: {}'.format(energy_variable))
-            #     print('emissions_divisia: {}'.format(emissions_divisia))
-            #     print('hierarchical: {}'.format(hierarchical))
-            #     print('residual_variable1: {}'.format(residual_variable1))
-                
-            #     breakpoint()
-            #     continue
-            #####################
-            try: 
-                if PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR and emissions_divisia:
-                    
-                    # # if _Target_passenger_road then brakpoiint
-                    # if '_Target_passenger_road' in extra_identifier2:
-                    #     breakpoint()
-                        
-                    #use structure_variables_list_with_elec_emissions_factor sine we have added the effect of electricity emissions factor to it. Also use the data for extra_identifier2
-                    
-                    #create a dataset to be used for cumulative version of the addtive data as well
-                    def save_copy_of_data_for_cumulative_version(extra_identifier, output_data_folder):
-                        data = pd.read_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier}_additive.csv')
-                        data.to_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier}_cumulative_additive.csv', index=False)
-                        return extra_identifier+'_cumulative'
-                    extra_identifier3 = save_copy_of_data_for_cumulative_version(extra_identifier2, output_data_folder)
-                    try:
-                        plot_output.plot_additive_waterfall(config, data_title, extra_identifier2, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT, INCLUDE_EXTRA_FACTORS_AT_END = True,PLOT_CUMULATIVE_VERSION = False)
-                    except:
-                        breakpoint()
-                    try:
-                        plot_output.plot_additive_waterfall(config, data_title, extra_identifier3, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT, INCLUDE_EXTRA_FACTORS_AT_END = True,PLOT_CUMULATIVE_VERSION = True)
-                    except:
-                        breakpoint()
-                        
-                    #and then plot the same data but with the original structure_variables_list and extra_identifier
-                    #PLEASE NOTE THAT THE TIMESERIES VALUES DONT INCLUDE THE EFFECT OF THE ELECTRICITY EMISSIONS FACTOR OR THE LIFECYCLE EMISSIONS FACTOR IN THEIR 'TOTAL' VALUES SICNEIT WOULD BE MORE CONFUSING THAN HELPFUL
-                    try:
-                        plot_output.plot_multiplicative_timeseries(config, data_title, extra_identifier2,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_EXTRA_FACTORS_AT_END = True)
-                    except:
-                        breakpoint()
-                    try:
-                        plot_output.plot_additive_timeseries(config, data_title, extra_identifier2,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_EXTRA_FACTORS_AT_END = True)  
-                    except:
-                        breakpoint()
-                try:
-                    plot_output.plot_additive_waterfall(config, data_title, extra_identifier, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT)
-                except:
-                    breakpoint()
-                # if hierarchical:
-                #     breakpoint()  
-                try:
-                    plot_output.plot_additive_timeseries(config, data_title, extra_identifier,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder)
-                except:
-                    breakpoint()
-                try:
-                    plot_output.plot_multiplicative_timeseries(config, data_title, extra_identifier,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder)
-                except:
-                    breakpoint()
-            except:
-                # breakpoint()
-                print('error plotting {}'.format(extra_identifier))
+        try:
+            if USE_LIST_OF_DATASETS_TO_PRODUCE and combination_dict['extra_identifier'] not in datasets_to_produce:
+                # if 
+                # print('skipping {}'.format(combination_dict['extra_identifier']))
                 continue
+            
+            i+=1
+            # print('\n\nRunning lmdi method for {}th iteration for '.format(i,combination_dict['extra_identifier']))
+            # if combination_dict['extra_identifier'] == '15_PHL_Reference_passenger_road_2_Energy use_Hierarchical':
+            #     breakpoint()
+            #create a dataframe for each combination
+            try:
+                activity_data, energy_data, emissions_data = prepare_data_for_divisia(config, combination_dict, all_data, END_DATE)
+            except Exception as e:
+                breakpoint()
+            #set variables to input into the LMDI function
+            economy = combination_dict['economy']
+            activity_variable = combination_dict['activity_variable']
+            structure_variables_list = combination_dict['structure_variables_list']
+            graph_title = combination_dict['graph_title']
+            extra_identifier = combination_dict['extra_identifier']
+            data_title = ''
+            energy_variable = 'Energy use'
+            time_variable = 'Date'
+            font_size=35
+            INCLUDE_TEXT = True
+            y_axis_min_percent_decrease=0
+            residual_variable1=combination_dict['residual_variable1']
+            emissions_divisia = combination_dict['emissions_divisia']
+            hierarchical = combination_dict['hierarchical']
+            output_data_folder=combination_dict['output_data_folder']
+            plotting_output_folder=combination_dict['plotting_output_folder']
+
+            # if not emissions_divisia:
+            #     continue
+            # elif not hierarchical:
+            #     # print('plotting of hierarchical emissions divisia is not currently supported')
+            #     continue#currently we cannto do hierarchical for emissions
+
+            #check the folders exist:
+            if not os.path.exists(config.root_dir + '\\' + output_data_folder):
+                os.makedirs(config.root_dir + '\\' + output_data_folder)
+            if not os.path.exists(config.root_dir + '\\' + plotting_output_folder):
+                os.makedirs(config.root_dir + '\\' + plotting_output_folder)
+            #run LMDI
+            # if hierarchical:
+            #     breakpoint()
+        except Exception as e:
+            breakpoint()
+        try:
+            main_function.run_divisia(config, data_title, extra_identifier, activity_data, energy_data, structure_variables_list, activity_variable, emissions_variable = 'Emissions', energy_variable = energy_variable, emissions_divisia = emissions_divisia, emissions_data=emissions_data, time_variable=time_variable,hierarchical=hierarchical,output_data_folder=output_data_folder)
+        except Exception as e:
+            breakpoint()
+            print(e)
+            
+        try:
+            if PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR and emissions_divisia:
+                extra_identifier2 = calculate_emissions_effect_from_additive_data(config, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict, PLOT_EMISSIONS_FACTORS=PLOT_EMISSIONS_FACTORS)
+                extra_identifier2 = calculate_emissions_effect_from_multiplicative_data(config, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict)
+                #now we can plot the additive and multiplicatve effecst of electricity emissions factor on the engine switching effect using the specially deisgiend INCLUDE_EXTRA_FACTORS_AT_END argument in the plotting functions
+                #TODO
+                if INCLUDE_LIFECYCLE_EMISSIONS:
+                    attach_lifecycle_emissions_series(config, extra_identifier2, output_data_folder, combination_dict, stocks)  
+            if USE_LIST_OF_CHARTS_TO_PRODUCE and combination_dict['extra_identifier'] not in charts_to_produce:
+                continue
+            if PLOTTING:
+                #####################
+                # if energy_variable == 'Energy use' and combination_dict['hierarchical'] == True and combination_dict['emissions_divisia'] == False and combination_dict['residual_variable1'] == 'Vehicle efficiency' and combination_dict['scenario'] == 'Target':
+                #     breakpoint()
+                # else:
+                #     continue
+                        
+                #     print('plotting {}'.format(extra_identifier))
+                #     print('energy_variable: {}'.format(energy_variable))
+                #     print('emissions_divisia: {}'.format(emissions_divisia))
+                #     print('hierarchical: {}'.format(hierarchical))
+                #     print('residual_variable1: {}'.format(residual_variable1))
+                    
+                #     breakpoint()
+                #     continue
+                #####################
+                try: 
+                    if PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR and emissions_divisia:
+                        
+                        # # if _Target_passenger_road then brakpoiint
+                        # if '_Target_passenger_road' in extra_identifier2:
+                        #     breakpoint()
+                            
+                        #use structure_variables_list_with_elec_emissions_factor sine we have added the effect of electricity emissions factor to it. Also use the data for extra_identifier2
+                        
+                        #create a dataset to be used for cumulative version of the addtive data as well
+                        def save_copy_of_data_for_cumulative_version(extra_identifier, output_data_folder):
+                            data = pd.read_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier}_additive.csv')
+                            data.to_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier}_cumulative_additive.csv', index=False)
+                            return extra_identifier+'_cumulative'
+                        extra_identifier3 = save_copy_of_data_for_cumulative_version(extra_identifier2, output_data_folder)
+                        try:
+                            plot_output.plot_additive_waterfall(config, data_title, extra_identifier2, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT, INCLUDE_EXTRA_FACTORS_AT_END = True,PLOT_CUMULATIVE_VERSION = False)
+                        except:
+                            breakpoint()
+                        try:
+                            plot_output.plot_additive_waterfall(config, data_title, extra_identifier3, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT, INCLUDE_EXTRA_FACTORS_AT_END = True,PLOT_CUMULATIVE_VERSION = True)
+                        except:
+                            breakpoint()
+                            
+                        #and then plot the same data but with the original structure_variables_list and extra_identifier
+                        #PLEASE NOTE THAT THE TIMESERIES VALUES DONT INCLUDE THE EFFECT OF THE ELECTRICITY EMISSIONS FACTOR OR THE LIFECYCLE EMISSIONS FACTOR IN THEIR 'TOTAL' VALUES SICNEIT WOULD BE MORE CONFUSING THAN HELPFUL
+                        try:
+                            plot_output.plot_multiplicative_timeseries(config, data_title, extra_identifier2,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_EXTRA_FACTORS_AT_END = True)
+                        except:
+                            breakpoint()
+                            plot_output.plot_multiplicative_timeseries(config, data_title, extra_identifier2,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_EXTRA_FACTORS_AT_END = True)
+                        try:
+                            plot_output.plot_additive_timeseries(config, data_title, extra_identifier2,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_EXTRA_FACTORS_AT_END = True)  
+                        except:
+                            if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                                breakpoint()
+                                plot_output.plot_additive_timeseries(config, data_title, extra_identifier2,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_EXTRA_FACTORS_AT_END = True)  
+                            else:
+                                pass
+                    try:
+                        plot_output.plot_additive_waterfall(config, data_title, extra_identifier, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT)
+                    except:
+                        if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                            breakpoint()
+                            plot_output.plot_additive_waterfall(config, data_title, extra_identifier, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT)
+                        else:
+                            pass
+                    # if hierarchical:
+                    #     breakpoint()  
+                    try:
+                        plot_output.plot_additive_timeseries(config, data_title, extra_identifier,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder)
+                    except:
+                        if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                            breakpoint()
+                            plot_output.plot_additive_timeseries(config, data_title, extra_identifier,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder)
+                        else:
+                            pass
+                    try:
+                        plot_output.plot_multiplicative_timeseries(config, data_title, extra_identifier,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder)
+                    except:
+                        if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                            breakpoint()
+                            plot_output.plot_multiplicative_timeseries(config, data_title, extra_identifier,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder)
+                        else:
+                            pass
+                except:
+                    # breakpoint()
+                    print('error plotting {}'.format(extra_identifier))
+                    continue
+        except Exception as e:
+            if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                print(e)
+                breakpoint()
+            else:
+                pass
+            
+            if PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR and emissions_divisia:
+                extra_identifier2 = calculate_emissions_effect_from_additive_data(config, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict, PLOT_EMISSIONS_FACTORS=PLOT_EMISSIONS_FACTORS)
+                extra_identifier2 = calculate_emissions_effect_from_multiplicative_data(config, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict)
+                #now we can plot the additive and multiplicatve effecst of electricity emissions factor on the engine switching effect using the specially deisgiend INCLUDE_EXTRA_FACTORS_AT_END argument in the plotting functions
+                #TODO
+                if INCLUDE_LIFECYCLE_EMISSIONS:
+                    attach_lifecycle_emissions_series(config, extra_identifier2, output_data_folder, combination_dict, stocks)  
+            if USE_LIST_OF_CHARTS_TO_PRODUCE and combination_dict['extra_identifier'] not in charts_to_produce:
+                continue
+            if PLOTTING:
+                #####################
+                # if energy_variable == 'Energy use' and combination_dict['hierarchical'] == True and combination_dict['emissions_divisia'] == False and combination_dict['residual_variable1'] == 'Vehicle efficiency' and combination_dict['scenario'] == 'Target':
+                #     breakpoint()
+                # else:
+                #     continue
+                        
+                #     print('plotting {}'.format(extra_identifier))
+                #     print('energy_variable: {}'.format(energy_variable))
+                #     print('emissions_divisia: {}'.format(emissions_divisia))
+                #     print('hierarchical: {}'.format(hierarchical))
+                #     print('residual_variable1: {}'.format(residual_variable1))
+                    
+                #     breakpoint()
+                #     continue
+                #####################
+                try: 
+                    if PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR and emissions_divisia:
+                        
+                        # # if _Target_passenger_road then brakpoiint
+                        # if '_Target_passenger_road' in extra_identifier2:
+                        #     breakpoint()
+                            
+                        #use structure_variables_list_with_elec_emissions_factor sine we have added the effect of electricity emissions factor to it. Also use the data for extra_identifier2
+                        
+                        #create a dataset to be used for cumulative version of the addtive data as well
+                        def save_copy_of_data_for_cumulative_version(extra_identifier, output_data_folder):
+                            data = pd.read_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier}_additive.csv')
+                            data.to_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier}_cumulative_additive.csv', index=False)
+                            return extra_identifier+'_cumulative'
+                        extra_identifier3 = save_copy_of_data_for_cumulative_version(extra_identifier2, output_data_folder)
+                        try:
+                            plot_output.plot_additive_waterfall(config, data_title, extra_identifier2, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT, INCLUDE_EXTRA_FACTORS_AT_END = True,PLOT_CUMULATIVE_VERSION = False)
+                        except:
+                            if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                                breakpoint()
+                                plot_output.plot_additive_waterfall(config, data_title, extra_identifier2, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT, INCLUDE_EXTRA_FACTORS_AT_END = True,PLOT_CUMULATIVE_VERSION = False)
+                            else:
+                                pass                                
+                        try:
+                            plot_output.plot_additive_waterfall(config, data_title, extra_identifier3, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT, INCLUDE_EXTRA_FACTORS_AT_END = True,PLOT_CUMULATIVE_VERSION = True)
+                        except:
+                            if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                                breakpoint()
+                                plot_output.plot_additive_waterfall(config, data_title, extra_identifier3, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT, INCLUDE_EXTRA_FACTORS_AT_END = True,PLOT_CUMULATIVE_VERSION = True)
+                            else:
+                                pass
+                            
+                        #and then plot the same data but with the original structure_variables_list and extra_identifier
+                        #PLEASE NOTE THAT THE TIMESERIES VALUES DONT INCLUDE THE EFFECT OF THE ELECTRICITY EMISSIONS FACTOR OR THE LIFECYCLE EMISSIONS FACTOR IN THEIR 'TOTAL' VALUES SICNEIT WOULD BE MORE CONFUSING THAN HELPFUL
+                        try:
+                            plot_output.plot_multiplicative_timeseries(config, data_title, extra_identifier2,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_EXTRA_FACTORS_AT_END = True)
+                        except:
+                            if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                                breakpoint()
+                                plot_output.plot_multiplicative_timeseries(config, data_title, extra_identifier2,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_EXTRA_FACTORS_AT_END = True)
+                            else:
+                                pass
+                        try:
+                            plot_output.plot_additive_timeseries(config, data_title, extra_identifier2,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_EXTRA_FACTORS_AT_END = True)  
+                        except:
+                            if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                                breakpoint()
+                                plot_output.plot_additive_timeseries(config, data_title, extra_identifier2,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_EXTRA_FACTORS_AT_END = True) 
+                            else:
+                                pass
+                    try:
+                        plot_output.plot_additive_waterfall(config, data_title, extra_identifier, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT)
+                    except:
+                        if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                            breakpoint()
+                            plot_output.plot_additive_waterfall(config, data_title, extra_identifier, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT)
+                        else:
+                            pass
+                    # if hierarchical:
+                    #     breakpoint()  
+                    try:
+                        plot_output.plot_additive_timeseries(config, data_title, extra_identifier,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder)
+                    except:
+                        if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                            breakpoint()
+                            plot_output.plot_additive_timeseries(config, data_title, extra_identifier,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder)
+                        else:
+                            pass
+                    try:
+                        plot_output.plot_multiplicative_timeseries(config, data_title, extra_identifier,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder)
+                    except:
+                        if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                            plot_output.plot_multiplicative_timeseries(config, data_title, extra_identifier,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder)
+                            breakpoint()
+                        else:
+                            pass
+                except:
+                    # breakpoint()
+                    print('error plotting {}'.format(extra_identifier))
+                    continue
+
     #now loop through unqiue keys in combined_transport_type_waterfall_inputs and plot them all together:
     for key in combined_transport_type_waterfall_inputs.keys():
         new_extra_identifier = key 
@@ -368,7 +507,9 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
             plot_output.plot_additive_waterfall(config, data_title, new_extra_identifier2, structure_variables_list=structure_variables_list,activity_variable=new_activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder,INCLUDE_TEXT = INCLUDE_TEXT)#in the output we just added _concatenated to the end of the extra identifier, berfore additive, so we need to update it hereas the additive plotting function will not look for this
         
         except:
-            breakpoint()
+            if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                breakpoint()
+                plot_output.plot_additive_waterfall(config, data_title, new_extra_identifier2, structure_variables_list=structure_variables_list,activity_variable=new_activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder,INCLUDE_TEXT = INCLUDE_TEXT)#in the output we just added _concatenated to the end of the extra identifier, berfore additive, so we need to update it hereas the additive plotting function will not look for this
             print('error plotting {}'.format(extra_identifier))
             continue
         
@@ -421,7 +562,10 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                 print('error plotting {}'.format(extra_identifier))
                 continue
     except:
-        breakpoint()
+        if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+            breakpoint()
+        else:
+            pass
 
 
 def calculate_emissions(config, energy_use_by_fuels, all_data, USE_AVG_GENERATION_EMISSIONS_FACTOR=False, drive_column='Drive', energy_column = 'Energy use', PLOT_EMISSIONS_FACTORS=False):

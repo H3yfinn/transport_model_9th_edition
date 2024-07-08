@@ -3956,7 +3956,6 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
                 #prodcue individual graph
                 # WRITE_HTML=True
                 if WRITE_HTML:   
-                    breakpoint()
                     write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger'] = [fig, title, PLOTTED]
@@ -4587,8 +4586,9 @@ def plot_new_vehicle_efficiency_by_vehicle_type(config, fig_dict, ECONOMY_IDs, m
         energy_eff_bev['ICE_ONLY'] = 'bev_only'
         #now concat the two dfs:
         energy_eff = pd.concat([energy_eff, energy_eff_bev])
-    
-    breakpoint()#im not 100% this is being calculated correctly. It seems that ICE_ONL=all is too high at beginning
+    if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+        breakpoint()#im not 100% this is being calculated correctly. It seems that ICE_ONL=all is too high at beginning
+        print('check that the new vehicle efficiency is being calculated correctly. It seems that ICE_ONL=all is too high at beginning')
     energy_eff['New_vehicle_efficiency_weighted'] = energy_eff['New_vehicle_efficiency'] * energy_eff['New_stocks_needed']
     energy_eff = energy_eff[['Date', 'Economy', 'Vehicle Type', 'Scenario','New_vehicle_efficiency_weighted', 'New_vehicle_efficiency', 'New_stocks_needed', 'ICE_ONLY']].groupby(['Date','Economy','Scenario','Vehicle Type', 'ICE_ONLY']).sum().reset_index()
     #calculate weighted average

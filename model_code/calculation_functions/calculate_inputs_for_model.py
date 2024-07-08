@@ -85,14 +85,13 @@ def calculate_inputs_for_model(config, road_model_input_wide, non_road_model_inp
     if ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR:
         #use teh funcitons in adjust_data_to_match_esto.py to adjust the energy use to match the esto data in the MODEL_BASE_YEAR. To do this we will have needed to run the model up ot htat year already, and saved the results. We will then use the results to adjust the energy use to match the esto data. This is so that we can make sure that stocks, mileage and efficiency are still relatively close to their previous estiamtes while energy use is equal to the esto data. Currently this is done with optimisation in the optimise_to_calcualte_base_data.py file.
         
-        
-        #save non_road_model_input_wide
-        non_road_model_input_wide.to_csv(config.root_dir + '\\' + '1_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+        # #save non_road_model_input_wide
+        # non_road_model_input_wide.to_csv(config.root_dir + '\\' + '1_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
         
         road_model_input_wide, non_road_model_input_wide, supply_side_fuel_mixing = adjust_data_to_match_esto.adjust_data_to_match_esto_handler(config, BASE_YEAR, ECONOMY_ID, road_model_input_wide,non_road_model_input_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, TESTING=adjust_data_to_match_esto_TESTING, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS)
         
         #save non_road_model_input_wide
-        non_road_model_input_wide.to_csv(config.root_dir + '\\' + '2_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+        # non_road_model_input_wide.to_csv(config.root_dir + '\\' + '2_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
         
     #set New_vehicle_efficiency now, since it may have been affected by efficie4ncy adjsutments in adjust_data_to_match_esto.py
     road_model_input_wide['New_vehicle_efficiency'] = road_model_input_wide['Efficiency'] *1.15#seems like new vehicles are 15% more efficient than the average vehicle (which is probasbly about 10 years old. this would make sense with an avg 1.5% efficiency improvement per year (leading to about 16% improvement).

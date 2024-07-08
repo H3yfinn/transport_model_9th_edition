@@ -3,12 +3,12 @@
 import os
 import pandas as pd
 import numpy as np
-from ..data_creation_functions import *
-from .LMDI_functions import *
+from . import data_creation
+from . import LMDI_functions
 import re
 #%%
 def run_divisia(config, data_title, extra_identifier, activity_data, energy_data, structure_variables_list, activity_variable = 'Activity', emissions_variable = 'Emissions', energy_variable = 'Energy', emissions_divisia = False, emissions_data=[], time_variable='Year', hierarchical=False, output_data_folder='output_data'):
-    """This is a central function that will run the LMDI model. It will take the input data and format/adjust it using the functions in data_creation_functions.py. 
+    """This is a central function that will run the LMDI model. It will take the input data and format/adjust it using the functions in data_creation.py. 
     It will then run the LMDI model and save the output. It will also plot the output.
     If you want to run the method using emissions intensity then you jsut set emissions divisia to true and include data for emissions_data"""
     #first, if there are any 0's in the data replace them with a very small number. This means we dont have to deal with any issues with dividing by 0, and given the context of the data, it is unlikely that the 0's are actually 0, or even the result of replacing 0's with small numbers will have a noticeable impact on the results.
@@ -24,11 +24,11 @@ def run_divisia(config, data_title, extra_identifier, activity_data, energy_data
 
         ###################################
         #run data creation functions using variables names set by the user
-        activity = data_creation_functions.format_activity(activity_data, activity_variable, time_variable)
+        activity = data_creation.format_activity(activity_data, activity_variable, time_variable)
 
-        energy_intensity = data_creation_functions.format_energy_intensity(activity_data, energy_data, structure_variables_list, activity_variable, energy_variable, time_variable)
+        energy_intensity = data_creation.format_energy_intensity(activity_data, energy_data, structure_variables_list, activity_variable, energy_variable, time_variable)
 
-        structure,structure_share_values_names = data_creation_functions.format_structure_multiple(activity_data, structure_variables_list,activity_variable, time_variable)
+        structure,structure_share_values_names = data_creation.format_structure_multiple(activity_data, structure_variables_list,activity_variable, time_variable)
 
         ###################################
         #format data
@@ -72,13 +72,13 @@ def run_divisia(config, data_title, extra_identifier, activity_data, energy_data
 
         ###################################
         #run data creation functions using variables names set by the user
-        activity = data_creation_functions.format_activity(activity_data, activity_variable, time_variable)
+        activity = data_creation.format_activity(activity_data, activity_variable, time_variable)
 
-        energy_intensity = data_creation_functions.format_energy_intensity(activity_data, energy_data, structure_variables_list, activity_variable, energy_variable, time_variable)
+        energy_intensity = data_creation.format_energy_intensity(activity_data, energy_data, structure_variables_list, activity_variable, energy_variable, time_variable)
 
-        structure,structure_share_values_names = data_creation_functions.format_structure_multiple(activity_data, structure_variables_list,activity_variable, time_variable)
+        structure,structure_share_values_names = data_creation.format_structure_multiple(activity_data, structure_variables_list,activity_variable, time_variable)
 
-        emissions_intensity = data_creation_functions.format_emissions_intensity(emissions_data, energy_data, structure_variables_list, emissions_variable, energy_variable, time_variable)
+        emissions_intensity = data_creation.format_emissions_intensity(emissions_data, energy_data, structure_variables_list, emissions_variable, energy_variable, time_variable)
         ###################################
         #format data
         drivers_list = ['{} intensity'.format(energy_variable), '{} intensity'.format(emissions_variable), 'Total_{}'.format(activity_variable)] + structure_share_values_names
