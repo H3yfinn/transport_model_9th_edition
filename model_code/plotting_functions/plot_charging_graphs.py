@@ -265,7 +265,7 @@ def plot_required_chargers(config, ECONOMY_ID):
 
             # Set the title of the plot
             fig.update_layout(title_text=title)
-
+    
             # wrtite the plot to a file
             fig.write_html(config.root_dir + '\\' +f'plotting_output\\charging_requirements\\{title}.html')
             ############################################################

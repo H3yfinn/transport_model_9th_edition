@@ -232,8 +232,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
             residual_variable1=combination_dict['residual_variable1']
             emissions_divisia = combination_dict['emissions_divisia']
             hierarchical = combination_dict['hierarchical']
-            output_data_folder=combination_dict['output_data_folder']
-            plotting_output_folder=combination_dict['plotting_output_folder']
+            output_data_folder=config.root_dir + '\\' + combination_dict['output_data_folder']
+            plotting_output_folder=config.root_dir + '\\' + combination_dict['plotting_output_folder']
 
             # if not emissions_divisia:
             #     continue
@@ -242,10 +242,10 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
             #     continue#currently we cannto do hierarchical for emissions
 
             #check the folders exist:
-            if not os.path.exists(config.root_dir + '\\' + output_data_folder):
-                os.makedirs(config.root_dir + '\\' + output_data_folder)
-            if not os.path.exists(config.root_dir + '\\' + plotting_output_folder):
-                os.makedirs(config.root_dir + '\\' + plotting_output_folder)
+            if not os.path.exists(output_data_folder):
+                os.makedirs(output_data_folder)
+            if not os.path.exists(plotting_output_folder):
+                os.makedirs(plotting_output_folder)
             #run LMDI
             # if hierarchical:
             #     breakpoint()
