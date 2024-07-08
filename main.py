@@ -239,7 +239,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             international_bunker_share_calculation_handler(config)
         except:
             pass#usually happens because the economies in ECONOMIES_WITH_MODELLING_COMPLETE_DICT havent been run for this file date id. check extract_non_road_modelled_data(config) in international_bunkers
-        copy_required_output_files_to_one_folder(config, output_folder_path='output_datafor_other_modellers')
+        copy_required_output_files_to_one_folder(config, output_folder_path='output_data\\for_other_modellers')
     
         progress += increment
         update_progress(progress)
