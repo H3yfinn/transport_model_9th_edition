@@ -297,8 +297,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                         
                         #create a dataset to be used for cumulative version of the addtive data as well
                         def save_copy_of_data_for_cumulative_version(extra_identifier, output_data_folder):
-                            data = pd.read_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier}_additive.csv')
-                            data.to_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier}_cumulative_additive.csv', index=False)
+                            data = pd.read_csv(f'{output_data_folder}{extra_identifier}_additive.csv')
+                            data.to_csv(f'{output_data_folder}{extra_identifier}_cumulative_additive.csv', index=False)
                             return extra_identifier+'_cumulative'
                         extra_identifier3 = save_copy_of_data_for_cumulative_version(extra_identifier2, output_data_folder)
                         try:
@@ -409,8 +409,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                         
                         #create a dataset to be used for cumulative version of the addtive data as well
                         def save_copy_of_data_for_cumulative_version(extra_identifier, output_data_folder):
-                            data = pd.read_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier}_additive.csv')
-                            data.to_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier}_cumulative_additive.csv', index=False)
+                            data = pd.read_csv(f'{output_data_folder}{extra_identifier}_additive.csv')
+                            data.to_csv(f'{output_data_folder}{extra_identifier}_cumulative_additive.csv', index=False)
                             return extra_identifier+'_cumulative'
                         extra_identifier3 = save_copy_of_data_for_cumulative_version(extra_identifier2, output_data_folder)
                         try:
@@ -793,8 +793,8 @@ def attach_lifecycle_emissions_series(config, extra_identifier2, output_data_fol
     lca_wide.columns = ['Date'] + [f'Effect of lifecycle emissions {col}' for col in lca_wide.columns if col != 'Date']
     
     #add this to the data                            
-    data_mult = pd.read_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier2}_multiplicative.csv')
-    data_add = pd.read_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier2}_additive.csv')
+    data_mult = pd.read_csv(f'{output_data_folder}{extra_identifier2}_multiplicative.csv')
+    data_add = pd.read_csv(f'{output_data_folder}{extra_identifier2}_additive.csv')
     
     # add the lifecycle emissions to the data. convert to mult for data_mult and add for data_add
     data_mult = pd.merge(data_mult, lca_wide, on='Date', how='left')
@@ -804,8 +804,8 @@ def attach_lifecycle_emissions_series(config, extra_identifier2, output_data_fol
     for col in [col for col in data_mult.columns if 'Effect of lifecycle emissions' in col]:
         data_mult[col] = (data_mult['Total Emissions']+data_mult[col])/data_mult['Total Emissions']
     #save back to csv
-    data_mult.to_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier2}_multiplicative.csv', index=False)
-    data_add.to_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier2}_additive.csv', index=False)
+    data_mult.to_csv(f'{output_data_folder}{extra_identifier2}_multiplicative.csv', index=False)
+    data_add.to_csv(f'{output_data_folder}{extra_identifier2}_additive.csv', index=False)
 
 
 def plot_lca_bars(config, lca, numeric_cols=[], SIMPLE=True):
@@ -903,7 +903,7 @@ def calculate_emissions_effect_from_multiplicative_data(config, extra_identifier
     
     #calcualte the multiplacite effect of this new effect: it is the (total emissions  for that year, + the effect of electricity emissions factor) divided by the total emissions for that year
     data['Effect of electricity emissions'] = (data['Total Emissions']+data['Effect of electricity emissions'])/data['Total Emissions']
-    data.to_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier2}_multiplicative.csv', index=False)
+    data.to_csv(f'{output_data_folder}{extra_identifier2}_multiplicative.csv', index=False)
     
     return extra_identifier2
 
