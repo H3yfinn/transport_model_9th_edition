@@ -36,7 +36,7 @@ def copy_required_output_files_to_one_folder(config, ECONOMY_ID='all', output_fo
                 useful_file_paths.append(config.root_dir + '\\' +'plotting_output\\dashboards\\' + economy + f'\\{economy}_{scenario}_dashboard_results.html')
                 output_file_paths.append(config.root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_{scenario}_{config.FILE_DATE_ID}_dashboard_results.html')
                 
-                useful_file_paths.append(config.root_dir + '\\' +config.root_dir + '\\' +'plotting_output\\dashboards\\' + economy + f'\\{economy}_{scenario}_dashboard_assumptions.html')
+                useful_file_paths.append(config.root_dir + '\\' +'plotting_output\\dashboards\\' + economy + f'\\{economy}_{scenario}_dashboard_assumptions.html')
                 output_file_paths.append(config.root_dir + '\\' +output_folder_path + '\\' + economy + f'\\{economy}_{scenario}_{config.FILE_DATE_ID}_dashboard_assumptions.html')
                 
                 useful_file_paths.append(config.root_dir + '\\' +'plotting_output\\dashboards\\' + economy + f'\\{economy}_{scenario}_dashboard_assumptions_extra.html')

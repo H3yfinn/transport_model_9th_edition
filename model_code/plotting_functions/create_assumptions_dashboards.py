@@ -276,7 +276,7 @@ def create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors
                     #check that there is a folder for 
                     #write the plot to png for use in a presentation:
                     #PLEASE NOTE THAT THIS WONT SAVE ANYTHING UNLESS YOU ARE RUNNING PYTHON FILES FROM THE COMMAND LINE, I THINK.
-                    fig_dict[economy][scenario][plot][0].write_image( 'plotting_output\\dashboards\\{}\\{}\\{}_graph_{}.png'.format(economy,dashboard_name_id, plot, scenario) , engine="kaleido")
+                    fig_dict[economy][scenario][plot][0].write_image( config.root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}\\{}_graph_{}.png'.format(economy,dashboard_name_id, plot, scenario) , engine="kaleido")
                     #write as html
                     # pio.write_html(fig_dict[economy][scenario][plot][0], 'plotting_output\\dashboards\\{}\\{}\\{}_graph_{}.html'.format(economy,dashboard_name_id, plot, scenario))
                 # fig.update_layout(fig_dict[economy][scenario][plot]['layout'])

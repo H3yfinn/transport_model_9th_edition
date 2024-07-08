@@ -283,7 +283,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main('02_BD') # root_dir_param=root_dir_param)
+        main('02_BD', root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%

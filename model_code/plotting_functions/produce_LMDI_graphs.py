@@ -166,20 +166,20 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                                     graph_title = scenario_text# + ' 1.4% improvement in efficiency'
 
                                 combination_dict_list.append({'economy':economy,'scenario':scenario, 'transport_type':transport_type, 'medium':medium, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,
-                                'output_data_folder': f'intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'})
+                                'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}'})
                                 
                                 extra_identifier_no_transport_type = extra_identifier.replace(f'{transport_type}_', '')
                                 graph_title = graph_title.replace(f'{transport_type} ', '')
                                 extra_identifier_no_scenario = extra_identifier.replace(f'{scenario}_', '')
                                 if extra_identifier_no_transport_type not in combined_transport_type_waterfall_inputs.keys():
-                                    combined_transport_type_waterfall_inputs[extra_identifier_no_transport_type] = [{'economy':economy, 'scenario':scenario, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'}]
+                                    combined_transport_type_waterfall_inputs[extra_identifier_no_transport_type] = [{'economy':economy, 'scenario':scenario, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}'}]
                                 else:
-                                    combined_transport_type_waterfall_inputs[extra_identifier_no_transport_type].append({'economy':economy, 'scenario':scenario, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'})
+                                    combined_transport_type_waterfall_inputs[extra_identifier_no_transport_type].append({'economy':economy, 'scenario':scenario, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}'})
                                 
                                 if extra_identifier_no_scenario not in combined_scenario_waterfall_inputs.keys():
-                                    combined_scenario_waterfall_inputs[extra_identifier_no_scenario] = [{'economy':economy,'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'}]
+                                    combined_scenario_waterfall_inputs[extra_identifier_no_scenario] = [{'economy':economy,'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}'}]
                                 else:
-                                    combined_scenario_waterfall_inputs[extra_identifier_no_scenario].append({'economy':economy,'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}\\', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'})
+                                    combined_scenario_waterfall_inputs[extra_identifier_no_scenario].append({'economy':economy,'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}'})
     
     ###########################################################################
     # Do final data prep and then run the LMDI method and plot the results
@@ -258,6 +258,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
         except Exception as e:
             if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
                 breakpoint()
+                main_function.run_divisia(config, data_title, extra_identifier, activity_data, energy_data, structure_variables_list, activity_variable, emissions_variable = 'Emissions', energy_variable = energy_variable, emissions_divisia = emissions_divisia, emissions_data=emissions_data, time_variable=time_variable,hierarchical=hierarchical,output_data_folder=output_data_folder)
                 print(e)
             
         try:
@@ -297,8 +298,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                         
                         #create a dataset to be used for cumulative version of the addtive data as well
                         def save_copy_of_data_for_cumulative_version(extra_identifier, output_data_folder):
-                            data = pd.read_csv(f'{output_data_folder}{extra_identifier}_additive.csv')
-                            data.to_csv(f'{output_data_folder}{extra_identifier}_cumulative_additive.csv', index=False)
+                            data = pd.read_csv(f'{output_data_folder}\\{extra_identifier}_additive.csv')
+                            data.to_csv(f'{output_data_folder}\\{extra_identifier}_cumulative_additive.csv', index=False)
                             return extra_identifier+'_cumulative'
                         extra_identifier3 = save_copy_of_data_for_cumulative_version(extra_identifier2, output_data_folder)
                         try:
@@ -409,8 +410,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                         
                         #create a dataset to be used for cumulative version of the addtive data as well
                         def save_copy_of_data_for_cumulative_version(extra_identifier, output_data_folder):
-                            data = pd.read_csv(f'{output_data_folder}{extra_identifier}_additive.csv')
-                            data.to_csv(f'{output_data_folder}{extra_identifier}_cumulative_additive.csv', index=False)
+                            data = pd.read_csv(f'{output_data_folder}\\{extra_identifier}_additive.csv')
+                            data.to_csv(f'{output_data_folder}\\{extra_identifier}_cumulative_additive.csv', index=False)
                             return extra_identifier+'_cumulative'
                         extra_identifier3 = save_copy_of_data_for_cumulative_version(extra_identifier2, output_data_folder)
                         try:
@@ -701,7 +702,7 @@ def calculate_emissions_effect_from_additive_data(config, extra_identifier, outp
     # main_function.run_divisia(config, data_title, extra_identifier2, activity_data_gen, energy_data_gen, structure_variables_list, activity_variable, emissions_variable = 'Emissions', energy_variable = energy_variable, emissions_divisia = emissions_divisia, emissions_data=emissions_data_gen, time_variable=time_variable,hierarchical=hierarchical,output_data_folder=output_data_folder)
     #load in the additive effect data and find the effect of electricity emissions on engine switching:
     # data_generation_emissions = pd.read_csv(f'{output_data_folder}{extra_identifier2}_additive.csv')
-    data = pd.read_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier}_additive.csv')
+    data = pd.read_csv(f'{output_data_folder}\\{extra_identifier}_additive.csv')
     #keep only the date column and emissions column, also filter for transport type, medium from combination_dict
     electricity_emissions = electricity_emissions[(electricity_emissions['Transport Type']==combination_dict['transport_type']) & (electricity_emissions['Scenario']==combination_dict['scenario'])]
     if combination_dict['medium'] == 'road':
@@ -712,7 +713,7 @@ def calculate_emissions_effect_from_additive_data(config, extra_identifier, outp
     electricity_emissions = electricity_emissions.rename(columns={'Emissions':'Effect of electricity emissions'})
     data = data.merge(electricity_emissions, on='Date')
     
-    data.to_csv(config.root_dir + '\\' +f'{output_data_folder}{extra_identifier2}_additive.csv', index=False)
+    data.to_csv(f'{output_data_folder}\\{extra_identifier2}_additive.csv', index=False)
     
     return extra_identifier2
     
@@ -793,8 +794,8 @@ def attach_lifecycle_emissions_series(config, extra_identifier2, output_data_fol
     lca_wide.columns = ['Date'] + [f'Effect of lifecycle emissions {col}' for col in lca_wide.columns if col != 'Date']
     
     #add this to the data                            
-    data_mult = pd.read_csv(f'{output_data_folder}{extra_identifier2}_multiplicative.csv')
-    data_add = pd.read_csv(f'{output_data_folder}{extra_identifier2}_additive.csv')
+    data_mult = pd.read_csv(f'{output_data_folder}\\{extra_identifier2}_multiplicative.csv')
+    data_add = pd.read_csv(f'{output_data_folder}\\{extra_identifier2}_additive.csv')
     
     # add the lifecycle emissions to the data. convert to mult for data_mult and add for data_add
     data_mult = pd.merge(data_mult, lca_wide, on='Date', how='left')
@@ -804,8 +805,8 @@ def attach_lifecycle_emissions_series(config, extra_identifier2, output_data_fol
     for col in [col for col in data_mult.columns if 'Effect of lifecycle emissions' in col]:
         data_mult[col] = (data_mult['Total Emissions']+data_mult[col])/data_mult['Total Emissions']
     #save back to csv
-    data_mult.to_csv(f'{output_data_folder}{extra_identifier2}_multiplicative.csv', index=False)
-    data_add.to_csv(f'{output_data_folder}{extra_identifier2}_additive.csv', index=False)
+    data_mult.to_csv(f'{output_data_folder}\\{extra_identifier2}_multiplicative.csv', index=False)
+    data_add.to_csv(f'{output_data_folder}\\{extra_identifier2}_additive.csv', index=False)
 
 
 def plot_lca_bars(config, lca, numeric_cols=[], SIMPLE=True):
@@ -890,7 +891,7 @@ def calculate_emissions_effect_from_multiplicative_data(config, extra_identifier
     all_data_generation_emissions, electricity_emissions = calculate_emissions(config, energy_use_by_fuels, all_data.drop(columns=['Emissions']), USE_AVG_GENERATION_EMISSIONS_FACTOR=True, drive_column='Engine switching', energy_column = 'Energy use')
     extra_identifier2 = extra_identifier+'_generation_emissions'
     
-    data = pd.read_csv(f'{output_data_folder}{extra_identifier}_multiplicative.csv')
+    data = pd.read_csv(f'{output_data_folder}\\{extra_identifier}_multiplicative.csv')
     #keep only the date column and emissions column, also filter for transport type, medium, scneaio from combination_dict
     electricity_emissions =  electricity_emissions[(electricity_emissions['Transport Type']==combination_dict['transport_type']) & (electricity_emissions['Scenario']==combination_dict['scenario'])]
     if combination_dict['medium'] == 'road':
@@ -903,7 +904,7 @@ def calculate_emissions_effect_from_multiplicative_data(config, extra_identifier
     
     #calcualte the multiplacite effect of this new effect: it is the (total emissions  for that year, + the effect of electricity emissions factor) divided by the total emissions for that year
     data['Effect of electricity emissions'] = (data['Total Emissions']+data['Effect of electricity emissions'])/data['Total Emissions']
-    data.to_csv(f'{output_data_folder}{extra_identifier2}_multiplicative.csv', index=False)
+    data.to_csv(f'{output_data_folder}\\{extra_identifier2}_multiplicative.csv', index=False)
     
     return extra_identifier2
 

@@ -109,7 +109,7 @@ if save_html:
 
 # Save fig
 if save_fig:
-    fig.write_image('\\plotting_output\\diagnostics\\png\\{}.png'.format(title))
+    fig.write_image(config.root_dir + '\\' + 'plotting_output\\diagnostics\\png\\{}.png'.format(title))
 
 
 

@@ -274,9 +274,9 @@ class Config:
     
     def _set_FILE_DATE_ID(self, root_dir):    
         if self.USE_LATEST_OUTPUT_DATE_ID:
-            data_folder_path = '\\output_data\\model_output\\'
-            file_name = 'model_output_years_'
-            FILE_DATE_ID = utility_functions.get_latest_date_for_data_file(root_dir, data_folder_path, file_name)
+            data_folder_path = self.root_dir + '\\output_data\\model_output\\'
+            file_name = 'model_output'
+            FILE_DATE_ID = utility_functions.get_latest_date_for_data_file(data_folder_path, file_name)
         else:
             FILE_DATE_ID = datetime.datetime.now().strftime("%Y%m%d")
         return FILE_DATE_ID
