@@ -503,8 +503,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
         residual_variable1 = combination_dict['residual_variable1']#will be the same for all
         scenario = combination_dict['scenario']#will be the same for all
         economy = combination_dict['economy']
-        plotting_output_folder = combination_dict['plotting_output_folder']
-        output_data_folder = combination_dict['output_data_folder']
+        plotting_output_folder =config.root_dir + '\\' +  combination_dict['plotting_output_folder']
+        output_data_folder =config.root_dir + '\\' +  combination_dict['output_data_folder']
         
         graph_title = combination_dict['graph_title']#will be the same for all
         #temp, find where things are going wrong:
@@ -566,8 +566,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
             economy = combination_dict['economy']
             emissions_divisia = combination_dict['emissions_divisia']
             residual_variable1 = combination_dict['residual_variable1']
-            plotting_output_folder = combination_dict['plotting_output_folder']
-            output_data_folder = combination_dict['output_data_folder']
+            plotting_output_folder =config.root_dir + '\\' +  combination_dict['plotting_output_folder']
+            output_data_folder =config.root_dir + '\\' +  combination_dict['output_data_folder']
             
             # if hierarchical:
             #     continue#not sure about summing up multiplicative effects
