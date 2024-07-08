@@ -420,7 +420,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                                 breakpoint()
                                 plot_output.plot_additive_waterfall(config, data_title, extra_identifier2, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT, INCLUDE_EXTRA_FACTORS_AT_END = True,PLOT_CUMULATIVE_VERSION = False)
                             else:
-                                pass                                
+                                print('error plotting {}'.format(extra_identifier))                                
                         try:
                             plot_output.plot_additive_waterfall(config, data_title, extra_identifier3, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT, INCLUDE_EXTRA_FACTORS_AT_END = True,PLOT_CUMULATIVE_VERSION = True)
                         except:
@@ -428,7 +428,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                                 breakpoint()
                                 plot_output.plot_additive_waterfall(config, data_title, extra_identifier3, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT, INCLUDE_EXTRA_FACTORS_AT_END = True,PLOT_CUMULATIVE_VERSION = True)
                             else:
-                                pass
+                                print('error plotting {}'.format(extra_identifier))
                             
                         #and then plot the same data but with the original structure_variables_list and extra_identifier
                         #PLEASE NOTE THAT THE TIMESERIES VALUES DONT INCLUDE THE EFFECT OF THE ELECTRICITY EMISSIONS FACTOR OR THE LIFECYCLE EMISSIONS FACTOR IN THEIR 'TOTAL' VALUES SICNEIT WOULD BE MORE CONFUSING THAN HELPFUL
@@ -439,7 +439,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                                 breakpoint()
                                 plot_output.plot_multiplicative_timeseries(config, data_title, extra_identifier2,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_EXTRA_FACTORS_AT_END = True)
                             else:
-                                pass
+                                print('error plotting {}'.format(extra_identifier))
                         try:
                             plot_output.plot_additive_timeseries(config, data_title, extra_identifier2,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_EXTRA_FACTORS_AT_END = True)  
                         except:
@@ -447,7 +447,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                                 breakpoint()
                                 plot_output.plot_additive_timeseries(config, data_title, extra_identifier2,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_EXTRA_FACTORS_AT_END = True) 
                             else:
-                                pass
+                                print('error plotting {}'.format(extra_identifier))
                     try:
                         plot_output.plot_additive_waterfall(config, data_title, extra_identifier, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT)
                     except:
@@ -455,7 +455,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                             breakpoint()
                             plot_output.plot_additive_waterfall(config, data_title, extra_identifier, structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size, y_axis_min_percent_decrease=y_axis_min_percent_decrease,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical,output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder, INCLUDE_TEXT = INCLUDE_TEXT)
                         else:
-                            pass
+                            print('error plotting {}'.format(extra_identifier))
                     # if hierarchical:
                     #     breakpoint()  
                     try:
@@ -465,7 +465,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                             breakpoint()
                             plot_output.plot_additive_timeseries(config, data_title, extra_identifier,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder)
                         else:
-                            pass
+                            print('error plotting {}'.format(extra_identifier))
                     try:
                         plot_output.plot_multiplicative_timeseries(config, data_title, extra_identifier,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder)
                     except:
@@ -473,13 +473,14 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                             plot_output.plot_multiplicative_timeseries(config, data_title, extra_identifier,structure_variables_list=structure_variables_list,activity_variable=activity_variable,energy_variable='Energy use', emissions_variable='Emissions',emissions_divisia=emissions_divisia, time_variable='Date', graph_title=graph_title, residual_variable1=residual_variable1, residual_variable2='Emissions intensity', font_size=font_size,AUTO_OPEN=AUTO_OPEN, hierarchical=hierarchical, output_data_folder=output_data_folder, plotting_output_folder=plotting_output_folder)
                             breakpoint()
                         else:
-                            pass
+                            print('error plotting {}'.format(extra_identifier))
                 except:
                     # breakpoint()
                     print('error plotting {}'.format(extra_identifier))
                     continue
 
     #now loop through unqiue keys in combined_transport_type_waterfall_inputs and plot them all together:
+    
     for key in combined_transport_type_waterfall_inputs.keys():
         new_extra_identifier = key 
         if USE_LIST_OF_DATASETS_TO_PRODUCE and new_extra_identifier not in datasets_to_produce:

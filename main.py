@@ -108,11 +108,11 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     # Your long-running code here
     try:
         #Things to do once a day:
-        do_these_once_a_day = True
+        do_these_once_a_day = False
         if do_these_once_a_day:
             create_all_concordances(config)
         
-        PREPARE_DATA = True
+        PREPARE_DATA = False
         if PREPARE_DATA:
             import_macro_data(config, UPDATE_INDUSTRY_VALUES=False)
             import_transport_system_data(config)
@@ -142,7 +142,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             aggregate_data_for_model(config, ECONOMY_ID)
             progress += increment
             update_progress(progress)
-            MODEL_RUN_1  = True
+            MODEL_RUN_1  = False
             if MODEL_RUN_1:   
                 print('\nDoing first model run for {}\n'.format(economy))   
                 #MODEL RUN 1: (RUN MODEL FOR DATA BETWEEN AND INCLUDIONG BASE YEAR AND config.OUTLOOK_BASE_YEAR. This is important because we often dont have the data up to OUTLOOK_BASE_YEAR, so we have to model it. But its also important the data in the OUTLOOK_BASE_YEAR matches the energy use from ESTO. Otherwise we'd just model it all in one go)).
@@ -167,7 +167,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             
             progress += increment
             update_progress(progress)
-            MODEL_RUN_2  = True
+            MODEL_RUN_2  = False
             #below are required for MODEL_RUN_2. only chasnge them if you just want to run the model for the base year and not the whole period
             PROJECT_TO_JUST_OUTLOOK_BASE_YEAR = False
             ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR = True
@@ -219,6 +219,14 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                 progress += increment
                 update_progress(progress)
                 copy_required_output_files_to_one_folder(config, ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\\for_other_modellers')
+    
+            try:
+                produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
+            except:
+                print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
+                if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                    breakpoint()
+                pass
 
         # international_bunkers.international_bunker_share_calculation_handler(config)
         print('\nFinished running model for all economies, now doing final formatting\n')
