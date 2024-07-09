@@ -1394,8 +1394,13 @@ def prodcue_LMDI_mutliplicative_plot(config, ECONOMY_IDs, fig_dict, colors_dict,
                 medium_id = 'road'
             # breakpoint()
             file_identifier = f'{economy}_{scenario}_{transport_type}_{medium_id}_2_Energy use_Hierarchical_2070_multiplicative'
-            
-            lmdi_data = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\{economy}\\{file_identifier}.csv')
+            try:
+                lmdi_data = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\{economy}\\{file_identifier}.csv')
+            except:
+                if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                    breakpoint()
+                fig_dict[economy][scenario][f'lmdi_{transport_type}_{medium}'] = [None, None, False]
+                return fig_dict
             #melt data so we have the different components of the LMDI as rows. eg. for freight the cols are: Date	Change in Energy	Energy intensity effect	freight_tonne_km effect	Engine type effect	Total Energy	Total_freight_tonne_km
             #we want to drop the last two plots, then melt the data so we have the different components of the LMDI as rows. eg. for freight the cols will end up as: Date	Effect. Then we will also create a line dash col and if the Effect is Change in Energy then the line dash will be solid, otherwise it will be dotted
             #drop cols by index, not name so it doesnt matter what thei names are

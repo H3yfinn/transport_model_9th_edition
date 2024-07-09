@@ -63,7 +63,7 @@ def adjust_data_to_match_esto_handler(config, BASE_YEAR, ECONOMY_ID, road_model_
     Returns:
         _type_: _description_
     """    
-    energy_use_esto = format_9th_input_energy_from_esto(config, ECONOMY_ID)#Economy missing in here
+    energy_use_esto = format_9th_input_energy_from_esto(config, ECONOMY_ID=ECONOMY_ID)#Economy missing in here
     
     #move electricity use in road to rail. This is based on the parameters the user has set. It should generally default to False unless the user things that Elec use in road is overexaggerated.
     ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR']
@@ -519,7 +519,6 @@ def incorporate_fuel_mixing_before_recalculating_stocks(config, required_energy_
 #why is ratio so high in places? maybe need to fix.
 def test_output_matches_expectations(config, ECONOMY_ID, supply_side_fuel_mixing, demand_side_fuel_mixing, road_all_wide, non_road_all_wide, energy_use_merged, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True):
 
-    
         
     #calcauklte total energy use by year and economy for both road and non road.
     
@@ -618,18 +617,21 @@ def move_electricity_use_in_road_to_rail_esto(config, energy_use_esto, ECONOMY_I
     energy_use_esto = pd.concat([energy_use_esto, rail_elec])
     return energy_use_esto
     
-def format_9th_input_energy_from_esto(config, ECONOMY_ID=None):
+def format_9th_input_energy_from_esto(config, ECONOMY_ID=None, REDO_SAME_DATE_ID=False):
+    
     #take in data from the EBT system of 9th and format it so that it can be used to create the energy data to whcih the model will be rescaled:
     #load the 9th data
     date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + 'input_data\\9th_model_inputs', 'model_df_wide_')
     energy_use_esto = pd.read_csv(config.root_dir + '\\' +f'input_data\\9th_model_inputs\\model_df_wide_{date_id}.csv')
-    #just quickly, if it contains '15_PHL', '17_SGP', then change them and resave it. this should be sorted out later but for now its okay desu.
-    # if len(energy_use_esto.loc[energy_use_esto['economy'].isin(['15_PHL', '17_SGP'])]) > 0:
-    #     energy_use_esto['economy'] = energy_use_esto['economy'].replace({'15_PHL': '15_PHL', '17_SIN': '17_SGP'})
-    #     energy_use_esto.to_csv(f'input_data\\9th_model_inputs\\model_df_wide_{date_id}.csv', index=False)
-        
-    if ECONOMY_ID != None:
-        energy_use_esto = energy_use_esto.loc[energy_use_esto['economy'] == ECONOMY_ID].copy()
+    #check that that matches config.latest_esto_data_FILE_DATE_ID. if not then jsut notify user
+    if date_id != config.latest_esto_data_FILE_DATE_ID:
+        print('WARNING: the date_id for the 9th model inputs does not match the latest esto data date_id. This is okay for now but it should be fixed later')
+    #now check if we've already created an output for this file. if so then we dont need to do it again:energy_use_esto
+    if os.path.exists(config.root_dir + '\\' + f'intermediate_data\\model_inputs_{date_id}.csv') and not REDO_SAME_DATE_ID:
+        energy_use_esto = pd.read_csv(config.root_dir + '\\' + f'intermediate_data\\model_inputs_{date_id}.csv')
+        if ECONOMY_ID != None:
+            energy_use_esto = energy_use_esto.loc[energy_use_esto['Economy'] == ECONOMY_ID].copy()
+        return energy_use_esto
     
     #reverse the mappings:
     medium_mapping_reverse = {v: k for k, v in config.medium_mapping.items()}
@@ -759,6 +761,11 @@ def format_9th_input_energy_from_esto(config, ECONOMY_ID=None):
     #reame Energy_esto to Energy:
     energy_use_esto.rename(columns={'Energy_esto': 'Energy'}, inplace=True)
     
+    #save the file to the intermediate_data folder
+    energy_use_esto.to_csv(config.root_dir + '\\' + f'intermediate_data\\model_inputs_{date_id}.csv', index=False)
+    
+    if ECONOMY_ID != None:
+        energy_use_esto = energy_use_esto.loc[energy_use_esto['Economy'] == ECONOMY_ID].copy()
     return energy_use_esto
 
 

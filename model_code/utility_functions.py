@@ -69,28 +69,6 @@ def copy_required_output_files_to_one_folder(config, ECONOMY_ID='all', output_fo
     #go through the files output_file_paths and put them in a list but repalce the dateid with a wildcard
     for file in output_file_paths:
         files_in_output_folder.append(re.sub(config.FILE_DATE_ID, '*', file))
-    #drop duplicates
-    # files_in_output_folder = list(set(files_in_output_folder))
-    if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
-        breakpoint()   #check if 20240618_21_VN_cost_inputs gets removed 
-    
-    # files_in_output_folder = os.listdir(output_folder_path + '\\' + economy)
-    # #drop any dateids in the file names
-    # files_in_output_folder = [re.sub(r'_\d{8}', '', file) for file in files_in_output_folder]
-                        
-    #find file in output_folder_path + '\\' + economy. if there is one, remove it
-    # if f'{economy}_{scenario}__dashboard_results.html' in files_in_output_folder:
-    #     file_paths_to_remove.append(output_folder_path + '\\' + economy + f'\\{economy}_{scenario}_dashboard_results.html')
-    # chargers: output_data\\for_other_modellers\\estimated_number_of_chargers.csv
-    #this one si already put there automatically so ignore it
-    # useful_file_paths.append('output_data\\' + 'for_other_modellers' + '\\estimated_number_of_chargers.csv')
-    # Energy use:
-    # output_data\\for_other_modellers\\transport_energy_use{config.FILE_DATE_ID}.csv
-
-    # for filename in os.listdir(output_folder_path + '\\' + economy):
-    #     file_path = os.path.join(output_folder_path, economy, filename)
-    #     if os.path.isfile(file_path) or os.path.islink(file_path):
-    #         os.unlink(file_path)
     #for every file in useful file paths, copy it to its corresponding output file path
     for f in range(len(useful_file_paths)):
         try:

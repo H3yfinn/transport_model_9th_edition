@@ -814,7 +814,8 @@ def project_total_bunkers_energy_use(config, international_bunker_inputs, turnov
     
     #calcaulte activity for each row using itneisty and energy:
     international_bunker_inputs['Activity'] = international_bunker_inputs['Energy'] / international_bunker_inputs['Intensity']
-    
+
+    Extra_proportional_increases_in_activity = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['Extra_proportional_increases_in_activity']
     for medium in international_bunker_inputs.Medium.unique():
         for scenario in international_bunker_inputs.Scenario.unique():
             for economy in international_bunker_inputs.Economy.unique():
@@ -846,6 +847,17 @@ def project_total_bunkers_energy_use(config, international_bunker_inputs, turnov
                     # if year == 2021 or year == config.OUTLOOK_BASE_YEAR+1:
                     #     breakpoint()
                     new_activity_growth_sum = current_year['Activity'].sum() * current_year['Growth Rate'].iloc[0]
+                    #if we have parameters.yml>Extra_proportional_increases_in_activity entries for this economy, then we need to add that to the growth rate:
+                    #e.g. 
+                    # Extra_proportional_increases_in_activity: #order is: script(e.g. road, bunkers, nonroad), economy, year, medium, transport type
+                    # 'bunkers': {'14_PE': {'2025': {'ship': {'freight': 0.1}}}}
+                    if Extra_proportional_increases_in_activity.get('bunkers', {}).get(economy, {}).get(str(year), {}).get(medium):
+                        change_for_medium_economy_year = Extra_proportional_increases_in_activity['bunkers'][economy][str(year)][medium]
+                        new_activity_growth_sum *= (1+change_for_medium_economy_year)
+                        # If the path exists and the value is truthy, do something
+                    else:
+                        # Handle the case where the path does not exist or the value is falsy
+                        pass  # Replace with your code
                     #take away 0.03 from activity use in all rows. this is to replicate the turnover of stocks so that old fuel types can go to zero. then the lost enegry use will be added to the new activity requried and distributed via the fuel shares: (note that we make sure not to take away activity before we find the sum of new activity use for that year - this is what we do in the otehr models)
                     turnover_of_activity = current_year['Activity'].sum() * turnover_rate
                     #take away the turnover of stocks from the sum of activity use for that year:

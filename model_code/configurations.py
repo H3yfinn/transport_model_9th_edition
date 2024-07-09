@@ -9,11 +9,12 @@ class Config:
     def __init__(self, root_dir):
         self.root_dir = root_dir
         # Frequently changed config variables
-        self.USE_LATEST_OUTPUT_DATE_ID = False
+        self.USE_LATEST_OUTPUT_DATE_ID = True
         self.NEW_SALES_SHARES = True
         self.NEW_FUEL_MIXING_DATA = True
         self.IMPORT_FROM_TRANSPORT_DATA_SYSTEM = False
         self.transport_data_system_FILE_DATE_ID = 'DATE20240612'
+        self.latest_esto_data_FILE_DATE_ID = '20231207'
         self.PRINT_LESS_IMPORTANT_DETAILS = False
         self.PRINT_WARNINGS_FOR_FUTURE_WORK = False
 
