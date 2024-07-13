@@ -853,7 +853,8 @@ def project_total_bunkers_energy_use(config, international_bunker_inputs, turnov
                     # 'bunkers': {'14_PE': {'2025': {'ship': {'freight': 0.1}}}}
                     if Extra_proportional_increases_in_activity.get('bunkers', {}).get(economy, {}).get(str(year), {}).get(medium):
                         change_for_medium_economy_year = Extra_proportional_increases_in_activity['bunkers'][economy][str(year)][medium]
-                        new_activity_growth_sum *= (1+change_for_medium_economy_year)
+                        change_for_medium_economy_year = (1+change_for_medium_economy_year) * current_year['Activity'].sum()
+                        new_activity_growth_sum += change_for_medium_economy_year
                         # If the path exists and the value is truthy, do something
                     else:
                         # Handle the case where the path does not exist or the value is falsy

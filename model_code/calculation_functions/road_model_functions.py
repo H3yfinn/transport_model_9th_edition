@@ -697,7 +697,8 @@ def check_activity_after_run(config, change_dataframe, throw_error=True):
                 #print the avg difference
                 print('Max activity error margin is {}'.format(comparison['difference'].max()))
         elif year != 2021:
-            breakpoint()
+            if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                breakpoint()
             time.sleep(1)
             if throw_error:
                 raise ValueError('Activity is not equal to previous years activity times the activity growth rate. Max activity error margin is {}'.format(comparison['difference'].max()))

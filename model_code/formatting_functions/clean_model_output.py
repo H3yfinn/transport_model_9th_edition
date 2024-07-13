@@ -163,32 +163,54 @@ def concatenate_output_data(config):
     model_output_all_with_fuels_non_road = pd.DataFrame()
     not_all_economies = False
     for e in config.ECONOMY_LIST:
-        try:
+        if not os.path.exists(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_{}'.format(e, config.model_output_file_name)):
+            #find altest date available for the file:
+            # get_latest_date_for_data_file(data_folder_path, file_name_start, file_name_end=None, EXCLUDE_DATE_STR_START=False)
+            file_date_id_for_economy = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + 'output_data\\model_output_detailed\\', f"{e}_{config.model_output_file_name.replace(config.FILE_DATE_ID, '')}".strip('.csv'), '.csv')
+            if file_date_id_for_economy is None:
+                not_all_economies = True
+                break
+            model_output_detailed_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_{}'.format(e, config.model_output_file_name.replace(config.FILE_DATE_ID, file_date_id_for_economy)))
+            model_output_non_detailed_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output\\{}_{}'.format(e, config.model_output_file_name.replace(config.FILE_DATE_ID, file_date_id_for_economy)))
+            model_output_all_with_fuels_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_{}'.format(e, config.model_output_file_name.replace(config.FILE_DATE_ID, file_date_id_for_economy)))
+            
+            #now for NON_ROAD_DETAILED_ files:
+            model_output_detailed_non_road_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name.replace(config.FILE_DATE_ID, file_date_id_for_economy)))
+            model_output_non_detailed_non_road_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output\\{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name.replace(config.FILE_DATE_ID, file_date_id_for_economy)))
+            model_output_all_with_fuels_non_road_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name.replace(config.FILE_DATE_ID, file_date_id_for_economy)))
+            
+            model_output_detailed = pd.concat([model_output_detailed, model_output_detailed_economy])
+            model_output_non_detailed = pd.concat([model_output_non_detailed, model_output_non_detailed_economy])
+            model_output_all_with_fuels = pd.concat([model_output_all_with_fuels, model_output_all_with_fuels_economy])
+            
+            #concatenate the NON_ROAD_DETAILED_ dataframes
+            model_output_detailed_non_road = pd.concat([model_output_detailed_non_road, model_output_detailed_non_road_economy])
+            model_output_non_detailed_non_road = pd.concat([model_output_non_detailed_non_road, model_output_non_detailed_non_road_economy])
+            model_output_all_with_fuels_non_road = pd.concat([model_output_all_with_fuels_non_road, model_output_all_with_fuels_non_road_economy])
+        else:
+            
             model_output_detailed_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_{}'.format(e, config.model_output_file_name))
-        except:
-            not_all_economies = True
-            break#we didnt run the model for this economy, so no need to concatenate any
-        model_output_non_detailed_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output\\{}_{}'.format(e, config.model_output_file_name))
-        model_output_all_with_fuels_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_{}'.format(e, config.model_output_file_name))
-        
-        #now for NON_ROAD_DETAILED_ files:
-        model_output_detailed_non_road_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name))
-        model_output_non_detailed_non_road_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output\\{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name))
-        model_output_all_with_fuels_non_road_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name))
-        
-        model_output_detailed = pd.concat([model_output_detailed, model_output_detailed_economy])
-        model_output_non_detailed = pd.concat([model_output_non_detailed, model_output_non_detailed_economy])
-        model_output_all_with_fuels = pd.concat([model_output_all_with_fuels, model_output_all_with_fuels_economy])
-        
-        #concatenate the NON_ROAD_DETAILED_ dataframes
-        model_output_detailed_non_road = pd.concat([model_output_detailed_non_road, model_output_detailed_non_road_economy])
-        model_output_non_detailed_non_road = pd.concat([model_output_non_detailed_non_road, model_output_non_detailed_non_road_economy])
-        model_output_all_with_fuels_non_road = pd.concat([model_output_all_with_fuels_non_road, model_output_all_with_fuels_non_road_economy])
-
-    if not_all_economies:
-        print('not all economies have been run. Not concatenating data')
-        return
+            
+            model_output_non_detailed_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output\\{}_{}'.format(e, config.model_output_file_name))
+            model_output_all_with_fuels_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_{}'.format(e, config.model_output_file_name))
+            
+            #now for NON_ROAD_DETAILED_ files:
+            model_output_detailed_non_road_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name))
+            model_output_non_detailed_non_road_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output\\{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name))
+            model_output_all_with_fuels_non_road_economy = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_NON_ROAD_DETAILED_{}'.format(e, config.model_output_file_name))
+            
+            model_output_detailed = pd.concat([model_output_detailed, model_output_detailed_economy])
+            model_output_non_detailed = pd.concat([model_output_non_detailed, model_output_non_detailed_economy])
+            model_output_all_with_fuels = pd.concat([model_output_all_with_fuels, model_output_all_with_fuels_economy])
+            
+            #concatenate the NON_ROAD_DETAILED_ dataframes
+            model_output_detailed_non_road = pd.concat([model_output_detailed_non_road, model_output_detailed_non_road_economy])
+            model_output_non_detailed_non_road = pd.concat([model_output_non_detailed_non_road, model_output_non_detailed_non_road_economy])
+            model_output_all_with_fuels_non_road = pd.concat([model_output_all_with_fuels_non_road, model_output_all_with_fuels_non_road_economy])
     
+    if not_all_economies:
+        print('Not all economies have been run, so not all data has been concatenated')
+        return False
     #save the final df: 
     model_output_detailed.to_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
     model_output_non_detailed.to_csv(config.root_dir + '\\' + 'output_data\\model_output\\all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
@@ -199,6 +221,7 @@ def concatenate_output_data(config):
     model_output_non_detailed_non_road.to_csv(config.root_dir + '\\' + 'output_data\\model_output\\all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
     model_output_all_with_fuels_non_road.to_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name), index=False)
     
+    return True
 def create_output_for_cost_modelling(config, model_output_detailed, ECONOMY_ID):
     #create a version of the model output which is just the energy use, stocks and sales by vehicle type and drive. Later on we might also want to provid enegry use by fuel type so cost of fuel can be more precisely calculated (because of fuel mixing).
     model_output_detailed = model_output_detailed.loc[model_output_detailed['Medium']=='road'].copy()

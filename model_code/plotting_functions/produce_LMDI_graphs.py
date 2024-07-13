@@ -30,9 +30,9 @@ from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 
 #%%
-def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_PRODUCE = False, PLOTTING = False, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070, PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR=True, INCLUDE_LIFECYCLE_EMISSIONS=True, PLOT_EMISSIONS_FACTORS=False, SET_START_DATE_TO_AFTER_COVID=True):
+def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = False, PLOTTING = False, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070, PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR=True, INCLUDE_LIFECYCLE_EMISSIONS=True, PLOT_EMISSIONS_FACTORS=False, SET_START_DATE_TO_AFTER_COVID=True):
     #take in energy and activity data 
-    if ECONOMY_ID == None:
+    if ECONOMY_ID == 'all':
         all_data = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output\\all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
         energy_use_by_fuels = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
         detailed_data = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\all_economies_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name))
@@ -40,7 +40,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
         all_data = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output\\{}_{}'.format(ECONOMY_ID,config.model_output_file_name))
         energy_use_by_fuels = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_{}'.format(ECONOMY_ID,config.model_output_file_name))
         detailed_data = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_{}'.format(ECONOMY_ID,config.model_output_file_name))
-    
+     
     if SET_START_DATE_TO_AFTER_COVID:
         #TO BE SAFE WE HAVE TO SET THE START DATE TO AFTER WHEN ANY RETURN TO NORMAL AFTER COVID WAS OVER. SO WE WILL SET IT TO 2024, EVEN THOUGH THAT IS 3 YEARS AFTER OUR BASE YEAR DATA:
         all_data = all_data[all_data['Date']>=2024]
@@ -91,16 +91,28 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
     ################################################
     #drop nans?
     all_data = all_data.dropna()
-    
-    #create a 'APEC' economy which is the sum of all and concat it on:
-    APEC = all_data.copy()
-    #set economy to APEC
-    APEC['Economy'] = 'APEC'
-    APEC.groupby(['Date', 'Economy', 'Scenario', 'Transport Type', 'Vehicle Type', 'Drive', 'Medium']).sum(numeric_only=True).reset_index()
+    if ECONOMY_ID == 'all':
+        #create a 'APEC' economy which is the sum of all and concat it on:
+        APEC = all_data.copy()
+        #set economy to APEC
+        APEC['Economy'] = 'all'
+        APEC.groupby(['Date', 'Economy', 'Scenario', 'Transport Type', 'Vehicle Type', 'Drive', 'Medium']).sum(numeric_only=True).reset_index()
 
-    #concat APEC on
-    all_data = pd.concat([all_data, APEC])
+        #concat APEC on
+        all_data = APEC.copy()#pd.concat([all_data, APEC])
+        
+        energy_use_by_fuels_all = energy_use_by_fuels.copy()
+        #set economy to APEC
+        energy_use_by_fuels_all['Economy'] = 'all'
+        energy_use_by_fuels_all.groupby(['Date', 'Economy', 'Scenario', 'Transport Type', 'Vehicle Type', 'Drive', 'Medium', 'Fuel']).sum(numeric_only=True).reset_index()
+        energy_use_by_fuels = energy_use_by_fuels_all.copy()#pd.concat([energy_use_by_fuels, energy_use_by_fuels_all])
 
+        detailed_data_all = detailed_data.copy()
+        #set economy to APEC
+        detailed_data_all['Economy'] = 'all'
+        detailed_data_all.groupby(['Date', 'Economy', 'Scenario', 'Transport Type', 'Vehicle Type', 'Drive', 'Medium']).sum(numeric_only=True).reset_index()
+        detailed_data = detailed_data_all.copy()#pd.concat([detailed_data, detailed_data_all])
+        
     ###########################################################################
 
     #we will create a script which will loop through the different combinations of data we have and run the LMDI model on them and plot them
@@ -188,7 +200,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
     #drop Stocks col
     all_data = all_data.drop(columns = ['Stocks'])
 
-    all_data, electricity_emissions = calculate_emissions(config, energy_use_by_fuels, all_data, USE_AVG_GENERATION_EMISSIONS_FACTOR=False)
+    all_data, electricity_emissions = calculate_emissions(config, energy_use_by_fuels, all_data,ECONOMY_ID, USE_AVG_GENERATION_EMISSIONS_FACTOR=False)
     
     better_names_dict = {'Drive': 'Engine switching', 'Energy':'Energy use'}
     #before going through the data lets rename some structural variables to be more readable
@@ -264,8 +276,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
             continue    
         try:
             if PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR and emissions_divisia:
-                extra_identifier2 = calculate_emissions_effect_from_additive_data(config, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict, PLOT_EMISSIONS_FACTORS=PLOT_EMISSIONS_FACTORS)
-                extra_identifier2 = calculate_emissions_effect_from_multiplicative_data(config, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict)
+                extra_identifier2 = calculate_emissions_effect_from_additive_data(config, ECONOMY_ID, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict, PLOT_EMISSIONS_FACTORS=PLOT_EMISSIONS_FACTORS)
+                extra_identifier2 = calculate_emissions_effect_from_multiplicative_data(config, ECONOMY_ID, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict)
                 #now we can plot the additive and multiplicatve effecst of electricity emissions factor on the engine switching effect using the specially deisgiend INCLUDE_EXTRA_FACTORS_AT_END argument in the plotting functions
                 #TODO
                 if INCLUDE_LIFECYCLE_EMISSIONS:
@@ -371,8 +383,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
                 pass
             
             if PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR and emissions_divisia:
-                extra_identifier2 = calculate_emissions_effect_from_additive_data(config, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict, PLOT_EMISSIONS_FACTORS=PLOT_EMISSIONS_FACTORS)
-                extra_identifier2 = calculate_emissions_effect_from_multiplicative_data(config, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict)
+                extra_identifier2 = calculate_emissions_effect_from_additive_data(config, ECONOMY_ID, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict, PLOT_EMISSIONS_FACTORS=PLOT_EMISSIONS_FACTORS)
+                extra_identifier2 = calculate_emissions_effect_from_multiplicative_data(config, ECONOMY_ID, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict)
                 #now we can plot the additive and multiplicatve effecst of electricity emissions factor on the engine switching effect using the specially deisgiend INCLUDE_EXTRA_FACTORS_AT_END argument in the plotting functions
                 #TODO
                 if INCLUDE_LIFECYCLE_EMISSIONS:
@@ -583,7 +595,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID=None, USE_LIST_OF_CHARTS_TO_P
             pass
 
 
-def calculate_emissions(config, energy_use_by_fuels, all_data, USE_AVG_GENERATION_EMISSIONS_FACTOR=False, drive_column='Drive', energy_column = 'Energy use', PLOT_EMISSIONS_FACTORS=False):
+def calculate_emissions(config, energy_use_by_fuels, all_data, ECONOMY_ID, USE_AVG_GENERATION_EMISSIONS_FACTOR=False, drive_column='Drive', energy_column = 'Energy use', PLOT_EMISSIONS_FACTORS=False):
     """take in energy_use_by_fuels and all_data, calcaulte emissions in energy_use_by_fuels and then merge them back into all_data, since all data didnt have energy use by fuel, so it wasnt possible to calculate emissions in all_data
 
     Args:
@@ -613,6 +625,10 @@ def calculate_emissions(config, energy_use_by_fuels, all_data, USE_AVG_GENERATIO
     if USE_AVG_GENERATION_EMISSIONS_FACTOR:
         #pull in the 8th outlook emissions factors by year then use that to claculate the emissions for electricity.
         emissions_factor_elec = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
+        if ECONOMY_ID == 'all':
+            #set economy == 00_APEC to 'all'
+            emissions_factor_elec['Economy'] = emissions_factor_elec['Economy'].replace('00_APEC', 'all')
+
         #extract the emissions factor for elctricity for each economy
         emissions_factor_elec = emissions_factor_elec[emissions_factor_elec.fuel_code=='17_electricity'].copy()
         #rename Carbon Neutral Scenario to Target
@@ -686,13 +702,13 @@ def prepare_data_for_divisia(config, combination_dict, all_data, END_DATE):
     activity_data = activity_data.rename(columns={'Activity':combination_dict['activity_variable']})
     return activity_data, energy_data, emissions_data
 
-def calculate_emissions_effect_from_additive_data(config, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict, PLOT_EMISSIONS_FACTORS):
+def calculate_emissions_effect_from_additive_data(config,ECONOMY_ID, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict, PLOT_EMISSIONS_FACTORS):
     #we want to serparate the effect of electricity emissions from the engine switching effect. To do this we will run the LMDI again but this time we will use the emissions factor for electricity from the 8th outlook. We will then subtract the effect of the electricity emissions from the engine switching effect to get the effect of engine switching on non-electricity emissions. Then include a new structure_variable in structure_variables_list which is the electricity emissions factor. This will be used to calculate the effect of engine switching on electricity emissions. Note that this is quite a crude way of doing this as it assumes that the effect of the electricity emissions factor is entriely within the engine switching effect. This is not true, as you will get a slight amount of reduction in emissions from other effects (for example making evs more efficient), but it is the best we can do with the time we have...
     #run again but with USE_AVG_GENERATION_EMISSIONS_FACTOR = True
     
     #OR alternatively we could jsut calcualte the emissions from electricity in that transport type/medium and set that as an extra bar, maybe yellow colored after everything. then it will 'seem' more separate to the drivers, seem more simple and not invovling potentially wrong calcs and yet still show the same thing!
     
-    all_data_generation_emissions, electricity_emissions = calculate_emissions(config, energy_use_by_fuels, all_data.drop(columns=['Emissions']), USE_AVG_GENERATION_EMISSIONS_FACTOR=True, drive_column='Engine switching', energy_column = 'Energy use',PLOT_EMISSIONS_FACTORS=PLOT_EMISSIONS_FACTORS)
+    all_data_generation_emissions, electricity_emissions = calculate_emissions(config, energy_use_by_fuels, all_data.drop(columns=['Emissions']), ECONOMY_ID, USE_AVG_GENERATION_EMISSIONS_FACTOR=True, drive_column='Engine switching', energy_column = 'Energy use',PLOT_EMISSIONS_FACTORS=PLOT_EMISSIONS_FACTORS)
     extra_identifier2 = extra_identifier+'_generation_emissions'
     # activity_data_gen, energy_data_gen, emissions_data_gen = prepare_data_for_divisia(config, combination_dict, all_data_generation_emissions, END_DATE)
     # main_function.run_divisia(config, data_title, extra_identifier2, activity_data_gen, energy_data_gen, structure_variables_list, activity_variable, emissions_variable = 'Emissions', energy_variable = energy_variable, emissions_divisia = emissions_divisia, emissions_data=emissions_data_gen, time_variable=time_variable,hierarchical=hierarchical,output_data_folder=output_data_folder)
@@ -859,7 +875,7 @@ def plot_lifecycle_emissions(config, emissions_factors, fuels_to_plot):
 
     fig.write_html(config.root_dir + '\\' +f'plotting_output\\lifecycle_emissions\\{economy}_lifecycle_emissions_LINE.html')
 
-def calculate_emissions_effect_from_multiplicative_data(config, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict):
+def calculate_emissions_effect_from_multiplicative_data(config, ECONOMY_ID, extra_identifier, output_data_folder, energy_use_by_fuels, all_data, combination_dict):
     """please note that because emissions for passenger transport will likely go to 0, the multiplicative effect of the electricity emissions will be very high, making the graph look ugly.
 
     Args:
@@ -884,7 +900,7 @@ def calculate_emissions_effect_from_multiplicative_data(config, extra_identifier
     #run again but with USE_AVG_GENERATION_EMISSIONS_FACTOR = True
     #OR alternatively we could jsut calcualte the emissions from electricity in that transport type/medium and set that as an extra bar, maybe yellow colored after everything. then it will 'seem' more separate to the drivers, seem more simple and not invovling potentially wrong calcs and yet still show the same thing! 
     
-    all_data_generation_emissions, electricity_emissions = calculate_emissions(config, energy_use_by_fuels, all_data.drop(columns=['Emissions']), USE_AVG_GENERATION_EMISSIONS_FACTOR=True, drive_column='Engine switching', energy_column = 'Energy use')
+    all_data_generation_emissions, electricity_emissions = calculate_emissions(config, energy_use_by_fuels, all_data.drop(columns=['Emissions']), ECONOMY_ID,USE_AVG_GENERATION_EMISSIONS_FACTOR=True, drive_column='Engine switching', energy_column = 'Energy use')
     extra_identifier2 = extra_identifier+'_generation_emissions'
     
     data = pd.read_csv(f'{output_data_folder}\\{extra_identifier}_multiplicative.csv')

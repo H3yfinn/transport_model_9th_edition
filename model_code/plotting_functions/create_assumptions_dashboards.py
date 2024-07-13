@@ -388,6 +388,7 @@ def load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, E
     previous_projection_energy_output_for_outlook_data_system = pd.DataFrame()
     previous_bunkers_data = pd.DataFrame()
     bunkers_data = pd.DataFrame()
+    supply_side_fuel_mixing_output = pd.DataFrame()
     def assign_FILE_DATE_ID(ECONOMY_IDs):
         #in some cases we dont have the data for the file date id that is stated in the config.py file so this will first check that we have the data for the file date id, and if not, it will assign the latest file date id that we do have data for.
         ECONOMY_IDs_dict = {}
@@ -401,7 +402,6 @@ def load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, E
     
     #please note that this ECONOMY_IDs_dict only works within the for loop below, so any use of file ids outside of this loop will still use only the config.FILE_DATE_ID
     ECONOMY_IDs_dict = assign_FILE_DATE_ID(ECONOMY_IDs)
-    
     for economy in ECONOMY_IDs_dict.keys():
         date_id = ECONOMY_IDs_dict[economy]
         if date_id == None:
@@ -421,6 +421,7 @@ def load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, E
         gompertz_parameters_df_ = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_parameters_estimates_{}.csv'.format(economy, date_id)) 
         activity_change_for_plotting_ = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_medium_to_medium_activity_change_for_plotting{}.csv'.format(economy, date_id))
         bunkers_data_ = pd.read_csv(config.root_dir + '\\' +f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{economy}_international_bunker_energy_use_{date_id}.csv'.format(economy))
+        supply_side_fuel_mixing_output_ = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_supply_side_fuel_shares_{}.csv'.format(economy, date_id))
                 
         ##################
         #NOTE THAT WITH THE PREVIOUS_PROJECTION_FILE_DATE_ID THE FILE SHOULD BE SAVED IN C:\Users\finbar.maunsell\OneDrive - APERC\outlook 9th\Modelling\Sector models\Transport - results only\01_AUS/01_AUS_20240327_transport_energy_use.csv SO YOU CAN ALWAYS GRAB THAT AND PUT IT IN C:\Users\finbar.maunsell\github\transport_model_9th_edition\output_data\for_other_modellers\output_for_outlook_data_system IF YOU WANT TO MAKE SURE YOU'RE USING THAT FILE AND NOT A DIFFERENT VERSION WITH SAME DATE ID
@@ -443,6 +444,7 @@ def load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, E
         gompertz_parameters_df = pd.concat([gompertz_parameters_df, gompertz_parameters_df_])
         activity_change_for_plotting = pd.concat([activity_change_for_plotting, activity_change_for_plotting_])
         bunkers_data = pd.concat([bunkers_data, bunkers_data_])
+        supply_side_fuel_mixing_output = pd.concat([supply_side_fuel_mixing_output, supply_side_fuel_mixing_output_])
         if PREVIOUS_PROJECTION_FILE_DATE_ID!=None:
             previous_projection_energy_output_for_outlook_data_system = pd.concat([previous_projection_energy_output_for_outlook_data_system, previous_projection_energy_output_for_outlook_data_system_])
             previous_bunkers_data = pd.concat([previous_bunkers_data, previous_bunkers_data_])
@@ -537,7 +539,7 @@ def load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, E
     # supply_side_fuel_mixing = supply_side_fuel_mixing.loc[supply_side_fuel_mixing['Economy'].isin(ECONOMY_IDs)]
     # stocks = stocks.loc[stocks['Economy'].isin(ECONOMY_IDs)]
 
-    return new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing,demand_side_fuel_mixing, stocks, road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting, model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data
+    return new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing,demand_side_fuel_mixing, stocks, road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting, model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data, supply_side_fuel_mixing_output
 
 def format_energy_output_for_outlook_data_system_for_plotting(config, energy_output_for_outlook_data_system):
 
@@ -693,12 +695,12 @@ def plotting_handler(config, ECONOMY_IDs, plots, fig_dict, color_preparation_lis
         None
     """
     #breakpoint()
-    new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing,demand_side_fuel_mixing, stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting,model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data = load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR,ECONOMY_IDs, PREVIOUS_PROJECTION_FILE_DATE_ID)
+    new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing,demand_side_fuel_mixing, stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting,model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data, supply_side_fuel_mixing_output = load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR,ECONOMY_IDs, PREVIOUS_PROJECTION_FILE_DATE_ID)
     
     #CREATE EXPERIMENTAL DATASETS TO PLOT. 
     if CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT is not None:
-        new_datasets_tuple = create_single_transport_type_medium_plot(config, (new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing,demand_side_fuel_mixing,  stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting, model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data), transport_type=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT['transport_type'], mediums=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT['mediums']) 
-        new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing, demand_side_fuel_mixing, stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting,model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data = new_datasets_tuple
+        new_datasets_tuple = create_single_transport_type_medium_plot(config, (new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing,demand_side_fuel_mixing,  stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting, model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data, supply_side_fuel_mixing_output), transport_type=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT['transport_type'], mediums=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT['mediums']) 
+        new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing, demand_side_fuel_mixing, stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting,model_output_with_fuels, previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data, supply_side_fuel_mixing_output = new_datasets_tuple
     
     #breakpoint()
     # Share of Transport Type
@@ -1276,36 +1278,44 @@ def dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=Tr
     # #'energy_efficiency_timeseries_freight', 'energy_efficiency_road_strip','energy_efficiency_timeseries_passenger']#activity_growth
     # create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'development',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
     
-def plot_multi_economy_plots(config, ECONOMY_IDs, economy_grouping_name, plots, colors_dict, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True, PREVIOUS_PROJECTION_FILE_DATE_ID=None):
-    config.FILE_DATE_ID = '20240327'
-    new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing, demand_side_fuel_mixing, stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting,model_output_with_fuels,previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data = load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR,ECONOMY_IDs, PREVIOUS_PROJECTION_FILE_DATE_ID)    
+def plot_multi_economy_plots(config, ECONOMY_IDs, economy_grouping_name, plots, colors_dict, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True, PREVIOUS_PROJECTION_FILE_DATE_ID=None, ONLY_AGG_OF_ALL=False):
+    # config.FILE_DATE_ID = '20240327'
+    new_sales_shares_all_plot_drive_shares, model_output_detailed, model_output_detailed_detailed_non_road_drives, energy_output_for_outlook_data_system, original_model_output_8th, chargers, supply_side_fuel_mixing, demand_side_fuel_mixing, stocks,road_model_input, gompertz_parameters_df, growth_forecasts, emissions_factors, first_road_model_run_data, energy_use_esto, data_8th, energy_8th, activity_change_for_plotting,model_output_with_fuels,previous_projection_energy_output_for_outlook_data_system, bunkers_data,previous_bunkers_data,esto_bunkers_data, supply_side_fuel_mixing_output  = load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR,ECONOMY_IDs, PREVIOUS_PROJECTION_FILE_DATE_ID)    
     sum_vehicle_types = ['passenger', 'freight', 'all']
     INDEPENDENT_AXIS_list = [True, False]
-    SUM_OF_ALL_ECONOMIES = True
+    AGG_OF_ALL_ECONOMIES = True
     SALES_list = [True, False]
     for transport_type in sum_vehicle_types:
         if f'plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES_{transport_type}' in plots:
-            assumptions_dashboard_plotting_scripts.plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, new_sales_shares_all_plot_drive_shares,stocks, colors_dict, transport_type)
-        if f'plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES_{transport_type}' in plots:
+            assumptions_dashboard_plotting_scripts.plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, new_sales_shares_all_plot_drive_shares,stocks, model_output_detailed, colors_dict, transport_type,AGG_OF_ALL_ECONOMIES=AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
+        if  f'plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES_{transport_type}' in plots:
             for SALES in SALES_list:
-                assumptions_dashboard_plotting_scripts.plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, model_output_detailed, colors_dict, transport_type, SALES, SUM_OF_ALL_ECONOMIES = SUM_OF_ALL_ECONOMIES)
+                assumptions_dashboard_plotting_scripts.plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, model_output_detailed, colors_dict, transport_type, SALES, AGG_OF_ALL_ECONOMIES = AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
         if f'plot_emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES_{transport_type}' in plots:
             for INDEPENDENT_AXIS in INDEPENDENT_AXIS_list:
-                assumptions_dashboard_plotting_scripts.emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, emissions_factors, model_output_with_fuels, colors_dict,transport_type=transport_type, SUM_OF_ALL_ECONOMIES=INDEPENDENT_AXIS, INDEPENDENT_AXIS=INDEPENDENT_AXIS, USE_AVG_GENERATION_EMISSIONS_FACTOR=True)
-            
+                assumptions_dashboard_plotting_scripts.emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, emissions_factors, model_output_with_fuels, colors_dict,transport_type=transport_type, AGG_OF_ALL_ECONOMIES=INDEPENDENT_AXIS, INDEPENDENT_AXIS=INDEPENDENT_AXIS, USE_AVG_GENERATION_EMISSIONS_FACTOR=True, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL) 
         for medium in ['road', 'all']:
             if f'energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES_{medium}_{transport_type}' in plots:
                 for INDEPENDENT_AXIS in INDEPENDENT_AXIS_list:
-                    assumptions_dashboard_plotting_scripts.energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, energy_output_for_outlook_data_system, colors_dict,transport_type, medium,SUM_OF_ALL_ECONOMIES=INDEPENDENT_AXIS, INDEPENDENT_AXIS=INDEPENDENT_AXIS)
+                    assumptions_dashboard_plotting_scripts.energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, energy_output_for_outlook_data_system, colors_dict,transport_type, medium,AGG_OF_ALL_ECONOMIES=INDEPENDENT_AXIS, INDEPENDENT_AXIS=INDEPENDENT_AXIS, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
+                            
+            if f'prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES_{medium}_{transport_type}' in plots:
+                assumptions_dashboard_plotting_scripts.prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES(config ,economy_grouping_name, model_output_with_fuels, colors_dict, ECONOMY_IDs,  transport_type=transport_type, medium=medium, AGG_OF_ALL_ECONOMIES=AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
+            if f'produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES_{medium}' in plots and transport_type == 'all':#dont want to repeat this for each transport type since theres only one plot for each medium
+                assumptions_dashboard_plotting_scripts.produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, model_output_with_fuels, colors_dict, ECONOMY_IDs, medium=medium, AGG_OF_ALL_ECONOMIES=AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
     if f'plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES' in plots:
-        assumptions_dashboard_plotting_scripts.plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, supply_side_fuel_mixing, colors_dict)
+        assumptions_dashboard_plotting_scripts.plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, supply_side_fuel_mixing, supply_side_fuel_mixing_output, colors_dict, AGG_OF_ALL_ECONOMIES=AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
     if 'share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES' in plots:
-        assumptions_dashboard_plotting_scripts.compare_8th_and_9th_stocks_salesshare_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES(economy_grouping_name, emissions_factors, model_output_with_fuels, colors_dict, SUM_OF_ALL_ECONOMIES=SUM_OF_ALL_ECONOMIES)
+        assumptions_dashboard_plotting_scripts.share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES(economy_grouping_name, emissions_factors, model_output_with_fuels, colors_dict, AGG_OF_ALL_ECONOMIES=AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
+        
+
     
-def setup_and_run_multi_economy_plots(config):
+def setup_and_run_multi_economy_plots(config, economies_to_skip=[], ONLY_AGG_OF_ALL=False):
     """helper function to run the multi economy plots.cuts down on setup and amount of code where we dont need it"""
     ECONOMY_IDs = config.economy_scenario_concordance['Economy'].unique().tolist()
     #drop png and bd from economy since they are not in the model yet
+    for economy in economies_to_skip:
+        ECONOMY_IDs.remove(economy)
     # ECONOMY_IDs.remove('13_PNG')
     # ECONOMY_IDs.remove('02_BD')
     economy_grouping_name = 'all'
@@ -1319,11 +1329,41 @@ def setup_and_run_multi_economy_plots(config):
     'plot_emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES_all',
     'plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES_all',
     'plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES_freight',
-    'plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES_passenger'
+    'plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES_passenger',
     # 'plot_emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES_passenger',
-    # 'plot_emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES_freight'
+    # 'plot_emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES_freight',
+    'prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES_road_passenger',
+    'prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES_road_all',
+    'prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES_road_freight',
+    
+    'prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES_all_passenger',
+    'prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES_all_all',
+    'prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES_all_freight',
+    'produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES_road',
+    'produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES_all',
+    # 'plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES_passenger_agg', 'plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES_freight_agg', 
+    'plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES_all_agg', 'plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES_agg', 
+    #  'energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES_road_freight_agg','energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES_road_passenger_agg',
+    # 'energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES_road_all_agg',
+    #  'energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES_all_freight_agg','energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES_all_passenger_agg',
+    'energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES_all_all_agg',
+    'plot_emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES_all_agg',
+    'plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES_all_agg',
+    'plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES_freight_agg',
+    'plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES_passenger_agg',
+    # 'plot_emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES_passenger_agg',
+    # 'plot_emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES_freight_agg'
+    'prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES_road_passenger_agg',
+    'prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES_road_all_agg',
+    'prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES_road_freight_agg',
+    
+    'prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES_all_passenger_agg',
+    'prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES_all_all_agg',
+    'prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES_all_freight_agg',
+    'produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES_road_agg',
+    'produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES_all_agg'
     ]
-    plot_multi_economy_plots(config, ECONOMY_IDs, economy_grouping_name, plots, colors_dict,  ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True)
+    plot_multi_economy_plots(config, ECONOMY_IDs, economy_grouping_name, plots, colors_dict,  ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
 #%%
 #NOTE THAT WITH THE PREVIOUS_PROJECTION_FILE_DATE_ID THE FILE SHOULD BE SAVED IN C:\Users\finbar.maunsell\OneDrive - APERC\outlook 9th\Modelling\Sector models\Transport - results only\01_AUS/01_AUS_20240327_transport_energy_use.csv SO YOU CAN ALWAYS GRAB THAT AND PUT IT IN C:\Users\finbar.maunsell\github\transport_model_9th_edition\output_data\for_other_modellers\output_for_outlook_data_system IF YOU WANT TO MAKE SURE YOU'RE USING THAT FILE AND NOT A DIFFERENT VERSION WITH SAME DATE ID
 

@@ -94,7 +94,7 @@ def copy_required_output_files_to_one_folder(config, ECONOMY_ID='all', output_fo
             breakpoint()
             raise e 
     
-def get_latest_date_for_data_file(data_folder_path, file_name_start, file_name_end=None, EXCLUDE_DATE_STR_START=False):
+def get_latest_date_for_data_file(data_folder_path, file_name_start, file_name_end='', EXCLUDE_DATE_STR_START=False):
     """Note that if file_name_end is not specified then it will just take the first file that matches the file_name_start, eben if that matches the end if the file name as well. This is because the file_name_end is not always needed, and this cahnge was made post hoc, so we want to keep the old functionality.
 
     Args:
@@ -113,7 +113,7 @@ def get_latest_date_for_data_file(data_folder_path, file_name_start, file_name_e
     #get list of all files in the data folder
     all_files = os.listdir(data_folder_path)
     #filter for only the files with the correct file extension
-    if file_name_end is None:
+    if file_name_end == '':
         all_files = [file for file in all_files if file_name_start in file]
     else:
         all_files = [file for file in all_files if file_name_start in file and file_name_end in file]

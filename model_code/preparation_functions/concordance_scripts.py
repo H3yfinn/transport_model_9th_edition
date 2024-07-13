@@ -48,11 +48,13 @@ from plotly.subplots import make_subplots
 
 ################################################################################################################################################################
 
-def create_all_concordances(config):
+def create_all_concordances(config, USE_LATEST_CONCORDANCES=False):
     #create set of categories of data that will be output by the model. 
     #update this with the transport categories you want to use in the transport model and they should flow through so that the inputs and outputs of the model need to be like that.
+    if check_for_and_save_previous_concordances(config, USE_LATEST_CONCORDANCES):
+        return
     manually_defined_transport_categories = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\manually_defined_transport_categories.csv')
-    
+            
     #drop duplicates
     manually_defined_transport_categories.drop_duplicates(inplace=True)
 
@@ -304,6 +306,23 @@ def create_fuel_mixing_concordances(config, model_concordances_fuels):
     demand.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_demand_side_fuel_mixing_file_name), index=False)
     supply.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_supply_side_fuel_mixing_file_name), index=False)
 
+
+def check_for_and_save_previous_concordances(config, USE_LATEST_CONCORDANCES):
+    if USE_LATEST_CONCORDANCES:
+        #check if we have concordances available to copy to save on time:
+        file_date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\', 'model_concordances_', file_name_end='.csv')
+        if file_date_id == config.FILE_DATE_ID:
+            return True
+        elif file_date_id:
+            #just copy all the cocordances we'd save now to the folder with current file_date_id
+            shutil.copyfile(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels.replace(file_date_id, config.FILE_DATE_ID)), config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
+            shutil.copyfile(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_base_year_measures_file_name.replace(file_date_id, config.FILE_DATE_ID)), config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_base_year_measures_file_name))
+            shutil.copyfile(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_user_input_and_growth_rates_file_name.replace(file_date_id, config.FILE_DATE_ID)), config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))
+            shutil.copyfile(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_demand_side_fuel_mixing_file_name.replace(file_date_id, config.FILE_DATE_ID)), config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_demand_side_fuel_mixing_file_name))
+            shutil.copyfile(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_supply_side_fuel_mixing_file_name.replace(file_date_id, config.FILE_DATE_ID)), config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_supply_side_fuel_mixing_file_name))
+            return True
+        else:
+            return False
 #%%
 #%%
 # create_all_concordances(config)

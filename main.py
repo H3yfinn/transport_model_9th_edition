@@ -38,7 +38,7 @@ from model_code.plotting_functions import calculate_and_plot_oil_displacement
 from model_code.calculation_functions import international_bunker_share_calculation_handler
 
 from model_code.plotting_functions import produce_lots_of_LMDI_charts
-from model_code.plotting_functions import dashboard_creation_handler
+from model_code.plotting_functions import dashboard_creation_handler, setup_and_run_multi_economy_plots
 from model_code.utility_functions import copy_required_output_files_to_one_folder
 from model_code.formatting_functions import concatenate_outlook_data_system_outputs
 from model_code import utility_functions
@@ -110,9 +110,9 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         #Things to do once a day:
         do_these_once_a_day = True
         if do_these_once_a_day:
-            create_all_concordances(config)
+            create_all_concordances(config, USE_LATEST_CONCORDANCES=True)
         
-        PREPARE_DATA = True
+        PREPARE_DATA = False#only needs to be done if the macro or transport system data changes
         if PREPARE_DATA:
             import_macro_data(config, UPDATE_INDUSTRY_VALUES=False)
             import_transport_system_data(config)
@@ -125,7 +125,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         update_progress(progress)
         FOUND = False
         for economy in ECONOMY_BASE_YEARS_DICT.keys():
-            if economy_to_run == 'all':
+            if economy_to_run == 'all' or 'all' in economy_to_run:
                 pass
             elif economy in economy_to_run:
                 pass
@@ -191,18 +191,12 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                 #now concatenate all the model outputs together
                 create_output_for_outlook_data_system(config, ECONOMY_ID)
 
-                # exec(open(f"{config.root_dir}\\code\\6_create_osemosys_output.py").read())
-                # import create_osemosys_output
-                # create_osemosys_output.create_osemosys_output()
-                # ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True
                 ANALYSE_OUTPUT = True
                 ARCHIVE_PREVIOUS_DASHBOARDS = False
                 if ANALYSE_OUTPUT: 
                     estimate_kw_of_required_chargers(config, ECONOMY_ID)
                     plot_required_chargers(config, ECONOMY_ID)
-                    calculate_and_plot_oil_displacement(config, ECONOMY_ID)   
-                    # produce_LMDI_graphs.produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=False, END_DATE=2035)
-                    # produce_LMDI_graphs.produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=False, END_DATE=2050)
+                    calculate_and_plot_oil_displacement(config, ECONOMY_ID)  
                     ###################do bunkers calc for this economy###################
                     international_bunker_share_calculation_handler(config, ECONOMY_ID=ECONOMY_ID)
                     ###################do bunkers calc for this economy###################
@@ -213,35 +207,33 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                         if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
                             breakpoint()
                         pass
-                    dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
-                    # compare_esto_energy_to_data.compare_esto_energy_to_data(config)#UNDER DEVELOPMENT   
+                    dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS) 
                 
                 progress += increment
                 update_progress(progress)
                 copy_required_output_files_to_one_folder(config, ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\\for_other_modellers')
     
-            # try:
-            #     produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
-            #     breakpoint()
-            # except:
-            #     print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
-            #     if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
-            #         breakpoint()
-            #     pass
-
-        # international_bunkers.international_bunker_share_calculation_handler(config)
         print('\nFinished running model for all economies, now doing final formatting\n')
+        
         concatenate_outlook_data_system_outputs(config)
         
         progress += increment
         update_progress(progress)
-        concatenate_output_data(config)
-        try:
-            international_bunker_share_calculation_handler(config)
-        except:
-            pass#usually happens because the economies in ECONOMIES_WITH_MODELLING_COMPLETE_DICT havent been run for this file date id. check extract_non_road_modelled_data(config) in international_bunkers
+        
+        SETUP_AND_RUN_MULTI_ECONOMY_PLOTS = True
+        if concatenate_output_data(config):
+            try:
+                international_bunker_share_calculation_handler(config)
+                if SETUP_AND_RUN_MULTI_ECONOMY_PLOTS:
+                    try:
+                        produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
+                    except:
+                        print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
+                    setup_and_run_multi_economy_plots(config)
+            except:
+                pass#usually happens because the economies in ECONOMIES_WITH_MODELLING_COMPLETE_DICT havent been run for this file date id. check extract_non_road_modelled_data(config) in international_bunkers
         copy_required_output_files_to_one_folder(config, output_folder_path='output_data\\for_other_modellers')
-    
+        
         progress += increment
         update_progress(progress)
         # ARCHIVE_INPUT_DATA = False
@@ -284,7 +276,28 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main('14_PE')#, root_dir_param=root_dir_param)
+        main('05_PRC')#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%
+#   '01_AUS': 1
+#   '02_BD': 1
+#   '03_CDA': 1 #canada return is super weird. it goes higher than it was prevoouisly. so just dropping it to 0.5 compared to 1 for everyone else
+#   '04_CHL': 1
+#   '05_PRC': 1
+#   '06_HKC': 1
+#   '07_INA': 1
+#   '08_JPN': 1
+#   '09_ROK': 1
+#   '10_MAS': 1
+#   '11_MEX': 1
+#   '12_NZ': 1
+#   '13_PNG': 1
+#   '14_PE': 1
+#   '15_PHL': 1
+#   '16_RUS': 1
+#   '17_SGP': 1
+#   '18_CT': 1
+#   '19_THA': 1
+#   '20_USA': 1
+#   '21_VN': 1
