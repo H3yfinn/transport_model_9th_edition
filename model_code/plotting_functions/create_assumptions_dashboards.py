@@ -1320,6 +1320,7 @@ def setup_and_run_multi_economy_plots(config, economies_to_skip=[], ONLY_AGG_OF_
     # ECONOMY_IDs.remove('02_BD')
     economy_grouping_name = 'all'
     plots = [
+    'share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES',
     # 'plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES_passenger', 'plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES_freight', 
     'plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES_all', 'plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES', 
     #  'energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES_road_freight','energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES_road_passenger',

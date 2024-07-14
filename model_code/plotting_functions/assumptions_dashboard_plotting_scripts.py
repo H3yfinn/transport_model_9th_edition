@@ -1320,7 +1320,7 @@ def plot_supply_side_fuel_mixing(config, ECONOMY_IDs, supply_side_fuel_mixing_df
             fig_dict[economy][scenario]['supply_side_fuel_mixing'] = [fig, title_text, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'fuel_mixing_{scenario}.html', graph_type='bar', plot_data=supply_side_fuel_mixing_plot_economy, economy=economy, x='Date', y='Supply_side_fuel_share', color='New_fuel', title=title_text, y_axes_title='%', legend_title='', colors_dict=colors_dict, font_size=35)
+                write_graph_to_html(config, filename=f'fuel_mixing_{scenario}.html', graph_type='line', plot_data=supply_side_fuel_mixing_plot_economy, economy=economy, x='Date', y='Supply_side_fuel_share', color='New_fuel', title=title_text, y_axes_title='%', legend_title='', colors_dict=colors_dict, font_size=35)
             
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(supply_side_fuel_mixing_plot_economy['New_fuel'].unique().tolist())
@@ -1712,6 +1712,8 @@ def plot_stocks_per_capita(config, ECONOMY_IDs, gompertz_parameters_df, model_ou
             
             #for now lets just drop the original model run data so we dont confuse reader:
             stocks_per_capita_economy = stocks_per_capita_economy.loc[stocks_per_capita_economy['Model']!='Original'].copy()
+            #keep only trnapsort type = passenger
+            stocks_per_capita_economy = stocks_per_capita_economy.loc[stocks_per_capita_economy['Transport Type']=='passenger'].copy()
             #now plot
             fig = px.line(stocks_per_capita_economy, x='Date', y='Stocks_per_thousand_capita', color='Transport Type', line_dash='Model', color_discrete_map=colors_dict)
             title_text = 'Stocks per capita (Weighted) (Thousand)'
@@ -4965,34 +4967,28 @@ def plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, 
     
     new_sales_shares_all_plot_drive_shares['Value'] = new_sales_shares_all_plot_drive_shares.groupby(['Date','Economy', 'Scenario', 'Transport Type', 'Vehicle Type'], group_keys=False)['Value'].transform(lambda x: x/x.sum())
     
-    new_sales_shares_all_plot_drive_shares['line_dash'] = 'sales'
-    
     #now calucalte share of total stocks as a proportion like the sales share
     # stocks['Value'] = stocks.groupby(['Scenario', 'Economy', 'Date', 'Transport Type','Vehicle Type'], group_keys=False)['Value'].apply(lambda x: x/x.sum(numeric_only=True))
     # Assuming 'stocks' is your DataFrame and 'Value' is the column containing the stock values
     stocks['Value'] = stocks.groupby(['Scenario', 'Economy', 'Date', 'Transport Type','Vehicle Type'])['Value'].apply(lambda x: x / x.sum()).reset_index(drop=True)
-    stocks['line_dash'] = 'stocks'
     
     # model_output_detailed_df_activity['Value'] = model_output_detailed_df_activity.groupby(['Date','Economy', 'Scenario', 'Transport Type', 'Vehicle Type'], group_keys=False)['Value'].transform(lambda x: x/x.sum())
     if AGG_OF_ALL_ECONOMIES:
-        if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
-            breakpoint()#will this work? have i calculated the stock shares right by using prexisting shares or should i recalc from bottom up?
         #this si a bit complicated but we will use the activity data to weight the stock shares and calcualte the stock/sales shares for all economies
         
         #We will need to calculate the weighted average sales share for each drive type, since some economies have more stocks than others. But also some economies have lower mileage than otehrs so we should use activity rather than stocks, to show a better reresentatin of howmuch those stocks are used. For this we will jsut use activity rather than sales or stocks as the weighting factor
-        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(stocks, on=['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive'], how='left', suffixes=('_sales_share', '_stocks'))
-        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(model_output_detailed_df_activity[['Economy', 'Date', 'Scenario', 'Drive', 'Transport Type', 'Value']], on=['Scenario', 'Economy', 'Date', 'Drive', 'Transport Type'], how='left', suffixes=('_sales_share', '_activity'))
+        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(stocks, on=['Scenario', 'Economy', 'Date', 'Vehicle Type', 'Transport Type', 'Drive'], how='left', suffixes=('_sales_share', '_stocks'))
+        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(model_output_detailed_df_activity[['Economy', 'Date', 'Scenario', 'Drive','Vehicle Type', 'Transport Type', 'Value']], on=['Scenario', 'Economy', 'Date', 'Drive', 'Transport Type'], how='left', suffixes=('_sales_share', '_activity'))
         #rename Value to Value_activity
         new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.rename(columns={'Value':'Value_activity'})
         #now we can calculate the weighted average sales share
         weighted_value_sales_share = new_sales_shares_all_plot_drive_shares.copy()
         weighted_value_sales_share['Weighted_value_sales_share'] = (weighted_value_sales_share['Value_sales_share'] * weighted_value_sales_share['Value_activity'])
-        weighted_value_sales_share = weighted_value_sales_share[['Scenario', 'Date', 'Transport Type', 'Drive','Value_activity', 'Weighted_value_sales_share']].groupby(['Scenario', 'Date', 'Drive', 'Transport Type'], group_keys=False).sum(numeric_only=True).reset_index()
+        weighted_value_sales_share = weighted_value_sales_share[['Scenario', 'Date','Vehicle Type',  'Transport Type', 'Drive','Value_activity', 'Weighted_value_sales_share']].groupby(['Scenario', 'Date', 'Drive','Vehicle Type',  'Transport Type'], group_keys=False).sum(numeric_only=True).reset_index()
         weighted_value_sales_share['Value'] = weighted_value_sales_share['Weighted_value_sales_share'] / weighted_value_sales_share['Value_activity']
         #since we may be dividing by zero, we will sdet any values that are nan to 0
         weighted_value_sales_share['Value'] = weighted_value_sales_share['Value'].fillna(0)
         weighted_value_sales_share = weighted_value_sales_share[['Scenario', 'Date', 'Transport Type', 'Drive', 'Value']]
-        weighted_value_sales_share['line_dash'] = 'sales'
         weighted_value_sales_share['Economy'] = 'all'
         #and calculate the stock share in same way
         weighted_value_stock_share = new_sales_shares_all_plot_drive_shares.copy()
@@ -5000,9 +4996,10 @@ def plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, 
         weighted_value_stock_share['Value'] = weighted_value_stock_share['Weighted_value_stocks'] / weighted_value_stock_share['Value_activity']
         #since we may be dividing by zero, we will sdet any values that are nan to 0
         weighted_value_stock_share['Value'] = weighted_value_stock_share['Value'].fillna(0)
-        weighted_value_stock_share = weighted_value_stock_share[['Scenario','Date', 'Transport Type', 'Drive', 'Value']]
-        weighted_value_stock_share['line_dash'] = 'stocks'
+        weighted_value_stock_share = weighted_value_stock_share[['Scenario','Date', 'Transport Type', 'Vehicle Type', 'Drive', 'Value']]
         weighted_value_stock_share['Economy'] = 'all'
+        
+        #drop any line_dash_stocks
         #concat the two dataframes to originals or only keep that if we are only looking at the aggregate of all economies
         if ONLY_AGG_OF_ALL:
             new_sales_shares_all_plot_drive_shares = weighted_value_sales_share.copy()
@@ -5010,6 +5007,9 @@ def plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, 
         else:
             new_sales_shares_all_plot_drive_shares = pd.concat([new_sales_shares_all_plot_drive_shares, weighted_value_sales_share])
             stocks = pd.concat([stocks, weighted_value_stock_share])
+    
+    new_sales_shares_all_plot_drive_shares['line_dash'] = 'sales'
+    stocks['line_dash'] = 'stocks'
     
     for scenario in new_sales_shares_all_plot_drive_shares['Scenario'].unique():
         new_sales_shares_all_plot_drive_shares_scenario = new_sales_shares_all_plot_drive_shares.loc[(new_sales_shares_all_plot_drive_shares['Scenario']==scenario)]
@@ -5035,7 +5035,6 @@ def plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, 
 
         #concat drive and vehicle type
         plot_data['Drive'] = plot_data['Drive'] + ' ' + plot_data['Vehicle Type']
-        
         # Group by 'Drive' and filter out groups where all values are 0
         groups = plot_data.groupby(['Economy', 'Drive', 'line_dash'])
         plot_data = groups.filter(lambda x: not all(x['Value'] == 0))
@@ -5072,6 +5071,123 @@ def plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, 
     return
         
 
+def plot_share_transport_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, new_sales_shares_all_plot_drive_shares_df, stocks_df, model_output_detailed_df, colors_dict, share_of_transport_type_type, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL, INCLUDE_OTHER_DRIVES=True):
+    """a copy of above funciton but made to only plot by transport type (not including vehicle type) for the named economies without other charts in the same dashboard"""
+    #This data is in terms of transport type, so will need to normalise it to vehicle type by summing up the shares for each vehicle type and dividing individual shares by their sum
+    new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df.copy()
+    stocks = stocks_df.copy()
+    
+    stocks, new_sales_shares_all_plot_drive_shares = remap_stocks_and_sales_based_on_economy(config, stocks, new_sales_shares_all_plot_drive_shares)
+    #do the same for model_output_detailed_df[['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive']] where Measure=='Activity'
+    #this is a bit hacky but we can just use the same function as for stocks
+    model_output_detailed_df_activity = model_output_detailed_df[['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive', 'Activity']].copy()
+    #renaem activity to value
+    model_output_detailed_df_activity = model_output_detailed_df_activity.rename(columns={'Activity':'Value'})
+    model_output_detailed_df_activity, model_output_detailed_df_activity1 = remap_stocks_and_sales_based_on_economy(config, model_output_detailed_df_activity, model_output_detailed_df_activity)
+    
+    new_sales_shares_all_plot_drive_shares['Value'] = new_sales_shares_all_plot_drive_shares.groupby(['Date','Economy', 'Scenario', 'Transport Type'], group_keys=False)['Value'].transform(lambda x: x/x.sum())
+    
+    #now calucalte share of total stocks as a proportion like the sales share
+    # stocks['Value'] = stocks.groupby(['Scenario', 'Economy', 'Date', 'Transport Type','Vehicle Type'], group_keys=False)['Value'].apply(lambda x: x/x.sum(numeric_only=True))
+    # Assuming 'stocks' is your DataFrame and 'Value' is the column containing the stock values
+    stocks['Value'] = stocks.groupby(['Scenario', 'Economy', 'Date', 'Transport Type'])['Value'].apply(lambda x: x / x.sum()).reset_index(drop=True)
+    
+    # model_output_detailed_df_activity['Value'] = model_output_detailed_df_activity.groupby(['Date','Economy', 'Scenario', 'Transport Type', 'Vehicle Type'], group_keys=False)['Value'].transform(lambda x: x/x.sum())
+    if AGG_OF_ALL_ECONOMIES:
+        #this si a bit complicated but we will use the activity data to weight the stock shares and calcualte the stock/sales shares for all economies
+        
+        #We will need to calculate the weighted average sales share for each drive type, since some economies have more stocks than others. But also some economies have lower mileage than otehrs so we should use activity rather than stocks, to show a better reresentatin of howmuch those stocks are used. For this we will jsut use activity rather than sales or stocks as the weighting factor
+        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(stocks, on=['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive'], how='left', suffixes=('_sales_share', '_stocks'))
+        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(model_output_detailed_df_activity[['Economy', 'Date', 'Scenario', 'Drive', 'Transport Type', 'Value']], on=['Scenario', 'Economy', 'Date', 'Drive', 'Transport Type'], how='left', suffixes=('_sales_share', '_activity'))
+        #rename Value to Value_activity
+        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.rename(columns={'Value':'Value_activity'})
+        #now we can calculate the weighted average sales share
+        weighted_value_sales_share = new_sales_shares_all_plot_drive_shares.copy()
+        weighted_value_sales_share['Weighted_value_sales_share'] = (weighted_value_sales_share['Value_sales_share'] * weighted_value_sales_share['Value_activity'])
+        weighted_value_sales_share = weighted_value_sales_share[['Scenario', 'Date',  'Transport Type', 'Drive','Value_activity', 'Weighted_value_sales_share']].groupby(['Scenario', 'Date', 'Drive', 'Transport Type'], group_keys=False).sum(numeric_only=True).reset_index()
+        weighted_value_sales_share['Value'] = weighted_value_sales_share['Weighted_value_sales_share'] / weighted_value_sales_share['Value_activity']
+        #since we may be dividing by zero, we will sdet any values that are nan to 0
+        weighted_value_sales_share['Value'] = weighted_value_sales_share['Value'].fillna(0)
+        weighted_value_sales_share = weighted_value_sales_share[['Scenario', 'Date', 'Transport Type', 'Drive', 'Value']]
+        weighted_value_sales_share['Economy'] = 'all'
+        #and calculate the stock share in same way
+        weighted_value_stock_share = new_sales_shares_all_plot_drive_shares.copy()
+        weighted_value_stock_share['Weighted_value_stocks'] = (weighted_value_stock_share['Value_stocks'] * weighted_value_stock_share['Value_activity'])
+        weighted_value_stock_share['Value'] = weighted_value_stock_share['Weighted_value_stocks'] / weighted_value_stock_share['Value_activity']
+        #since we may be dividing by zero, we will sdet any values that are nan to 0
+        weighted_value_stock_share['Value'] = weighted_value_stock_share['Value'].fillna(0)
+        weighted_value_stock_share = weighted_value_stock_share[['Scenario','Date', 'Transport Type', 'Drive', 'Value']]
+        weighted_value_stock_share['Economy'] = 'all'
+        
+        #drop any line_dash_stocks
+        #concat the two dataframes to originals or only keep that if we are only looking at the aggregate of all economies
+        if ONLY_AGG_OF_ALL:
+            new_sales_shares_all_plot_drive_shares = weighted_value_sales_share.copy()
+            stocks = weighted_value_stock_share.copy()
+        else:
+            new_sales_shares_all_plot_drive_shares = pd.concat([new_sales_shares_all_plot_drive_shares, weighted_value_sales_share])
+            stocks = pd.concat([stocks, weighted_value_stock_share])
+    
+    new_sales_shares_all_plot_drive_shares['line_dash'] = 'sales'
+    stocks['line_dash'] = 'stocks'
+    
+    for scenario in new_sales_shares_all_plot_drive_shares['Scenario'].unique():
+        new_sales_shares_all_plot_drive_shares_scenario = new_sales_shares_all_plot_drive_shares.loc[(new_sales_shares_all_plot_drive_shares['Scenario']==scenario)]
+        stocks_scen = stocks.loc[(stocks['Scenario']==scenario)].copy()
+        ###
+        
+        #then concat the two dataframes
+        new_sales_shares_all_plot_drive_shares_scenario = pd.concat([new_sales_shares_all_plot_drive_shares_scenario, stocks_scen])
+        
+        #times shares by 100
+        new_sales_shares_all_plot_drive_shares_scenario['Value'] = new_sales_shares_all_plot_drive_shares_scenario['Value']*100
+            
+        # #also plot the data like the iea does. So plot the data for 2022 and previous, then plot for the follwoign eyars: [2025, 2030, 2035, 2040, 2050, 2060]. This helps to keep the plot clean too
+        # plot_data = plot_data.apply(lambda x: x if x['Date'] <= 2022 or x['Date'] in [2025, 2030, 2035, 2040, 2050, 2060, 2070, 2080,2090, 2100] else 0, axis=1)
+        #drop all drives except bev and fcev
+        plot_data = new_sales_shares_all_plot_drive_shares_scenario.copy()
+        if INCLUDE_OTHER_DRIVES:
+            mapping = {'bev':'bev', 'fcev':'fcev', 'phev_g':'phev', 'phev_d':'phev', 'cng':'gas', 'lpg':'gas'}
+            plot_data['Drive'] = plot_data['Drive'].replace(mapping)
+            plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='fcev') | (plot_data['Drive']=='gas') | (plot_data['Drive']=='phev')].copy()
+        else:
+            plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='fcev')].copy()
+
+        # Group by 'Drive' and filter out groups where all values are 0
+        groups = plot_data.groupby(['Economy', 'Drive', 'line_dash'])
+        plot_data = groups.filter(lambda x: not all(x['Value'] == 0))
+        
+        #sort by date col
+        plot_data.sort_values(by=['Date', 'Economy'], inplace=True)
+        if ONLY_AGG_OF_ALL and AGG_OF_ALL_ECONOMIES:
+            extra_identifier = '_agg'
+        else:
+            extra_identifier = ''
+        #############
+        #now plot
+        if share_of_transport_type_type == 'passenger':
+            title = f'Shares for passenger (%) - {economy_grouping_name} - {scenario}'
+
+            fig = px.line(plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
+            #save to html
+            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\shares_of_transport_type_{scenario}_{economy_grouping_name}_passenger{extra_identifier}.html')
+        elif share_of_transport_type_type == 'freight':
+            title = f'Shares for freight (%) - {economy_grouping_name} - {scenario}'
+
+            fig = px.line(plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
+            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\shares_of_transport_type_{scenario}_{economy_grouping_name}_freight{extra_identifier}.html')
+
+        elif share_of_transport_type_type == 'all':
+            # sum up, because 2w are used in freight and passenger:
+            plot_data_all = plot_data.groupby(['Scenario', 'Economy', 'Date', 'Drive','line_dash']).sum().reset_index()
+            title = f'Sales and stock shares (%) - {economy_grouping_name} - {scenario}'
+
+            fig = px.line(plot_data_all, x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
+            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\shares_of_transport_type_{scenario}_{economy_grouping_name}_all{extra_identifier}.html')
+        else:
+            raise ValueError('share_of_transport_type_type must be either passenger or freight')
+    return
+        
 def plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, supply_side_fuel_mixing_df, supply_side_fuel_mixing_output, colors_dict, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL):
     """a copy of similarly named funciton but made to only plot this chart for the named economies without other charts in the same dashboard
 
@@ -5473,7 +5589,12 @@ def prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES(config,  economy_gro
             # breakpoint()
             file_identifier = f'{economy}_{scenario}_{transport_type}_{medium_id}_2_Energy use_Hierarchical_2070_multiplicative'
             try:
-                lmdi_data_economy = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\{economy}\\{file_identifier}.csv')
+                if economy == 'all':
+                    #search in folder 'APEC' and use APEC instead of economy in file_id
+                    file_identifier = f'APEC_{scenario}_{transport_type}_{medium_id}_2_Energy use_Hierarchical_2070_multiplicative'
+                    lmdi_data_economy = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\APEC\\{file_identifier}.csv')
+                else:
+                    lmdi_data_economy = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\{economy}\\{file_identifier}.csv')
             except:
                 if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
                     breakpoint()
@@ -5491,7 +5612,7 @@ def prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES(config,  economy_gro
         #If there are any values with Effect 'Total Energy use'  or 'Total_passenger_km'  then emove them since they are totals:
         lmdi_data_melt = lmdi_data_melt.loc[(lmdi_data_melt['Effect']!='Total Energy use') & (lmdi_data_melt['Effect']!='Total_passenger_km') & (lmdi_data_melt['Effect']!='Total_freight_tonne_km')].copy()
         #if any values are > 10, create a breakpoint so we can see what they are, just in case they need to be removed like above:
-        if lmdi_data_melt['Value'].max() > 10:
+        if lmdi_data_melt['Value'].max() > 10: 
             breakpoint()
         lmdi_data_melt['line_dash'] = lmdi_data_melt['Effect'].apply(lambda x: 'solid' if x == 'Percent change in Energy' else 'dash')
         
@@ -5525,13 +5646,19 @@ def produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES(config,  economy_grouping_
             # breakpoint()
             file_identifier = f'{economy}_{scenario}_{medium_id}_2_Energy use_Hierarchical_2070_concatenated_additive'
             try:
-                lmdi_data_economy = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\{economy}\\{file_identifier}.csv')
+                if economy == 'all':
+                    #search in folder 'APEC' and use APEC instead of economy in file_id
+                    file_identifier = f'APEC_{scenario}_{medium_id}_2_Energy use_Hierarchical_2070_concatenated_additive'
+                    lmdi_data_economy = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\APEC\\{file_identifier}.csv')
+                else:
+                    lmdi_data_economy = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\{economy}\\{file_identifier}.csv')
+                
             except:
                 if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
                     breakpoint()
                 continue
             #add economy col and then concat to all_economy df
-            lmdi_data['Economy'] = economy
+            lmdi_data_economy['Economy'] = economy
             lmdi_data = pd.concat([lmdi_data, lmdi_data_economy])
         if len(lmdi_data)==0:
             return

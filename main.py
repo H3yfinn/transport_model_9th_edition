@@ -112,7 +112,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         if do_these_once_a_day:
             create_all_concordances(config, USE_LATEST_CONCORDANCES=True)
         
-        PREPARE_DATA = False#only needs to be done if the macro or transport system data changes
+        PREPARE_DATA = True#only needs to be done if the macro or transport system data changes
         if PREPARE_DATA:
             import_macro_data(config, UPDATE_INDUSTRY_VALUES=False)
             import_transport_system_data(config)
@@ -220,7 +220,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         progress += increment
         update_progress(progress)
         
-        SETUP_AND_RUN_MULTI_ECONOMY_PLOTS = True
+        SETUP_AND_RUN_MULTI_ECONOMY_PLOTS = False
         if concatenate_output_data(config):
             try:
                 international_bunker_share_calculation_handler(config)
@@ -276,7 +276,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main('05_PRC')#, root_dir_param=root_dir_param)
+        main('04_CHL')#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%
