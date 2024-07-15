@@ -1251,7 +1251,7 @@ def dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=Tr
     except Exception as e:
         print('assumptions_extra dashboard not created, error: ', e)
         breakpoint()
-    plots = ['energy_use_by_fuel_type_all_all', 'emissions_by_fuel_type_all_gen','passenger_km_by_drive_road','freight_tonne_km_by_drive_road', 'share_of_vehicle_type_by_transport_type_all','share_of_vehicle_type_activity_all', 'line_turnover_rate_by_vtype_all_road','avg_age_road',  'lmdi_freight_road',  'lmdi_passenger_road', 'energy_efficiency_timeseries_all','INTENSITY_ANALYSIS_timeseries_freight','INTENSITY_ANALYSIS_timeseries_passenger', 'share_of_vehicle_type_by_transport_type_freight_INTENSITY_ANALYSIS', 'share_of_vehicle_type_by_transport_type_passenger_INTENSITY_ANALYSIS', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_all', 'lifecycle_emissions_of_cars']
+    plots = ['energy_use_by_fuel_type_all_all', 'emissions_by_fuel_type_all_gen','passenger_km_by_drive_road','freight_tonne_km_by_drive_road', 'share_of_vehicle_type_by_transport_type_all','share_of_vehicle_type_activity_all', 'line_turnover_rate_by_vtype_all_road','avg_age_road',  'lmdi_freight_road',  'lmdi_passenger_road', 'energy_efficiency_timeseries_all','INTENSITY_ANALYSIS_timeseries_freight','INTENSITY_ANALYSIS_timeseries_passenger', 'share_of_vehicle_type_by_transport_type_freight_INTENSITY_ANALYSIS', 'share_of_vehicle_type_by_transport_type_passenger_INTENSITY_ANALYSIS', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_all', 'lifecycle_emissions_of_cars', 'box_turnover_rate_by_drive_all', 'turnover_rate_age_curve']
     
     CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT = {'transport_type':'all', 'mediums':['road']}
     create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'transport_type_intensity_analysis',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS,CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PRODUCE_AS_SINGLE_POTS=True, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
@@ -1306,9 +1306,9 @@ def plot_multi_economy_plots(config, ECONOMY_IDs, economy_grouping_name, plots, 
     if f'plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES' in plots:
         assumptions_dashboard_plotting_scripts.plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, supply_side_fuel_mixing, supply_side_fuel_mixing_output, colors_dict, AGG_OF_ALL_ECONOMIES=AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
     if 'share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES' in plots:
-        assumptions_dashboard_plotting_scripts.share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES(economy_grouping_name, emissions_factors, model_output_with_fuels, colors_dict, AGG_OF_ALL_ECONOMIES=AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
+        assumptions_dashboard_plotting_scripts.share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, emissions_factors, model_output_with_fuels, colors_dict, AGG_OF_ALL_ECONOMIES=AGG_OF_ALL_ECONOMIES, USE_AVG_GENERATION_EMISSIONS_FACTOR=False,ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
         
-
+        assumptions_dashboard_plotting_scripts.share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, emissions_factors, model_output_with_fuels, colors_dict, AGG_OF_ALL_ECONOMIES=AGG_OF_ALL_ECONOMIES, USE_AVG_GENERATION_EMISSIONS_FACTOR=True,ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
     
 def setup_and_run_multi_economy_plots(config, economies_to_skip=[], ONLY_AGG_OF_ALL=False):
     """helper function to run the multi economy plots.cuts down on setup and amount of code where we dont need it"""
@@ -1364,7 +1364,12 @@ def setup_and_run_multi_economy_plots(config, economies_to_skip=[], ONLY_AGG_OF_
     'produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES_road_agg',
     'produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES_all_agg'
     ]
-    plot_multi_economy_plots(config, ECONOMY_IDs, economy_grouping_name, plots, colors_dict,  ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
+    try:
+        breakpoint()
+        plot_multi_economy_plots(config, ECONOMY_IDs, economy_grouping_name, plots, colors_dict,  ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
+    except Exception as e:
+        breakpoint()
+        plot_multi_economy_plots(config, ECONOMY_IDs, economy_grouping_name, plots, colors_dict,  ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
 #%%
 #NOTE THAT WITH THE PREVIOUS_PROJECTION_FILE_DATE_ID THE FILE SHOULD BE SAVED IN C:\Users\finbar.maunsell\OneDrive - APERC\outlook 9th\Modelling\Sector models\Transport - results only\01_AUS/01_AUS_20240327_transport_energy_use.csv SO YOU CAN ALWAYS GRAB THAT AND PUT IT IN C:\Users\finbar.maunsell\github\transport_model_9th_edition\output_data\for_other_modellers\output_for_outlook_data_system IF YOU WANT TO MAKE SURE YOU'RE USING THAT FILE AND NOT A DIFFERENT VERSION WITH SAME DATE ID
 

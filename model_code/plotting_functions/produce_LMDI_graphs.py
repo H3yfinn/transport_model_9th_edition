@@ -51,6 +51,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
     if USE_LIST_OF_CHARTS_TO_PRODUCE:
         charts_to_produce = []
         for economy in all_data.Economy.unique():
+            if ECONOMY_ID == 'all':
+                economy = 'all'
             for scenario in all_data.Scenario.unique():
                 for transport_type in all_data['Transport Type'].unique():
                     charts_to_produce.append(f'{economy}_{scenario}_{transport_type}_road_2_Energy use_Hierarchical_{END_DATE}')
@@ -59,10 +61,14 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
                 charts_to_produce.append(f'{economy}_{scenario}_road_2_Energy use_Hierarchical_{END_DATE}')
             charts_to_produce.append(f'{economy}_road_1_Energy use_{END_DATE}')
             charts_to_produce.append(f'{economy}_road_2_Energy use_Hierarchical_{END_DATE}')
+            if ECONOMY_ID == 'all':
+                break
     
     if USE_LIST_OF_DATASETS_TO_PRODUCE:
         datasets_to_produce = []
         for economy in all_data.Economy.unique():
+            if ECONOMY_ID == 'all':
+                economy = 'all'
             for scenario in all_data.Scenario.unique():
                 for transport_type in all_data['Transport Type'].unique():
                     datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_road_1_Energy use_{END_DATE}')
@@ -72,6 +78,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
                 datasets_to_produce.append(f'{economy}_{scenario}_road_2_Energy use_Hierarchical_{END_DATE}')
             datasets_to_produce.append(f'{economy}_road_1_Energy use_{END_DATE}')
             datasets_to_produce.append(f'{economy}_road_2_Energy use_Hierarchical_{END_DATE}')
+            if ECONOMY_ID == 'all':
+                break
     # #simplify by filtering for road medium only
     # all_data = all_data[all_data['Medium'] == 'road']
     #make drive and vehicle type = medium where it is no road
@@ -178,20 +186,20 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
                                     graph_title = scenario_text# + ' 1.4% improvement in efficiency'
 
                                 combination_dict_list.append({'economy':economy,'scenario':scenario, 'transport_type':transport_type, 'medium':medium, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,
-                                'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}'})
+                                'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'})
                                 
                                 extra_identifier_no_transport_type = extra_identifier.replace(f'{transport_type}_', '')
                                 graph_title = graph_title.replace(f'{transport_type} ', '')
                                 extra_identifier_no_scenario = extra_identifier.replace(f'{scenario}_', '')
                                 if extra_identifier_no_transport_type not in combined_transport_type_waterfall_inputs.keys():
-                                    combined_transport_type_waterfall_inputs[extra_identifier_no_transport_type] = [{'economy':economy, 'scenario':scenario, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}'}]
+                                    combined_transport_type_waterfall_inputs[extra_identifier_no_transport_type] = [{'economy':economy, 'scenario':scenario, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'}]
                                 else:
-                                    combined_transport_type_waterfall_inputs[extra_identifier_no_transport_type].append({'economy':economy, 'scenario':scenario, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}'})
+                                    combined_transport_type_waterfall_inputs[extra_identifier_no_transport_type].append({'economy':economy, 'scenario':scenario, 'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'})
                                 
                                 if extra_identifier_no_scenario not in combined_scenario_waterfall_inputs.keys():
-                                    combined_scenario_waterfall_inputs[extra_identifier_no_scenario] = [{'economy':economy,'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}'}]
+                                    combined_scenario_waterfall_inputs[extra_identifier_no_scenario] = [{'economy':economy,'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'}]
                                 else:
-                                    combined_scenario_waterfall_inputs[extra_identifier_no_scenario].append({'economy':economy,'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}'})
+                                    combined_scenario_waterfall_inputs[extra_identifier_no_scenario].append({'economy':economy,'activity_variable':activity_variable, 'structure_variables_list':structure_variables, 'graph_title':graph_title, 'extra_identifier':extra_identifier, 'emissions_divisia':emissions_divisia, 'hierarchical':hierarchical, 'residual_variable1':residual_variable1,'output_data_folder': f'intermediate_data\\LMDI\\{economy}', 'plotting_output_folder':f'plotting_output\\LMDI\\{economy}\\'})
     
     ###########################################################################
     # Do final data prep and then run the LMDI method and plot the results
@@ -209,7 +217,6 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
     #create loop to run through the combinations
     i=0
     
-    # f'{economy}_{scenario}_{transport_type}_road_2_Emissions_Hierarchical_{END_DATE}'
     for combination_dict in combination_dict_list:
         
         try:

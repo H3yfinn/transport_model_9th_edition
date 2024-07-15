@@ -380,7 +380,7 @@ def plot_share_of_vehicle_type_by_transport_type(config, ECONOMY_IDs, new_sales_
     stocks = stocks_df.copy()
     
     stocks, new_sales_shares_all_plot_drive_shares = remap_stocks_and_sales_based_on_economy(config, stocks, new_sales_shares_all_plot_drive_shares)
-    high_gas_reliance_economies = identify_high_gas_reliance_economies(config, stocks, X=.2)
+    high_gas_reliance_economies = identify_high_gas_reliance_economies(config, stocks, X=.1)
     if INCLUDE_GENERAL_DRIVE_TYPES:
         #use categories: gasoline, diesel, ev, fcev, other
         
@@ -500,7 +500,7 @@ def plot_share_of_vehicle_type_by_transport_type_both_on_one_graph(config, ECONO
     stocks = stocks_df.copy()
     
     stocks, new_sales_shares_all_plot_drive_shares = remap_stocks_and_sales_based_on_economy(config, stocks, new_sales_shares_all_plot_drive_shares)
-    high_gas_reliance_economies = identify_high_gas_reliance_economies(config, stocks, X=.2)
+    high_gas_reliance_economies = identify_high_gas_reliance_economies(config, stocks, X=.1)
     new_sales_shares_all_plot_drive_shares['Value'] = new_sales_shares_all_plot_drive_shares.groupby(['Date','Economy', 'Scenario', 'Transport Type', 'Vehicle Type'])['Value'].transform(lambda x: x/x.sum())
     
     stocks['Value'] = stocks.groupby(['Scenario', 'Economy', 'Date', 'Transport Type','Vehicle Type'])['Value'].apply(lambda x: x/x.sum())
@@ -559,7 +559,7 @@ def share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs, new_sal
     #i think that maybe stocks % can be higher than sales % here because of turnvoer rates. hard to get it correct right now
     new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df.copy()
     stocks = stocks_df.copy()
-    high_gas_reliance_economies = identify_high_gas_reliance_economies(config, stocks, X=.2)
+    high_gas_reliance_economies = identify_high_gas_reliance_economies(config, stocks, X=.1)
     #make phev_d and phev_g into phev
     new_sales_shares_all_plot_drive_shares.loc[(new_sales_shares_all_plot_drive_shares['Drive']=='phev_d') | (new_sales_shares_all_plot_drive_shares['Drive']=='phev_g'), 'Drive'] = 'phev'
     stocks.loc[(stocks['Drive']=='phev_d') | (stocks['Drive']=='phev_g'), 'Drive'] = 'phev'
@@ -1806,7 +1806,7 @@ def plot_non_road_energy_use(config, ECONOMY_IDs, energy_output_for_outlook_data
                     # energy_use_by_fuel_type_economy = energy_use_by_fuel_type_economy.groupby('Fuel').filter(lambda x: x['Energy'].sum() > energy_use_by_fuel_type_economy['Energy'].sum()*0.0001)
                     #remove any values that are less than 1
                     energy_use_by_fuel_type_economy = energy_use_by_fuel_type_economy.loc[energy_use_by_fuel_type_economy['Energy'] > 1].copy()
-                    write_graph_to_html(config, filename=f'energy_use_by_fuel_type_non_road_{scenario}.html', graph_type='bar', plot_data=energy_use_by_fuel_type_economy, economy=economy,  x='Date', y='Energy', color='Fuel', title=f'Non road energy by Fuel - {scenario}', y_axes_title='PJ', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
+                    write_graph_to_html(config, filename=f'energy_use_by_fuel_type_non_road_{scenario}.html', graph_type='area', plot_data=energy_use_by_fuel_type_economy, economy=economy,  x='Date', y='Energy', color='Fuel', title=f'Non road energy by Fuel - {scenario}', y_axes_title='PJ', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
             else:
                 raise ValueError('transport_type must be passenger, all or freight')
             
@@ -3500,46 +3500,46 @@ def compare_8th_and_9th_stocks_sales(config, ECONOMY_IDs, data_8th, model_output
     color_preparation_list.append(stocks['Drive'].unique().tolist())
     return fig_dict, color_preparation_list
 
-def plot_age_distributions(config, ECONOMY_IDs, model_output_detailed_df, fig_dict, color_preparation_list, colors_dict, medium, title):
-    """take in age distributions data and plot as a historgram. Will involve combining age distributions so we can aggregate to vehicle type or drives etc. 
-    since a historgram is a bit too messy for so many categories, we will plot a line historgram, where each line is a different category. This will mean that we will need to convert each age distribtuion cell in the column from a list of values into a whole dataframe of vlaues where the index is the age and the value is the share of vehicles of that age. 
-    """
+# def plot_age_distributions(config, ECONOMY_IDs, model_output_detailed_df, fig_dict, color_preparation_list, colors_dict, medium, title):
+#     """take in age distributions data and plot as a historgram. Will involve combining age distributions so we can aggregate to vehicle type or drives etc. 
+#     since a historgram is a bit too messy for so many categories, we will plot a line historgram, where each line is a different category. This will mean that we will need to convert each age distribtuion cell in the column from a list of values into a whole dataframe of vlaues where the index is the age and the value is the share of vehicles of that age. 
+#     """
     
     
-    # Step 1: Data Preprocessing (I assume you've already got this under control)
+#     # Step 1: Data Preprocessing (I assume you've already got this under control)
     
-    # Step 2: Combining Distributions (Use your previously defined function)
-    # -- You could modify your function to return a DataFrame instead of a string of concatenated values.
+#     # Step 2: Combining Distributions (Use your previously defined function)
+#     # -- You could modify your function to return a DataFrame instead of a string of concatenated values.
     
-    # Step 3: Transform to DataFrame
-    # Let's assume for this example that each economy has its own DataFrame of age distributions
+#     # Step 3: Transform to DataFrame
+#     # Let's assume for this example that each economy has its own DataFrame of age distributions
     
     
-    # other_cols_age_dist = other_cols_df.groupby(group_cols)['Age_distribution'].agg(road_model_functions.combine_age_distributions).reset_index()
-    # grouped_df = grouped_df.merge(other_cols_age_dist, on=group_cols, how='left')
-    breakpoint()
+#     # other_cols_age_dist = other_cols_df.groupby(group_cols)['Age_distribution'].agg(road_model_functions.combine_age_distributions).reset_index()
+#     # grouped_df = grouped_df.merge(other_cols_age_dist, on=group_cols, how='left')
+#     breakpoint()
                 
-    dfs = {}
-    for id in ECONOMY_IDs:
-        df = model_output_detailed_df[model_output_detailed_df['Economy_ID'] == id]
-        age_dist = df['Age_distribution'].apply(road_model_functions)
-        dfs[id] = pd.DataFrame(age_dist)
+#     dfs = {}
+#     for id in ECONOMY_IDs:
+#         df = model_output_detailed_df[model_output_detailed_df['Economy_ID'] == id]
+#         age_dist = df['Age_distribution'].apply(road_model_functions)
+#         dfs[id] = pd.DataFrame(age_dist)
     
-    # Step 4: Plotting
-    plt.figure(figsize=fig_dict.get('figsize', (10, 6)))
+#     # Step 4: Plotting
+#     plt.figure(figsize=fig_dict.get('figsize', (10, 6)))
     
-    for id, df in dfs.items():
-        plt.plot(df.index, df.values, label=id, color=colors_dict.get(id, 'b'))
+#     for id, df in dfs.items():
+#         plt.plot(df.index, df.values, label=id, color=colors_dict.get(id, 'b'))
     
-    plt.xlabel('Vehicle Age')
-    plt.ylabel(f'Number of Vehicles ({medium})')
-    plt.title(title)
-    plt.legend()
-    plt.show()
+#     plt.xlabel('Vehicle Age')
+#     plt.ylabel(f'Number of Vehicles ({medium})')
+#     plt.title(title)
+#     plt.legend()
+#     plt.show()
 
     
     
-    return 
+#     return 
 
 
 def plot_age_distributions(config, ECONOMY_IDs, model_output_detailed_detailed_non_road_drives, fig_dict, color_preparation_list, colors_dict, medium, BY_DRIVE, BY_VEHICLE_TYPE, WRITE_HTML=True):
@@ -4978,17 +4978,19 @@ def plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, 
         
         #We will need to calculate the weighted average sales share for each drive type, since some economies have more stocks than others. But also some economies have lower mileage than otehrs so we should use activity rather than stocks, to show a better reresentatin of howmuch those stocks are used. For this we will jsut use activity rather than sales or stocks as the weighting factor
         new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(stocks, on=['Scenario', 'Economy', 'Date', 'Vehicle Type', 'Transport Type', 'Drive'], how='left', suffixes=('_sales_share', '_stocks'))
-        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(model_output_detailed_df_activity[['Economy', 'Date', 'Scenario', 'Drive','Vehicle Type', 'Transport Type', 'Value']], on=['Scenario', 'Economy', 'Date', 'Drive', 'Transport Type'], how='left', suffixes=('_sales_share', '_activity'))
+        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(model_output_detailed_df_activity[['Economy', 'Date', 'Scenario', 'Drive','Vehicle Type', 'Transport Type', 'Value']], on=['Scenario','Vehicle Type', 'Economy', 'Date', 'Drive', 'Transport Type'], how='left', suffixes=('_sales_share', '_activity'))
         #rename Value to Value_activity
         new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.rename(columns={'Value':'Value_activity'})
         #now we can calculate the weighted average sales share
         weighted_value_sales_share = new_sales_shares_all_plot_drive_shares.copy()
         weighted_value_sales_share['Weighted_value_sales_share'] = (weighted_value_sales_share['Value_sales_share'] * weighted_value_sales_share['Value_activity'])
+        
         weighted_value_sales_share = weighted_value_sales_share[['Scenario', 'Date','Vehicle Type',  'Transport Type', 'Drive','Value_activity', 'Weighted_value_sales_share']].groupby(['Scenario', 'Date', 'Drive','Vehicle Type',  'Transport Type'], group_keys=False).sum(numeric_only=True).reset_index()
+            
         weighted_value_sales_share['Value'] = weighted_value_sales_share['Weighted_value_sales_share'] / weighted_value_sales_share['Value_activity']
         #since we may be dividing by zero, we will sdet any values that are nan to 0
         weighted_value_sales_share['Value'] = weighted_value_sales_share['Value'].fillna(0)
-        weighted_value_sales_share = weighted_value_sales_share[['Scenario', 'Date', 'Transport Type', 'Drive', 'Value']]
+        weighted_value_sales_share = weighted_value_sales_share[['Scenario', 'Date','Vehicle Type',  'Transport Type', 'Drive', 'Value']]
         weighted_value_sales_share['Economy'] = 'all'
         #and calculate the stock share in same way
         weighted_value_stock_share = new_sales_shares_all_plot_drive_shares.copy()
@@ -5018,6 +5020,7 @@ def plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, 
         
         #then concat the two dataframes
         new_sales_shares_all_plot_drive_shares_scenario = pd.concat([new_sales_shares_all_plot_drive_shares_scenario, stocks_scen])
+        breakpoint()#why are we mising sales in the final graph??
         
         #times shares by 100
         new_sales_shares_all_plot_drive_shares_scenario['Value'] = new_sales_shares_all_plot_drive_shares_scenario['Value']*100
@@ -5492,6 +5495,7 @@ def emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name,
     return
             
 def share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, emissions_factors, model_output_with_fuels_df, colors_dict, AGG_OF_ALL_ECONOMIES, USE_AVG_GENERATION_EMISSIONS_FACTOR=True, ONLY_AGG_OF_ALL=False):
+    extra_identifier = ''
     model_output_with_fuels = model_output_with_fuels_df.copy()
     # drop non road:
     model_output_with_fuels = model_output_with_fuels.loc[model_output_with_fuels['Medium']=='road'].copy()
@@ -5511,6 +5515,7 @@ def share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES(config, economy_gr
     
     if USE_AVG_GENERATION_EMISSIONS_FACTOR:
         gen='_gen'
+        extra_identifier+=gen
         #pull in the 8th outlook emissions factors by year, then use that to claculate the emissions for electricity.
         emissions_factor_elec = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
         #extract the emissions factor for elctricity for each economy
@@ -5558,9 +5563,7 @@ def share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES(config, economy_gr
     emissions_by_vehicle_type = emissions_by_vehicle_type.merge(total_emissions, on=['Economy', 'Scenario', 'Date'], how='left', suffixes=('', '_total'))
     emissions_by_vehicle_type['Share of emissions'] = emissions_by_vehicle_type['Emissions'] / emissions_by_vehicle_type['Emissions_total']
     if AGG_OF_ALL_ECONOMIES and ONLY_AGG_OF_ALL:
-        extra_identifier = '_agg'
-    else:
-        extra_identifier = ''
+        extra_identifier += '_agg'
     #plot the data
     for scenario in emissions_by_vehicle_type['Scenario'].unique():
         emissions_by_vehicle_type_scenario = emissions_by_vehicle_type.loc[emissions_by_vehicle_type['Scenario']==scenario].copy()

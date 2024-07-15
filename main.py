@@ -124,6 +124,14 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         progress += increment
         update_progress(progress)
         FOUND = False
+        RUN_MODEL = True#set me
+        if not RUN_MODEL:
+            MODEL_RUN_1  = False
+            MODEL_RUN_2  = False
+        else:
+            MODEL_RUN_1  = True#set me
+            MODEL_RUN_2  = True#set me
+            
         for economy in ECONOMY_BASE_YEARS_DICT.keys():
             if economy_to_run == 'all' or 'all' in economy_to_run:
                 pass
@@ -142,7 +150,6 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             aggregate_data_for_model(config, ECONOMY_ID)
             progress += increment
             update_progress(progress)
-            MODEL_RUN_1  = True
             if MODEL_RUN_1:   
                 print('\nDoing first model run for {}\n'.format(economy))   
                 #MODEL RUN 1: (RUN MODEL FOR DATA BETWEEN AND INCLUDIONG BASE YEAR AND config.OUTLOOK_BASE_YEAR. This is important because we often dont have the data up to OUTLOOK_BASE_YEAR, so we have to model it. But its also important the data in the OUTLOOK_BASE_YEAR matches the energy use from ESTO. Otherwise we'd just model it all in one go)).
@@ -167,7 +174,6 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             
             progress += increment
             update_progress(progress)
-            MODEL_RUN_2  = True
             #below are required for MODEL_RUN_2. only chasnge them if you just want to run the model for the base year and not the whole period
             PROJECT_TO_JUST_OUTLOOK_BASE_YEAR = False
             ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR = True
@@ -220,7 +226,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         progress += increment
         update_progress(progress)
         
-        SETUP_AND_RUN_MULTI_ECONOMY_PLOTS = False
+        SETUP_AND_RUN_MULTI_ECONOMY_PLOTS = True
         if concatenate_output_data(config):
             try:
                 international_bunker_share_calculation_handler(config)
@@ -229,7 +235,8 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                         produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
                     except:
                         print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
-                    setup_and_run_multi_economy_plots(config)
+                    PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES = True
+                    setup_and_run_multi_economy_plots(config,ONLY_AGG_OF_ALL=PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES)
             except:
                 pass#usually happens because the economies in ECONOMIES_WITH_MODELLING_COMPLETE_DICT havent been run for this file date id. check extract_non_road_modelled_data(config) in international_bunkers
         copy_required_output_files_to_one_folder(config, output_folder_path='output_data\\for_other_modellers')
@@ -276,7 +283,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main('04_CHL')#, root_dir_param=root_dir_param)
+        main(['all'])#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%
