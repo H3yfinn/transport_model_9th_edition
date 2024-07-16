@@ -278,6 +278,8 @@ class Config:
             data_folder_path = self.root_dir + '\\output_data\\model_output\\'
             file_name = 'model_output'
             FILE_DATE_ID = utility_functions.get_latest_date_for_data_file(data_folder_path, file_name)
+            if FILE_DATE_ID is None:
+                FILE_DATE_ID = datetime.datetime.now().strftime("%Y%m%d")
         else:
             FILE_DATE_ID = datetime.datetime.now().strftime("%Y%m%d")
         return FILE_DATE_ID
