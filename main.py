@@ -259,11 +259,11 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             # archiving_scripts.revert_to_previous_version_of_files(config, '03_CDA', 'output_dataarchived_runs03_CDA_20230902_1626', CURRENT_FILE_DATE_ID='20230902')
         COMPLETED = True
     except Exception as e:
-        print('Error in main()')
-        print(e)
+        print('Error in main(): {}'.format(e))
         COMPLETED=False
+        return config.FILE_DATE_ID, COMPLETED, e
     finally:
-        return config.FILE_DATE_ID, COMPLETED
+        return config.FILE_DATE_ID, COMPLETED, None
     #     # Restore the original state
     #     ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
 #%%
@@ -283,7 +283,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main(['all'])#, root_dir_param=root_dir_param)
+        main(['04_CHL'])#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%

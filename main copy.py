@@ -265,12 +265,14 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             folder_name =None# 'output_data\\archived_runs\\20_USA_20230902_2331'
             # archiving_scripts.revert_to_previous_version_of_files(config, '03_CDA', 'output_dataarchived_runs03_CDA_20230902_1626', CURRENT_FILE_DATE_ID='20230902')
         COMPLETED = True
+        e = None
     except Exception as e:
-        print('Error in main()')
-        print(e)
+        e = str(e)
+        print('Error in main(): {}'.format(e))
         COMPLETED=False
+        return config.FILE_DATE_ID, COMPLETED, e
     finally:
-        return config.FILE_DATE_ID, COMPLETED
+        return config.FILE_DATE_ID, COMPLETED, e
     #     # Restore the original state
     #     ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
 #%%
