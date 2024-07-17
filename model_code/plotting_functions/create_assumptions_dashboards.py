@@ -195,7 +195,7 @@ def prepare_fig_dict_and_subfolders(config, ECONOMY_IDs, plots, ADVANCE_BASE_YEA
                     fig_dict[economy][scenario][plot] = None
     return fig_dict
 
-def create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id, hidden_legend_names, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS, CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=None, PRODUCE_AS_SINGLE_POTS=False, PREVIOUS_PROJECTION_FILE_DATE_ID=None, WRITE_INDIVIDUAL_HTMLS=False):
+def create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id, hidden_legend_names, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS, CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=None, PRODUCE_AS_SINGLE_POTS=False, PREVIOUS_PROJECTION_FILE_DATE_ID=None, WRITE_INDIVIDUAL_HTMLS=False,SAVE_AS_WEB_PLOTS=False):
     """
     Creates an assumptions dashboard for the specified economies and plots.
 
@@ -290,7 +290,6 @@ def create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors
                     trace.update(showlegend=False)
                     if (trace.name in hidden_legend_names or trace.name in names)
                     else names.add(trace.name))
-
             fig.update_layout(title_text=f"Dashboard for {economy} {scenario} - {dashboard_name_id}")
             if ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR:
                 if ARCHIVE_PREVIOUS_DASHBOARDS:
@@ -300,6 +299,13 @@ def create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors
                 if ARCHIVE_PREVIOUS_DASHBOARDS:
                     archive_previous_dashboards_before_saving(config, economy, scenario,dashboard_name_id, config.OUTLOOK_BASE_YEAR)
                 pio.write_html(fig, config.root_dir + '\\' + 'plotting_output\\dashboards\\{}\\{}\\{}_{}_dashboard_{}.html'.format(economy,config.OUTLOOK_BASE_YEAR,economy,  scenario,dashboard_name_id))
+            if SAVE_AS_WEB_PLOTS:
+                if scenario == 'Reference':
+                    web_scenario = 'Business_as_Usual'
+                elif scenario == 'Target':
+                    web_scenario = 'Low_Carbon'
+                fig.update_layout(title_text=f"Dashboard for {economy} {web_scenario.replace('_',' ')} - {dashboard_name_id.replace('_',' ')}")
+                fig.write_html(config.root_dir + '\\' + 'plotting_output\\dashboards\\{}\\WEB_{}_{}_dashboard_{}.html'.format(economy, economy, web_scenario,dashboard_name_id), auto_open=False)
 
     return fig_dict
        
@@ -941,7 +947,17 @@ def plotting_handler(config, ECONOMY_IDs, plots, fig_dict, color_preparation_lis
             ONLY_BUNKERS=True
         else:
             ONLY_BUNKERS=False
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_comparison_of_energy_by_dataset(config, ECONOMY_IDs,energy_output_for_outlook_data_system, bunkers_data, energy_use_esto, esto_bunkers_data, energy_8th, fig_dict, color_preparation_list, colors_dict, mapping_type, INCLUDE_8TH, INCLUDE_BUNKERS,ONLY_BUNKERS, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        if '_emissions' in title:
+            EMISSIONS=True
+            USE_AVG_GENERATION_EMISSIONS_FACTOR=False
+        elif '_emissions_gen' in title:
+            EMISSIONS=True
+            USE_AVG_GENERATION_EMISSIONS_FACTOR=True
+        else:
+            EMISSIONS=False
+            USE_AVG_GENERATION_EMISSIONS_FACTOR=False
+            
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_comparison_of_energy_by_dataset(config, ECONOMY_IDs,energy_output_for_outlook_data_system, bunkers_data, energy_use_esto, esto_bunkers_data, energy_8th, fig_dict, color_preparation_list, colors_dict, mapping_type,EMISSIONS, USE_AVG_GENERATION_EMISSIONS_FACTOR, INCLUDE_8TH, INCLUDE_BUNKERS,ONLY_BUNKERS, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     
     mapping_types = [p for p in plots if 'compare_energy_vs_previous_' in p]
     for title in mapping_types:
@@ -1133,7 +1149,7 @@ def dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=Tr
         ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR (int): The base year for the data being displayed in the dashboards.
         ECONOMY_ID (str or None): The ID of the economy for which the dashboard is being created. If None, dashboards are created for all economies.
         ARCHIVE_PREVIOUS_DASHBOARDS (bool): Whether to archive previous dashboards before saving a new one.
-        PREVIOUS_PROJECTION_FILE_DATE_ID: if this is not None then we use 'compare_energy_vs_previous_{mapping_type}' in the plots list for assumptions_extra with the previous projection file date id as file to comapre to.
+        PREVIOUS_PROJECTION_FILE_DATE_ID: if this is not None then we use 'compare_energy_vs_previous_{mapping_type}' in the plots list for detail_and_assumptions with the previous projection file date id as file to comapre to.
     Returns:
         None
     """
@@ -1216,7 +1232,7 @@ def dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=Tr
     #Create a results dashboard:
     ######################################
     #RESULTS AND MAIN ASSUMPTIONS DASHBOARDS
-    plots = ['energy_use_by_fuel_type_all_all','compare_energy1_all_8th',  'passenger_km_by_drive_road', 'freight_tonne_km_by_drive_road','non_road_energy_use_by_fuel_type_all', 'line_energy_use_by_all_all', 'sum_of_vehicle_types_by_transport_type_all', 'emissions_by_fuel_type_all']#'energy_use_by_fuel_type_passenger_road', 'energy_use_by_fuel_type_freight_road', 
+    plots = ['energy_use_by_fuel_type_all_all','compare_energy1_all_8th',  'passenger_km_by_drive_road', 'freight_tonne_km_by_drive_road','non_road_energy_use_by_fuel_type_all', 'line_energy_use_by_all_all', 'sum_of_vehicle_types_by_transport_type_all', 'compare_energy1_all_8th_emissions']#'emissions_by_fuel_type_all'#'energy_use_by_fuel_type_passenger_road', 'energy_use_by_fuel_type_freight_road', 
     if PREVIOUS_PROJECTION_FILE_DATE_ID != None:
         #replce  'emissions_by_fuel_type_all_gen' with 'compare_energy_vs_previous_all_ESTO' and replace stocks with emissions_by_fuel_type_all_gen
         # plots.remove('vehicle_type_stocks')
@@ -1224,7 +1240,7 @@ def dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=Tr
         plots = ['compare_energy_vs_previous_all_ESTO_simplified' if x == 'compare_energy1_all_8th' else x for x in plots]
         # plots = ['emissions_by_fuel_type_all_gen' if x == 'vehicle_type_stocks' else x for x in plots]
     #, 'charging']#activity_growth# 'charging',
-    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'results',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
+    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'results',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS,SAVE_AS_WEB_PLOTS=True)
     #create a presentation dashboard:
     # plots = ['energy_use_by_fuel_type_all','passenger_km_by_drive', 'freight_tonne_km_by_drive', 'share_of_transport_type_passenger']#activity_growth
     # create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'presentation',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS)
@@ -1237,8 +1253,7 @@ def dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=Tr
         # plots.remove('vehicle_type_stocks')
         # plots.append(config.root_dir + '\\' + f'compare_energy_vs_previous_all_ESTO')
         plots = ['compare_energy_vs_previous_all_ESTO_onlybunkers' if x == 'compare_energy1_all_onlybunkers' else x for x in plots]
-    
-    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'assumptions',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID,  WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
+    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'secondary_results',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID,  WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS,SAVE_AS_WEB_PLOTS=True)
     #CREATE ASSUMPTIONS 2, WHICH IS THE EXTRA DATA THAT PROBABLY NOONE WILL WANT TO SEE, BUT AVAILABLE IF NEEDED:
     plots = ['macro_lines_population', 'macro_lines_gdp', 'energy_efficiency_timeseries_all', 'non_road_share_of_transport_type','share_of_vehicle_type_activity_all', 'energy_intensity_timeseries_non_road', 'mileage_timeseries_all',  'demand_side_fuel_mixing', 'share_of_emissions_by_vehicle_type', 'new_vehicle_efficiency_timeseries_all', 'charging','avg_age_road','decrease_in_activity_from_activity_efficiency', 'shifted_activity_from_medium_to_medium','energy_intensity_strip']#activity_growth
     #'energy_efficiency_timeseries_freight', 'energy_efficiency_road_strip','energy_efficiency_timeseries_passenger']#activity_growth #'road_sales_by_drive_vehicle','share_of_vehicle_type_by_transport_type_all_True',
@@ -1246,15 +1261,13 @@ def dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=Tr
     # if PREVIOUS_PROJECTION_FILE_DATE_ID != None:
     #     #since for results we drop stocks and include compare_energy_vs_previous_all, we will add stocks here instead
     #     plots.append(config.root_dir + '\\' + f'vehicle_type_stocks')
-    try:
-        create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'assumptions_extra',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID,  WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
-    except Exception as e:
-        print('assumptions_extra dashboard not created, error: ', e)
-        breakpoint()
+    
+    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'detail_and_assumptions',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID,  WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS,SAVE_AS_WEB_PLOTS=True)
+        
     plots = ['energy_use_by_fuel_type_all_all', 'emissions_by_fuel_type_all_gen','passenger_km_by_drive_road','freight_tonne_km_by_drive_road', 'share_of_vehicle_type_by_transport_type_all','share_of_vehicle_type_activity_all', 'line_turnover_rate_by_vtype_all_road','avg_age_road',  'lmdi_freight_road',  'lmdi_passenger_road', 'energy_efficiency_timeseries_all','INTENSITY_ANALYSIS_timeseries_freight','INTENSITY_ANALYSIS_timeseries_passenger', 'share_of_vehicle_type_by_transport_type_freight_INTENSITY_ANALYSIS', 'share_of_vehicle_type_by_transport_type_passenger_INTENSITY_ANALYSIS', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_all', 'lifecycle_emissions_of_cars', 'box_turnover_rate_by_drive_all', 'turnover_rate_age_curve']
     
     CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT = {'transport_type':'all', 'mediums':['road']}
-    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'transport_type_intensity_analysis',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS,CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PRODUCE_AS_SINGLE_POTS=True, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
+    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'transport_type_intensity_analysis',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS,CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PRODUCE_AS_SINGLE_POTS=True, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS,SAVE_AS_WEB_PLOTS=False)
     
     
     
@@ -1364,12 +1377,7 @@ def setup_and_run_multi_economy_plots(config, economies_to_skip=[], ONLY_AGG_OF_
     'produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES_road_agg',
     'produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES_all_agg'
     ]
-    try:
-        breakpoint()
-        plot_multi_economy_plots(config, ECONOMY_IDs, economy_grouping_name, plots, colors_dict,  ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
-    except Exception as e:
-        breakpoint()
-        plot_multi_economy_plots(config, ECONOMY_IDs, economy_grouping_name, plots, colors_dict,  ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
+    plot_multi_economy_plots(config, ECONOMY_IDs, economy_grouping_name, plots, colors_dict,  ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True, ONLY_AGG_OF_ALL=ONLY_AGG_OF_ALL)
 #%%
 #NOTE THAT WITH THE PREVIOUS_PROJECTION_FILE_DATE_ID THE FILE SHOULD BE SAVED IN C:\Users\finbar.maunsell\OneDrive - APERC\outlook 9th\Modelling\Sector models\Transport - results only\01_AUS/01_AUS_20240327_transport_energy_use.csv SO YOU CAN ALWAYS GRAB THAT AND PUT IT IN C:\Users\finbar.maunsell\github\transport_model_9th_edition\output_data\for_other_modellers\output_for_outlook_data_system IF YOU WANT TO MAKE SURE YOU'RE USING THAT FILE AND NOT A DIFFERENT VERSION WITH SAME DATE ID
 

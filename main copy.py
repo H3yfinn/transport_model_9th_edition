@@ -72,10 +72,14 @@ def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_ca
         script_dir = os.path.dirname(os.path.abspath(__file__))
     if root_dir_param is not None:
         root_dir = root_dir_param
-        if "\\\\?\\" not in root_dir:
-            root_dir =  "\\\\?\\" + root_dir
+        if os.name == 'nt':#if we are on windows, we need to add the \\?\ prefix to the root_dir to allow for long file paths
+            if "\\\\?\\" not in root_dir:
+                root_dir =  "\\\\?\\" + root_dir
     else:
-        root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+        if os.name == 'nt':
+            root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+        else:
+            root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
 
     config = configurations.Config(root_dir)
     
@@ -98,6 +102,7 @@ def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_ca
     return increment, progress, update_progress, config
 
 def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
+    error_message = None
     increment, progress, update_progress, config = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
 
     # Prevent the system from going to sleep
@@ -218,7 +223,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                 progress += increment
                 update_progress(progress)
                 copy_required_output_files_to_one_folder(config, ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\\for_other_modellers')
-    
+        
         print('\nFinished running model for all economies, now doing final formatting\n')
         
         concatenate_outlook_data_system_outputs(config)
@@ -265,14 +270,12 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             folder_name =None# 'output_data\\archived_runs\\20_USA_20230902_2331'
             # archiving_scripts.revert_to_previous_version_of_files(config, '03_CDA', 'output_dataarchived_runs03_CDA_20230902_1626', CURRENT_FILE_DATE_ID='20230902')
         COMPLETED = True
-        e = None
     except Exception as e:
-        e = str(e)
-        print('Error in main(): {}'.format(e))
+        error_message = str(e)
+        print('Error in main(): {}'.format(error_message))
         COMPLETED=False
-        return config.FILE_DATE_ID, COMPLETED, e
-    finally:
-        return config.FILE_DATE_ID, COMPLETED, e
+        # return config.FILE_DATE_ID, COMPLETED, error_message
+    return config.FILE_DATE_ID, COMPLETED, error_message
     #     # Restore the original state
     #     ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
 #%%
@@ -286,13 +289,13 @@ if __name__ == "__main__":
             economy_to_run = sys.argv[1]
             print('Running model for economy {}'.format(economy_to_run), 'in root directory {}'.format(root_dir_param))
             main(economy_to_run=economy_to_run, root_dir_param=root_dir_param, script_dir_param=root_dir_param) #e.g. python transport_model_9th_edition/main.py all C:\Users\finbar.maunsell\github\transport_model_9th_edition
-                
+            #e.g. python transport_model_9th_edition/main.py all /var/www/transport-modeling-guide/transport_model_9th_edition
             # os.chdir('C:\\Users\\finbar.maunsell\\github')
             # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main('04_CHL')#, root_dir_param=root_dir_param)
+        main('all')#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%

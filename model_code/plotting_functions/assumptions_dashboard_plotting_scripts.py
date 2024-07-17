@@ -2471,8 +2471,8 @@ def emissions_by_fuel_type(config, ECONOMY_IDs, emissions_factors, model_output_
     color_preparation_list.append(emissions_by_fuel_type_economy['Fuel'].unique().tolist())
     return fig_dict, color_preparation_list
 
-
-def plot_comparison_of_energy_by_dataset(config, ECONOMY_IDs, energy_output_for_outlook_data_system_df, bunkers_data_df, energy_use_esto, esto_bunkers_data, energy_8th, fig_dict, color_preparation_list, colors_dict, mapping_type, INCLUDE_8TH=False, INCLUDE_BUNKERS=False, ONLY_BUNKERS=False, WRITE_HTML=True):
+ 
+def plot_comparison_of_energy_by_dataset(config, ECONOMY_IDs, energy_output_for_outlook_data_system_df, bunkers_data_df, energy_use_esto, esto_bunkers_data, energy_8th, fig_dict, color_preparation_list, colors_dict, mapping_type, EMISSIONS=False, USE_AVG_GENERATION_EMISSIONS_FACTOR=False, INCLUDE_8TH=False, INCLUDE_BUNKERS=False, ONLY_BUNKERS=False, WRITE_HTML=True):
     """plot the energy use for each economy and scenario for the 8th, 9th and ESTO models. The plot will be a line chart with energy on the y axis and year on the x axis. The lines will be the different fuels. The color of the lines will be the dataset (9th, 8th or ESTO). 
 
     Args:
@@ -2529,17 +2529,27 @@ def plot_comparison_of_energy_by_dataset(config, ECONOMY_IDs, energy_output_for_
     
     energy_use_by_fuel_type = energy_use_by_fuel_type[['Economy','Scenario', 'Date', 'Fuel', 'Energy','Dataset']].groupby(['Economy','Scenario', 'Date','Dataset', 'Fuel']).sum().reset_index()
     
+    ############################################################################################################################################################
+    if EMISSIONS:
+        energy_use_by_fuel_type, electricity_emissions, emissions_factors = calculate_emissions(config, energy_use_by_fuel_type, all_data=None, USE_AVG_GENERATION_EMISSIONS_FACTOR=False, drive_column=None, energy_column = 'Energy', SUPPLIED_COLS =['Economy','Scenario', 'Date','Dataset', 'Fuel', 'Energy'],DROP_FUELS=False)
+        energy_col = 'Emissions'
+        extra_identifier = '_emissions'
+        unit = 'MtCO2'
+    else:
+        energy_col = 'Energy'
+        extra_identifier= ''
+        unit = 'PJ'
+    ############################################################################################################################################################
     #create a total fuel for each dataset. this will jsut be the sum of energy for each dataset, by year, scenario and economy:
-    energy_use_by_fuel_type_totals = energy_use_by_fuel_type[['Economy','Scenario', 'Date','Dataset', 'Energy']].groupby(['Economy','Scenario', 'Date','Dataset']).sum(numeric_only=True).reset_index().copy()
+    energy_use_by_fuel_type_totals = energy_use_by_fuel_type[['Economy','Scenario', 'Date','Dataset', energy_col]].groupby(['Economy','Scenario', 'Date','Dataset']).sum(numeric_only=True).reset_index().copy()
     #set Fuel to total:
     energy_use_by_fuel_type_totals['Fuel'] = 'Total'
     #cocnat the total onto the main df:
     energy_use_by_fuel_type = pd.concat([energy_use_by_fuel_type, energy_use_by_fuel_type_totals])
-    
-    energy_use_by_fuel_type = map_fuels(config, energy_use_by_fuel_type, value_col='Energy', index_cols=['Economy','Scenario', 'Date','Dataset', 'Fuel'], mapping_type=mapping_type)
+    energy_use_by_fuel_type = map_fuels(config, energy_use_by_fuel_type, value_col=energy_col, index_cols=['Economy','Scenario', 'Date','Dataset', 'Fuel'], mapping_type=mapping_type)
     
     #add units (by setting measure to Energy haha)
-    energy_use_by_fuel_type['Measure'] = 'Energy'
+    energy_use_by_fuel_type['Measure'] = energy_col
     #add units
     energy_use_by_fuel_type['Unit'] = energy_use_by_fuel_type['Measure'].map(config.measure_to_unit_concordance_dict)
     #load in data and recreate plot, as created in all_economy_graphs
@@ -2551,18 +2561,18 @@ def plot_comparison_of_energy_by_dataset(config, ECONOMY_IDs, energy_output_for_
             energy_use_by_fuel_type_economy = energy_use_by_fuel_type_s.loc[energy_use_by_fuel_type_s['Economy']==economy].copy()
             
             #now plot
-            fig = px.line(energy_use_by_fuel_type_economy, x='Date', y='Energy', color='Fuel',line_dash='Dataset', title='Compared Energy by Fuel', color_discrete_map=colors_dict)
-            plot_id = f'compare_energy_{mapping_type}'
+            fig = px.line(energy_use_by_fuel_type_economy, x='Date', y=energy_col, color='Fuel',line_dash='Dataset', title=f'Compared {energy_col} by Fuel', color_discrete_map=colors_dict)
+            plot_id = f'compare_energy_{mapping_type}{extra_identifier}'
             if INCLUDE_8TH:
-                title_text = 'Energy (8th,9th,ESTO)'
+                title_text = f'{energy_col} (8th,9th,ESTO)'
                 plot_id = plot_id+'_8th'
             else:
-                title_text = 'Energy (9th,ESTO)'
+                title_text = f'{energy_col} (9th,ESTO)'
             if INCLUDE_BUNKERS:
                 title_text = title_text.replace(')', ',Bunkers)')
                 plot_id = plot_id+'_bunkers' 
             if ONLY_BUNKERS:
-                title_text = title_text.replace('Energy', 'Bunkers Energy')
+                title_text = title_text.replace(energy_col, f'Bunkers {energy_col}')
                 #drop ,Bunkers) if it exists
                 title_text = title_text.replace(',Bunkers)', ')')
                 plot_id = plot_id+'_only_bunkers'
@@ -2570,7 +2580,7 @@ def plot_comparison_of_energy_by_dataset(config, ECONOMY_IDs, energy_output_for_
             fig_dict[economy][scenario][plot_id] = [fig, title_text, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'{plot_id}_{scenario}_{economy}.html', graph_type='line', plot_data=energy_use_by_fuel_type_economy, economy=economy, x='Date', y='Energy', color='Fuel', title=title_text, line_dash='Dataset', y_axes_title='Energy (PJ)', legend_title='Fuel', font_size=30, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=f'{plot_id}_{scenario}_{economy}{extra_identifier}.html', graph_type='line', plot_data=energy_use_by_fuel_type_economy, economy=economy, x='Date', y=energy_col, color='Fuel', title=title_text, line_dash='Dataset', y_axes_title=f'{energy_col} {unit}', legend_title='Fuel', font_size=30, colors_dict=colors_dict)
             
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(energy_use_by_fuel_type_economy['Fuel'].unique().tolist())
@@ -4379,7 +4389,7 @@ def clean_and_merge_lca_and_emissions(config, lca, all_data):
     lca = lca.melt(id_vars=['Economy', 'Scenario', 'Date', 'Drive'], value_vars=['Emissions from inputs', 'Emissions from use'], var_name='Emissions_source', value_name='Emissions')
     return lca
 
-def calculate_emissions(config, energy_use_by_fuels, all_data, USE_AVG_GENERATION_EMISSIONS_FACTOR=True, drive_column='Drive', energy_column = 'Energy'):
+def calculate_emissions(config, energy_use_by_fuels, all_data, USE_AVG_GENERATION_EMISSIONS_FACTOR=True, drive_column='Drive', energy_column = 'Energy', SUPPLIED_COLS =[], DROP_FUELS=True):
     """take in energy_use_by_fuels and all_data (any general dataframe with the index cols required for most things in this system - except a fuel column), calcaulte emissions in energy_use_by_fuels and then merge them back into all_data, since all data didnt have energy use by fuel, so it wasnt possible to calculate emissions in all_data
 
     Args:
@@ -4392,20 +4402,42 @@ def calculate_emissions(config, energy_use_by_fuels, all_data, USE_AVG_GENERATIO
     """
     
     emissions_factors = pd.read_csv(config.root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
-    if drive_column != 'Drive':
-        energy_use_by_fuels = energy_use_by_fuels.rename(columns={'Drive':drive_column})
-    if energy_column != 'Energy':
-        energy_use_by_fuels = energy_use_by_fuels.rename(columns={'Energy':energy_column})
+    if len(SUPPLIED_COLS)>0:
+        cols = SUPPLIED_COLS
+    else:
+        cols =['Economy', 'Scenario','Date', 'Fuel', 'Transport Type','Vehicle Type',drive_column,'Medium',energy_column]
+            
+        if drive_column != 'Drive':
+            energy_use_by_fuels = energy_use_by_fuels.rename(columns={'Drive':drive_column})
+        if energy_column != 'Energy':
+            energy_use_by_fuels = energy_use_by_fuels.rename(columns={'Energy':energy_column})
         
+    cols_no_energy = [x for x in cols if x != energy_column]
+    cols_no_energy_no_fuel = [x for x in cols_no_energy if x != 'Fuel']
     #load in data and recreate plot, as created in all_economy_graphs
     #loop through scenarios and grab the data for each scenario:
-    energy_use_by_fuels = energy_use_by_fuels[['Economy', 'Scenario','Date', 'Fuel', 'Transport Type','Vehicle Type',drive_column,'Medium',energy_column]].groupby(['Economy', 'Scenario','Date','Transport Type','Vehicle Type',drive_column,'Medium', 'Fuel']).sum().reset_index().copy()
+    energy_use_by_fuels = energy_use_by_fuels[cols].groupby(cols_no_energy).sum().reset_index().copy()
     
     #rename fuel_code to fuel in emissions_factors
     emissions_factors = emissions_factors.rename(columns={'fuel_code':'Fuel'})
     #join on the emissions factors (has the cols fuel_code,	Emissions factor (MT/PJ))
+    energy_use_by_fuels_TEST = energy_use_by_fuels.merge(emissions_factors, how='left', on='Fuel')
+    ###########
+    #identify where there a!re no emissions factors:
+    missing_emissions_factors = energy_use_by_fuels_TEST.loc[energy_use_by_fuels_TEST['Emissions factor (MT/PJ)'].isna()].copy()
+    if len(missing_emissions_factors)>0:
+            
+        #if any are in the follwoing m apping, then map them accordingly:
+        fuel_mapping = {'7_x_other_petroleum_products':'07_x_other_petroleum_products'}
+        energy_use_by_fuels['Fuel'] = energy_use_by_fuels['Fuel'].replace(fuel_mapping)
+    #then do the mapping again
     energy_use_by_fuels = energy_use_by_fuels.merge(emissions_factors, how='left', on='Fuel')
-    
+    #identify where there are no emissions factors:
+    missing_emissions_factors = energy_use_by_fuels.loc[energy_use_by_fuels['Emissions factor (MT/PJ)'].isna()].copy()
+    if len(missing_emissions_factors)>0:
+        breakpoint()
+        raise ValueError(f'missing emissions factors, {missing_emissions_factors.Fuel.unique()}')
+    ###########
     if USE_AVG_GENERATION_EMISSIONS_FACTOR:
         #pull in the 8th outlook emissions factors by year then use that to claculate the emissions for electricity.
         emissions_factor_elec = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
@@ -4424,7 +4456,7 @@ def calculate_emissions(config, energy_use_by_fuels, all_data, USE_AVG_GENERATIO
         energy_use_by_fuels['Emissions factor (MT/PJ)'] = np.where(energy_use_by_fuels['_merge']=='both', energy_use_by_fuels['Emissions factor (MT/PJ)_elec'], energy_use_by_fuels['Emissions factor (MT/PJ)'])
         
         #fill any missing values using ffill after sorting by date and grouping by 'Economy', 'Scenario','Date', 'Fuel', 'Transport Type'
-        energy_use_by_fuels['Emissions factor (MT/PJ)'] = energy_use_by_fuels.sort_values(by='Date').groupby(['Economy', 'Scenario','Date', 'Fuel','Transport Type','Vehicle Type',drive_column,'Medium'])['Emissions factor (MT/PJ)'].fillna(method='ffill')
+        energy_use_by_fuels['Emissions factor (MT/PJ)'] = energy_use_by_fuels.sort_values(by='Date').groupby(cols_no_energy)['Emissions factor (MT/PJ)'].fillna(method='ffill')
         
         #drop columns
         energy_use_by_fuels = energy_use_by_fuels.drop(columns=['Emissions factor (MT/PJ)_elec', '_merge'])
@@ -4433,7 +4465,6 @@ def calculate_emissions(config, energy_use_by_fuels, all_data, USE_AVG_GENERATIO
     missing_emissions_factors = energy_use_by_fuels.loc[energy_use_by_fuels['Emissions factor (MT/PJ)'].isna()].copy()
     if len(missing_emissions_factors)>0:
         breakpoint()
-        time.sleep(1)
         raise ValueError(f'missing emissions factors, {missing_emissions_factors.Fuel.unique()}')
     
     #calculate emissions:
@@ -4444,10 +4475,20 @@ def calculate_emissions(config, energy_use_by_fuels, all_data, USE_AVG_GENERATIO
     #extract the electricity emissions to use them separately if need be:
     electricity_emissions = energy_use_by_fuels[energy_use_by_fuels.Fuel=='17_electricity'].copy()
     #drop fuels and then sum
-    energy_use_by_fuels = energy_use_by_fuels.drop(columns=['Fuel', 'Emissions factor (MT/PJ)']).groupby(['Economy', 'Scenario','Date', 'Transport Type','Vehicle Type',drive_column,'Medium']).sum().reset_index()
-    electricity_emissions = electricity_emissions.drop(columns=['Fuel', 'Emissions factor (MT/PJ)']).groupby(['Economy', 'Scenario','Date', 'Transport Type','Vehicle Type',drive_column,'Medium']).sum().reset_index()
-    #now merge emissions back into all_data
-    all_data = all_data.merge(energy_use_by_fuels[['Economy', 'Scenario','Date', 'Transport Type','Vehicle Type',drive_column,'Medium','Emissions']], how='left', on=['Economy', 'Scenario','Date', 'Vehicle Type',drive_column,'Medium', 'Transport Type'])
+    if DROP_FUELS:
+        energy_use_by_fuels = energy_use_by_fuels.drop(columns=['Fuel', 'Emissions factor (MT/PJ)']).groupby(cols_no_energy_no_fuel).sum().reset_index()
+        electricity_emissions = electricity_emissions.drop(columns=['Fuel', 'Emissions factor (MT/PJ)']).groupby(cols_no_energy_no_fuel).sum().reset_index()
+        #now merge emissions back into all_data
+        if all_data is not None:
+            all_data = all_data.merge(energy_use_by_fuels[cols_no_energy_no_fuel +['Emissions']], how='left', on=cols_no_energy_no_fuel)
+        else:
+            all_data = energy_use_by_fuels.copy()
+    else:
+        if all_data is not None:
+            all_data = all_data.merge(energy_use_by_fuels[cols_no_energy +['Emissions']], how='left', on=cols_no_energy)
+        else:
+            all_data = energy_use_by_fuels.copy()
+        
     
     return all_data, electricity_emissions, emissions_factors
 
@@ -5020,7 +5061,6 @@ def plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, 
         
         #then concat the two dataframes
         new_sales_shares_all_plot_drive_shares_scenario = pd.concat([new_sales_shares_all_plot_drive_shares_scenario, stocks_scen])
-        breakpoint()#why are we mising sales in the final graph??
         
         #times shares by 100
         new_sales_shares_all_plot_drive_shares_scenario['Value'] = new_sales_shares_all_plot_drive_shares_scenario['Value']*100
