@@ -119,11 +119,11 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     # Your long-running code here
     # try:
     #Things to do once a day:
-    do_these_once_a_day = False
+    do_these_once_a_day = True
     if do_these_once_a_day:
         create_all_concordances(config, USE_LATEST_CONCORDANCES=True)
     
-    PREPARE_DATA = False#only needs to be done if the macro or transport system data changes
+    PREPARE_DATA = True#only needs to be done if the macro or transport system data changes
     if PREPARE_DATA:
         import_macro_data(config, UPDATE_INDUSTRY_VALUES=False)
         import_transport_system_data(config)
@@ -237,7 +237,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     progress += increment
     update_progress(progress)
     
-    SETUP_AND_RUN_MULTI_ECONOMY_PLOTS = True
+    SETUP_AND_RUN_MULTI_ECONOMY_PLOTS = False
     if concatenate_output_data(config):
         international_bunker_share_calculation_handler(config)
         if SETUP_AND_RUN_MULTI_ECONOMY_PLOTS:
@@ -268,7 +268,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     #     #set up archive folder:
     #     archiving_folder = archiving_scripts.create_archiving_folder_for_FILE_DATE_ID(config)
     #     archiving_scripts.archive_lots_of_files(config, archiving_folder)    
-    ARCHIVE_RESULTS=True
+    ARCHIVE_RESULTS=False
     if ARCHIVE_RESULTS:
         economies_to_archive = ['01_AUS']#, '21_VN', '07_INA']
         for economy in economies_to_archive:
