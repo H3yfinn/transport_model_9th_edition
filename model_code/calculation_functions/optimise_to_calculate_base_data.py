@@ -138,7 +138,6 @@ def calculate_mse_stocks(config, stocks, EPSILON, mse_stocks_dominant_vehicles_e
     if stocks.groupby(['Transport Type'])['Value'].sum().min() == 0:
         proportional_mse = 1e6
     return proportional_mse
-
 def calculate_mse_opposite_drives(config, stocks, EPSILON):
     # Secondary Objective: Minimize amount of stocks that are in undesired drive types. Since we are already trying to minimse the difference in stocks for each drive type, we should just create another penalty which further penalises extra stocks in the undesired drive types (but doesnt penalise when there are less stocks than expected in the undesired drive types). We will do this using the proportion of stocks that are in that respective drive/vehicle type rather than absolute amount, so big decreases in all stocks dont get ignored.
     #get proportions of stocks for everyhting:
@@ -256,7 +255,7 @@ def constraint_function(config, x, actual_energy_by_drive, df_transport, paramet
             if parameters_dict['USE_SAME_MILEAGE_ACROSS_VEHICLE_TYPES']:
                 if np.any(mileage > df_transport_upper_bounds.loc[(df_transport_upper_bounds['Measure'] == 'Mileage'), 'Value'].to_numpy()) or np.any(stocks > df_transport_upper_bounds.loc[(df_transport_upper_bounds['Measure'] == 'Stocks') & (df_transport_upper_bounds['Drive'] == drive), 'Value'].to_numpy()) or np.any(intensity > df_transport_upper_bounds.loc[(df_transport_upper_bounds['Measure'] == 'Intensity') & (df_transport_upper_bounds['Drive'] == drive), 'Value'].to_numpy()):
                     return 1e6
-                if np.any(mileage < df_transport_lower_bounds.loc[(df_transport_lower_bounds['Measure'] == 'Mileage'), 'Value'].to_numpy()) or np.any(stocks < df_transport_lower_bounds.loc[(df_transport_lower_bounds['Measure'] == 'Stocks') & (df_transport_lower_bounds['Drive'] == drive), 'Value'].to_numpy()) or np.any(intensity < df_transport_lower_bounds.loc[(df_transport_lower_bounds['Measure'] == 'Intensity') & (df_transport_lower_bounds['Drive'] == drive), 'Value'].to_numpy()):
+            if np.any(mileage < df_transport_lower_bounds.loc[(df_transport_lower_bounds['Measure'] == 'Mileage'), 'Value'].to_numpy()) or np.any(stocks < df_transport_lower_bounds.loc[(df_transport_lower_bounds['Measure'] == 'Stocks') & (df_transport_lower_bounds['Drive'] == drive), 'Value'].to_numpy()) or np.any(intensity < df_transport_lower_bounds.loc[(df_transport_lower_bounds['Measure'] == 'Intensity') & (df_transport_lower_bounds['Drive'] == drive), 'Value'].to_numpy()):
                     return 1e6
             else:
                 if np.any(mileage > df_transport_upper_bounds.loc[(df_transport_upper_bounds['Measure'] == 'Mileage') & (df_transport_upper_bounds['Drive'] == drive), 'Value'].to_numpy()) or np.any(stocks > df_transport_upper_bounds.loc[(df_transport_upper_bounds['Measure'] == 'Stocks') & (df_transport_upper_bounds['Drive'] == drive), 'Value'].to_numpy()) or np.any(intensity > df_transport_upper_bounds.loc[(df_transport_upper_bounds['Measure'] == 'Intensity') & (df_transport_upper_bounds['Drive'] == drive), 'Value'].to_numpy()):
@@ -358,7 +357,6 @@ def format_and_prepare_inputs_for_optimisation(config, ECONOMY_ID, input_data_ne
     actual_energy_by_drive = {}
     for drive in df_transport['Drive'].unique():
         actual_energy_by_drive[drive] = np.sum(df_transport_copy.loc[(df_transport_copy['Drive'] == drive) & (df_transport_copy['Measure'] == 'Energy_new'), 'Value'].to_numpy())
-        
     #if the abs difference between the value for Energy_new and the energy calculated from the initial values is greater than the difference between factors_bounds_tolerance_adjustment**3 times the actual energy and the actual energy, then we need to raise the tolerance to at least the 3rd root of the proportional difference (energy_new/energy_calc) or mroe so that the optimisation can work (where energy_new is the energy we are aiming for and energy_calc is the energy calculated from the initial values)
     # This is because the optimisation will otherwise not be able to find a solution that is within the tolerance
     #example:
@@ -367,7 +365,7 @@ def format_and_prepare_inputs_for_optimisation(config, ECONOMY_ID, input_data_ne
     #thereofre to solve this we need the tol to be ((energy_new/energy_calc)**(1/3)) where 3 is the proportional difference since 15 -( 15*( (0.33**(1/3))**3 ) ) = 10 which is the difference between energy_new and energy_calc and 15*( (0.33**(1/3))**3 ) = 5 which is the energy we want to achieve!
     #so we want the tolerance to be ((energy_new/energy_calc)**(1/3)) or more so that the optimisation can work. To give some leeway we will times it by 1.5 so that the tolerance is higher. This will mean that the % difference is able eg. 1.5*((energy_new/energy_calc)**(1/3))  but i dont know if that is the best way since ( 15*( (1.5*((energy_new/energy_calc)**(1/3)))**3 ) ) is -1.875. obv its because we want to apply the negsative version (like 1-x) but i dont know if this is the best way to do it.
     # tolerance = 
-    
+
     sum_energy_new = df_transport_copy.loc[df_transport_copy['Measure'] == 'Energy_new', 'Value'].sum()
     sum_energy_calc = df_transport_copy.loc[df_transport_copy['Measure'].isin(['Mileage', 'Stocks', 'Intensity'])].pivot(index=['Economy', 'Date', 'Medium', 'Scenario', 'Transport Type', 'Vehicle Type', 'Drive'], columns='Measure', values='Value').reset_index()
     sum_energy_calc['Energy_calc'] = (sum_energy_calc['Mileage'] * sum_energy_calc['Stocks']) * sum_energy_calc['Intensity']
@@ -386,22 +384,22 @@ def format_and_prepare_inputs_for_optimisation(config, ECONOMY_ID, input_data_ne
 def calculate_and_format_stocks_per_capita_constants(config, input_data_new_road, ECONOMY_ID):
     #these constants will remain the same thorughout the opimisation iterations. Note that we will need to calcualte stocks per cpita 
     #constants: ['Population', 'Stocks_per_capita_targets', 'spc_factors']
-    stocks_per_capita_factors = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters.csv'.format(ECONOMY_ID))    
+    stocks_per_capita_factors = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'road_model', '{}_vehicles_per_stock_parameters.csv'.format(ECONOMY_ID)))    
     stocks_per_capita_factors.rename(columns={'gompertz_vehicles_per_stock':'spc_factors'}, inplace=True)
-    
+
     #grab stocks and population
     stocks_population = input_data_new_road[['Economy', 'Scenario', 'Date','Vehicle Type', 'Transport Type', 'Drive', 'Stocks', 'Population']].copy()
 
     #filter for only Reference in both dfs:
     stocks_per_capita_factors = stocks_per_capita_factors.loc[stocks_per_capita_factors.Scenario=='Reference'].copy()
     stocks_population = stocks_population.loc[stocks_population.Scenario=='Reference'].copy()
-    
+
     #merge with spc factors
     stocks_population_spc_factors = stocks_population.merge(stocks_per_capita_factors, on=['Economy', 'Scenario', 'Date','Vehicle Type', 'Transport Type'])    
-    
+
     #get only passenger
     stocks_per_capita = stocks_population_spc_factors.loc[stocks_population_spc_factors['Transport Type']=='passenger'].copy()
-    
+
     #calcualte stocks per cpita now:
     stocks_per_capita['Thousand_stocks_per_capita'] = (stocks_per_capita['Stocks']*stocks_per_capita['spc_factors'])/stocks_per_capita['Population']
     stocks_per_capita['Stocks_per_capita_targets'] = stocks_per_capita['Thousand_stocks_per_capita'] * 1000000
@@ -437,8 +435,7 @@ def set_cng_lpg_stocks_to_zero_where_energy_is_zero(config, ECONOMY_ID, input_da
             input_data_new_road.loc[(input_data_new_road['Drive']==cng_or_lpg_drive) & (input_data_new_road['Economy'] == ECONOMY_ID), 'Stocks'] = 0
             #set Energy_old to 0 as well, just to avoid confusion
             input_data_new_road.loc[(input_data_new_road['Drive']==cng_or_lpg_drive) & (input_data_new_road['Economy'] == ECONOMY_ID), 'Energy_old'] = 0
-    return input_data_new_road    
-    
+    return input_data_new_road
 def set_elec_vehicles_stocks_to_zero(config, ECONOMY_ID, input_data_new_road):
     #where drive is bev or phev_d or phev_g then set Stocks col values to 0 
     #double check there is no energy use for these drive types, as there shouldnt be:
@@ -452,7 +449,7 @@ def set_elec_vehicles_stocks_to_zero(config, ECONOMY_ID, input_data_new_road):
     return input_data_new_road
 
 def load_in_optimisation_parameters(config, ECONOMY_ID):
-    with open(config.root_dir + '\\' + 'config\\optimisation_parameters.yml') as file:
+    with open(os.path.join(config.root_dir, 'config', 'optimisation_parameters.yml')) as file:
         parameters_dict = yaml.load(file, Loader=yaml.FullLoader)
         #get the parameters for the economy
         if ECONOMY_ID=='ALL' or ECONOMY_ID=='ALL2':
@@ -527,7 +524,7 @@ def optimise_to_find_base_year_values(config, input_data_new_road, ECONOMY_ID, m
             df_transport['Lower_Bound'] = lower_bounds
             df_transport['Upper_Bound'] = upper_bounds
             df_transport['Initial_Value'] = initial_values
-            df_transport.to_csv(config.root_dir + '\\' + 'intermediate_data\\analysis_single_use\\bounds.csv')
+            df_transport.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'analysis_single_use', 'bounds.csv'))
             df_transport.drop(['Lower_Bound', 'Upper_Bound', 'Initial_Value'], axis=1, inplace=True)
         
         #make it so taht we only have one value for mileage for each vehicle type (or at least where mielage starts off the same, it will end up the same - allows for different mileage for different drive types if we want)
@@ -543,7 +540,7 @@ def optimise_to_find_base_year_values(config, input_data_new_road, ECONOMY_ID, m
             
             # if ECONOMY_ID == '08_JPN':
             #     breakpoint()
-            result = objective_function_handler(config, method, initial_values, df_transport, actual_values, parameters_dict,actual_energy_by_drive, constraints, bounds, stocks_per_capita_constants) 
+            result = objective_function_handler(config, method, initial_values, df_transport, actual_values, parameters_dict,actual_energy_by_drive, constraints, bounds, stocks_per_capita_constants)
             #################   IMPORTANT FUNCTION HERE. THIS IS WHERE THE OPTIMISATION HAPPENS #################
             ###################################################
             
@@ -561,7 +558,7 @@ def optimise_to_find_base_year_values(config, input_data_new_road, ECONOMY_ID, m
             
             # Save all the inputs to objective_function_handler
             # timex = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            # with open(f'inputs_to_objective_function_handler_{timex}.pkl', 'wb') as f:
+            # with open(os.path.join(f'inputs_to_objective_function_handler_{timex}.pkl'), 'wb') as f:
             #     pickle.dump({
             #         'method': method,
             #         'initial_values': initial_values,
@@ -574,7 +571,7 @@ def optimise_to_find_base_year_values(config, input_data_new_road, ECONOMY_ID, m
             #         'stocks_per_capita_constants': stocks_per_capita_constants
             #     }, f)
 
-            # # with open(config.root_dir + '\\' + 'inputs_to_objective_function_handler.pkl', 'rb') as f:
+            # # with open(os.path.join(config.root_dir,  'inputs_to_objective_function_handler.pkl'), 'rb') as f:
             # #     inputs = pickle.load(f)
 
             # # # Now you can access the inputs like this:
@@ -706,7 +703,7 @@ def format_and_check_optimisation_results_before_finalising(config, result, df_t
 #         ValueError: _description_
 #     """
     
-#     parameters = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)
+#     parameters = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)
 #     for transport_type in ['passenger', 'freight']:
             
 #         if transport_type =='passenger':
@@ -776,13 +773,13 @@ def check_results_difference_after_optimisation(config, df_transport, df_transpo
         if SAVE:
             #save results dict just in case
             results_dict['file_id'] = datetime.datetime.now().strftime("%Y%m%d_%H%M") 
-            with open(config.root_dir + '\\' + f'plotting_output\\input_exploration\\results_dict_{economy}_{year}_{scenario}_{results_dict["file_id"]}_UNSUCCESSFUL.pkl', 'wb') as f:
+            with open(os.path.join(config.root_dir, 'plotting_output', f'input_exploration', f'results_dict_{economy}_{year}_{scenario}_{results_dict["file_id"]}_UNSUCCESSFUL.pkl'), 'wb') as f:
                 pickle.dump(results_dict, f)
             #and save the optimised data (df_transport)
-            df_transport.to_csv(config.root_dir + '\\' + f'plotting_output\\input_exploration\\optimised_data_{economy}_{year}_{scenario}_{results_dict["file_id"]}_UNSUCCESSFUL.csv')
-        return df_transport, results_dict, False #None, None
-    else:
-        return df_transport, results_dict, True
+            df_transport.to_csv(os.path.join(config.root_dir, 'plotting_output', 'input_exploration', f'optimised_data_{economy}_{year}_{scenario}_{results_dict["file_id"]}_UNSUCCESSFUL.csv'))
+            return df_transport, results_dict, False #None, None
+        else:
+            return df_transport, results_dict, True
     
 def objective_function_handler(config, method, initial_values, df_transport, actual_values, parameters_dict, actual_energy_by_drive, constraints, bounds, stocks_per_capita_constants):
     """
@@ -916,15 +913,14 @@ def set_bounds_for_optimisation(config, parameters_dict, df_transport_copy, UPPE
         lower_initial_values_bounded_by_maximum_eff_mielage.loc[lower_initial_values_bounded_by_maximum_eff_mielage['Measure'] == 'Intensity', 'Value'] = lower_initial_values_bounded_by_maximum_eff_mielage.loc[lower_initial_values_bounded_by_maximum_eff_mielage['Measure'] == 'Intensity', 'Value'] * (1-maximum_change_in_mileage)
         #adjust mileage
         lower_initial_values_bounded_by_maximum_eff_mielage.loc[lower_initial_values_bounded_by_maximum_eff_mielage['Measure'] == 'Mileage', 'Value'] = lower_initial_values_bounded_by_maximum_eff_mielage.loc[lower_initial_values_bounded_by_maximum_eff_mielage['Measure'] == 'Mileage', 'Value'] * (1-maximum_change_in_intensity)
-        
     lower_bounds, upper_bounds  = lower_initial_values_bounded_by_maximum_eff_mielage['Value'].to_numpy(), upper_initial_values_bounded_by_maximum_eff_mielage['Value'].to_numpy()
     return lower_bounds, upper_bounds
-    
+
 def check_bounds_and_adjust_stocks_to_be_able_to_calculate_energy(config, initial_values, bounds, lower_bounds, upper_bounds, UPPER, df_transport, parameters_dict, sum_energy_new, df_transport_copy):
     """check that the sum of energy using the upper/lower bounds can reach the sum of energy_new. if not, this means that the bounds are too tight and we need to increase them. We will increase/decrease the upper/lower bounds for stocks so that they increase/decrease by parameters_dict['maximum_proportional_change_in_stocks'] times the required increase/decrease in energy use (if it is required) so that the required energy can be reached.
-    
+
     after all that we finally do a check that the energy by drive type can be reached. This will be done by checking that the sum of energy using the upper bounds is greater or equal to the sum of energy_new for that drive and the sum of energy using the lower bounds is lower or equal to the sum of energy_new for that drive type (no matter whether UPPER is True or False). If not, then we will adjust the bounds enough so that the energy can be reached. to make it simple we'll adjust all bounds by an equal proportion, (except any where their stocks are already 0) so that the energy can be reached.
-    
+
     Args:
         initial_values (_type_): _description_
         bounds (_type_): _description_
@@ -951,7 +947,7 @@ def check_bounds_and_adjust_stocks_to_be_able_to_calculate_energy(config, initia
         df_transport['Value'] = lower_bounds
         df_transport_other_bounds = df_transport.copy()
         df_transport_other_bounds['Value'] = upper_bounds
-        
+
     sum_energy_calc = df_transport.loc[df_transport['Measure'].isin(['Mileage', 'Stocks', 'Intensity'])].pivot(index=['Economy', 'Date', 'Medium', 'Scenario', 'Transport Type', 'Vehicle Type', 'Drive'], columns='Measure', values='Value').reset_index()
     sum_energy_calc['Energy_calc'] = (sum_energy_calc['Mileage'] * sum_energy_calc['Stocks']) * sum_energy_calc['Intensity']
     sum_energy_calc = sum_energy_calc['Energy_calc'].sum()
@@ -966,19 +962,19 @@ def check_bounds_and_adjust_stocks_to_be_able_to_calculate_energy(config, initia
             lower_bounds_stocks = bounds_to_check.loc[bounds_to_check['Measure'] == 'Stocks', 'Value'] - bounds_to_check.loc[bounds_to_check['Measure'] == 'Stocks', 'Change_in_bounds']
         else:
             upper_bounds_stocks = bounds_to_check.loc[bounds_to_check['Measure'] == 'Stocks', 'Value'] + bounds_to_check.loc[bounds_to_check['Measure'] == 'Stocks', 'Change_in_bounds']
-            
+
         #Now times the cahnge in stocks by maximum_proportional_change_in_stocks to get the new change in bounds
         bounds_to_check.loc[bounds_to_check['Measure'] == 'Stocks', 'Change_in_bounds'] = bounds_to_check.loc[bounds_to_check['Measure'] == 'Stocks', 'Change_in_bounds'] * parameters_dict['maximum_proportional_change_in_stocks']    
         if UPPER:
             upper_bounds_stocks = bounds_to_check.loc[bounds_to_check['Measure'] == 'Stocks', 'Value'] + bounds_to_check.loc[bounds_to_check['Measure'] == 'Stocks', 'Change_in_bounds']
         else:
             lower_bounds_stocks = bounds_to_check.loc[bounds_to_check['Measure'] == 'Stocks', 'Value'] - bounds_to_check.loc[bounds_to_check['Measure'] == 'Stocks', 'Change_in_bounds']
-        
+
         #if any lower bounds are less than 0, set them to 0
         lower_bounds_stocks[lower_bounds_stocks < 0] = 0
         #if any upper bounds are less than 0, set them to 0
         upper_bounds_stocks[upper_bounds_stocks < 0] = 0  
-        
+
         #join back with the other bounds by ataching to the df and then extacting all as a series
         if UPPER:
             df_transport.loc[df_transport['Measure'] == 'Stocks', 'Value'] = upper_bounds_stocks
@@ -990,22 +986,22 @@ def check_bounds_and_adjust_stocks_to_be_able_to_calculate_energy(config, initia
             lower_bounds = df_transport['Value'].to_numpy()
             df_transport_other_bounds.loc[df_transport_other_bounds['Measure'] == 'Stocks', 'Value'] = upper_bounds_stocks
             upper_bounds = df_transport_other_bounds['Value'].to_numpy()
-        
+
         bounds = list(zip(lower_bounds, upper_bounds))
-        
+
         #double check no lower bounds are higher than upper bounds
         if (lower_bounds > upper_bounds).any():
             breakpoint()
             raise ValueError('lower bounds are higher than upper bounds')
         #now check again taht the enegy value can be reached. This will be done by checking that the sum of energy using the upper bounds is higher than the sum of energy_new and the sum of energy using the lower bounds is lower than the sum of energy_new
-        
+
         #clac new sum of energy using the initial values:
         #LOWER
         df_transport['Value'] = lower_bounds
         sum_energy_calc = df_transport.loc[df_transport['Measure'].isin(['Mileage', 'Stocks', 'Intensity'])].pivot(index=['Economy', 'Date', 'Medium', 'Scenario', 'Transport Type', 'Vehicle Type', 'Drive'], columns='Measure', values='Value').reset_index()
         sum_energy_calc['Energy_calc'] = (sum_energy_calc['Mileage'] * sum_energy_calc['Stocks']) * sum_energy_calc['Intensity']
         sum_energy_calc = sum_energy_calc['Energy_calc'].sum()
-            
+
         prop_difference = (sum_energy_new+EPSILON)/(sum_energy_calc+EPSILON)
         if sum_energy_new - sum_energy_calc < 0:
             breakpoint()
@@ -1015,12 +1011,11 @@ def check_bounds_and_adjust_stocks_to_be_able_to_calculate_energy(config, initia
         sum_energy_calc = df_transport.loc[df_transport['Measure'].isin(['Mileage', 'Stocks', 'Intensity'])].pivot(index=['Economy', 'Date', 'Medium', 'Scenario', 'Transport Type', 'Vehicle Type', 'Drive'], columns='Measure', values='Value').reset_index()
         sum_energy_calc['Energy_calc'] = (sum_energy_calc['Mileage'] * sum_energy_calc['Stocks']) * sum_energy_calc['Intensity']
         sum_energy_calc = sum_energy_calc['Energy_calc'].sum()
-            
+
         prop_difference = (sum_energy_new+EPSILON)/(sum_energy_calc+EPSILON)
         if sum_energy_new - sum_energy_calc > 0:
             breakpoint()
             raise ValueError(f'Bounds values do not meet the constraint even after increasing the bounds,  poportional difference of sum_energy_new\\sum_energy_calc is {prop_difference}')
-        
     #finally do a check that the energy by drive type can be reached. This will be done by checking that the sum of energy using the upper bounds is greater or equal to the sum of energy_new for that drive and the sum of energy using the lower bounds is lower or equal to the sum of energy_new for that drive type (no matter whether UPPER is True or False). If not, then we will adjust the bounds enough so that the energy can be reached. to make it simple we'll adjust all bounds by an equal proportion, (except any where their stocks are already 0 ??) so that the energy can be reached.
     # def check_bounds_by_drive(config):
     energy_target_by_drive = df_transport_copy.loc[df_transport_copy['Measure'].isin(['Energy_new'])][['Economy', 'Date', 'Medium', 'Scenario', 'Drive', 'Value']].groupby(['Economy', 'Date', 'Medium', 'Scenario', 'Drive'], as_index=False).agg({'Value':'sum'})
@@ -1213,10 +1208,10 @@ def plot_optimisation_results(config, optimised_data, input_data_new_road_df, re
             fig = px.bar(df_all_pct_diff_eds, x='Vehicle Type', y='pct_diff', color='Drive', barmode='group', facet_col='Measure', facet_col_wrap=2, title=f'{method} in {round(time, 2)} seconds with {str(parameters_dict.values())}')
             #make the y axis independent for each facet
             fig.update_yaxes(matches=None)
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\optimisation_reestimations\\{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}.html')
+            fig.write_html(os.path.join(config.root_dir, f'plotting_output', 'input_exploration', 'optimisation_reestimations', f'{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}.html'))
             
             #write the data to a csv so we can inspect it if it seems fishy 'plotting_output\\input_exploration\\optimisation_reestimations\\{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["Scenario"]}_{param_id}.csv'
-            df_all_pct_diff_eds.to_csv(config.root_dir + '\\' + f'plotting_output\\input_exploration\\optimisation_reestimations\\{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}.csv')
+            df_all_pct_diff_eds.to_csv(os.path.join(config.root_dir, f'plotting_output', 'input_exploration', 'optimisation_reestimations', f'{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}.csv'))
         except:
             print(f'could not plot for {results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["Scenario"]}_{param_id}')
                 
@@ -1245,9 +1240,9 @@ def plot_optimisation_results(config, optimised_data, input_data_new_road_df, re
             return
     fig = px.bar(df_all_long_eds, x='Drive', y='Value', color='optimised', barmode='group', facet_col='Measure', hover_data=['Vehicle Type'], facet_col_wrap=2, title=f'{method} in {round(time, 2)} seconds with {str(parameters_dict.values())}')
     fig.update_yaxes(matches=None)
-    fig.write_html(config.root_dir + '\\' +f'plotting_output\\input_exploration\\optimisation_reestimations\\{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}_energy_comparison.html')
+    fig.write_html(os.path.join(config.root_dir, f'plotting_output', 'input_exploration', 'optimisation_reestimations', f'{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}_energy_comparison.html'))
     #write the data to a csv so we can inspect it if it seems fishy 
-    df_all_long_eds.to_csv(config.root_dir + '\\' + f'plotting_output\\input_exploration\\optimisation_reestimations\\{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}_energy_comparison.csv')
+    df_all_long_eds.to_csv(os.path.join(config.root_dir, f'plotting_output', 'input_exploration', 'optimisation_reestimations', f'{results_dict["Economy"]}_{results_dict["Date"]}_{results_dict["method"]}_{param_id}_energy_comparison.csv'))
      
     return
     
@@ -1299,7 +1294,7 @@ def optimisation_handler_testing(config, ECONOMY_ID, input_data_new_road_df=None
     for parameters_dict in all_params:
         for method in methods_list:
             if input_data_new_road_df is None:
-                input_data_new_road = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\input_data_new_road_{ECONOMY_ID}.pkl')
+                input_data_new_road = pd.read_pickle(os.path.join(config.root_dir, f'intermediate_data', 'analysis_single_use', f'input_data_new_road_{ECONOMY_ID}.pkl'))
             else:
                 input_data_new_road = input_data_new_road_df.copy()
             optimised_data, results_dict = optimise_to_find_base_year_values(config, input_data_new_road,ECONOMY_ID, methods=[method], all_parameters_dicts=[parameters_dict], REMOVE_NON_MAJOR_VARIABLES=REMOVE_NON_MAJOR_VARIABLES, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO)
@@ -1312,7 +1307,7 @@ def optimisation_handler_testing(config, ECONOMY_ID, input_data_new_road_df=None
                 print(f'No values returned for {ECONOMY_ID} with file_id: {file_id}, going to next iteration after this one for {method} and parameters_dict: {parameters_dict}')
                 #frist plot
                 optimised_data = input_data_new_road.copy()
-                #set it up to be in the same format as the optimised data would be 
+                #set it up to be in the same format as the optimised data would be
                 optimised_data = input_data_new_road.melt(id_vars=['Economy', 'Date', 'Medium', 'Scenario', 'Transport Type','Vehicle Type', 'Drive'], value_name='Value', var_name='Measure').reset_index(drop=True)
                 optimised_data['Value'] = np.nan
                 
@@ -1327,8 +1322,8 @@ def optimisation_handler_testing(config, ECONOMY_ID, input_data_new_road_df=None
             #save all outputs with file_date_id with mins and hours
             if SAVE_INDIVIDUAL_RESULTS:
                 print(f'Saving optimisation outputs and results dicts for {ECONOMY_ID} with file_id: {file_id}')
-                pickle.dump(results_dict, open(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\results_dict_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl', 'wb'))
-                optimised_data.to_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\optimised_data_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl')             
+                pickle.dump(results_dict, open(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\results_dict_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl'), 'wb'))
+                optimised_data.to_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\optimised_data_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl'))
                 
             all_outputs = pd.concat([all_outputs, optimised_data])
             all_results_dicts[(ECONOMY_ID, method, round(sum(parameters_dict.values()),3))] = results_dict
@@ -1337,14 +1332,14 @@ def optimisation_handler_testing(config, ECONOMY_ID, input_data_new_road_df=None
     #save all outputs with file_date_id with mins and hours
     if SAVE_ALL_RESULTS:
         file_id = datetime.datetime.now().strftime("%Y%m%d_%H%M") 
-        all_outputs.to_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\all_outputs_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl')
-        pickle.dump(all_results_dicts, open(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\all_results_dicts_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl', 'wb'))
+        all_outputs.to_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\all_outputs_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl'))
+        pickle.dump(all_results_dicts, open(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\all_results_dicts_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl'), 'wb'))
         
   
 def optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=False, method='L-BFGS-B', PLOT=False, REMOVE_NON_MAJOR_VARIABLES=True, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=True, USE_SAVED_OPT_PARAMATERS=False, parameters_ranges = None, methods_list=None, PARAMETERS_RANGES_KEY='ALL'):
     ECONOMY_ID = input_data_new_road['Economy'].unique()[0]
     file_id = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-    input_data_new_road.to_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_{ECONOMY_ID}_{config.FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.pkl')
+    input_data_new_road.to_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_{ECONOMY_ID}_{config.FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.pkl'))
     #note that energy_new is the energy we want to optimise for, to achive. energy old is what  we have using the current values (stocks, mileage, eff etc).
     if parameters_ranges is None:
         #These are the full set of paramter ranges we can iterate over. load it in from a yaml file
@@ -1385,7 +1380,7 @@ def optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=False, me
     results_dict['file_id'] = file_id
     if optimised_data is None:
         #no values returned so throw error
-        input_data_new_road.to_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\failed_run_input_data_new_road_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl')
+        input_data_new_road.to_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\failed_run_input_data_new_road_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl'))
         #plot the input data so user can try identify why it failed. 
         #first create a results df so we can use the plot_optimisation_results function:
         optimised_data = input_data_new_road.copy()
@@ -1395,7 +1390,7 @@ def optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=False, me
         optimised_data['Value'] = np.nan
         plot_optimisation_results(config, optimised_data, input_data_new_road, results_dict=results_dict)       
             
-        raise ValueError('no values returned from optimisation. data saved so you can test different methods\\params etc. at {}'.format(f'intermediate_data\\analysis_single_use\\failed_run_input_data_new_road_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl'))
+        raise ValueError('no values returned from optimisation. data saved so you can test different methods\\params etc. at {}'.format(os.path.join('intermediate_data\\analysis_single_use\\failed_run_input_data_new_road_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl')))
     
     if PLOT:
         plot_optimisation_results(config, optimised_data, input_data_new_road, results_dict=results_dict)
@@ -1407,11 +1402,11 @@ def optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=False, me
     #save all outputs with file_date_id with mins and hours
     if SAVE_ALL_RESULTS:
         print(f'Saving all optimisation outputs and results dicts for {ECONOMY_ID} with file_id: {file_id}')
-        pickle.dump(results_dict, open(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\results_dict_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl', 'wb'))
-        optimised_data.to_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\optimised_data_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl')       
+        pickle.dump(results_dict, open(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\results_dict_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl'), 'wb'))
+        optimised_data.to_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\optimised_data_{ECONOMY_ID}_{file_id}_{config.transport_data_system_FILE_DATE_ID}.pkl'))
            
     #save final resutls to a more permanent location:
-    optimised_data.to_pickle(config.root_dir + '\\' + f'intermediate_data\\input_data_optimisations\\optimised_data_{ECONOMY_ID}_{config.FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.pkl')         
+    optimised_data.to_pickle(os.path.join(config.root_dir, f'intermediate_data\\input_data_optimisations\\optimised_data_{ECONOMY_ID}_{config.FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.pkl'))
     
     save_and_overwrite_parameters_in_yaml(config, ECONOMY_ID, results_dict)
     
@@ -1422,7 +1417,7 @@ def save_and_overwrite_parameters_in_yaml(config, ECONOMY_ID, results_dict):
     #just in case, save the original yaml file with a date id to config/archive
     
     #load yaml
-    with open(config.root_dir + '\\' + 'config\\optimisation_parameters.yml') as file:
+    with open(os.path.join(config.root_dir, 'config\\optimisation_parameters.yml')) as file:
         parameters_dict = yaml.load(file, Loader=yaml.FullLoader)
     
     if parameters_dict is not None:
@@ -1430,7 +1425,7 @@ def save_and_overwrite_parameters_in_yaml(config, ECONOMY_ID, results_dict):
             #add methid to parameters dict
             parameters_dict[ECONOMY_ID]['method'] = results_dict['method']
             #save as new file to archive with just that economy and date id
-            with open(config.root_dir + '\\' + f'config\\archive\\optimisation_parameters_{ECONOMY_ID}_{config.FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.yml', 'w') as file:
+            with open(os.path.join(config.root_dir, f'config\\archive\\optimisation_parameters_{ECONOMY_ID}_{config.FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.yml'), 'w') as file:
                 yaml.dump(parameters_dict[ECONOMY_ID], file)
     else:
         parameters_dict = {}
@@ -1441,7 +1436,7 @@ def save_and_overwrite_parameters_in_yaml(config, ECONOMY_ID, results_dict):
     #add methid to parameters dict
     parameters_dict[ECONOMY_ID]['method'] = results_dict['method']
     #save
-    with open(config.root_dir + '\\' + 'config\\optimisation_parameters.yml', 'w') as file:
+    with open(os.path.join(config.root_dir, 'config\\optimisation_parameters.yml'), 'w') as file:
         yaml.dump(parameters_dict, file)
 #%%
 def plot_data_from_saved_results(config, ECONOMY_ID, FILE_DATE_ID=None, FILE_DATE_ID_MIN_HOURS=None, BY_FILE_NAME=False, optimised_data_filename=None, input_data_new_road_filename=None, results_dict_filename=None):
@@ -1455,32 +1450,32 @@ def plot_data_from_saved_results(config, ECONOMY_ID, FILE_DATE_ID=None, FILE_DAT
         plot_optimisation_results(config, optimised_data, input_data_new_road, results_dict=results_dict)
     elif FILE_DATE_ID_MIN_HOURS is not None:
         FILE_DATE_ID = FILE_DATE_ID_MIN_HOURS.split('_')[0]
-        input_data_new_road = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_{ECONOMY_ID}_{FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.pkl')
+        input_data_new_road = pd.read_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_{ECONOMY_ID}_{FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.pkl'))
 
-        optimised_data = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\optimised_data_{ECONOMY_ID}_{FILE_DATE_ID_MIN_HOURS}_{config.transport_data_system_FILE_DATE_ID}.pkl')
+        optimised_data = pd.read_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\optimised_data_{ECONOMY_ID}_{FILE_DATE_ID_MIN_HOURS}_{config.transport_data_system_FILE_DATE_ID}.pkl'))
 
-        results_dict = pickle.load(open(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\results_dict_{ECONOMY_ID}_{FILE_DATE_ID_MIN_HOURS}_{config.transport_data_system_FILE_DATE_ID}.pkl', 'rb'))
+        results_dict = pickle.load(open(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\results_dict_{ECONOMY_ID}_{FILE_DATE_ID_MIN_HOURS}_{config.transport_data_system_FILE_DATE_ID}.pkl'), 'rb'))
         plot_optimisation_results(config, optimised_data, input_data_new_road, results_dict=results_dict)
     elif FILE_DATE_ID is not None:
-        for file in os.listdir(config.root_dir + '\\' + 'intermediate_data\\analysis_single_use\\'):
+        for file in os.listdir(os.path.join(config.root_dir, 'intermediate_data\\analysis_single_use\\')):
             if file.startswith(f'results_dict_{ECONOMY_ID}_{FILE_DATE_ID}'):
                 MIN_HOURS = file.split('_')[-1].split('.')[0]
                 FILE_DATE_ID_MIN_HOURS = f'{FILE_DATE_ID}_{MIN_HOURS}'
-                input_data_new_road = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_{ECONOMY_ID}_{FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.pkl')
-                optimised_data = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\optimised_data_{ECONOMY_ID}_{FILE_DATE_ID_MIN_HOURS}_{config.transport_data_system_FILE_DATE_ID}.pkl')
-                results_dict = pickle.load(open(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\results_dict_{ECONOMY_ID}_{FILE_DATE_ID_MIN_HOURS}_{config.transport_data_system_FILE_DATE_ID}.pkl', 'rb'))
+                input_data_new_road = pd.read_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_{ECONOMY_ID}_{FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.pkl'))
+                optimised_data = pd.read_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\optimised_data_{ECONOMY_ID}_{FILE_DATE_ID_MIN_HOURS}_{config.transport_data_system_FILE_DATE_ID}.pkl'))
+                results_dict = pickle.load(open(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\results_dict_{ECONOMY_ID}_{FILE_DATE_ID_MIN_HOURS}_{config.transport_data_system_FILE_DATE_ID}.pkl'), 'rb'))
                 plot_optimisation_results(config, optimised_data, input_data_new_road, results_dict=results_dict)
     else:
         #find latest file_date_id
         file_date_ids = []
-        for file in os.listdir(config.root_dir + '\\' + 'intermediate_data\\analysis_single_use\\'):
+        for file in os.listdir(os.path.join(config.root_dir, 'intermediate_data\\analysis_single_use\\')):
             if file.startswith(f'results_dict_{ECONOMY_ID}_'):
                 file_date_ids.append(file.split('_')[-1].split('.')[0])
         file_date_ids.sort()
         FILE_DATE_ID_MIN_HOURS = file_date_ids[-1]
-        input_data_new_road = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_{ECONOMY_ID}_{FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.pkl')
-        optimised_data = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\opti    mised_data_{ECONOMY_ID}_{FILE_DATE_ID_MIN_HOURS}_{config.transport_data_system_FILE_DATE_ID}.pkl')
-        results_dict = pickle.load(open(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\results_dict_{ECONOMY_ID}_{FILE_DATE_ID_MIN_HOURS}_{config.transport_data_system_FILE_DATE_ID}.pkl', 'rb'))
+        input_data_new_road = pd.read_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_{ECONOMY_ID}_{FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.pkl'))
+        optimised_data = pd.read_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\optimised_data_{ECONOMY_ID}_{FILE_DATE_ID_MIN_HOURS}_{config.transport_data_system_FILE_DATE_ID}.pkl'))
+        results_dict = pickle.load(open(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\results_dict_{ECONOMY_ID}_{FILE_DATE_ID_MIN_HOURS}_{config.transport_data_system_FILE_DATE_ID}.pkl'), 'rb'))
         #breakpoint()
         plot_optimisation_results(config, optimised_data, input_data_new_road, results_dict=results_dict)
         
@@ -1493,33 +1488,33 @@ for ECONOMY_ID in ['08_JPN']:#01_AUS, '03_CDA', '01_AUS']:
     REMOVE_NON_MAJOR_VARIABLES=False
     USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=True
     USE_SAVED_OPT_PARAMATERS=True
-    # input_data_new_road = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_08_JPN_20240611_DATE20240605.pkl')
+    # input_data_new_road = pd.read_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_08_JPN_20240611_DATE20240605.pkl'))
     
-    # input_data_new_road = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_15_PHL_20240530.pkl')
+    # input_data_new_road = pd.read_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_15_PHL_20240530.pkl'))
     
     # input_data_new_road_actual_run_01_AUS_20240311_DATE20240304_DATE20240215
     
-    # input_data_new_road = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_01_AUS_20240311_DATE20240304_DATE20240215.pkl')
-    # # # # # # # # # # # # # input_data_new_road = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\failed_run_input_data_new_road_05_PRC_20231120_1341_DATE20231106.pkl')
-    # # # # # # # # # # # input_data_new_road = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_21_VN_20231128_DATE20231106.pkl')
-    # # # # # # # # # # # # # # input_data_new_road = pd.read_pickle(config.root_dir + '\\' + f' \\analysis_single_use\\failed_run_input_data_new_road_20_USA_20231010HYUJ7NADZXQE 1613_DATE20231010_DATE20231010.pkl')
-    # plotting_output/input_exploration/{economy}_{year}_{scenario}_{results_dict["file_id"]}_UNSUCCESSFUL.pkl
-    # # # # # # # # # # # #%%
-    # optimisation_handler_testing(config, ECONOMY_ID, input_data_new_road_df=input_data_new_road, SAVE_ALL_RESULTS=True,SAVE_INDIVIDUAL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=REMOVE_NON_MAJOR_VARIABLES, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='ALL2')
-    # plot_data_from_saved_results(config, '08_JPN',FILE_DATE_ID_MIN_HOURS=None, FILE_DATE_ID=config.FILE_DATE_ID)#'20231128')#FILE_DATE_ID='20230917')#, #optimised_data_08_JPN_20230917_0425
+    # input_data_new_road = pd.read_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_01_AUS_20240311_DATE20240304_DATE20240215.pkl'))
+    # # # # # # # # # # # # # input_data_new_road = pd.read_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\failed_run_input_data_new_road_05_PRC_20231120_1341_DATE20231106.pkl'))
+# # # # # # # # # # # input_data_new_road = pd.read_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_21_VN_20231128_DATE20231106.pkl'))
+# # # # # # # # # # # # # # input_data_new_road = pd.read_pickle(os.path.join(config.root_dir, f' \\analysis_single_use\\failed_run_input_data_new_road_20_USA_20231010HYUJ7NADZXQE 1613_DATE20231010_DATE20231010.pkl'))
+# plotting_output/input_exploration/{economy}_{year}_{scenario}_{results_dict["file_id"]}_UNSUCCESSFUL.pkl
+# # # # # # # # # # # #%%
+# optimisation_handler_testing(config, ECONOMY_ID, input_data_new_road_df=input_data_new_road, SAVE_ALL_RESULTS=True,SAVE_INDIVIDUAL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=REMOVE_NON_MAJOR_VARIABLES, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='ALL2')
+# plot_data_from_saved_results(config, '08_JPN',FILE_DATE_ID_MIN_HOURS=None, FILE_DATE_ID=config.FILE_DATE_ID)#'20231128')#FILE_DATE_ID='20230917')#, #optimised_data_08_JPN_20230917_0425
     
 #%%
-# plot_data_from_saved_results(config, '13_PNG',BY_FILE_NAME=True, optimised_data_filename=config.root_dir + '\\' + 'plotting_output\\input_exploration\\optimised_data_13_PNG_2021_Reference_20240528_1840_UNSUCCESSFUL.csv', input_data_new_road_filename=f'intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_{ECONOMY_ID}_20240306_DATE20240304_DATE20240215.pkl', results_dict_filename=config.root_dir + '\\' + 'plotting_output\\input_exploration\\results_dict_13_PNG_2021_Reference_20240528_1840_UNSUCCESSFUL.pkl')
+# plot_data_from_saved_results(config, '13_PNG',BY_FILE_NAME=True, optimised_data_filename=os.path.join(config.root_dir, 'plotting_output\\input_exploration\\optimised_data_13_PNG_2021_Reference_20240528_1840_UNSUCCESSFUL.csv'), input_data_new_road_filename=os.path.join('intermediate_data\\analysis_single_use\\input_data_new_road_actual_run_{ECONOMY_ID}_20240306_DATE20240304_DATE20240215.pkl'), results_dict_filename=os.path.join(config.root_dir, 'plotting_output\\input_exploration\\results_dict_13_PNG_2021_Reference_20240528_1840_UNSUCCESSFUL.pkl'))
                              
 #                              #'20231128')#FILE_DATE_ID='20230917')#, #optimised_data_08_JPN_20230917_0425#trying to save pong rsults from \\plotting_output\\input_exploration e.g 13_PNG_2021_Reference_20240307_1246_UNSUCCESSFUL.pkl
 #%%
 #%%
-# results_dict = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\analysis_single_use\\results_dict_15_PHL_20240105_1154_DATE20231213.pkl')
+# results_dict = pd.read_pickle(os.path.join(config.root_dir, f'intermediate_data\\analysis_single_use\\results_dict_15_PHL_20240105_1154_DATE20231213.pkl'))
 # %%
 
 
 # # #%%
-# with open(config.root_dir + '\\' + 'inputs_to_objective_function_handler.pkl', 'rb') as f:
+# with open(os.path.join(config.root_dir, 'inputs_to_objective_function_handler.pkl'), 'rb') as f:
 #     inputs = pickle.load(f)
 
 # # Now you can access the inputs like this:

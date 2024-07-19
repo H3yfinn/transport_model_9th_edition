@@ -1,5 +1,3 @@
-
-
 #%%
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
@@ -42,7 +40,7 @@ def import_transport_system_data(config):
     #import data from the transport data system and extract what we need from it.
     # We can use the model_concordances_measures concordance file to determine what we need to extract from the transport data system. This way we dont rely on things like dataset names.
 
-    model_concordances_measures = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_base_year_measures_file_name))
+    model_concordances_measures = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'computer_generated_concordances', config.model_concordances_base_year_measures_file_name))
 
 
     #load transport data  from the transport data system which is out of this repo but is in the same folder as this repo #file name is like DATE20221214_interpolated_combined_data_concordance
@@ -52,10 +50,10 @@ def import_transport_system_data(config):
     
     # combined_data_DATE20230531
     if config.IMPORT_FROM_TRANSPORT_DATA_SYSTEM:
-        transport_data_system_folder = '..\\transport_data_system\\output_data'
+        transport_data_system_folder = os.path.join('..', 'transport_data_system', 'output_data')
     else:
-        transport_data_system_folder = 'input_data\\transport_data_system'
-    transport_data_system_df = pd.read_csv(config.root_dir + '\\' + '{}\\combined_data_{}.csv'.format(transport_data_system_folder,config.transport_data_system_FILE_DATE_ID))
+        transport_data_system_folder = os.path.join('input_data', 'transport_data_system')
+    transport_data_system_df = pd.read_csv(os.path.join(config.root_dir,  transport_data_system_folder, 'combined_data_{}.csv'.format(config.transport_data_system_FILE_DATE_ID)))
 
     
     #if they are there, remove cols called index, level_0
@@ -99,7 +97,7 @@ def import_transport_system_data(config):
     #filter for the same measures as are in the model concordances in the transport data system
     transport_data_system_df = transport_data_system_df[transport_data_system_df.Measure.isin(model_concordances_measures.Measure.unique())]
     
-    TRANSPORT_DATA_SYSTEM_DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['TRANSPORT_DATA_SYSTEM_DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS']
+    TRANSPORT_DATA_SYSTEM_DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS = yaml.load(open(os.path.join(config.root_dir,  'config', 'parameters.yml')), Loader=yaml.FullLoader)['TRANSPORT_DATA_SYSTEM_DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS']
     new_transport_data_system_df = pd.DataFrame()
     
     for economy in transport_data_system_df.Economy.unique():
@@ -189,7 +187,7 @@ def import_transport_system_data(config):
             #save a to a csv so we can see what values are missing and fill them in in the trans[port datasyetem
             save_this = True
             if save_this:
-              a.to_csv(config.root_dir + '\\' + 'intermediate_data\\transport_data_system\\missing_important_values.csv')
+              a.to_csv(os.path.join(config.root_dir,  'intermediate_data', 'transport_data_system', 'missing_important_values.csv'))
             if USE_REPLACEMENTS:#im not sure what the intendsed option if this was false was? I guess it doesnt really matter, we have made it so that the data coming from the transport data system is what we need.
                 #for now jsut replace them with the mean for the same vehicle type:
                 #first find the mean for each vehicle type by measure and then replace the missing values with these means
@@ -199,33 +197,32 @@ def import_transport_system_data(config):
                 b.set_index(['Measure', 'Vehicle Type'], inplace=True)
                 b = b.groupby(['Measure', 'Vehicle Type']).mean()
                 b = b.reset_index()
-                replacement_values =b.copy() 
-                #create row_and_data_not_available column
+                replacement_values = b.copy()
+                # create row_and_data_not_available column
                 replacement_values['Data_available'] = 'row_and_data_not_available'
 
-        #now we need to add these rows to the transport_data_system_df
-        #first create a df with the missing index values
+        # now we need to add these rows to the transport_data_system_df
+        # first create a df with the missing index values
         missing_index_values1 = pd.DataFrame(index=missing_index_values1)
         missing_index_values1['Data_available'] = 'row_and_data_not_available'
         missing_index_values1['Value'] = 0
-        #then append to transport_data_system_df
+        # then append to transport_data_system_df
         transport_data_system_df = pd.concat([missing_index_values1, transport_data_system_df], sort=False)
         if USE_REPLACEMENTS and replacement_values is not None:
-            #join on the replacement_values
-            transport_data_system_df = pd.merge(transport_data_system_df.reset_index(), replacement_values, how='left', on=['Data_available','Measure', 'Vehicle Type'], suffixes=('', '_y'))
-            #fill in the missing values with the replacement values where data_available is row_and_data_not_available  and value_y is not null or 0
+            # join on the replacement_values
+            transport_data_system_df = pd.merge(transport_data_system_df.reset_index(), replacement_values, how='left', on=['Data_available', 'Measure', 'Vehicle Type'], suffixes=('', '_y'))
+            # fill in the missing values with the replacement values where data_available is row_and_data_not_available  and value_y is not null or 0
 
-            transport_data_system_df['Value'] = np.where((transport_data_system_df['Data_available'] == 'row_and_data_not_available') & (transport_data_system_df['Value_y'].notnull())& (transport_data_system_df['Value_y']!=0), transport_data_system_df['Value_y'], transport_data_system_df['Value'])
-            #we can leave row_and_data_not_available as is. drop the value_y column
+            transport_data_system_df['Value'] = np.where((transport_data_system_df['Data_available'] == 'row_and_data_not_available') & (transport_data_system_df['Value_y'].notnull()) & (transport_data_system_df['Value_y'] != 0), transport_data_system_df['Value_y'], transport_data_system_df['Value'])
+            # we can leave row_and_data_not_available as is. drop the value_y column
             transport_data_system_df.drop(columns=['Value_y'], inplace=True)
             transport_data_system_df.set_index(INDEX_COLS_NO_SCENARIO_no_date, inplace=True)
-    
 
     if USE_BASE_DATE_ONLY:
 
         missing_index_values2 = transport_data_system_df.index.difference(model_concordances_measures.index)
     else:
-        #set index so date isnt included, then find rows that shouldnt be in the data:
+        # set index so date isnt included, then find rows that shouldnt be in the data:
         transport_data_system_df.reset_index(inplace=True)
         transport_data_system_df.set_index(INDEX_COLS_NO_SCENARIO_no_date, inplace=True)
         model_concordances_measures.reset_index(inplace=True)
@@ -233,61 +230,56 @@ def import_transport_system_data(config):
         missing_index_values2 = transport_data_system_df.index.difference(model_concordances_measures.index)
 
     if missing_index_values2.empty:
-        #this is unexpected so create an error
+        # this is unexpected so create an error
         # raise ValueError('All rows in the transport system dataset are present in the concordance. This is unexpected. Please check the code.')
         pass
     else:
-        #we just want to make sure the user is aware that we will be removing rows from the user input
+        # we just want to make sure the user is aware that we will be removing rows from the user input
         if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
             print('Removing unnecessary rows from the transport datasystem dataset. If you intended to have new data in the dataset, please make sure you have added them to the concordance table as well.')
-        #remove these rows from the user_input
+        # remove these rows from the user_input
         transport_data_system_df.drop(missing_index_values2, inplace=True)
 
+    # TEMP
+    # if any of the missing values were for turnover rate then set it to 0.03
+    transport_data_system_df.loc[((transport_data_system_df.index.get_level_values('Measure') == 'Turnover_rate') & (transport_data_system_df.Data_available == 'row_and_data_not_available')), 'Value'] = 0.03
 
-    
-    #TEMP
-    #if any of the missing values were for turnover rate then set it to 0.03
-    transport_data_system_df.loc[((transport_data_system_df.index.get_level_values('Measure')=='Turnover_rate') & (transport_data_system_df.Data_available=='row_and_data_not_available')), 'Value'] = 0.03
-    
-
-
-    #resrt index
+    # resrt index
     transport_data_system_df.reset_index(inplace=True)
     model_concordances_measures.reset_index(inplace=True)
-    # #test what values in x dont equal the values in missing_index_values1
+    # # test what values in x dont equal the values in missing_index_values1
     # for col in x.columns:
     #     print(col)
     #     print(x[col].equals(missing_index_values1[col]))
-    
+
     if not missing_index_values1.empty:
         missing_index_values1.reset_index(inplace=True)
-        #save the missing values to a csv for use separately:
-        missing_index_values1.to_csv(config.root_dir + '\\' + 'output_data\\for_other_modellers\\missing_values\\{}_missing_input_values.csv'.format(config.FILE_DATE_ID), index=False)
+        # save the missing values to a csv for use separately:
+        missing_index_values1.to_csv(os.path.join(config.root_dir,  'output_data', 'for_other_modellers', 'missing_values', '{}_missing_input_values.csv'.format(config.FILE_DATE_ID)), index=False)
     else:
         print('No missing values in the transport data system dataset')
-    
-    #create a scenario column in the transport data system dataset which will have a scenario for each in teh scenarios list in config
+
+    # create a scenario column in the transport data system dataset which will have a scenario for each in teh scenarios list in config
 
     i = 0
     for scenario in config.SCENARIOS_LIST:
         if i == 0:
-            #create copy df
+            # create copy df
             new_transport_data_system_df = transport_data_system_df.copy()
             new_transport_data_system_df['Scenario'] = scenario
             i += 1
         else:
             transport_data_system_df['Scenario'] = scenario
             new_transport_data_system_df = pd.concat([new_transport_data_system_df, transport_data_system_df])
-        
-    
-    #TEMP DROP ANY DATA THAT IS FOR DATES AFTER THE BASE DATE. WE WILL FIGURE OUT HOW TO INCLUDE THEM IN THE FUTURE BUT FOR NOW IT WILL PROBS BE TOO COMPLICATED
+
+    # TEMP DROP ANY DATA THAT IS FOR DATES AFTER THE BASE DATE. WE WILL FIGURE OUT HOW TO INCLUDE THEM IN THE FUTURE BUT FOR NOW IT WILL PROBS BE TOO COMPLICATED
     # new_transport_data_system_df = new_transport_data_system_df[new_transport_data_system_df.Date <= config.DEFAULT_BASE_YEAR]
-    
-    #save the new transport dataset
-    new_transport_data_system_df.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\transport_data_system_extract.csv', index=False)
+
+    # save the new transport dataset
+    new_transport_data_system_df.to_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', 'transport_data_system_extract.csv'), index=False)
 
 
-#TODO need to update thids
+# TODO need to update thids
 
 def adjust_non_road_TEMP(config, transport_data_system_df, model_concordances_measures, TRANSPORT_DATA_SYSTEM_DATE_TO_USE_FOR_NON_ROAD_TRANSPORT_TYPE_SPLITS, SINGLE_ECONOMY=None, RAISE_ERROR=False):
     """
@@ -300,83 +292,37 @@ def adjust_non_road_TEMP(config, transport_data_system_df, model_concordances_me
     Returns:
         pandas.DataFrame: A dataframe containing the adjusted transport data system data.
     """
-    #we added drive types to non road. now we need to make sure that the input from datasyustem contains them. 
-    #essentailly, the input datasystem data will contain a row for each non road medium (air, rail, ship) and the drive and vehicle types will be 'all'. 
-    #now we have created drive types and they are in the concordance.
-    #so separate the non road data and merge on the drive types from the concordance, to repalce the 'all' drive types with the new drive types and create new rows where we need. 
-    #one issue will be that we will be replicating the vlaues for activity and enegry use, resulting in double counting. so for now, pull in the data from ESTO and make the amount of energy use in each drve type match its repsective fuel use. Then recalcualte the acitvity using the intensity. 
-    #however, we will also adjsut the intensity values a tad, since you can expect inttensity of electiricty to be at least a half of that of the fossil fuel types. so we will adjust the intensity of electricity to be 0.5 of the fossil fuel types.
-    transport_data_system_df_road=transport_data_system_df[transport_data_system_df['Medium']=='road'].copy()
-    #load model concordances with fuels
-    model_concordances_fuels = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
+    # we added drive types to non road. now we need to make sure that the input from datasyustem contains them.
+    # essentailly, the input datasystem data will contain a row for each non road medium (air, rail, ship) and the drive and vehicle types will be 'all'.
+    # now we have created drive types and they are in the concordance.
+    # so separate the non road data and merge on the drive types from the concordance, to repalce the 'all' drive types with the new drive types and create new rows where we need.
+    # one issue will be that we will be replicating the vlaues for activity and enegry use, resulting in double counting. so for now, pull in the data from ESTO and make the amount of energy use in each drve type match its repsective fuel use. Then recalcualte the acitvity using the intensity.
+    # however, we will also adjsut the intensity values a tad, since you can expect inttensity of electiricty to be at least a half of that of the fossil fuel types. so we will adjust the intensity of electricity to be 0.5 of the fossil fuel types.
+    transport_data_system_df_road = transport_data_system_df[transport_data_system_df['Medium'] == 'road'].copy()
+    # load model concordances with fuels
+    model_concordances_fuels = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'computer_generated_concordances', '{}'.format(config.model_concordances_file_name_fuels)))
 
-
-    # date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + '..\transport_data_system\intermediate_data\EGEDA\', 'model_input_9th_cleaned')
-    # esto_non_road = pd.read_csv(config.root_dir + '\\' +f'..\\transport_data_system\\intermediate_data\\EGEDA\\model_input_9th_cleanedDATE{date_id}.csv')
-    
     energy_use_esto = adjust_data_to_match_esto.format_9th_input_energy_from_esto(config)
-    
-    #keep medium in rail, air and ship
+
+    # keep medium in rail, air and ship
     esto_non_road = energy_use_esto[energy_use_esto.Medium.isin(['rail', 'air', 'ship'])].copy()
-    
-    # energy_use_esto = energy_use_esto.rename(columns={'Fuel_Type': 'Fuel', 'Value': 'Energy'})
-
-    # #drop these fuels and then check for any otehrs that are missing
-    # esto_fuels_to_remove = ['01_coal',
-    # '07_petroleum_products',
-    # '19_total',
-    # '21_modern_renewables',
-    # '08_gas',
-    # '02_coal_products',
-    # '01_01_coking_coal',
-    # '01_05_lignite',
-    # '06_01_crude_oil',
-    # '06_crude_oil_and_ngl',
-    # '03_peat',
-    # '08_03_gas_works_gas',
-    # '16_others',
-    # '20_total_renewables',
-    # '06_02_natural_gas_liquids']
-    # esto_non_road = esto_non_road[~esto_non_road['Fuel'].isin(esto_fuels_to_remove)]
-    
-    # esto_non_road['Date'] = esto_non_road['Date'].apply(lambda x: x[:4])
-    # esto_non_road['Date'] = esto_non_road['Date'].astype(int)
-
-    # #filter for data in years great or = to config.DEFAULT_BASE_YEAR
-    # esto_non_road = esto_non_road[esto_non_road['Date'] >= config.DEFAULT_BASE_YEAR]
-
-    #drop economy in APEC '22_SEA', '23_NEA', '23b_ONEA', '24_OAM', '24b_OOAM', '25_OCE'
-    # esto_non_road = esto_non_road.loc[~esto_non_road['Economy'].isin(['22_SEA', '23_NEA', '23b_ONEA', '24_OAM', '24b_OOAM', '25_OCE', 'APEC'])].copy()
-
-    # #drop nonneeded cols
-    # esto_non_road = esto_non_road.drop(columns=['Frequency', 'Source', 'Dataset', 'Measure', 'Vehicle Type', 'Drive', 'Transport Type', 'Unit'])
-
 
     model_concordances_fuels_non_road = model_concordances_fuels[model_concordances_fuels.Medium.isin(['rail', 'air', 'ship'])]
-    model_concordances_fuels_non_road = model_concordances_fuels_non_road[[ 'Medium', 'Fuel', 'Drive']].drop_duplicates()
-    #join the model_concordances_fuels onto it so we can get the correspinding drive type for each fuel type.
+    model_concordances_fuels_non_road = model_concordances_fuels_non_road[['Medium', 'Fuel', 'Drive']].drop_duplicates()
+    # join the model_concordances_fuels onto it so we can get the correspinding drive type for each fuel type.
     esto_non_road_drives = pd.merge(esto_non_road, model_concordances_fuels_non_road, how='outer', on=['Medium', 'Fuel'])
 
-    #also drop any fuels that are mixed in on the supply side only (i.e. biofuels):    
-    supply_side_fuel_mixing_fuels = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_supply_side_fuel_mixing_file_name), dtype={'Demand_side_fuel_mixing': str}).New_fuel.unique().tolist()
-    # #TEMP
-    # #IF 16_01_biogas ISNT IN THERE, ADD IT
-    # if '16_01_biogas' not in supply_side_fuel_mixing_fuels:
-    #     print('######################\n 16_01_biogas not in supply_side_fuel_mixing_fuels. Adding it \n ################')
-    #     supply_side_fuel_mixing_fuels.append('16_01_biogas')
-    # else:
-    #     print('REMOVE THIS LINE!')
+    # also drop any fuels that are mixed in on the supply side only (i.e. biofuels):
+    supply_side_fuel_mixing_fuels = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'computer_generated_concordances', '{}'.format(config.model_concordances_supply_side_fuel_mixing_file_name)), dtype={'Demand_side_fuel_mixing': str}).New_fuel.unique().tolist()
     esto_non_road_drives = esto_non_road_drives[~esto_non_road_drives.Fuel.isin(supply_side_fuel_mixing_fuels)]
-    
-    #if there are any nans in the following list then throw error:
+
+    # if there are any nans in the following list then throw error:
     # new_fuels= ['16_x_ammonia']
     if len(esto_non_road_drives[esto_non_road_drives.Date.isna()]) > 0:
         breakpoint()
         time.sleep(1)
         raise ValueError('There are some new fuels in the non road data that are not in the model concordances. Please add them {} to the model concordances'.format(esto_non_road_drives[esto_non_road_drives.Date.isna()].Fuel.unique().tolist()))
-
-    #drop the rows where the fuel is not na but economy and Date are na (this is where the fuel is not in the esto data but is in the model concordances)
-    # esto_non_road_drives = esto_non_road_drives[~((esto_non_road_drives.Fuel.notna()) & (esto_non_road_drives.Economy.isna()) & (esto_non_road_drives.Date.isna()))]#ifgnore this because the dfata we are using is now the 9th eidtion model inport, so eveyr possible orw should be there with at least 0's or nas
+        # esto_non_road_drives = esto_non_road_drives[~((esto_non_road_drives.Fuel.notna()) & (esto_non_road_drives.Economy.isna()) & (esto_non_road_drives.Date.isna()))]#ifgnore this because the dfata we are using is now the 9th eidtion model inport, so eveyr possible orw should be there with at least 0's or nas
 
     #and then find where we may  be missing some data in the conocrdances by findin where the drive is na but the fuel is not na, and the date is greater than config.OUTLOOK_BASE_YEAR-1
     missing_drives = esto_non_road_drives[esto_non_road_drives.Drive.isna() & esto_non_road_drives.Fuel.notna() & (esto_non_road_drives.Date >= config.OUTLOOK_BASE_YEAR)][['Medium', 'Fuel']].drop_duplicates()

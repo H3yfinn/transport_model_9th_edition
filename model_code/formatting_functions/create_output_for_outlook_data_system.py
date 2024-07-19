@@ -48,9 +48,9 @@ def create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_
         model_output_file_name = config.model_output_file_name
     if FILE_DATE_ID == None:
         FILE_DATE_ID = config.FILE_DATE_ID
-    model_output_all_with_fuels_df = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name))
-    stocks_df = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name))[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Stocks']]
-    activity_df = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name))[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Activity']]
+    model_output_all_with_fuels_df = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', '{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name)))
+    stocks_df = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', '{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name)))[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Stocks']]
+    activity_df = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', '{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name)))[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Activity']]
     
     stock_shares_df = convert_stocks_to_stock_shares(config, stocks_df)
     
@@ -350,29 +350,6 @@ def create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_
             # x
 
 
-            # fuels
-            # 01_coal
-            # 02_coal_products
-            # 03_peat
-            # 04_peat_products
-            # 05_oil_shale_and_oil_sands
-            # 06_crude_oil_and_ngl
-            # 07_petroleum_products
-            # 08_gas
-            # 09_nuclear
-            # 10_hydro
-            # 11_geothermal
-            # 12_solar
-            # 13_tide_wave_ocean
-            # 14_wind
-            # 15_solid_biomass
-            # 16_others
-            # 17_electricity
-            # 18_heat
-            # 19_total
-            # 20_total_renewables
-            # 21_modern_renewables
-
             fuels_df = df.Fuel.unique()
             fuels_df = pd.DataFrame(fuels_df, columns=['Fuel'])
             #now map the fuels to the unique fuels. Note that most fuels have a directly corresponding subfuels. THose that dont should have a directly correpsnong fuels (in this case set their subfuel to x). Those that dont should raise a wanring.
@@ -400,7 +377,6 @@ def create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_
             # 20_total_renewables
             # 21_modern_renewables
 
-            #now map the df to these:
             fuels_df['subfuels'] = fuels_df['Fuel'].map(config.subfuels_mapping)
             fuels_df['fuels'] = fuels_df['Fuel'].map(config.fuels_mapping)
 
@@ -468,19 +444,19 @@ def create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_
         # new_final_df['economy'] = new_final_df['economy'].replace({'15_RP':'15_PHL', '17_SIN':'17_SGP'})
 
         #save this file to output_data\for_other_modellers
-        new_final_df.to_csv(config.root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{ECONOMY_ID}_{FILE_DATE_ID}_{output_file_name}.csv', index=False)
+        new_final_df.to_csv(os.path.join(config.root_dir, 'output_data', 'for_other_modellers', 'output_for_outlook_data_system', f'{ECONOMY_ID}_{FILE_DATE_ID}_{output_file_name}.csv'), index=False)
         
 def concatenate_outlook_data_system_outputs(config):
     #take in all outlook data system outputs for teh same FILE DATE ID and concatenate them into one file. if an economy is missing throw an error
     #load in all files:    
     for file_ending in ['transport_energy_use', 'transport_stocks']:
         final_df = pd.DataFrame()
-        for file in os.listdir(config.root_dir + '\\' + 'output_data\\for_other_modellers\\output_for_outlook_data_system'):
+        for file in os.listdir(os.path.join(config.root_dir, 'output_data', 'for_other_modellers', 'output_for_outlook_data_system')):
             if file.endswith('_{}_{}.csv'.format(config.FILE_DATE_ID, file_ending)):
                 #double check its not {config.FILE_DATE_ID}_transport_energy_use.csv' since that is the file we are creating
                 if file == '{}_{}.csv'.format(config.FILE_DATE_ID, file_ending):
                     continue
-                df = pd.read_csv(config.root_dir + '\\' +f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{file}')
+                df = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'for_other_modellers', 'output_for_outlook_data_system', file))
                 final_df = pd.concat([final_df, df])
         #check that all economies are there:
         if len(final_df['economy'].unique()) != len(config.ECONOMY_LIST):
@@ -491,7 +467,7 @@ def concatenate_outlook_data_system_outputs(config):
             else:
                 print(f'The following economies are missing from the outlook data system outputs: {missing_economies}')
         #save the final df:
-        final_df.to_csv(config.root_dir + '\\' + f'output_data\\for_other_modellers\\output_for_outlook_data_system\\{config.FILE_DATE_ID}_{file_ending}.csv', index=False)
+        final_df.to_csv(os.path.join(config.root_dir, 'output_data', 'for_other_modellers', 'output_for_outlook_data_system', f'{config.FILE_DATE_ID}_{file_ending}.csv'), index=False)
    
 def convert_stocks_to_stock_shares(config, stocks_df):
     #convert stocks to stock shares

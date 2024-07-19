@@ -1,4 +1,3 @@
-
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
 import sys
@@ -55,7 +54,7 @@ def write_graph_to_html(config, filename, graph_type, plot_data, economy, x=None
 
     # Update layout with y_axes_title and legend_title
     fig.update_layout(yaxis_title=y_axes_title, legend_title=legend_title,font_size=font_size)   
-    fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\{economy}\\transport_type_intensity_analysis\\' + filename)
+    fig.write_html(os.path.join(config.root_dir,  'plotting_output', 'dashboards', economy, 'transport_type_intensity_analysis', filename))
     
     
 def remap_vehicle_types(config, df, value_col='Value', new_index_cols = ['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive'], vehicle_type_mapping_set='simplified', include_non_road=True, aggregation_type=('sum', )):
@@ -958,7 +957,7 @@ def activity_growth(config, ECONOMY_IDs, model_output_detailed_df, fig_dict, col
         model_output_detailed['Activity_growth'] = model_output_detailed.groupby(['Economy', 'Transport Type', 'Scenario'])['Activity'].pct_change().fillna(0)
         
         #save to x.scv
-        # model_output_detailed.to_csv(config.root_dir + '\\' + 'model_output_detailed.csv', index=False)
+        # model_output_detailed.to_csv(config.root_dir + config.slash + 'model_output_detailed.csv', index=False)
         model_output_detailed.drop(columns=['Activity'], inplace=True)
         if SMOOTH:
             model_output_detailed['Activity_growth'] = model_output_detailed.groupby(['Economy', 'Transport Type', 'Scenario'])['Activity_growth'].rolling(5, center=True).mean().reset_index()['Activity_growth']
@@ -1096,6 +1095,8 @@ def macro_lines(config, ECONOMY_IDs, growth_forecasts, fig_dict, color_preparati
     color_preparation_list.append(growth_forecasts_scen_economy['Measure'].unique().tolist())
     
     return fig_dict, color_preparation_list
+
+import os
 
 def activity_and_macro_growth_lines(config, ECONOMY_IDs, original_model_output_8th_df, model_output_detailed, growth_forecasts, fig_dict, color_preparation_list, colors_dict, indexed=False, WRITE_HTML=True):
     """plot activity and macro lines, i.e. activity, and 
@@ -1272,7 +1273,7 @@ def activity_and_macro_growth_lines(config, ECONOMY_IDs, original_model_output_8
             fig_dict[economy][scenario]['activity_and_macro_lines'] = [fig, title_text, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'activity_and_macro_lines_{scenario}_{economy}.html', graph_type='line', plot_data=index_data_economy, economy=economy, x='Date', y='Value', color='Measure', title=title_text, line_dash='line_dash', y_axes_title=title_text, legend_title='', font_size=30, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=os.path.join('activity_and_macro_lines_{}_{}.html'.format(scenario, economy)), graph_type='line', plot_data=index_data_economy, economy=economy, x='Date', y='Value', color='Measure', title=title_text, line_dash='line_dash', y_axes_title=title_text, legend_title='', font_size=30, colors_dict=colors_dict)
     
             
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
@@ -1320,7 +1321,7 @@ def plot_supply_side_fuel_mixing(config, ECONOMY_IDs, supply_side_fuel_mixing_df
             fig_dict[economy][scenario]['supply_side_fuel_mixing'] = [fig, title_text, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'fuel_mixing_{scenario}.html', graph_type='line', plot_data=supply_side_fuel_mixing_plot_economy, economy=economy, x='Date', y='Supply_side_fuel_share', color='New_fuel', title=title_text, y_axes_title='%', legend_title='', colors_dict=colors_dict, font_size=35)
+                write_graph_to_html(config, filename=os.path.join('fuel_mixing_{}.html'.format(scenario)), graph_type='line', plot_data=supply_side_fuel_mixing_plot_economy, economy=economy, x='Date', y='Supply_side_fuel_share', color='New_fuel', title=title_text, y_axes_title='%', legend_title='', colors_dict=colors_dict, font_size=35)
             
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(supply_side_fuel_mixing_plot_economy['New_fuel'].unique().tolist())
@@ -1378,7 +1379,7 @@ def plot_demand_side_fuel_mixing(config, ECONOMY_IDs, demand_side_fuel_mixing_df
             fig_dict[economy][scenario]['demand_side_fuel_mixing'] = [fig, title_text, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'demand_side_fuel_mixing_{scenario}.html', graph_type='line', plot_data=demand_side_fuel_mixing_plot_economy, economy=economy, x='Date', y='Demand_side_fuel_share', color='Fuel', title=title_text, line_dash='Drive', y_axes_title='%', legend_title='', colors_dict=colors_dict, font_size=30)
+                write_graph_to_html(config, filename=os.path.join('demand_side_fuel_mixing_{}.html'.format(scenario)), graph_type='line', plot_data=demand_side_fuel_mixing_plot_economy, economy=economy, x='Date', y='Demand_side_fuel_share', color='Fuel', title=title_text, line_dash='Drive', y_axes_title='%', legend_title='', colors_dict=colors_dict, font_size=30)
             
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(demand_side_fuel_mixing_plot_economy['Fuel'].unique().tolist())
@@ -1411,7 +1412,7 @@ def create_charging_plot(config, ECONOMY_IDs, chargers_df, fig_dict, color_prepa
             
             if WRITE_HTML:
                 
-                write_graph_to_html(config, filename=f'charging_{scenario}.html', graph_type='bar', plot_data=chargers_economy, economy=economy, x='Date', y=['Fast chargers (200kW)', 'Slow chargers (60kW)'], title=f'Public chargers', y_axes_title='(thousands)', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
+                write_graph_to_html(config, filename=os.path.join('charging_{}.html'.format(scenario)), graph_type='bar', plot_data=chargers_economy, economy=economy, x='Date', y=['Fast chargers (200kW)', 'Slow chargers (60kW)'], title=f'Public chargers', y_axes_title='(thousands)', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(['sum_of_fast_chargers_needed','sum_of_slow_chargers_needed'])
     return fig_dict, color_preparation_list
@@ -1427,7 +1428,7 @@ def prodcue_LMDI_mutliplicative_plot(config, ECONOMY_IDs, fig_dict, colors_dict,
             # breakpoint()
             file_identifier = f'{economy}_{scenario}_{transport_type}_{medium_id}_2_Energy use_Hierarchical_2070_multiplicative'
             try:
-                lmdi_data = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\{economy}\\{file_identifier}.csv')
+                lmdi_data = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI', economy, f'{file_identifier}.csv'))
             except:
                 if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
                     breakpoint()
@@ -1456,7 +1457,7 @@ def prodcue_LMDI_mutliplicative_plot(config, ECONOMY_IDs, fig_dict, colors_dict,
             fig_dict[economy][scenario][f'lmdi_{transport_type}_{medium}'] = [fig, title_text, PLOTTED]
 
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'lmdi_{transport_type}_{medium}_{scenario}_{economy}.html', graph_type='line', plot_data=lmdi_data_melt, economy=economy, x='Date', y='Value', color='Effect', title=title_text, line_dash='line_dash', y_axes_title='Value', legend_title='Effect', font_size=30, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=os.path.join(f'lmdi_{transport_type}_{medium}_{scenario}_{economy}.html'), graph_type='line', plot_data=lmdi_data_melt, economy=economy, x='Date', y='Value', color='Effect', title=title_text, line_dash='line_dash', y_axes_title='Value', legend_title='Effect', font_size=30, colors_dict=colors_dict)
 
     return fig_dict
     
@@ -1471,7 +1472,7 @@ def produce_LMDI_additive_plot(config, ECONOMY_IDs, fig_dict, colors_dict, mediu
                 medium_id = 'road'
             # breakpoint()
             file_identifier = f'{economy}_{scenario}_{medium_id}_2_Energy use_Hierarchical_2070_concatenated_additive'
-            lmdi_data = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\{economy}\\{file_identifier}.csv')
+            lmdi_data = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI', economy, f'{file_identifier}.csv'))
             #melt data so we have the different components of the LMDI as rows. eg. for freight the cols are: Date	Change in Energy	Energy intensity effect	freight_tonne_km effect	Engine type effect	Total Energy	Total_freight_tonne_km
             #we want to drop the last two plots, then melt the data so we have the different components of the LMDI as rows. eg. for freight the cols will end up as: Date	Effect. Then we will also create a line dash col and if the Effect is Change in Energy then the line dash will be solid, otherwise it will be dotted
             #drop cols by index, not name so it doesnt matter what thei names are
@@ -1522,7 +1523,7 @@ def produce_LMDI_additive_plot(config, ECONOMY_IDs, fig_dict, colors_dict, mediu
             fig_dict[economy][scenario][f'lmdi_additive_{medium}'] = [fig, title_text, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'lmdi_additive_{medium}_{scenario}_{economy}.html', graph_type='bar', plot_data=lmdi_data_melt, economy=economy, x='Effect', y='Value', color='Effect', title=title_text, y_axes_title='Value', legend_title='Effect', font_size=30, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=os.path.join(f'lmdi_additive_{medium}_{scenario}_{economy}.html'), graph_type='bar', plot_data=lmdi_data_melt, economy=economy, x='Effect', y='Value', color='Effect', title=title_text, y_axes_title='Value', legend_title='Effect', font_size=30, colors_dict=colors_dict)
 
 
     return fig_dict
@@ -1589,7 +1590,7 @@ def plot_average_age_by_simplified_drive_type(config, ECONOMY_IDs, model_output_
             fig_dict[economy][scenario][title] = [fig, title_text, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'average_age_{medium}_{scenario}_{economy}.html', graph_type='line', plot_data=avg_age_economy, economy=economy, x='Date', y='Average_age', color='Drive', title=title_text, line_dash='Transport Type', y_axes_title='Age', legend_title='Drive', font_size=30, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=os.path.join(f'average_age_{medium}_{scenario}_{economy}.html'), graph_type='line', plot_data=avg_age_economy, economy=economy, x='Date', y='Average_age', color='Drive', title=title_text, line_dash='Transport Type', y_axes_title='Age', legend_title='Drive', font_size=30, colors_dict=colors_dict)
             
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(avg_age_economy['Drive'].unique().tolist())
@@ -1600,7 +1601,7 @@ def plot_average_age_by_simplified_drive_type(config, ECONOMY_IDs, model_output_
 def plot_stocks_per_capita(config, ECONOMY_IDs, gompertz_parameters_df, model_output_detailed, first_road_model_run_data, fig_dict, color_preparation_list, colors_dict, PLOT_ANYWAY=True, WRITE_HTML=True):
     PLOTTED=True
     #load in ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED from yaml. if the econmoy is in this we should either not plot anything or just plot the stocks per cpita, no thresholds.
-    ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED']
+    ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED = yaml.load(open(os.path.join(config.root_dir, 'config','parameters.yml')), Loader=yaml.FullLoader)['ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED']
     if (len(gompertz_parameters_df)==0) and not PLOT_ANYWAY:
         for scenario in config.economy_scenario_concordance['Scenario'].unique():
             for economy in ECONOMY_IDs:
@@ -1620,9 +1621,9 @@ def plot_stocks_per_capita(config, ECONOMY_IDs, gompertz_parameters_df, model_ou
     stocks_per_capita = pd.concat([stocks_per_capita, first_model_run_stocks_per_capita], axis=0)
     
     # #extract the vehicles_per_stock_parameters:
-    # vehicles_per_stock_parameters = pd.read_excel(config.root_dir + '\\' + 'input_data\\parameters.xlsx', sheet_name='gompertz_vehicles_per_stock')
+    # vehicles_per_stock_parameters = pd.read_excel(config.root_dir + config.slash + 'input_data/parameters.xlsx', sheet_name='gompertz_vehicles_per_stock')
     # #convert from regiosn to economies:
-    # vehicles_per_stock_regions = pd.read_excel(config.root_dir + '\\' + 'input_data\\parameters.xlsx', sheet_name='vehicles_per_stock_regions')
+    # vehicles_per_stock_regions = pd.read_excel(config.root_dir + config.slash + 'input_data/parameters.xlsx', sheet_name='vehicles_per_stock_regions')
     # #join on region
     # vehicles_per_stock_parameters = vehicles_per_stock_parameters.merge(vehicles_per_stock_regions, on='Region', how='left')
     # #dro regions
@@ -1631,14 +1632,14 @@ def plot_stocks_per_capita(config, ECONOMY_IDs, gompertz_parameters_df, model_ou
     if len(ECONOMY_IDs)>1:
         raise ValueError('This function only works for one economy at a time')
     
-    # DO_LOG_FITTING_ON_ONLY_PASSENGER_VEHICLES_DICT = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['DO_LOG_FITTING_ON_ONLY_PASSENGER_VEHICLES_ECONOMIES']
+    # DO_LOG_FITTING_ON_ONLY_PASSENGER_VEHICLES_DICT = yaml.load(open(config.root_dir + config.slash + 'config/parameters.yml'), Loader=yaml.FullLoader)['DO_LOG_FITTING_ON_ONLY_PASSENGER_VEHICLES_ECONOMIES']
     # if DO_LOG_FITTING_ON_ONLY_PASSENGER_VEHICLES_DICT[ECONOMY_IDs[0]]:
-    #     vehicles_per_stock_parameters = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters_passenger_only.csv'.format(ECONOMY_IDs[0]))
+    #     vehicles_per_stock_parameters = pd.read_csv(config.root_dir + config.slash + 'intermediate_data/road_model/{}_vehicles_per_stock_parameters_passenger_only.csv'.format(ECONOMY_IDs[0]))
     #     #filter for only passenger
     #     stocks_per_capita = stocks_per_capita.loc[stocks_per_capita['Transport Type']=='passenger'].copy()
     #     gompertz_parameters_df = gompertz_parameters_df.loc[gompertz_parameters_df['Transport Type']=='passenger'].copy()
     # else:
-    vehicles_per_stock_parameters = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters.csv'.format(ECONOMY_IDs[0]))
+    vehicles_per_stock_parameters = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'road_model', f'{ECONOMY_IDs[0]}_vehicles_per_stock_parameters.csv'))
     
     
     #Convert some stocks to gompertz adjusted stocks by multiplying them by the vehicle_gompertz_factors. This is because you can expect some economies to have more or less of that vehicle type than others. These are very general estiamtes, and could be refined later.
@@ -1656,11 +1657,11 @@ def plot_stocks_per_capita(config, ECONOMY_IDs, gompertz_parameters_df, model_ou
     #convert to more readable units. We will convert back later if we need to #todo do we need to?
     stocks_per_capita['Stocks_per_thousand_capita'] = stocks_per_capita['Thousand_stocks_per_capita'] * 1000000
     if len(gompertz_parameters_df)>0:#will be empty if economy is in ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED as true
-        gompertz_parameters = gompertz_parameters_df[['Economy','Transport Type', 'Scenario', 'Gompertz_gamma']].drop_duplicates().dropna().copy()
+        gompertz_parameters = gompertz_parameters_df[['Economy','Transport Type', 'Scenario', 'Stocks_per_capita']].drop_duplicates().dropna().copy()
         #set measure to 'maximum_stocks_per_captia'
         gompertz_parameters['Model'] = 'stocks_per_capita_threshold'
-        #rename Gompertz_gamma to Stocks_per_thousand_capita
-        gompertz_parameters.rename(columns={'Gompertz_gamma':'Stocks_per_thousand_capita'}, inplace=True)
+        #rename Stocks_per_capita to Stocks_per_thousand_capita
+        gompertz_parameters.rename(columns={'Stocks_per_capita':'Stocks_per_thousand_capita'}, inplace=True)
         
         #merge on the gompertz parameters to date col then concat it
         gompertz_parameters = stocks_per_capita[['Economy','Transport Type', 'Scenario','Date']].drop_duplicates().merge(gompertz_parameters, on=['Economy','Transport Type', 'Scenario'], how='left')
@@ -1712,17 +1713,18 @@ def plot_stocks_per_capita(config, ECONOMY_IDs, gompertz_parameters_df, model_ou
             
             #for now lets just drop the original model run data so we dont confuse reader:
             stocks_per_capita_economy = stocks_per_capita_economy.loc[stocks_per_capita_economy['Model']!='Original'].copy()
-            #keep only trnapsort type = passenger
-            stocks_per_capita_economy = stocks_per_capita_economy.loc[stocks_per_capita_economy['Transport Type']=='passenger'].copy()
+            # #keep only trnapsort type = passenger#commented this out because having the freight one at 0 makes it so the scale includes 0, which cannot easily be done otherwise i think
+            # stocks_per_capita_economy = stocks_per_capita_economy.loc[stocks_per_capita_economy['Transport Type']=='passenger'].copy()
             #now plot
             fig = px.line(stocks_per_capita_economy, x='Date', y='Stocks_per_thousand_capita', color='Transport Type', line_dash='Model', color_discrete_map=colors_dict)
             title_text = 'Stocks per capita (Weighted) (Thousand)'
-
+            #make scale start at 0
+            fig.update_yaxes(range=[0, 1000])
             #add fig to dictionary for scenario and economy:
             fig_dict[economy][scenario]['stocks_per_capita'] = [fig, title_text, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'stocks_per_capita_{scenario}.html', graph_type='line', plot_data=stocks_per_capita_economy, economy=economy,  x='Date', y='Stocks_per_thousand_capita', color='Transport Type', title=title_text, line_dash='Model', y_axes_title='Stocks per capita (Thousand)', legend_title='', colors_dict=colors_dict, font_size=30)
+                write_graph_to_html(config, filename=os.path.join('stocks_per_capita_{}.html'.format(scenario)), graph_type='line', plot_data=stocks_per_capita_economy, economy=economy,  x='Date', y='Stocks_per_thousand_capita', color='Transport Type', title=title_text, line_dash='Model', y_axes_title='Stocks per capita (Thousand)', legend_title='', colors_dict=colors_dict, font_size=30)
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(stocks_per_capita_economy['Transport Type'].unique().tolist())
     return fig_dict, color_preparation_list
@@ -1806,7 +1808,7 @@ def plot_non_road_energy_use(config, ECONOMY_IDs, energy_output_for_outlook_data
                     # energy_use_by_fuel_type_economy = energy_use_by_fuel_type_economy.groupby('Fuel').filter(lambda x: x['Energy'].sum() > energy_use_by_fuel_type_economy['Energy'].sum()*0.0001)
                     #remove any values that are less than 1
                     energy_use_by_fuel_type_economy = energy_use_by_fuel_type_economy.loc[energy_use_by_fuel_type_economy['Energy'] > 1].copy()
-                    write_graph_to_html(config, filename=f'energy_use_by_fuel_type_non_road_{scenario}.html', graph_type='area', plot_data=energy_use_by_fuel_type_economy, economy=economy,  x='Date', y='Energy', color='Fuel', title=f'Non road energy by Fuel - {scenario}', y_axes_title='PJ', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
+                    write_graph_to_html(config, filename=os.path.join(f'energy_use_by_fuel_type_non_road_{scenario}.html'), graph_type='area', plot_data=energy_use_by_fuel_type_economy, economy=economy,  x='Date', y='Energy', color='Fuel', title=f'Non road energy by Fuel - {scenario}', y_axes_title='PJ', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
             else:
                 raise ValueError('transport_type must be passenger, all or freight')
             
@@ -1821,7 +1823,7 @@ def non_road_activity_by_drive_type(config, ECONOMY_IDs, model_output_detailed_d
     # model_output_detailed.pkl
     #loop through scenarios and grab the data for each scenario:
     #since we need detail on non road drive types, we have to pull the data fromm here:
-    # 'output_data\\model_output\\NON_ROAD_DETAILED_{}'.format(config.model_output_file_name)
+    # 'output_data/model_output/NON_ROAD_DETAILED_{}'.format(config.model_output_file_name)
     model_output_detailed=model_output_detailed_df.copy()
     model_output_detailed = model_output_detailed.loc[model_output_detailed['Medium']!='road'].copy()
     
@@ -1894,7 +1896,7 @@ def non_road_activity_by_drive_type(config, ECONOMY_IDs, model_output_detailed_d
                 
                 
                 if WRITE_HTML:
-                    write_graph_to_html(config, filename=f'non_road_activity_by_drive_all_{scenario}_{economy}.html', graph_type='line', plot_data=activity_by_drive_economy, economy=economy, x='Date', y='Activity', color='Drive', title=title_text, line_dash='Transport Type', y_axes_title='Activity (Billions)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename=os.path.join(f'non_road_activity_by_drive_all_{scenario}_{economy}.html'), graph_type='line', plot_data=activity_by_drive_economy, economy=economy, x='Date', y='Activity', color='Drive', title=title_text, line_dash='Transport Type', y_axes_title='Activity (Billions)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
                 
             else:
                 raise ValueError('transport_type must be passenger, all or freight')
@@ -1979,7 +1981,7 @@ def road_stocks_by_drive_type(config, ECONOMY_IDs, model_output_detailed_df, fig
                 fig_dict[economy][scenario]['road_stocks_by_drive_all'] = [fig, title_text, PLOTTED]
                 
                 if WRITE_HTML:
-                    write_graph_to_html(config, filename=f'road_stocks_by_drive_all_{scenario}_{economy}.html', graph_type='line', plot_data=stocks_by_drive_economy, economy=economy, x='Date', y='Stocks', color='Drive', title=title_text, line_dash='Vehicle Type', y_axes_title='Stocks (Billions)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename=os.path.join(f'road_stocks_by_drive_all_{scenario}_{economy}.html'), graph_type='line', plot_data=stocks_by_drive_economy, economy=economy, x='Date', y='Stocks', color='Drive', title=title_text, line_dash='Vehicle Type', y_axes_title='Stocks (Billions)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
                 
             else:
                 raise ValueError('transport_type must be passenger, all or freight')
@@ -2048,7 +2050,7 @@ def road_sales_by_drive_vehicle(config, ECONOMY_IDs, model_output_detailed_df, f
             fig_dict[economy][scenario]['road_sales_by_drive_vehicle'] = [fig, title, PLOTTED]
                 
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'road_sales_by_drive_vehicle_{scenario}_{economy}.html', graph_type='line', plot_data=sales_economy_scen, economy=economy, x='Date', y='sales', color='Drive', title=title, line_dash='Vehicle Type', y_axes_title='Sales (Billions)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=os.path.join(f'road_sales_by_drive_vehicle_{scenario}_{economy}.html'), graph_type='line', plot_data=sales_economy_scen, economy=economy, x='Date', y='sales', color='Drive', title=title, line_dash='Vehicle Type', y_axes_title='Sales (Billions)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
             
             # else:
             #     raise ValueError('transport_type must be passenger, all or freight')
@@ -2056,6 +2058,8 @@ def road_sales_by_drive_vehicle(config, ECONOMY_IDs, model_output_detailed_df, f
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(sales_economy_scen['Drive'].unique().tolist())
     return fig_dict, color_preparation_list
+
+import os
 
 def non_road_stocks_by_drive_type(config, ECONOMY_IDs, model_output_detailed_df, fig_dict, color_preparation_list, colors_dict, transport_type, WRITE_HTML=True):
     PLOTTED=True
@@ -2125,13 +2129,13 @@ def non_road_stocks_by_drive_type(config, ECONOMY_IDs, model_output_detailed_df,
                 fig = px.line(stocks_by_drive_economy, x='Date', y='Stocks', color='Drive',line_dash="Transport Type" , title='Non road stocks by drive', color_discrete_map=colors_dict)
                 
                 #add units to y col
-                title_text = 'Non road stocks (Freight\\Passenger km)'#.format(stocks_by_drive_economy['Unit'].unique()[0])
+                title_text = 'Non road stocks (Freight/Passenger km)'#.format(stocks_by_drive_economy['Unit'].unique()[0])
                 
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario]['non_road_stocks_by_drive_all'] = [fig, title_text, PLOTTED]
                 
                 if WRITE_HTML:
-                    write_graph_to_html(config, filename=f'non_road_stocks_by_drive_all_{scenario}_{economy}.html', graph_type='line', plot_data=stocks_by_drive_economy, economy=economy, x='Date', y='Stocks', color='Drive', title=title_text, line_dash='Transport Type', y_axes_title='Stocks (Billions)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename=os.path.join(config.root_dir, f'non_road_stocks_by_drive_all_{scenario}_{economy}.html'), graph_type='line', plot_data=stocks_by_drive_economy, economy=economy, x='Date', y='Stocks', color='Drive', title=title_text, line_dash='Transport Type', y_axes_title='Stocks (Billions)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
                 
             else:
                 raise ValueError('transport_type must be passenger, all or freight')
@@ -2204,13 +2208,13 @@ def turnover_rate_by_drive_type_box(config, ECONOMY_IDs, model_output_detailed, 
                 fig = px.box(turnover_rate_by_drive_economy,x='Medium', y='Turnover_rate', color='Drive', title='Passenger turnover_rate by drive', color_discrete_map=colors_dict)
                 
                 #add units to y col
-                title_text = 'turnover_rate box (Freight\\Passenger km) (based on median)'#.format(turnover_rate_by_drive_economy['Unit'].unique()[0])
+                title_text = 'turnover_rate box (Freight/Passenger km) (based on median)'#.format(turnover_rate_by_drive_economy['Unit'].unique()[0])
                 
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario]['box_turnover_rate_by_drive_all'] = [fig, title_text, PLOTTED]
                 
                 if WRITE_HTML:
-                    write_graph_to_html(config, filename=f'turnover_rate_by_drive_{scenario}.html', graph_type='box', plot_data=turnover_rate_by_drive_economy, economy=economy,  x='Medium', y='Turnover_rate', color='Drive', title=f'Turnover rate by Drive - {scenario}', y_axes_title='%', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
+                    write_graph_to_html(config, filename=os.path.join(config.root_dir, f'turnover_rate_by_drive_{scenario}.html'), graph_type='box', plot_data=turnover_rate_by_drive_economy, economy=economy,  x='Medium', y='Turnover_rate', color='Drive', title=f'Turnover rate by Drive - {scenario}', y_axes_title='%', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
                 
             else:
                 raise ValueError('transport_type must be passenger, all or freight')
@@ -2336,7 +2340,7 @@ def turnover_rate_by_vehicle_type_line(config, ECONOMY_IDs, model_output_detaile
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario][f'line_turnover_rate_by_vtype_{transport_type}_{medium}'] = [fig, title_text, PLOTTED]
                 if WRITE_HTML:
-                    write_graph_to_html(config, filename=f'turnover_rate_by_vtype_{transport_type}_{medium}_{scenario}.html', graph_type='line', plot_data=turnover_rate_by_vtype_economy,  economy=economy, x='Date', y='Turnover_rate', line_dash = 'Transport Type', color='Drive', title=f'Turnover rate by Drive - {scenario}', y_axes_title='%', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
+                    write_graph_to_html(config, filename=os.path.join(config.root_dir, f'turnover_rate_by_vtype_{transport_type}_{medium}_{scenario}.html'), graph_type='line', plot_data=turnover_rate_by_vtype_economy,  economy=economy, x='Date', y='Turnover_rate', line_dash = 'Transport Type', color='Drive', title=f'Turnover rate by Drive - {scenario}', y_axes_title='%', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
                     
             else:
                 raise ValueError('transport_type must be passenger, all or freight')
@@ -2362,7 +2366,7 @@ def emissions_by_fuel_type(config, ECONOMY_IDs, emissions_factors, model_output_
     if USE_AVG_GENERATION_EMISSIONS_FACTOR:
         gen='_gen'
         #pull in the 8th outlook emissions factors by year, then use that to claculate the emissions for electricity.
-        emissions_factor_elec = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
+        emissions_factor_elec = pd.read_csv(os.path.join(config.root_dir, 'input_data', 'from_8th', 'outlook_8th_emissions_factors_with_electricity.csv'))#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
         #extract the emissions factor for elctricity for each economy
         emissions_factor_elec = emissions_factor_elec[emissions_factor_elec.fuel_code=='17_electricity'].copy()
         #rename Carbon Neutral Scenario to Target
@@ -2463,7 +2467,7 @@ def emissions_by_fuel_type(config, ECONOMY_IDs, emissions_factors, model_output_
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario][plot_id] = [fig, title_text, PLOTTED]
                 if WRITE_HTML:
-                    write_graph_to_html(config, filename=f'emissions_by_fuel_type_{transport_type}{gen}_{scenario}.html', graph_type='area', plot_data=emissions_by_fuel_type_economy,  economy=economy, x='Date', y='Emissions', color='Fuel', title=f'Emissions by Fuel - {scenario}', y_axes_title='MtCO2', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
+                    write_graph_to_html(config, filename=os.path.join(config.root_dir, f'emissions_by_fuel_type_{transport_type}{gen}_{scenario}.html'), graph_type='area', plot_data=emissions_by_fuel_type_economy,  economy=economy, x='Date', y='Emissions', color='Fuel', title=f'Emissions by Fuel - {scenario}', y_axes_title='MtCO2', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
             else:
                 raise ValueError('transport_type must be passenger, all or freight')
             
@@ -2580,7 +2584,7 @@ def plot_comparison_of_energy_by_dataset(config, ECONOMY_IDs, energy_output_for_
             fig_dict[economy][scenario][plot_id] = [fig, title_text, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'{plot_id}_{scenario}_{economy}{extra_identifier}.html', graph_type='line', plot_data=energy_use_by_fuel_type_economy, economy=economy, x='Date', y=energy_col, color='Fuel', title=title_text, line_dash='Dataset', y_axes_title=f'{energy_col} {unit}', legend_title='Fuel', font_size=30, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=os.path.join(config.root_dir, f'{plot_id}_{scenario}_{economy}{extra_identifier}.html'), graph_type='line', plot_data=energy_use_by_fuel_type_economy, economy=economy, x='Date', y=energy_col, color='Fuel', title=title_text, line_dash='Dataset', y_axes_title=f'{energy_col} {unit}', legend_title='Fuel', font_size=30, colors_dict=colors_dict)
             
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(energy_use_by_fuel_type_economy['Fuel'].unique().tolist())
@@ -2689,7 +2693,7 @@ def plot_comparison_of_energy_to_previous_9th_projection(config, ECONOMY_IDs, en
             fig_dict[economy][scenario][id_string] = [fig, title_text, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'{id_string}_{scenario}_{economy}.html', graph_type='line', plot_data=energy_use_by_fuel_type_economy, economy=economy, x='Date', y='Energy', color='Fuel', title=title_text, line_dash='Dataset', y_axes_title='Energy (PJ)', legend_title='Fuel', font_size=30, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=os.path.join(config.root_dir, f'{id_string}_{scenario}_{economy}.html'), graph_type='line', plot_data=energy_use_by_fuel_type_economy, economy=economy, x='Date', y='Energy', color='Fuel', title=title_text, line_dash='Dataset', y_axes_title='Energy (PJ)', legend_title='Fuel', font_size=30, colors_dict=colors_dict)
             
             
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
@@ -2802,7 +2806,7 @@ def plot_pct_comparison_of_energy_compared_to_8th(config, ECONOMY_IDs, energy_ou
                 fig_dict[economy][scenario][plot_id] = [fig, title_text, PLOTTED]
                 
                 if WRITE_HTML:
-                    write_graph_to_html(config, filename=f'{plot_id}_{scenario}_{economy}.html', graph_type='line', plot_data=energy_use_by_fuel_type_economy, economy=economy, x='Date', y='9th_vs_8th_%_energy_difference', color='Fuel', title=title_text, y_axes_title='Percent Energy Difference (%)', legend_title='Fuel', font_size=30, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename=os.path.join(config.root_dir, f'{plot_id}_{scenario}_{economy}.html'), graph_type='line', plot_data=energy_use_by_fuel_type_economy, economy=economy, x='Date', y='9th_vs_8th_%_energy_difference', color='Fuel', title=title_text, y_axes_title='Percent Energy Difference (%)', legend_title='Fuel', font_size=30, colors_dict=colors_dict)
             
             
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
@@ -2814,7 +2818,7 @@ def plot_pct_comparison_of_energy_compared_to_8th(config, ECONOMY_IDs, energy_ou
 
 def plot_energy_efficiency_timeseries(config, ECONOMY_IDs, model_output_detailed, fig_dict, DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, transport_type, extra_ice_line=True, extra_bev_line=True, vehicle_type_grouping='simplified', WRITE_HTML=True):
     PLOTTED=True
-    conversion_factors = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\conversion_factors.csv')
+    conversion_factors = pd.read_csv(os.path.join(config.root_dir, 'config', 'concordances_and_config_data', 'conversion_factors.csv'))
     #to help with checking that the data is realistic, plot growth in energy efficiency here:
     
     energy_eff = model_output_detailed.copy()
@@ -2931,18 +2935,24 @@ def plot_energy_efficiency_timeseries(config, ECONOMY_IDs, model_output_detailed
                 #save the df to a csv
                 # energy_eff_by_scen_by_economy.to_csv(f'plotting_output\\dashboards\\{economy}\\transport_type_intensity_analysis\\{scenario}_{economy}_energy_efficiency_timeseries_{transport_type}_no_HEVs.csv')
                 #load the df from the csv and merge it but label it as 'no HEV's'
-                # energy_eff_by_scen_by_economy_no_HEVS = pd.read_csv(config.root_dir + '\\' +f'plotting_output\\dashboards\\{economy}\\transport_type_intensity_analysis\\{scenario}_{economy}_energy_efficiency_timeseries_{transport_type}_no_HEVs.csv')
+                # energy_eff_by_scen_by_economy_no_HEVS = pd.read_csv(config.root_dir + config.slash +f'plotting_output\\dashboards\\{economy}\\transport_type_intensity_analysis\\{scenario}_{economy}_energy_efficiency_timeseries_{transport_type}_no_HEVs.csv')
                 # energy_eff_by_scen_by_economy['line_type'] = 'HEVs'
                 # energy_eff_by_scen_by_economy_no_HEVS['line_type'] = 'no_HEVs'
                 # energy_eff_by_scen_by_economy = pd.concat([energy_eff_by_scen_by_economy, energy_eff_by_scen_by_economy_no_HEVS])
                 
                 ######TEMPORARY: save the df to a csv so we can compare scenarios
                 
-                write_graph_to_html(config, filename=f'{scenario}_{economy}_energy_efficiency_timeseries_{transport_type}.html', graph_type='line', plot_data=energy_eff_by_scen_by_economy,  economy=economy, x='Date', y='Efficiency', color='ICE_ONLY', title=f'Energy efficiency - {scenario} - {economy}', y_axes_title='km per MJ', legend_title='', colors_dict=colors_dict, font_size=30, line_width=10)
+                write_graph_to_html(config, filename=os.path.join(config.root_dir, f'{scenario}_{economy}_energy_efficiency_timeseries_{transport_type}.html'), graph_type='line', plot_data=energy_eff_by_scen_by_economy,  economy=economy, x='Date', y='Efficiency', color='ICE_ONLY', title=f'Energy efficiency - {scenario} - {economy}', y_axes_title='km per MJ', legend_title='', colors_dict=colors_dict, font_size=30, line_width=10)
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(energy_eff_by_scen_by_economy['Vehicle Type'].unique().tolist())
     
     return fig_dict, color_preparation_list
+
+
+import os
+import pandas as pd
+import numpy as np
+import plotly.express as px
 
 def plot_energy_efficiency_strip(config, ECONOMY_IDs, model_output_detailed, fig_dict, DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, WRITE_HTML=True):
     PLOTTED=True
@@ -2991,7 +3001,8 @@ def plot_energy_efficiency_strip(config, ECONOMY_IDs, model_output_detailed, fig
                 fig_dict[economy][scenario]['energy_efficiency_all_strip'] = [fig, title, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'energy_efficiency_all_strip_{scenario}_{economy}.html', graph_type='strip', plot_data=energy_eff_by_scen_by_economy, economy=economy, x='Vehicle Type', y='Efficiency', color='Drive', title=title, y_axes_title='Efficiency (km per MJ)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
+                filename = os.path.join(config.root_dir,  'plotting_output','dashboards', economy, 'transport_type_intensity_analysis', f'energy_efficiency_all_strip_{scenario}_{economy}.html')
+                write_graph_to_html(config, filename=filename, graph_type='strip', plot_data=energy_eff_by_scen_by_economy, economy=economy, x='Vehicle Type', y='Efficiency', color='Drive', title=title, y_axes_title='Efficiency (km per MJ)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
             
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(energy_eff_by_scen_by_economy['Drive'].unique().tolist())
@@ -3034,7 +3045,8 @@ def plot_energy_intensity_strip(config, ECONOMY_IDs, model_output_detailed_detai
             fig_dict[economy][scenario]['energy_intensity_strip'] = [fig, title, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'energy_intensity_strip_{scenario}_{economy}.html', graph_type='strip', plot_data=energy_int_by_scen_by_economy, economy=economy, x='Vehicle Type', y='Intensity', color='Drive', title=title, y_axes_title='Intensity (Pj per Bn activity km)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
+                filename = os.path.join(config.root_dir,  'plotting_output','dashboards', economy, 'transport_type_intensity_analysis', f'energy_intensity_strip_{scenario}_{economy}.html')
+                write_graph_to_html(config, filename=filename, graph_type='strip', plot_data=energy_int_by_scen_by_economy, economy=economy, x='Vehicle Type', y='Intensity', color='Drive', title=title, y_axes_title='Intensity (Pj per Bn activity km)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
             
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(energy_int_by_scen_by_economy['Drive'].unique().tolist())
@@ -3097,7 +3109,8 @@ def plot_energy_intensity_timeseries(config, ECONOMY_IDs, model_output_detailed_
             fig_dict[economy][scenario][f'energy_intensity_timeseries_{medium}'] = [fig, title, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'energy_intensity_timeseries_{medium}_{scenario}_{economy}.html', graph_type='line', plot_data=energy_int_by_scen_by_economy, economy=economy, x='Date', y='Intensity', color='Drive', title=title, y_axes_title='Intensity (Bn activity km per pj)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
+                filename = os.path.join(config.root_dir,  'plotting_output','dashboards', economy, 'transport_type_intensity_analysis', f'energy_intensity_timeseries_{medium}_{scenario}_{economy}.html')
+                write_graph_to_html(config, filename=filename, graph_type='line', plot_data=energy_int_by_scen_by_economy, economy=economy, x='Date', y='Intensity', color='Drive', title=title, y_axes_title='Intensity (Bn activity km per pj)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
 
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(energy_int_by_scen_by_economy['Drive'].unique().tolist())
@@ -3164,7 +3177,8 @@ def sales_and_turnover_lines(config, ECONOMY_IDs, model_output_detailed_df, fig_
             fig_dict[economy][scenario][f'sales_and_turnover_lines_{transport_type}'] = [fig, title, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'sales_and_turnover_lines_{transport_type}_{scenario}_{economy}.html', graph_type='line', plot_data=sales_and_turnover_by_scen_by_economy, economy=economy, x='Date', y='Value', color='Drive', title=title, y_axes_title='Value', legend_title='Drive', font_size=30, colors_dict=colors_dict)
+                filename = os.path.join(config.root_dir,  'plotting_output','dashboards', economy, 'transport_type_intensity_analysis', f'sales_and_turnover_lines_{transport_type}_{scenario}_{economy}.html')
+                write_graph_to_html(config, filename=filename, graph_type='line', plot_data=sales_and_turnover_by_scen_by_economy, economy=economy, x='Date', y='Value', color='Drive', title=title, y_axes_title='Value', legend_title='Drive', font_size=30, colors_dict=colors_dict)
                 
     
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
@@ -3178,7 +3192,7 @@ def plot_turnover_rate_age_curve(config, ECONOMY_IDs, model_output_detailed_df, 
     #Turnover_rate_midpoint is in detailed
     #steepness is currently in the parameters.yml file
     #load the parameters from the config file
-    turnover_rate_parameters_dict = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['turnover_rate_parameters_dict']
+    turnover_rate_parameters_dict = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['turnover_rate_parameters_dict']
     turnover_rate_steepness = turnover_rate_parameters_dict['turnover_rate_steepness']
     turnover_rate_max_value = turnover_rate_parameters_dict['turnover_rate_max_value']
     turnover_rate_midpoint = turnover_rate_parameters_dict['turnover_rate_midpoint']
@@ -3187,16 +3201,16 @@ def plot_turnover_rate_age_curve(config, ECONOMY_IDs, model_output_detailed_df, 
     turnover_rate_midpoint_non_road = turnover_rate_parameters_dict['turnover_rate_midpoint_non_road']
     model_output_detailed = model_output_detailed_df[['Economy', 'Date', 'Scenario', 'Average_age']].copy()
     
-    #now loop thorugh scenario and economy so we can set the turnover rate modpoint for each economy and scneario unqiuely, and then plot the turnover rate curve, with the median age of the fleet in the first year and the median age of the fleet for all years:
+    #now loop thorugh scenario and economy so we can set the turnover rate modpoint for each economy and scneario unqiuely, and then plot the turnover rate curve, with the median age of the fleet in first year and the median age of the fleet for all years:
     for scenario in config.economy_scenario_concordance['Scenario'].unique():
         for economy in ECONOMY_IDs:
                 
             #APPLY TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET OR TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_REFERENCE TO THE TURNOVER_RATE_MIDPOINT
             #load the parameters from the config file
             if scenario == 'Reference':
-                turnover_rate_midpoint_mult_adjustment_road = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_REFERENCE']
+                turnover_rate_midpoint_mult_adjustment_road = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_REFERENCE']
             elif scenario == 'Target':
-                turnover_rate_midpoint_mult_adjustment_road = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET']
+                turnover_rate_midpoint_mult_adjustment_road = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET']
             else:
                 raise ValueError('Scenario not recognised')
             #extract the value for the economy, if it exists
@@ -3261,7 +3275,8 @@ def plot_turnover_rate_age_curve(config, ECONOMY_IDs, model_output_detailed_df, 
             fig_dict[economy][scenario][f'turnover_rate_age_curve'] = [fig, title, PLOTTED]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'turnover_rate_age_curve_{scenario}_{economy}.html', graph_type='line', plot_data=turnover_rate_curve_economy_scen, economy=economy, x='Average_age', y='Turnover_rate', color='Measure', title=title, y_axes_title='Turnover Rate', legend_title='Measure', font_size=30, colors_dict=colors_dict)
+                filename = os.path.join(config.root_dir,  'plotting_output','dashboards', economy, 'transport_type_intensity_analysis', f'turnover_rate_age_curve_{scenario}_{economy}.html')
+                write_graph_to_html(config, filename=filename, graph_type='line', plot_data=turnover_rate_curve_economy_scen, economy=economy, x='Average_age', y='Turnover_rate', color='Measure', title=title, y_axes_title='Turnover Rate', legend_title='Measure', font_size=30, colors_dict=colors_dict)
                 
     return fig_dict
 
@@ -3305,7 +3320,7 @@ def plot_mileage_timeseries(config, ECONOMY_IDs, model_output_detailed, fig_dict
             fig_dict[economy][scenario][f'mileage_timeseries_{transport_type}'] = [fig, title, PLOTTED]
             
             if WRITE_HTML:
-                filename = f'mileage_timeseries_{transport_type}_{scenario}_{economy}.html'
+                filename = os.path.join(config.root_dir,  'plotting_output','dashboards', economy, 'transport_type_intensity_analysis', f'mileage_timeseries_{transport_type}_{scenario}_{economy}.html')
                 write_graph_to_html(config, filename=filename, graph_type='line', plot_data=mileage_by_scen_by_economy, economy=economy, x='Date', y='Mileage', color='Vehicle Type', title=title, y_axes_title='Mileage (Thousand km)', legend_title='Vehicle Type', font_size=30, colors_dict=colors_dict)
     
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
@@ -3350,7 +3365,7 @@ def plot_mileage_strip(config, ECONOMY_IDs, model_output_detailed, fig_dict, col
             fig_dict[economy][scenario]['mileage_strip'] = [fig, title, PLOTTED]
             
             if WRITE_HTML:
-                filename = f'mileage_strip_{scenario}_{economy}.html'
+                filename = os.path.join(config.root_dir, 'plotting_output','dashboards', economy, 'transport_type_intensity_analysis',  f'mileage_strip_{scenario}_{economy}.html')
                 write_graph_to_html(config, filename=filename, graph_type='strip', plot_data=mileage_by_scen_by_economy, economy=economy, x='Vehicle Type', y='Mileage', color='Drive', title=title, y_axes_title='Mileage (Thousand km)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
 
             
@@ -3502,55 +3517,13 @@ def compare_8th_and_9th_stocks_sales(config, ECONOMY_IDs, data_8th, model_output
                 fig_dict[economy][scenario][f'8th_9th_stocks_{measure}'] = [fig, title, PLOTTED]
                 
                 if WRITE_HTML:
-                    filename = f'8th_vs_9th_stocks_share_{scenario}_{economy}.html'
+                    filename = os.path.join(config.root_dir,  'plotting_output','dashboards', economy, 'transport_type_intensity_analysis', f'8th_vs_9th_stocks_share_{scenario}_{economy}.html')
                     write_graph_to_html(config, filename=filename, graph_type='line', plot_data=stocks_shares_economy_scen, economy=economy, x='Date', y='Value', color='Drive', line_dash='Dataset', title=title, y_axes_title='Stocks Share', legend_title='Drive', font_size=30, colors_dict=colors_dict)
                 
        
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(stocks['Drive'].unique().tolist())
     return fig_dict, color_preparation_list
-
-# def plot_age_distributions(config, ECONOMY_IDs, model_output_detailed_df, fig_dict, color_preparation_list, colors_dict, medium, title):
-#     """take in age distributions data and plot as a historgram. Will involve combining age distributions so we can aggregate to vehicle type or drives etc. 
-#     since a historgram is a bit too messy for so many categories, we will plot a line historgram, where each line is a different category. This will mean that we will need to convert each age distribtuion cell in the column from a list of values into a whole dataframe of vlaues where the index is the age and the value is the share of vehicles of that age. 
-#     """
-    
-    
-#     # Step 1: Data Preprocessing (I assume you've already got this under control)
-    
-#     # Step 2: Combining Distributions (Use your previously defined function)
-#     # -- You could modify your function to return a DataFrame instead of a string of concatenated values.
-    
-#     # Step 3: Transform to DataFrame
-#     # Let's assume for this example that each economy has its own DataFrame of age distributions
-    
-    
-#     # other_cols_age_dist = other_cols_df.groupby(group_cols)['Age_distribution'].agg(road_model_functions.combine_age_distributions).reset_index()
-#     # grouped_df = grouped_df.merge(other_cols_age_dist, on=group_cols, how='left')
-#     breakpoint()
-                
-#     dfs = {}
-#     for id in ECONOMY_IDs:
-#         df = model_output_detailed_df[model_output_detailed_df['Economy_ID'] == id]
-#         age_dist = df['Age_distribution'].apply(road_model_functions)
-#         dfs[id] = pd.DataFrame(age_dist)
-    
-#     # Step 4: Plotting
-#     plt.figure(figsize=fig_dict.get('figsize', (10, 6)))
-    
-#     for id, df in dfs.items():
-#         plt.plot(df.index, df.values, label=id, color=colors_dict.get(id, 'b'))
-    
-#     plt.xlabel('Vehicle Age')
-#     plt.ylabel(f'Number of Vehicles ({medium})')
-#     plt.title(title)
-#     plt.legend()
-#     plt.show()
-
-    
-    
-#     return 
-
 
 def plot_age_distributions(config, ECONOMY_IDs, model_output_detailed_detailed_non_road_drives, fig_dict, color_preparation_list, colors_dict, medium, BY_DRIVE, BY_VEHICLE_TYPE, WRITE_HTML=True):
 
@@ -3663,7 +3636,7 @@ def plot_age_distributions(config, ECONOMY_IDs, model_output_detailed_detailed_n
                 fig_dict[economy][scenario][f'age_distribution_{medium}'] = [fig, title, PLOTTED]
                 
             if WRITE_HTML:
-                filename = f'age_distribution_{medium}_{scenario}_{economy}.html'
+                filename = os.path.join(config.root_dir,  'plotting_output','dashboards', economy, 'transport_type_intensity_analysis', f'age_distribution_{medium}_{scenario}_{economy}.html')
                 write_graph_to_html(config, filename=filename, graph_type='line', plot_data=age_distribution_by_scen_by_economy, economy=economy, x='Age', y='Age_distribution', color='Drive' if BY_DRIVE else 'Vehicle Type' if BY_VEHICLE_TYPE else 'Medium', title=title, y_axes_title='Age Distribution', legend_title='Drive' if BY_DRIVE else 'Vehicle Type' if BY_VEHICLE_TYPE else 'Medium', font_size=30, colors_dict=colors_dict)
     
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
@@ -3732,7 +3705,7 @@ def plot_intensity_timeseries_INTENSITY_ANALYSIS(config, ECONOMY_IDs, model_outp
             fig_dict[economy][scenario][f'INTENSITY_ANALYSIS_timeseries_{transport_type}'] = [fig, title, PLOTTED]
             
             if WRITE_HTML:
-                filename = f'INTENSITY_ANALYSIS_timeseries_{transport_type}_{scenario}_{economy}.html'
+                filename = os.path.join(config.root_dir, 'plotting_output','dashboards', economy, 'transport_type_intensity_analysis', f'INTENSITY_ANALYSIS_timeseries_{transport_type}_{scenario}_{economy}.html')
                 write_graph_to_html(config, filename=filename, graph_type='line', plot_data=energy_eff_by_scen_by_economy, economy=economy, x='Date', y='Intensity', color='Drive', title=title, y_axes_title='Intensity (Pj per Billion-km)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(energy_eff_by_scen_by_economy['Drive'].unique().tolist())
@@ -3815,7 +3788,7 @@ def line_energy_use_by_transport_type(config, ECONOMY_IDs, model_output_detailed
             
             # Write the figure to HTML if required
             if WRITE_HTML:
-                filename = title_dict[f'{medium}_{transport_type}'] + f'_{scenario}_{economy}.html'
+                filename = os.path.join(config.root_dir, 'plotting_output','dashboards', economy, 'transport_type_intensity_analysis', f'line_energy_use_{medium}_{transport_type}_{scenario}_{economy}.html')
                 write_graph_to_html(config, 
                     filename=filename, 
                     graph_type='line', 
@@ -3834,92 +3807,8 @@ def line_energy_use_by_transport_type(config, ECONOMY_IDs, model_output_detailed
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(energy_use_by_scen_by_economy['Type'].unique().tolist())
     return fig_dict, color_preparation_list
-    
-    
-    
 
-# def plot_share_of_vehicle_type_by_transport_type_INTENSITY_ANALYSIS(ECONOMY_IDs,new_sales_shares_all_plot_drive_shares_df,stocks_df,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type):
-#     PLOTTED=True
-#     breakpoint()
-#     #This data is in terms of transport type, so will need to normalise it to vehicle type by summing up the shares for each vehicle type and dividing individual shares by their sum
-#     new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df.copy()
-#     stocks = stocks_df.copy()
-    
-#     stocks, new_sales_shares_all_plot_drive_shares = remap_stocks_and_sales_based_on_economy(config, stocks, new_sales_shares_all_plot_drive_shares)
-    
-#     new_sales_shares_all_plot_drive_shares['Value'] = new_sales_shares_all_plot_drive_shares.groupby(['Date','Economy', 'Scenario', 'Transport Type', 'Vehicle Type'], group_keys=False)['Value'].transform(lambda x: x/x.sum())
-    
-#     new_sales_shares_all_plot_drive_shares['line_dash'] = 'sales'
-    
-#     stocks['Value'] = stocks.groupby(['Scenario', 'Economy', 'Date', 'Transport Type','Vehicle Type'], group_keys=False)['Value'].apply(lambda x: x/x.sum(numeric_only=True))
-#     stocks['line_dash'] = 'stocks'
-    
-#     for scenario in new_sales_shares_all_plot_drive_shares['Scenario'].unique():
-#         new_sales_shares_all_plot_drive_shares_scenario = new_sales_shares_all_plot_drive_shares.loc[(new_sales_shares_all_plot_drive_shares['Scenario']==scenario)]
-#         stocks_scen = stocks.loc[(stocks['Scenario']==scenario)].copy()
-#         ###
-        
-#         #then concat the two dataframes
-#         new_sales_shares_all_plot_drive_shares_scenario = pd.concat([new_sales_shares_all_plot_drive_shares_scenario, stocks_scen])
-        
-#         #times shares by 100
-#         new_sales_shares_all_plot_drive_shares_scenario['Value'] = new_sales_shares_all_plot_drive_shares_scenario['Value']*100
-                
-#         for economy in ECONOMY_IDs:
-#             plot_data =  new_sales_shares_all_plot_drive_shares_scenario.loc[(new_sales_shares_all_plot_drive_shares_scenario['Economy']==economy)].copy()
 
-#             # #also plot the data like the iea does. So plot the data for 2022 and previous, then plot for the follwoign eyars: [2025, 2030, 2035, 2040, 2050, 2060]. This helps to keep the plot clean too
-#             # plot_data = plot_data.apply(lambda x: x if x['Date'] <= 2022 or x['Date'] in [2025, 2030, 2035, 2040, 2050, 2060, 2070, 2080,2090, 2100] else 0, axis=1)
-#             #drop all drives except bev and fcev
-#             plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='ice')].copy()
-    
-#             #concat drive and vehicle type
-#             plot_data['Drive'] = plot_data['Drive'] + ' ' + plot_data['Vehicle Type']
-            
-#             # Group by 'Drive' and filter out groups where all values are 0
-#             groups = plot_data.groupby(['Drive', 'line_dash'])
-#             plot_data = groups.filter(lambda x: not all(x['Value'] == 0))
-            
-#             #sort by date col
-#             plot_data.sort_values(by=['Date'], inplace=True)
-#             #############
-#             #now plot
-#             if share_of_transport_type_type == 'passenger':
-#                 title = f'Shares for passenger (%)'
-
-#                 fig = px.line(plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict)
-#                 ###
-#                 #add fig to dictionary for scenario and economy:
-#                 fig_dict[economy][scenario]['share_of_vehicle_type_by_transport_type_passenger_INTENSITY_ANALYSIS'] = [fig, title, PLOTTED]
-                
-#                 #############
-#             elif share_of_transport_type_type == 'freight':
-#                 title = f'Shares for freight (%)'
-
-#                 fig = px.line(plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict)
-                
-#                 #add fig to dictionary for scenario and economy:
-#                 fig_dict[economy][scenario]['share_of_vehicle_type_by_transport_type_freight_INTENSITY_ANALYSIS'] = [fig, title, PLOTTED]
-#             elif share_of_transport_type_type == 'all':
-                
-#                 # sum up, because 2w are used in freight and passenger:
-#                 plot_data = plot_data.groupby(['Scenario', 'Economy', 'Date', 'Drive','line_dash']).sum().reset_index()
-#                 title = f'Sales and stock shares (%)'
-
-#                 fig = px.line(plot_data, x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict)
-#                 ###
-#                 #add fig to dictionary for scenario and economy:
-#                 fig_dict[economy][scenario]['share_of_vehicle_type_by_transport_type_all_INTENSITY_ANALYSIS'] = [fig, title, PLOTTED]
-#             else:
-#                 raise ValueError('share_of_transport_type_type must be either passenger or freight')
-#             #############
-#     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
-#     color_preparation_list.append(plot_data['Drive'].unique().tolist())
-    
-#     return fig_dict,color_preparation_list
-            
-    
-# %%
 
 def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=True, LPV_ONLY=True, SIMPLIFY_DRIVES=True):
     PLOTTED=True
@@ -4005,7 +3894,7 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
                 #prodcue individual graph
                 # WRITE_HTML=True
                 if WRITE_HTML:   
-                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename=os.path.join(config.root_dir, 'plotting_output','dashboards', economy, 'transport_type_intensity_analysis', f'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger_{scenario}.html'), graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger'] = [fig, title, PLOTTED]
                 #############
@@ -4016,7 +3905,7 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
                 #prodcue individual graph
                 if WRITE_HTML:  
                     
-                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename=os.path.join(config.root_dir, 'plotting_output','dashboards', economy, 'transport_type_intensity_analysis', f'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight_{scenario}.html'), graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
                 
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_freight'] = [fig, title, PLOTTED]
@@ -4030,7 +3919,7 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
                 if WRITE_HTML:    
                     #make line thicker
                     
-                    write_graph_to_html(config, filename=f'INTENSITY_ANALYSIS_sales_share_by_transport_type_all_{scenario}.html', graph_type='line',economy=economy, plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename=os.path.join(config.root_dir, 'plotting_output','dashboards', economy, 'transport_type_intensity_analysis', f'INTENSITY_ANALYSIS_sales_share_by_transport_type_all_{scenario}.html'), graph_type='line',economy=economy, plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
                     
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_all'] = [fig, title, PLOTTED]
@@ -4083,89 +3972,9 @@ def plot_decrease_in_activity_from_activity_efficiency(config, ECONOMY_IDs, mode
             fig_dict[economy][scenario]['decrease_in_activity_from_activity_efficiency'] = [fig, title, True]
             
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'decrease_in_activity_from_activity_efficiency_{scenario}_{economy}.html', graph_type='line', economy=economy,plot_data=activity_efficiency_improvement_scenario_economy, x='Date', y='Activity', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=os.path.join(config.root_dir, f'decrease_in_activity_from_activity_efficiency_{scenario}_{economy}.html'), graph_type='line', economy=economy,plot_data=activity_efficiency_improvement_scenario_economy, x='Date', y='Activity', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
     
     return fig_dict, color_preparation_list
-
-# def plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs,activity_change_for_plotting_df,fig_dict, color_preparation_list, colors_dict):
-    
-#     #grab Activity_efficiency_improvement, activity and activity growth from model_output_detailed. backcalcualte activity if the activity efficiency is 1, by calcualting cumprod of Activity_efficiency_improvement and multiplying by activity. Then plot the activity vs the backcalculated activity for each transpott type
-#     activity_change_for_plotting = activity_change_for_plotting_df.copy()
-#     if 'GROWTH_RATE_TOO_HIGH' not in activity_change_for_plotting.columns:
-#         activity_change_for_plotting['GROWTH_RATE_TOO_HIGH'] = False
-#     activity_change_for_plotting = activity_change_for_plotting[config.INDEX_COLS_NO_MEASURE + ['TO_or_FROM', 'Original_activity', 'New_activity',  'To_medium', 'From_medium' 'GROWTH_RATE_TOO_HIGH']]
-        
-#     # model_output_detailed = model_output_detailed[config.INDEX_COLS_NO_MEASURE + ['Activity', 'Activity_original']]
-#     #now melt
-#     melted_df = activity_change_for_plotting.melt(id_vars=config.INDEX_COLS_NO_MEASURE+['TO_or_FROM',  'To_medium', 'From_medium' 'GROWTH_RATE_TOO_HIGH'], value_vars=['Original_activity', 'New_activity'], var_name='Activity_type', value_name='Activity')
-    
-#     #rename teh activity columns so we can melt them
-#     # model_output_detailed.rename(columns={'Activity_':'Activity', 'Activity_original':'Activity_original'}, inplace=True)
-#     #sum up activity by transport type and medium befroe we do anything else
-#     melted_df = melted_df.groupby(['Economy', 'Scenario', 'Date', 'Transport Type', 'Medium','TO_or_FROM', 'Activity_type',  'To_medium', 'From_medium' 'GROWTH_RATE_TOO_HIGH'])['Activity'].sum().reset_index()
-    
-#     #plot the activity diff
-#     for scenario in melted_df['Scenario'].unique():
-#         activity_scen = melted_df.loc[(melted_df['Scenario']==scenario)].copy()
-                    
-#         for economy in ECONOMY_IDs:
-#             activity_econ_scen = activity_scen.loc[(activity_scen['Economy']==economy)].copy()
-            
-#             #add medium to transport type so we can differentiate using the color                        
-#             if activity_econ_scen.empty:
-#                 PLOTTED=False
-#             else:
-#                 PLOTTED=True
-                
-#             activity_econ_scen['Transport Type'] = activity_econ_scen['Transport Type'] + ' ' + activity_econ_scen['Medium'] + ' ' + activity_econ_scen['medium_to_medium_shift'] + ' ' + activity_econ_scen['GROWTH_RATE_TOO_HIGH'].astype(str).replace('False', '').replace('True', 'GROWTH_RATE_TOO_HIGH')
-#             #plot the data
-#             title = f'Shifted activity between mediums'
-#             fig = px.line(activity_econ_scen, x='Date', y='Activity', color='Transport Type', line_dash='Activity_type', title=title, color_discrete_map=colors_dict)
-            
-#             #add fig to dictionary for scenario and economy:
-#             fig_dict[economy][scenario]['shifted_activity_from_medium_to_medium'] = [fig, title, PLOTTED]
-#     return fig_dict, color_preparation_list
-
-
-# def plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs,activity_change_for_plotting_df,fig_dict, color_preparation_list, colors_dict):
-    
-#     #grab Activity_efficiency_improvement, activity and activity growth from model_output_detailed. backcalcualte activity if the activity efficiency is 1, by calcualting cumprod of Activity_efficiency_improvement and multiplying by activity. Then plot the activity vs the backcalculated activity for each transpott type
-#     activity_change_for_plotting = activity_change_for_plotting_df.copy()
-#     #['Date', 'Scenario', 'Economy', 'Transport Type', 'Medium', 'Original_activity','New_activity', 'Very_original_activity', 'Change_in_activity','To_medium','From_medium', 'TO_or_FROM'])
-#     #drop change in activity
-#     activity_change_for_plotting = activity_change_for_plotting.drop(columns=['Change_in_activity'])
-    
-#     #for each grouping of =['Date', 'Scenario','Economy', 'Transport type', 'Medium'], we want to find the highest 
-#     #TODODODODO
-#     melted_df = activity_change_for_plotting.melt(id_vars=['Date', 'Scenario','Economy', 'Transport type', 'Medium'], value_vars=['Original_activity', 'New_activity'], var_name='Activity_type', value_name='Activity')
-    
-#     #rename teh activity columns so we can melt them
-#     # model_output_detailed.rename(columns={'Activity_':'Activity', 'Activity_original':'Activity_original'}, inplace=True)
-#     #sum up activity by transport type and medium befroe we do anything else
-#     melted_df = melted_df.groupby(['Economy', 'Scenario', 'Date', 'Transport Type', 'Medium', 'Activity_type'])['Activity'].sum().reset_index()
-    
-#     #plot the activity diff
-#     for scenario in melted_df['Scenario'].unique():
-#         activity_scen = melted_df.loc[(melted_df['Scenario']==scenario)].copy()
-                    
-#         for economy in ECONOMY_IDs:
-#             activity_econ_scen = activity_scen.loc[(activity_scen['Economy']==economy)].copy()
-            
-#             #add medium to transport type so we can differentiate using the color                        
-#             if activity_econ_scen.empty:
-#                 PLOTTED=False
-#             else:
-#                 PLOTTED=True
-                
-#             activity_econ_scen['Transport Type'] = activity_econ_scen['Transport Type'] + ' ' + activity_econ_scen['Medium']
-#             #plot the data
-#             title = f'Shifted activity between mediums'
-#             fig = px.line(activity_econ_scen, x='Date', y='Activity', color='Transport Type', line_dash='Activity_type', title=title, color_discrete_map=colors_dict)
-            
-#             #add fig to dictionary for scenario and economy:
-#             fig_dict[economy][scenario]['shifted_activity_from_medium_to_medium'] = [fig, title, PLOTTED]
-#     return fig_dict, color_preparation_list
-
 
 def plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs, activity_change_for_plotting_df, fig_dict, color_preparation_list, colors_dict, WRITE_HTML=True):
     # breakpoint()#somethign weird going on for mas?
@@ -4211,7 +4020,7 @@ def plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs, activity_ch
             #add fig to dictionary for scenario and economy:
             fig_dict[economy][scenario]['shifted_activity_from_medium_to_medium'] = [fig, title, PLOTTED]
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'shifted_activity_from_medium_to_medium_{scenario}_{economy}.html', graph_type='line', economy=economy,plot_data=activity_econ_scen, x='Date', y='Activity', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=os.path.join(config.root_dir, f'shifted_activity_from_medium_to_medium_{scenario}_{economy}.html'), graph_type='line', economy=economy,plot_data=activity_econ_scen, x='Date', y='Activity', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
                                 
     return fig_dict, color_preparation_list
 
@@ -4299,8 +4108,8 @@ def plot_lifecycle_emissions_of_cars(config, fig_dict, ECONOMY_IDs, model_output
                 # fig.update_layout(font_size=30)#, title_x=0.5, title_y=0.9)
                 # #make lines slightly thicker
                 # fig.update_traces(line=dict(width=10))
-                # fig.write_html(config.root_dir + '\\' +f'plotting_output\\lifecycle_emissions\\lifecycle_emissions_of_cars_{scenario}_{economy}.html')
-                write_graph_to_html(config, filename=f'lifecycle_emissions_of_cars_{scenario}_{economy}.html', graph_type='line', plot_data=lca_economy,economy=economy, x='Date', y='Emissions', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                # fig.write_html(config.root_dir + config.slash +f'plotting_output\\lifecycle_emissions\\lifecycle_emissions_of_cars_{scenario}_{economy}.html')
+                write_graph_to_html(config, filename=os.path.join(config.root_dir, f'lifecycle_emissions_of_cars_{scenario}_{economy}.html'), graph_type='line', plot_data=lca_economy,economy=economy, x='Date', y='Emissions', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
             #add fig to dictionary for scenario and economy:
             fig_dict[economy][scenario]['lifecycle_emissions_of_cars'] = [fig, title, True]
             
@@ -4319,7 +4128,7 @@ def plot_lca_inputs(config, lca_inputs):
     fig.update_layout(font_size=30)
     #drop the legend
     fig.update_layout(showlegend=False)
-    fig.write_html(config.root_dir + '\\' + 'plotting_output\\lifecycle_emissions\\lifecycle_emissions_of_cars_inputs.html')
+    fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'lifecycle_emissions', 'lifecycle_emissions_of_cars_inputs.html'))
 
 def plot_emissions_from_use_for_single_vehicle(config, emissions_factors, fuels_to_plot):
     
@@ -4361,7 +4170,7 @@ def plot_emissions_from_use_for_single_vehicle(config, emissions_factors, fuels_
         fig.update_traces(line=dict(width=10))
         #drop the legend
         fig.update_layout(showlegend=False)
-        fig.write_html(config.root_dir + '\\' +f'plotting_output\\lifecycle_emissions\\{economy}_lifecycle_emissions_LINE_{scenario}.html')
+        fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'lifecycle_emissions', f'{economy}_lifecycle_emissions_LINE_{scenario}.html'))
      
 def clean_and_merge_lca_and_emissions(config, lca, all_data):
     #merge lca and all_data to get the emissions from manufacturing and disposal and use:
@@ -4401,7 +4210,7 @@ def calculate_emissions(config, energy_use_by_fuels, all_data, USE_AVG_GENERATIO
         ValueError: _description_
     """
     
-    emissions_factors = pd.read_csv(config.root_dir + '\\' + 'config\\9th_edition_emissions_factors.csv')
+    emissions_factors = pd.read_csv(os.path.join(config.root_dir, 'config', '9th_edition_emissions_factors.csv'))
     if len(SUPPLIED_COLS)>0:
         cols = SUPPLIED_COLS
     else:
@@ -4440,7 +4249,7 @@ def calculate_emissions(config, energy_use_by_fuels, all_data, USE_AVG_GENERATIO
     ###########
     if USE_AVG_GENERATION_EMISSIONS_FACTOR:
         #pull in the 8th outlook emissions factors by year then use that to claculate the emissions for electricity.
-        emissions_factor_elec = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
+        emissions_factor_elec = pd.read_csv(os.path.join(config.root_dir, 'input_data', 'from_8th', 'outlook_8th_emissions_factors_with_electricity.csv'))#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
         #extract the emissions factor for elctricity for each economy
         emissions_factor_elec = emissions_factor_elec[emissions_factor_elec.fuel_code=='17_electricity'].copy()
         #rename Carbon Neutral Scenario to Target
@@ -4496,7 +4305,7 @@ def extract_lifecycle_emissions_series(config):
     
     #to help make the graph even more informative, we will add a series that represents the lifecyle emissions from purchasing ice and ev cars. This way the user can observe the difference in emissions when there are lots of evs vs not many purchased.
     #load in the lifecycle emissions data that was gatehred from multiple soruces and then averaged
-    lca = pd.read_excel(config.root_dir + '\\' + 'input_data\\lifecycle_emissions.xlsx')
+    lca = pd.read_excel(os.path.join(config.root_dir, 'input_data', 'lifecycle_emissions.xlsx'))
     #drop where READY_TO_USE is not True
     lca = lca[lca['READY_TO_USE']==True]
     #grab the cols we need and average them out (we will exclude the cols on use phase emissions for now)
@@ -4569,7 +4378,7 @@ def share_of_emissions_by_vehicle_type(config, fig_dict, ECONOMY_IDs, emissions_
     if USE_AVG_GENERATION_EMISSIONS_FACTOR:
         gen='_gen'
         #pull in the 8th outlook emissions factors by year, then use that to claculate the emissions for electricity.
-        emissions_factor_elec = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
+        emissions_factor_elec = pd.read_csv(os.path.join(config.root_dir, 'input_data', 'from_8th', 'outlook_8th_emissions_factors_with_electricity.csv'))#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
         #extract the emissions factor for elctricity for each economy
         emissions_factor_elec = emissions_factor_elec[emissions_factor_elec.fuel_code=='17_electricity'].copy()
         #rename Carbon Neutral Scenario to Target
@@ -4582,7 +4391,7 @@ def share_of_emissions_by_vehicle_type(config, fig_dict, ECONOMY_IDs, emissions_
         emissions_by_vehicle_type = emissions_by_vehicle_type.merge(emissions_factor_elec, on=['Date', 'Economy', 'Scenario', 'Fuel'], how='left', indicator=True, suffixes=('', '_elec'))
         #where indicator is both, use the new value
         emissions_by_vehicle_type['Emissions factor (MT/PJ)'] = np.where(emissions_by_vehicle_type['_merge']=='both', emissions_by_vehicle_type['Emissions factor (MT/PJ)_elec'], emissions_by_vehicle_type['Emissions factor (MT/PJ)'])
-        #fill any missing values using ffill after sorting by date and grouping by 'Economy', 'Scenario','Date', 'Fuel', 'Transport Type'
+        #fill any missing values using ffill after sorting by date and grouping by 'Economy', 'Scenario','Date','Vehicle Type', 'Fuel'])
         emissions_by_vehicle_type['Emissions factor (MT/PJ)'] = emissions_by_vehicle_type.sort_values(by='Date').groupby(['Economy', 'Scenario','Date','Vehicle Type', 'Fuel'])['Emissions factor (MT/PJ)'].fillna(method='ffill')
         #drop columns
         emissions_by_vehicle_type = emissions_by_vehicle_type.drop(columns=['Emissions factor (MT/PJ)_elec', '_merge'])
@@ -4614,7 +4423,7 @@ def share_of_emissions_by_vehicle_type(config, fig_dict, ECONOMY_IDs, emissions_
             #add fig to dictionary for scenario and economy:
             fig_dict[economy][scenario]['share_of_emissions_by_vehicle_type'] = [fig, title, True]
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'share_of_emissions_by_vehicle_type_{scenario}_{economy}.html',graph_type='line', economy=economy,plot_data=emissions_by_vehicle_type_economy, x='Date', y='Share of emissions', color='Vehicle Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=os.path.join(config.root_dir, f'share_of_emissions_by_vehicle_type_{scenario}_{economy}.html'),graph_type='line', economy=economy,plot_data=emissions_by_vehicle_type_economy, x='Date', y='Share of emissions', color='Vehicle Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
                                 
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(emissions_by_vehicle_type['Vehicle Type'].unique().tolist())
@@ -4625,7 +4434,7 @@ def plot_new_vehicle_efficiency_by_vehicle_type(config, fig_dict, ECONOMY_IDs, m
     # (ECONOMY_IDs,model_output_detailed,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, transport_type, extra_ice_line=True):
     PLOTTED=True
 
-    conversion_factors = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\conversion_factors.csv')
+    conversion_factors =pd.read_csv(os.path.join(config.root_dir, 'config', 'concordances_and_config_data', 'conversion_factors.csv'))
     #to help with checking the data is, plot new vehicle energy efficiency here:
     
     energy_eff = model_output_detailed_df.copy()
@@ -4743,7 +4552,7 @@ def plot_new_vehicle_efficiency_by_vehicle_type(config, fig_dict, ECONOMY_IDs, m
                 #keep only lpv if it is inthere
                 if 'lpv' in energy_eff_by_scen_by_economy['Vehicle Type'].unique():
                     energy_eff_by_scen_by_economy = energy_eff_by_scen_by_economy.loc[energy_eff_by_scen_by_economy['Vehicle Type']=='lpv'].copy()
-                write_graph_to_html(config, filename=f'{scenario}_new_vehicle_efficiency_timeseries_{transport_type}.html', graph_type='line', plot_data=energy_eff_by_scen_by_economy, economy=economy, x='Date', y='New_vehicle_efficiency', color='Vehicle Type', title=title, line_dash='ICE_ONLY', y_axes_title=unit, legend_title='', font_size=30, marker_line_width=2.5, line_width=10, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=os.path.join(config.root_dir, 'plotting_output', 'dashboards', economy, 'transport_type_intensity_analysis', f'{scenario}_new_vehicle_efficiency_timeseries_{transport_type}.html'), graph_type='line', plot_data=energy_eff_by_scen_by_economy, economy=economy, x='Date', y='New_vehicle_efficiency', color='Vehicle Type', title=title, line_dash='ICE_ONLY', y_axes_title=unit, legend_title='', font_size=30, marker_line_width=2.5, line_width=10, colors_dict=colors_dict)
                 
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(energy_eff_by_scen_by_economy['Vehicle Type'].unique().tolist())
@@ -4768,7 +4577,7 @@ def plot_new_vehicle_emissions_intensity_by_vehicle_type(config, fig_dict, ECONO
     elif transport_type == 'freight':
         emissions_intensity = emissions_intensity.loc[emissions_intensity['Transport Type']=='freight']
     
-    drive_type_to_fuel = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\drive_type_to_fuel.csv')
+    drive_type_to_fuel = pd.read_csv(os.path.join(config.root_dir, 'config', 'concordances_and_config_data', 'drive_type_to_fuel.csv'))
     drive_type_to_fuel = drive_type_to_fuel.loc[drive_type_to_fuel['Supply_side_fuel_mixing'] != 'New fuel'][['Drive','Fuel']].drop_duplicates()
     
     #convert from drive type to fuel type:
@@ -4782,7 +4591,7 @@ def plot_new_vehicle_emissions_intensity_by_vehicle_type(config, fig_dict, ECONO
     if USE_AVG_GENERATION_EMISSIONS_FACTOR:
         gen='_gen'
         #pull in the 8th outlook emissions factors by year, then use that to claculate the emissions for electricity.
-        emissions_factor_elec = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
+        emissions_factor_elec = pd.read_csv(os.path.join(config.root_dir, 'input_data', 'from_8th', 'outlook_8th_emissions_factors_with_electricity.csv'))#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
         #extract the emissions factor for elctricity for each economy
         emissions_factor_elec = emissions_factor_elec[emissions_factor_elec.fuel_code=='17_electricity'].copy()
         #rename Carbon Neutral Scenario to Target
@@ -4795,7 +4604,7 @@ def plot_new_vehicle_emissions_intensity_by_vehicle_type(config, fig_dict, ECONO
         emissions_intensity = emissions_intensity.merge(emissions_factor_elec, on=['Date', 'Economy', 'Scenario', 'Fuel'], how='left', indicator=True, suffixes=('', '_elec'))
         #where indicator is both, use the new value
         emissions_intensity['Emissions factor (MT/PJ)'] = np.where(emissions_intensity['_merge']=='both', emissions_intensity['Emissions factor (MT/PJ)_elec'], emissions_intensity['Emissions factor (MT/PJ)'])
-        #fill any missing values using ffill after sorting by date and grouping by 'Economy', 'Scenario','Date', 'Fuel', 'Transport Type'
+        #fill any missing values using ffill after sorting by date and grouping by 'Economy', 'Scenario','Date', 'Fuel', 'Transport Type']
         emissions_intensity['Emissions factor (MT/PJ)'] = emissions_intensity.sort_values(by='Date').groupby(['Economy', 'Scenario','Date','Transport Type', 'Fuel'])['Emissions factor (MT/PJ)'].fillna(method='ffill')
         #drop columns
         emissions_intensity = emissions_intensity.drop(columns=['Emissions factor (MT/PJ)_elec', '_merge'])
@@ -4887,19 +4696,21 @@ def plot_new_vehicle_emissions_intensity_by_vehicle_type(config, fig_dict, ECONO
                 # fig.update_traces(line=dict(width=10))
                 # #drop legend
                 # fig.update_layout(showlegend=False)
-                # fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\{economy}\\transport_type_intensity_analysis\\{scenario}_{economy}_new_vehicle_emissions_intensity_timeseries_{transport_type}.html')
+                # fig.write_html(config.root_dir + config.slash +f'plotting_output\\dashboards\\{economy}\\transport_type_intensity_analysis\\{scenario}_{economy}_new_vehicle_emissions_intensity_timeseries_{transport_type}.html')
                 
-                write_graph_to_html(config, filename=f'{scenario}_new_vehicle_emissions_intensity_timeseries_{transport_type}.html', graph_type='line', plot_data=emissions_intensity_by_scen_by_economy, economy=economy, x='Date', y='New_vehicle_emissions_intensity', color='Vehicle Type', title=title, line_dash='ICE_ONLY', y_axes_title='MtC02 per km', legend_title='', font_size=30, marker_line_width=2.5, line_width=10, colors_dict=colors_dict)
+                write_graph_to_html(config, filename = os.path.join(config.root_dir, 'plotting_output', 'dashboards', economy, 'transport_type_intensity_analysis', f'{scenario}_new_vehicle_emissions_intensity_timeseries_{transport_type}.html'), graph_type='line', plot_data=emissions_intensity_by_scen_by_economy, economy=economy, x='Date', y='New_vehicle_emissions_intensity', color='Vehicle Type', title=title, line_dash='ICE_ONLY', y_axes_title='MtC02 per km', legend_title='', font_size=30, marker_line_width=2.5, line_width=10, colors_dict=colors_dict)
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(emissions_intensity_by_scen_by_economy['Vehicle Type'].unique().tolist())
     
     return fig_dict, color_preparation_list
-    
+
+
+
 ############################################################################################################################################################
 #MULTI ECONOMY DASHBOARDS ############################################################################################################################################################
 
-    
-def plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, model_output_detailed_df, colors_dict, transport_type, SALES, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL):
+
+def plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES(config, ECONOMY_GROUPING, model_output_detailed_df, colors_dict, transport_type, SALES, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL):
     """to help with understanding total expected stocks of vehicles in the future and how they are distributed by vehicle type and how that measures up against capcity, we can plot the number of stocks of vehicles in the future. This will be done for each economy and scenario.""" 
     stocks_9th=model_output_detailed_df.copy()
     
@@ -4942,17 +4753,27 @@ def plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, 
     else:
         sales_or_stocks = 'stocks'
         stocks = stocks.loc[stocks['Measure']=='Stocks'].copy()
+    
+    #################
+    if ECONOMY_GROUPING != 'all':
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, ECONOMY_GROUPING)
+        stocks_economy_grouping = stocks.copy()
+        stocks_economy_grouping['Economy'] = stocks_economy_grouping['Economy'].replace(ECONOMY_GROUPING_DICT)
+        stocks_economy_grouping = stocks_economy_grouping.groupby(['Scenario', 'Date', 'Drive','Economy', 'Transport Type','Vehicle Type']).sum().reset_index()
+    if AGG_OF_ALL_ECONOMIES or ONLY_AGG_OF_ALL:
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, 'all')
+        stocks_all = stocks.copy()
+        stocks_all['Economy'] = stocks_all['Economy'].replace(ECONOMY_GROUPING_DICT)
+        stocks_all = stocks_all.groupby(['Scenario', 'Date', 'Drive','Economy', 'Transport Type','Vehicle Type']).sum().reset_index()
         
+    if ECONOMY_GROUPING != 'all':
+        stocks = stocks_economy_grouping.copy()
     if AGG_OF_ALL_ECONOMIES:
-        stocks_all = stocks.groupby(['Scenario', 'Date', 'Drive','Economy', 'Transport Type','Vehicle Type']).sum().reset_index().copy()
-        stocks_all['Economy'] = 'all'
-        if ONLY_AGG_OF_ALL:
-            stocks = stocks_all.copy()
-        else:
-            stocks = pd.concat([stocks_all, stocks])
-        facet_col_wrap =11
-    else:
-        facet_col_wrap =7
+        stocks = pd.concat([stocks_all, stocks])
+    if ONLY_AGG_OF_ALL:
+        stocks = stocks_all.copy()
+    facet_col_wrap =7
+    #################
         
     for scenario in stocks['Scenario'].unique():
         plot_data = stocks.loc[(stocks['Scenario']==scenario)].copy()       
@@ -4968,31 +4789,71 @@ def plot_number_of_stocks_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, 
         #sort by date col
         plot_data.sort_values(by=['Date', 'Economy'], inplace=True)
         #############
-        #now plot
+        # Now plot
         if transport_type == 'passenger':
-            title = f'Total {sales_or_stocks} for passenger - {economy_grouping_name} - {scenario}'
+            title = f'Total {sales_or_stocks} for passenger - {ECONOMY_GROUPING} - {scenario}'
 
-            fig = px.line(plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Value', color='Drive', title=title, line_dash='Vehicle Type', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=facet_col_wrap)
-            #save to html
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\{sales_or_stocks}_{scenario}_{economy_grouping_name}_passenger.html')
+            fig = px.line(plot_data[plot_data['Transport Type'] == 'passenger'], x='Date', y='Value', color='Drive', title=title, line_dash='Vehicle Type', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=facet_col_wrap)
+            # Save to HTML
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'{sales_or_stocks}_{scenario}_{ECONOMY_GROUPING}_passenger.html'))
         elif transport_type == 'freight':
-            title = f'Total {sales_or_stocks} for freight - {economy_grouping_name} - {scenario}'
+            title = f'Total {sales_or_stocks} for freight - {ECONOMY_GROUPING} - {scenario}'
 
-            fig = px.line(plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Value', color='Drive', title=title, line_dash='Vehicle Type', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=facet_col_wrap)
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\{sales_or_stocks}_{scenario}_{economy_grouping_name}_freight.html')
+            fig = px.line(plot_data[plot_data['Transport Type'] == 'freight'], x='Date', y='Value', color='Drive', title=title, line_dash='Vehicle Type', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=facet_col_wrap)
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'{sales_or_stocks}_{scenario}_{ECONOMY_GROUPING}_freight.html'))
 
         elif transport_type == 'all':
-            # sum up, because 2w are used in freight and passenger:
-            plot_data_all = plot_data.groupby(['Scenario', 'Economy', 'Date', 'Drive','Vehicle Type']).sum().reset_index()
-            title = f'Total {sales_or_stocks} - {economy_grouping_name} - {scenario}'
+            # Sum up, because 2w are used in freight and passenger:
+            plot_data_all = plot_data.groupby(['Scenario', 'Economy', 'Date', 'Drive', 'Vehicle Type']).sum().reset_index()
+            title = f'Total {sales_or_stocks} - {ECONOMY_GROUPING} - {scenario}'
 
             fig = px.line(plot_data_all, x='Date', y='Value', color='Drive', title=title, line_dash='Vehicle Type', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=facet_col_wrap)
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\{sales_or_stocks}_{scenario}_{economy_grouping_name}_all.html')
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'{sales_or_stocks}_{scenario}_{ECONOMY_GROUPING}_all.html'))
         else:
             raise ValueError('transport_type must be either passenger or freight')
     return
 
-def plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, new_sales_shares_all_plot_drive_shares_df, stocks_df, model_output_detailed_df, colors_dict, share_of_transport_type_type, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL, INCLUDE_OTHER_DRIVES=True):
+
+def aggregate_sales_and_stock_shares_by_economy_grouping(new_sales_shares_all_plot_drive_shares, stocks, model_output_detailed_df_activity, grouping_dict,INDEX_COLS=['Scenario', 'Economy','Date','Vehicle Type',  'Transport Type', 'Drive']):
+    #this si a bit complicated but we will use the activity data to weight the stock shares and calcualte the stock/sales shares for all economies
+    
+    #We will need to calculate the weighted average sales share for each drive type, since some economies have more stocks than others. But also some economies have lower mileage than otehrs so we should use activity rather than stocks, to show a better reresentatin of howmuch those stocks are used. For this we will jsut use activity rather than sales or stocks as the weighting factor
+    new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(stocks, on=INDEX_COLS, how='left', suffixes=('_sales_share', '_stocks'))
+    new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(model_output_detailed_df_activity[INDEX_COLS+['Value']], on=INDEX_COLS, how='left', suffixes=('_sales_share', '_activity'))
+    #rename Value to Value_activity
+    new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.rename(columns={'Value':'Value_activity'})
+    
+    #####################
+    #map according to grouping
+    new_sales_shares_all_plot_drive_shares['Economy'] = new_sales_shares_all_plot_drive_shares['Economy'].replace(grouping_dict)
+    #####################
+    
+    #now we can calculate the weighted average sales share
+    weighted_value_sales_share = new_sales_shares_all_plot_drive_shares.copy()
+    weighted_value_sales_share['Weighted_value_sales_share'] = (weighted_value_sales_share['Value_sales_share'] * weighted_value_sales_share['Value_activity'])
+    weighted_value_sales_share = weighted_value_sales_share[INDEX_COLS +['Value_activity', 'Weighted_value_sales_share']].groupby(INDEX_COLS, group_keys=False).sum(numeric_only=True).reset_index()
+        
+    weighted_value_sales_share['Value'] = weighted_value_sales_share['Weighted_value_sales_share'] / weighted_value_sales_share['Value_activity']
+    #since we may be dividing by zero, we will sdet any values that are nan to 0
+    weighted_value_sales_share['Value'] = weighted_value_sales_share['Value'].fillna(0)
+    weighted_value_sales_share = weighted_value_sales_share[INDEX_COLS+ ['Value']]
+    
+    #########################################################
+    
+    #and calculate the stock share in same way
+    weighted_value_stock_share = new_sales_shares_all_plot_drive_shares.copy()
+    weighted_value_stock_share['Weighted_value_stocks'] = (weighted_value_stock_share['Value_stocks'] * weighted_value_stock_share['Value_activity'])
+    
+    weighted_value_stock_share = weighted_value_stock_share[INDEX_COLS+['Value_activity', 'Weighted_value_stocks']].groupby(INDEX_COLS, group_keys=False).sum(numeric_only=True).reset_index()
+    
+    weighted_value_stock_share['Value'] = weighted_value_stock_share['Weighted_value_stocks'] / weighted_value_stock_share['Value_activity']
+    #since we may be dividing by zero, we will sdet any values that are nan to 0
+    weighted_value_stock_share['Value'] = weighted_value_stock_share['Value'].fillna(0)
+    weighted_value_stock_share = weighted_value_stock_share[INDEX_COLS+['Value']]
+    
+    return weighted_value_sales_share, weighted_value_stock_share
+
+def plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, ECONOMY_GROUPING, new_sales_shares_all_plot_drive_shares_df, stocks_df, model_output_detailed_df, colors_dict, share_of_transport_type_type, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL, INCLUDE_OTHER_DRIVES=True):
     """a copy of similarly named funciton but made to only plot this chart for the named economies without other charts in the same dashboard"""
     #This data is in terms of transport type, so will need to normalise it to vehicle type by summing up the shares for each vehicle type and dividing individual shares by their sum
     new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df.copy()
@@ -5014,43 +4875,27 @@ def plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, 
     stocks['Value'] = stocks.groupby(['Scenario', 'Economy', 'Date', 'Transport Type','Vehicle Type'])['Value'].apply(lambda x: x / x.sum()).reset_index(drop=True)
     
     # model_output_detailed_df_activity['Value'] = model_output_detailed_df_activity.groupby(['Date','Economy', 'Scenario', 'Transport Type', 'Vehicle Type'], group_keys=False)['Value'].transform(lambda x: x/x.sum())
+    #####################
+    extra_identifier = ''
+    if ECONOMY_GROUPING != 'all':
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, ECONOMY_GROUPING)
+        weighted_value_sales_share_economy_grouping, weighted_value_stock_share_economy_grouping = aggregate_sales_and_stock_shares_by_economy_grouping(new_sales_shares_all_plot_drive_shares, stocks, model_output_detailed_df_activity, grouping_dict=ECONOMY_GROUPING_DICT)
+    if AGG_OF_ALL_ECONOMIES or ONLY_AGG_OF_ALL:
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, 'all')
+        weighted_value_sales_share, weighted_value_stock_share = aggregate_sales_and_stock_shares_by_economy_grouping(new_sales_shares_all_plot_drive_shares, stocks, model_output_detailed_df_activity, grouping_dict=ECONOMY_GROUPING_DICT)
+        
+    if ECONOMY_GROUPING != 'all':
+        new_sales_shares_all_plot_drive_shares = pd.concat([new_sales_shares_all_plot_drive_shares, weighted_value_sales_share_economy_grouping])
+        stocks = pd.concat([stocks, weighted_value_stock_share_economy_grouping])
+        extra_identifier += f'_{ECONOMY_GROUPING}'
     if AGG_OF_ALL_ECONOMIES:
-        #this si a bit complicated but we will use the activity data to weight the stock shares and calcualte the stock/sales shares for all economies
-        
-        #We will need to calculate the weighted average sales share for each drive type, since some economies have more stocks than others. But also some economies have lower mileage than otehrs so we should use activity rather than stocks, to show a better reresentatin of howmuch those stocks are used. For this we will jsut use activity rather than sales or stocks as the weighting factor
-        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(stocks, on=['Scenario', 'Economy', 'Date', 'Vehicle Type', 'Transport Type', 'Drive'], how='left', suffixes=('_sales_share', '_stocks'))
-        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(model_output_detailed_df_activity[['Economy', 'Date', 'Scenario', 'Drive','Vehicle Type', 'Transport Type', 'Value']], on=['Scenario','Vehicle Type', 'Economy', 'Date', 'Drive', 'Transport Type'], how='left', suffixes=('_sales_share', '_activity'))
-        #rename Value to Value_activity
-        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.rename(columns={'Value':'Value_activity'})
-        #now we can calculate the weighted average sales share
-        weighted_value_sales_share = new_sales_shares_all_plot_drive_shares.copy()
-        weighted_value_sales_share['Weighted_value_sales_share'] = (weighted_value_sales_share['Value_sales_share'] * weighted_value_sales_share['Value_activity'])
-        
-        weighted_value_sales_share = weighted_value_sales_share[['Scenario', 'Date','Vehicle Type',  'Transport Type', 'Drive','Value_activity', 'Weighted_value_sales_share']].groupby(['Scenario', 'Date', 'Drive','Vehicle Type',  'Transport Type'], group_keys=False).sum(numeric_only=True).reset_index()
-            
-        weighted_value_sales_share['Value'] = weighted_value_sales_share['Weighted_value_sales_share'] / weighted_value_sales_share['Value_activity']
-        #since we may be dividing by zero, we will sdet any values that are nan to 0
-        weighted_value_sales_share['Value'] = weighted_value_sales_share['Value'].fillna(0)
-        weighted_value_sales_share = weighted_value_sales_share[['Scenario', 'Date','Vehicle Type',  'Transport Type', 'Drive', 'Value']]
-        weighted_value_sales_share['Economy'] = 'all'
-        #and calculate the stock share in same way
-        weighted_value_stock_share = new_sales_shares_all_plot_drive_shares.copy()
-        weighted_value_stock_share['Weighted_value_stocks'] = (weighted_value_stock_share['Value_stocks'] * weighted_value_stock_share['Value_activity'])
-        weighted_value_stock_share['Value'] = weighted_value_stock_share['Weighted_value_stocks'] / weighted_value_stock_share['Value_activity']
-        #since we may be dividing by zero, we will sdet any values that are nan to 0
-        weighted_value_stock_share['Value'] = weighted_value_stock_share['Value'].fillna(0)
-        weighted_value_stock_share = weighted_value_stock_share[['Scenario','Date', 'Transport Type', 'Vehicle Type', 'Drive', 'Value']]
-        weighted_value_stock_share['Economy'] = 'all'
-        
-        #drop any line_dash_stocks
-        #concat the two dataframes to originals or only keep that if we are only looking at the aggregate of all economies
-        if ONLY_AGG_OF_ALL:
-            new_sales_shares_all_plot_drive_shares = weighted_value_sales_share.copy()
-            stocks = weighted_value_stock_share.copy()
-        else:
-            new_sales_shares_all_plot_drive_shares = pd.concat([new_sales_shares_all_plot_drive_shares, weighted_value_sales_share])
-            stocks = pd.concat([stocks, weighted_value_stock_share])
-    
+        new_sales_shares_all_plot_drive_shares = pd.concat([new_sales_shares_all_plot_drive_shares, weighted_value_sales_share])
+        stocks = pd.concat([stocks, weighted_value_stock_share])
+    if ONLY_AGG_OF_ALL:
+        new_sales_shares_all_plot_drive_shares = weighted_value_sales_share.copy()
+        stocks = weighted_value_stock_share.copy()
+        extra_identifier += '_agg'
+    #####################
     new_sales_shares_all_plot_drive_shares['line_dash'] = 'sales'
     stocks['line_dash'] = 'stocks'
     
@@ -5084,49 +4929,48 @@ def plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, 
         
         #sort by date col
         plot_data.sort_values(by=['Date', 'Economy'], inplace=True)
-        if ONLY_AGG_OF_ALL and AGG_OF_ALL_ECONOMIES:
-            extra_identifier = '_agg'
-        else:
-            extra_identifier = ''
+            
         #############
-        #now plot
+        # Now plot
         if share_of_transport_type_type == 'passenger':
-            title = f'Shares for passenger (%) - {economy_grouping_name} - {scenario}'
+            title = f'Shares for passenger (%) - {ECONOMY_GROUPING} - {scenario}'
 
-            fig = px.line(plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
-            #save to html
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\shares_of_vehicle_type_by_transport_type_{scenario}_{economy_grouping_name}_passenger{extra_identifier}.html')
+            fig = px.line(plot_data[plot_data['Transport Type'] == 'passenger'], x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
+            # Save to HTML
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'shares_of_vehicle_type_by_transport_type_{scenario}_{ECONOMY_GROUPING}_passenger{extra_identifier}.html'))
         elif share_of_transport_type_type == 'freight':
-            title = f'Shares for freight (%) - {economy_grouping_name} - {scenario}'
+            title = f'Shares for freight (%) - {ECONOMY_GROUPING} - {scenario}'
 
-            fig = px.line(plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\shares_of_vehicle_type_by_transport_type_{scenario}_{economy_grouping_name}_freight{extra_identifier}.html')
+            fig = px.line(plot_data[plot_data['Transport Type'] == 'freight'], x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'shares_of_vehicle_type_by_transport_type_{scenario}_{ECONOMY_GROUPING}_freight{extra_identifier}.html'))
 
         elif share_of_transport_type_type == 'all':
-            # sum up, because 2w are used in freight and passenger:
-            plot_data_all = plot_data.groupby(['Scenario', 'Economy', 'Date', 'Drive','line_dash']).sum().reset_index()
-            title = f'Sales and stock shares (%) - {economy_grouping_name} - {scenario}'
+            # Sum up, because 2w are used in freight and passenger:
+            plot_data_all = plot_data.groupby(['Scenario', 'Economy', 'Date', 'Drive', 'line_dash']).sum().reset_index()
+            title = f'Sales and stock shares (%) - {ECONOMY_GROUPING} - {scenario}'
 
             fig = px.line(plot_data_all, x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\shares_of_vehicle_type_by_transport_type_{scenario}_{economy_grouping_name}_all{extra_identifier}.html')
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'shares_of_vehicle_type_by_transport_type_{scenario}_{ECONOMY_GROUPING}_all{extra_identifier}.html'))
         else:
             raise ValueError('share_of_transport_type_type must be either passenger or freight')
     return
         
 
-def plot_share_transport_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, new_sales_shares_all_plot_drive_shares_df, stocks_df, model_output_detailed_df, colors_dict, share_of_transport_type_type, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL, INCLUDE_OTHER_DRIVES=True):
+def plot_share_transport_type_FOR_MULTIPLE_ECONOMIES(config, ECONOMY_GROUPING, new_sales_shares_all_plot_drive_shares_df, stocks_df, model_output_detailed_df, colors_dict, share_of_transport_type_type, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL, INCLUDE_OTHER_DRIVES=True):
     """a copy of above funciton but made to only plot by transport type (not including vehicle type) for the named economies without other charts in the same dashboard"""
     #This data is in terms of transport type, so will need to normalise it to vehicle type by summing up the shares for each vehicle type and dividing individual shares by their sum
     new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df.copy()
     stocks = stocks_df.copy()
     
-    stocks, new_sales_shares_all_plot_drive_shares = remap_stocks_and_sales_based_on_economy(config, stocks, new_sales_shares_all_plot_drive_shares)
+    stocks = remap_vehicle_types(config, stocks, value_col='Value', new_index_cols = ['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive'],vehicle_type_mapping_set='simplified')
+    new_sales_shares_all_plot_drive_shares = remap_vehicle_types(config, new_sales_shares_all_plot_drive_shares, value_col='Value', new_index_cols = ['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive'],vehicle_type_mapping_set='simplified')
     #do the same for model_output_detailed_df[['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive']] where Measure=='Activity'
     #this is a bit hacky but we can just use the same function as for stocks
     model_output_detailed_df_activity = model_output_detailed_df[['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive', 'Activity']].copy()
     #renaem activity to value
     model_output_detailed_df_activity = model_output_detailed_df_activity.rename(columns={'Activity':'Value'})
-    model_output_detailed_df_activity, model_output_detailed_df_activity1 = remap_stocks_and_sales_based_on_economy(config, model_output_detailed_df_activity, model_output_detailed_df_activity)
+    
+    model_output_detailed_df_activity = remap_vehicle_types(config, model_output_detailed_df_activity, value_col='Value', new_index_cols = ['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive'],vehicle_type_mapping_set='simplified')
     
     new_sales_shares_all_plot_drive_shares['Value'] = new_sales_shares_all_plot_drive_shares.groupby(['Date','Economy', 'Scenario', 'Transport Type'], group_keys=False)['Value'].transform(lambda x: x/x.sum())
     
@@ -5135,41 +4979,27 @@ def plot_share_transport_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_na
     # Assuming 'stocks' is your DataFrame and 'Value' is the column containing the stock values
     stocks['Value'] = stocks.groupby(['Scenario', 'Economy', 'Date', 'Transport Type'])['Value'].apply(lambda x: x / x.sum()).reset_index(drop=True)
     
-    # model_output_detailed_df_activity['Value'] = model_output_detailed_df_activity.groupby(['Date','Economy', 'Scenario', 'Transport Type', 'Vehicle Type'], group_keys=False)['Value'].transform(lambda x: x/x.sum())
+    #####################
+    extra_identifier = ''
+    if ECONOMY_GROUPING != 'all':
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, ECONOMY_GROUPING)
+        weighted_value_sales_share_economy_grouping, weighted_value_stock_share_economy_grouping = aggregate_sales_and_stock_shares_by_economy_grouping(new_sales_shares_all_plot_drive_shares, stocks, model_output_detailed_df_activity, grouping_dict=ECONOMY_GROUPING_DICT, INDEX_COLS=['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive'])
+    if AGG_OF_ALL_ECONOMIES or ONLY_AGG_OF_ALL:
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, 'all')
+        weighted_value_sales_share, weighted_value_stock_share = aggregate_sales_and_stock_shares_by_economy_grouping(new_sales_shares_all_plot_drive_shares, stocks, model_output_detailed_df_activity, grouping_dict=ECONOMY_GROUPING_DICT, INDEX_COLS=['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive'])
+        
+    if ECONOMY_GROUPING != 'all':
+        new_sales_shares_all_plot_drive_shares = weighted_value_sales_share_economy_grouping.copy()
+        stocks =weighted_value_stock_share_economy_grouping.copy()
+        extra_identifier += f'_{ECONOMY_GROUPING}'
     if AGG_OF_ALL_ECONOMIES:
-        #this si a bit complicated but we will use the activity data to weight the stock shares and calcualte the stock/sales shares for all economies
-        
-        #We will need to calculate the weighted average sales share for each drive type, since some economies have more stocks than others. But also some economies have lower mileage than otehrs so we should use activity rather than stocks, to show a better reresentatin of howmuch those stocks are used. For this we will jsut use activity rather than sales or stocks as the weighting factor
-        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(stocks, on=['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive'], how='left', suffixes=('_sales_share', '_stocks'))
-        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(model_output_detailed_df_activity[['Economy', 'Date', 'Scenario', 'Drive', 'Transport Type', 'Value']], on=['Scenario', 'Economy', 'Date', 'Drive', 'Transport Type'], how='left', suffixes=('_sales_share', '_activity'))
-        #rename Value to Value_activity
-        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.rename(columns={'Value':'Value_activity'})
-        #now we can calculate the weighted average sales share
-        weighted_value_sales_share = new_sales_shares_all_plot_drive_shares.copy()
-        weighted_value_sales_share['Weighted_value_sales_share'] = (weighted_value_sales_share['Value_sales_share'] * weighted_value_sales_share['Value_activity'])
-        weighted_value_sales_share = weighted_value_sales_share[['Scenario', 'Date',  'Transport Type', 'Drive','Value_activity', 'Weighted_value_sales_share']].groupby(['Scenario', 'Date', 'Drive', 'Transport Type'], group_keys=False).sum(numeric_only=True).reset_index()
-        weighted_value_sales_share['Value'] = weighted_value_sales_share['Weighted_value_sales_share'] / weighted_value_sales_share['Value_activity']
-        #since we may be dividing by zero, we will sdet any values that are nan to 0
-        weighted_value_sales_share['Value'] = weighted_value_sales_share['Value'].fillna(0)
-        weighted_value_sales_share = weighted_value_sales_share[['Scenario', 'Date', 'Transport Type', 'Drive', 'Value']]
-        weighted_value_sales_share['Economy'] = 'all'
-        #and calculate the stock share in same way
-        weighted_value_stock_share = new_sales_shares_all_plot_drive_shares.copy()
-        weighted_value_stock_share['Weighted_value_stocks'] = (weighted_value_stock_share['Value_stocks'] * weighted_value_stock_share['Value_activity'])
-        weighted_value_stock_share['Value'] = weighted_value_stock_share['Weighted_value_stocks'] / weighted_value_stock_share['Value_activity']
-        #since we may be dividing by zero, we will sdet any values that are nan to 0
-        weighted_value_stock_share['Value'] = weighted_value_stock_share['Value'].fillna(0)
-        weighted_value_stock_share = weighted_value_stock_share[['Scenario','Date', 'Transport Type', 'Drive', 'Value']]
-        weighted_value_stock_share['Economy'] = 'all'
-        
-        #drop any line_dash_stocks
-        #concat the two dataframes to originals or only keep that if we are only looking at the aggregate of all economies
-        if ONLY_AGG_OF_ALL:
-            new_sales_shares_all_plot_drive_shares = weighted_value_sales_share.copy()
-            stocks = weighted_value_stock_share.copy()
-        else:
-            new_sales_shares_all_plot_drive_shares = pd.concat([new_sales_shares_all_plot_drive_shares, weighted_value_sales_share])
-            stocks = pd.concat([stocks, weighted_value_stock_share])
+        new_sales_shares_all_plot_drive_shares = pd.concat([new_sales_shares_all_plot_drive_shares, weighted_value_sales_share])
+        stocks = pd.concat([stocks, weighted_value_stock_share])
+    if ONLY_AGG_OF_ALL:
+        new_sales_shares_all_plot_drive_shares = weighted_value_sales_share.copy()
+        stocks = weighted_value_stock_share.copy()
+        extra_identifier += '_agg'
+    #####################
     
     new_sales_shares_all_plot_drive_shares['line_dash'] = 'sales'
     stocks['line_dash'] = 'stocks'
@@ -5209,34 +5039,34 @@ def plot_share_transport_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_na
         #############
         #now plot
         if share_of_transport_type_type == 'passenger':
-            title = f'Shares for passenger (%) - {economy_grouping_name} - {scenario}'
+            title = f'Shares for passenger (%) - {ECONOMY_GROUPING} - {scenario}'
 
             fig = px.line(plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
             #save to html
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\shares_of_transport_type_{scenario}_{economy_grouping_name}_passenger{extra_identifier}.html')
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'shares_of_transport_type_{scenario}_{ECONOMY_GROUPING}_passenger{extra_identifier}.html'))
         elif share_of_transport_type_type == 'freight':
-            title = f'Shares for freight (%) - {economy_grouping_name} - {scenario}'
+            title = f'Shares for freight (%) - {ECONOMY_GROUPING} - {scenario}'
 
             fig = px.line(plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\shares_of_transport_type_{scenario}_{economy_grouping_name}_freight{extra_identifier}.html')
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'shares_of_transport_type_{scenario}_{ECONOMY_GROUPING}_freight{extra_identifier}.html'))
 
         elif share_of_transport_type_type == 'all':
             # sum up, because 2w are used in freight and passenger:
             plot_data_all = plot_data.groupby(['Scenario', 'Economy', 'Date', 'Drive','line_dash']).sum().reset_index()
-            title = f'Sales and stock shares (%) - {economy_grouping_name} - {scenario}'
+            title = f'Sales and stock shares (%) - {ECONOMY_GROUPING} - {scenario}'
 
             fig = px.line(plot_data_all, x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\shares_of_transport_type_{scenario}_{economy_grouping_name}_all{extra_identifier}.html')
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'shares_of_transport_type_{scenario}_{ECONOMY_GROUPING}_all{extra_identifier}.html'))
         else:
             raise ValueError('share_of_transport_type_type must be either passenger or freight')
     return
         
-def plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, supply_side_fuel_mixing_df, supply_side_fuel_mixing_output, colors_dict, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL):
+def plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES(config, ECONOMY_GROUPING, supply_side_fuel_mixing_df, supply_side_fuel_mixing_output, colors_dict, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL):
     """a copy of similarly named funciton but made to only plot this chart for the named economies without other charts in the same dashboard
 
     Args:
         ECONOMY_IDs (_type_): _description_
-        economy_grouping_name (_type_): _description_
+        ECONOMY_GROUPING (_type_): _description_
         supply_side_fuel_mixing_df (_type_): _description_
         fig_dict (_type_): _description_
         color_preparation_list (_type_): _description_
@@ -5256,18 +5086,29 @@ def plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES(config, economy_grouping
     supply_side_fuel_mixing['Fuel mix'] = supply_side_fuel_mixing['New_fuel']# supply_side_fuel_mixing_plot['Fuel'] + ' mixed with ' + 
     #actually i changed that because it was too long. should be obivous that it's mixed with the fuel in the Fuel col (eg. biodesel mixed with diesel)
     
-    if AGG_OF_ALL_ECONOMIES:
-        # 'Scenario', 'Economy', 'Date', 'Fuel', 'Energy', 'Supply_side_fuel_share', 'original_energy'
-        # Sum up the energy and original_energy values and then calcualte the supply side fuel share from those by doing energy divided by original_energy
-        #rename Fuel to New_fuel
-        supply_side_fuel_mixing_output = supply_side_fuel_mixing_output.rename(columns={'Fuel':'New_fuel'})
-        supply_side_fuel_mixing_all = supply_side_fuel_mixing_output.groupby(['Scenario', 'Date','New_fuel']).sum().reset_index().copy()
+    #################
+    if ECONOMY_GROUPING != 'all':
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, ECONOMY_GROUPING)
+        supply_side_fuel_mixing_output_economy_grouping = supply_side_fuel_mixing_output.copy()
+        supply_side_fuel_mixing_output_economy_grouping['Economy'] = supply_side_fuel_mixing_output_economy_grouping['Economy'].replace(ECONOMY_GROUPING_DICT)
+        supply_side_fuel_mixing_output_economy_grouping = supply_side_fuel_mixing_output_economy_grouping.rename(columns={'Fuel':'New_fuel'})
+        supply_side_fuel_mixing_output_economy_grouping = supply_side_fuel_mixing_output_economy_grouping.groupby(['Scenario', 'Date','New_fuel', 'Economy']).sum().reset_index().copy()
+        supply_side_fuel_mixing_output_economy_grouping['Supply_side_fuel_share'] = (supply_side_fuel_mixing_output_economy_grouping['Energy']/supply_side_fuel_mixing_output_economy_grouping['original_energy'])*100
+    if AGG_OF_ALL_ECONOMIES or ONLY_AGG_OF_ALL:
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, 'all')
+        supply_side_fuel_mixing_all = supply_side_fuel_mixing_output.copy()
+        supply_side_fuel_mixing_all['Economy'] = supply_side_fuel_mixing_all['Economy'].replace(ECONOMY_GROUPING_DICT)
+        supply_side_fuel_mixing_all = supply_side_fuel_mixing_all.rename(columns={'Fuel':'New_fuel'})
+        supply_side_fuel_mixing_all = supply_side_fuel_mixing_all.groupby(['Scenario', 'Date','New_fuel', 'Economy']).sum().reset_index().copy()
         supply_side_fuel_mixing_all['Supply_side_fuel_share'] = (supply_side_fuel_mixing_all['Energy']/supply_side_fuel_mixing_all['original_energy'])*100
-        supply_side_fuel_mixing_all['Economy'] = 'all'
-        if ONLY_AGG_OF_ALL:
-            supply_side_fuel_mixing = supply_side_fuel_mixing_all.copy()
-        else:
-            supply_side_fuel_mixing = pd.concat([supply_side_fuel_mixing, supply_side_fuel_mixing_all])
+        
+    if ECONOMY_GROUPING != 'all':
+        supply_side_fuel_mixing = supply_side_fuel_mixing_output_economy_grouping.copy()
+    if AGG_OF_ALL_ECONOMIES:
+        supply_side_fuel_mixing = pd.concat([supply_side_fuel_mixing_all, supply_side_fuel_mixing])
+    if ONLY_AGG_OF_ALL:
+        supply_side_fuel_mixing = supply_side_fuel_mixing_all.copy()
+    #################
         
     #add units (by setting measure to Freight_tonne_km haha)
     supply_side_fuel_mixing['Measure'] = 'Fuel_mixing'
@@ -5287,7 +5128,7 @@ def plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES(config, economy_grouping
             extra_identifier = '_agg'
         else:
             extra_identifier=''
-        title = 'Supply side fuel mixing for ' + scenario + ' scenario - ' + economy_grouping_name + ' - ({})'.format(supply_side_fuel_mixing_plot_scenario['Unit'].unique()[0])
+        title = 'Supply side fuel mixing for ' + scenario + ' scenario - ' + ECONOMY_GROUPING + ' - ({})'.format(supply_side_fuel_mixing_plot_scenario['Unit'].unique()[0])
         fig = px.line(supply_side_fuel_mixing_plot_scenario, x="Date", y="Supply_side_fuel_share", color='New_fuel',  title=title, color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
 
         #add units to y col
@@ -5295,12 +5136,12 @@ def plot_supply_side_fuel_mixing_FOR_MULTIPLE_ECONOMIES(config, economy_grouping
         # fig.update_yaxes(title_text=title_text)#not working for some reason
 
         #save to html
-        fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\supply_side_fuel_mixing_{scenario}_{economy_grouping_name}{extra_identifier}.html')
+        fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'supply_side_fuel_mixing_{scenario}_{ECONOMY_GROUPING}{extra_identifier}.html'))
 
     return 
 
 ###################################################
-def energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, energy_output_for_outlook_data_system_tall_df, colors_dict, transport_type, medium, INDEPENDENT_AXIS, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL):
+def energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, ECONOMY_GROUPING, energy_output_for_outlook_data_system_tall_df, colors_dict, transport_type, medium, INDEPENDENT_AXIS, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL):
     PLOTTED=True
     energy_output_for_outlook_data_system_tall = energy_output_for_outlook_data_system_tall_df.copy()
     if medium == 'road':
@@ -5312,14 +5153,28 @@ def energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name
     energy_use_by_fuel_type['Measure'] = 'Energy'
     energy_use_by_fuel_type['Unit'] = energy_use_by_fuel_type['Measure'].map(config.measure_to_unit_concordance_dict)
     
+    #################
+    extra_identifier= '' 
+    if ECONOMY_GROUPING != 'all':
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, ECONOMY_GROUPING)
+        energy_use_by_fuel_type_economy_grouping = energy_use_by_fuel_type.copy()
+        energy_use_by_fuel_type_economy_grouping['Economy'] = energy_use_by_fuel_type_economy_grouping['Economy'].replace(ECONOMY_GROUPING_DICT)
+        energy_use_by_fuel_type_economy_grouping = energy_use_by_fuel_type_economy_grouping.groupby(['Scenario','Economy', 'Date', 'Transport Type', 'Fuel', 'Measure', 'Unit']).sum().reset_index()
+    if AGG_OF_ALL_ECONOMIES or ONLY_AGG_OF_ALL:
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, 'all')
+        energy_use_by_fuel_type_all = energy_use_by_fuel_type.copy()
+        energy_use_by_fuel_type_all['Economy'] = energy_use_by_fuel_type_all['Economy'].replace(ECONOMY_GROUPING_DICT)
+        energy_use_by_fuel_type_all = energy_use_by_fuel_type_all.groupby(['Scenario','Economy', 'Date', 'Transport Type', 'Fuel', 'Measure', 'Unit']).sum().reset_index()
+    if ECONOMY_GROUPING != 'all':
+        energy_use_by_fuel_type = energy_use_by_fuel_type_economy_grouping
+        extra_identifier += f'_{ECONOMY_GROUPING}'
     if AGG_OF_ALL_ECONOMIES:
-        energy_use_by_fuel_type_all = energy_use_by_fuel_type.groupby(['Scenario','Date','Transport Type', 'Fuel', 'Measure', 'Unit']).sum().reset_index().copy()
-        energy_use_by_fuel_type_all['Economy'] = 'all'
-        if ONLY_AGG_OF_ALL:
-            energy_use_by_fuel_type = energy_use_by_fuel_type_all.copy()
-        else:
-            energy_use_by_fuel_type = pd.concat([energy_use_by_fuel_type, energy_use_by_fuel_type_all])
-        
+        energy_use_by_fuel_type = pd.concat([energy_use_by_fuel_type_all, energy_use_by_fuel_type])
+    if ONLY_AGG_OF_ALL: 
+        energy_use_by_fuel_type = energy_use_by_fuel_type_all.copy()
+        extra_identifier='_agg'
+    #################
+    
     for scenario in config.economy_scenario_concordance['Scenario'].unique():
         energy_use_by_fuel_type_scen = energy_use_by_fuel_type.loc[(energy_use_by_fuel_type['Scenario']==scenario)].copy()
     
@@ -5339,10 +5194,7 @@ def energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name
 
         # Now sort the DataFrame by the 'Fuel' column:
         energy_use_by_fuel_type_scen.sort_values(by='Fuel', inplace=True)
-        if ONLY_AGG_OF_ALL and AGG_OF_ALL_ECONOMIES:
-            extra_identifier='_agg'
-        else:
-            extra_identifier=''
+
         if transport_type=='passenger':
             #now plot
             #add units to y col
@@ -5352,13 +5204,13 @@ def energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name
                 title_text = 'Energy by Fuel {} {} ({})'.format(scenario, transport_type, energy_use_by_fuel_type_scen['Unit'].unique()[0])
                 
             fig = px.area(energy_use_by_fuel_type_scen.loc[energy_use_by_fuel_type_scen['Transport Type']=='passenger'], x='Date', y='Energy', color='Fuel', title=title_text, color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
-                        
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\energy_use_by_fuel_type_{scenario}_{economy_grouping_name}_{transport_type}_{medium}{extra_identifier}.html')
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'energy_use_by_fuel_type_{scenario}_{ECONOMY_GROUPING}_{transport_type}_{medium}{extra_identifier}.html'))
+
             if INDEPENDENT_AXIS and not ONLY_AGG_OF_ALL:
                 fig.update_yaxes(matches=None)
                 fig.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
-                #write to html
-                fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\energy_use_by_fuel_type_{scenario}_{economy_grouping_name}_{transport_type}_{medium}_indep_axis.html')
+                # Write to HTML with independent axis
+                fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'energy_use_by_fuel_type_{scenario}_{ECONOMY_GROUPING}_{transport_type}_{medium}_indep_axis.html'))   
             
         elif transport_type == 'freight':
             #now plot
@@ -5369,13 +5221,13 @@ def energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name
             
             fig = px.area(energy_use_by_fuel_type_scen.loc[energy_use_by_fuel_type_scen['Transport Type']=='freight'], x='Date', y='Energy', color='Fuel', title=title_text, color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
             
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\energy_use_by_fuel_type_{scenario}_{economy_grouping_name}_{transport_type}_{medium}{extra_identifier}.html')
-            
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'energy_use_by_fuel_type_{scenario}_{ECONOMY_GROUPING}_{transport_type}_{medium}{extra_identifier}.html'))
+
             if INDEPENDENT_AXIS and not ONLY_AGG_OF_ALL:
                 fig.update_yaxes(matches=None)
                 fig.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
-                #write to html
-                fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\energy_use_by_fuel_type_{scenario}_{economy_grouping_name}_{transport_type}_{medium}_indep_axis.html')
+                # Write to HTML with independent axis
+                fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'energy_use_by_fuel_type_{scenario}_{ECONOMY_GROUPING}_{transport_type}_{medium}_indep_axis.html'))
             
         elif transport_type == 'all':
             #sum across transport types
@@ -5387,18 +5239,18 @@ def energy_use_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name
             energy_use_by_fuel_type_scen = energy_use_by_fuel_type_scen.groupby(['Economy', 'Date', 'Fuel','Unit']).sum(numeric_only =True).reset_index()
             #now plot
             fig = px.area(energy_use_by_fuel_type_scen, x='Date', y='Energy', color='Fuel', title=title_text, color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
-                        
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\energy_use_by_fuel_type_{scenario}_{economy_grouping_name}_{transport_type}_{medium}{extra_identifier}.html')
             
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'energy_use_by_fuel_type_{scenario}_{ECONOMY_GROUPING}_{transport_type}_{medium}{extra_identifier}.html'))
+
             if INDEPENDENT_AXIS and not ONLY_AGG_OF_ALL:
                 fig.update_yaxes(matches=None)
                 fig.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
-                #write to html
-                fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\energy_use_by_fuel_type_{scenario}_{economy_grouping_name}_{transport_type}_{medium}_indep_axis.html')
+                # Write to HTML with independent axis
+                fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'energy_use_by_fuel_type_{scenario}_{ECONOMY_GROUPING}_{transport_type}_{medium}_indep_axis.html'))
         else:
             raise ValueError('transport_type must be passenger, all or freight')
 
-def emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, emissions_factors, model_output_with_fuels_df, colors_dict, transport_type, INDEPENDENT_AXIS, AGG_OF_ALL_ECONOMIES, USE_AVG_GENERATION_EMISSIONS_FACTOR=False, ONLY_AGG_OF_ALL=False):
+def emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, ECONOMY_GROUPING, emissions_factors, model_output_with_fuels_df, colors_dict, transport_type, INDEPENDENT_AXIS, AGG_OF_ALL_ECONOMIES, USE_AVG_GENERATION_EMISSIONS_FACTOR=False, ONLY_AGG_OF_ALL=False):
     PLOTTED=True
     model_output_with_fuels = model_output_with_fuels_df.copy()
     #TEMP #WHERE TRANSPORT TYPE IS FREIGHT or medium is not road, SET THE electricty yse to 0. This is so we can test what the effect of electriicyt is 
@@ -5416,7 +5268,7 @@ def emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name,
     if USE_AVG_GENERATION_EMISSIONS_FACTOR:
         gen='_gen'
         #pull in the 8th outlook emissions factors by year, then use that to claculate the emissions for electricity.
-        emissions_factor_elec = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
+        emissions_factor_elec = pd.read_csv(os.path.join(config.root_dir, 'input_data', 'from_8th', 'outlook_8th_emissions_factors_with_electricity.csv'))#maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
         #extract the emissions factor for elctricity for each economy
         emissions_factor_elec = emissions_factor_elec[emissions_factor_elec.fuel_code=='17_electricity'].copy()
         #rename Carbon Neutral Scenario to Target
@@ -5448,14 +5300,29 @@ def emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name,
     
     #set y axis to be the maximum sum of all values for each economy and scenario:
     y_axis_max = model_output_with_fuels_sum.groupby(['Economy', 'Scenario'])['Emissions'].sum().max() * 1.1
-    
-    if AGG_OF_ALL_ECONOMIES:
-        #create a economy which is 'all' to represent all economies in this df:
-        model_output_with_fuels_sum_all = model_output_with_fuels_sum.groupby(['Scenario','Date','Transport Type', 'Fuel', 'Measure', 'Unit']).sum().reset_index().copy()
+    #################################
+    extra_identifier = ''
+    if ECONOMY_GROUPING != 'all':
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, ECONOMY_GROUPING)
+        model_output_with_fuels_sum_economy_grouping = model_output_with_fuels_sum.copy()
+        model_output_with_fuels_sum_economy_grouping['Economy'] = model_output_with_fuels_sum_economy_grouping['Economy'].replace(ECONOMY_GROUPING_DICT)
+        model_output_with_fuels_sum_economy_grouping = model_output_with_fuels_sum_economy_grouping.groupby(['Scenario', 'Date', 'Economy', 'Transport Type', 'Fuel', 'Measure', 'Unit']).sum().reset_index()
+    if AGG_OF_ALL_ECONOMIES or ONLY_AGG_OF_ALL:
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, 'all')
+        model_output_with_fuels_sum_all = model_output_with_fuels_sum.copy()
+        model_output_with_fuels_sum_all['Economy'] = model_output_with_fuels_sum_all['Economy'].replace(ECONOMY_GROUPING_DICT)
+        model_output_with_fuels_sum_all = model_output_with_fuels_sum_all.groupby(['Scenario','Economy',  'Date', 'Transport Type', 'Fuel', 'Measure', 'Unit']).sum().reset_index()
         model_output_with_fuels_sum_all['Economy'] = 'all'
-        if ONLY_AGG_OF_ALL:
-            model_output_with_fuels_sum = model_output_with_fuels_sum_all.copy()
-        model_output_with_fuels_sum= pd.concat([model_output_with_fuels_sum_all, model_output_with_fuels_sum])
+    if ECONOMY_GROUPING != 'all':
+        model_output_with_fuels_sum = model_output_with_fuels_sum_economy_grouping
+        extra_identifier += f'_{ECONOMY_GROUPING}'
+    if AGG_OF_ALL_ECONOMIES:
+        model_output_with_fuels_sum = pd.concat([model_output_with_fuels_sum_all, model_output_with_fuels_sum])
+    if ONLY_AGG_OF_ALL:
+        model_output_with_fuels_sum = model_output_with_fuels_sum_all.copy()
+        extra_identifier = '_agg'
+    
+    ######################
         
     for scenario in config.economy_scenario_concordance['Scenario'].unique():
         
@@ -5474,11 +5341,6 @@ def emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name,
 
         # Now sort the DataFrame by the 'Fuel' column:
         emissions_by_fuel_type_scen.sort_values(by='Fuel', inplace=True)
-        if AGG_OF_ALL_ECONOMIES and ONLY_AGG_OF_ALL:
-            extra_identifier = '_agg'
-        else:
-            extra_identifier = ''
-            
         if transport_type=='passenger':
             #now plot
             #add units to y col
@@ -5486,14 +5348,14 @@ def emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name,
             fig = px.area(emissions_by_fuel_type_scen.loc[emissions_by_fuel_type_scen['Transport Type']=='passenger'], x='Date', y='Emissions', color='Fuel',  title=title_text, color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=7)
                          
             #save to html
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\emissions_by_fuel_type_{scenario}_{economy_grouping_name}_{transport_type}{extra_identifier}.html')
-            
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'emissions_by_fuel_type_{scenario}_{ECONOMY_GROUPING}_{transport_type}{extra_identifier}.html'))
+
             if INDEPENDENT_AXIS:
                 fig.update_yaxes(matches=None)
                 fig.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
                 
-                #save to html
-                fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\emissions_by_fuel_type_{scenario}_{economy_grouping_name}_{transport_type}_indep_axis.html')
+                # Save to HTML with independent axis
+                fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'emissions_by_fuel_type_{scenario}_{ECONOMY_GROUPING}_{transport_type}_indep_axis.html'))
             
         elif transport_type == 'freight':
             #now plot
@@ -5503,14 +5365,14 @@ def emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name,
             # fig.update_layout(yaxis_range=(0, y_axis_max))
             
             #save to html
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\emissions_by_fuel_type_{scenario}_{economy_grouping_name}_{transport_type}{extra_identifier}.html')
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'emissions_by_fuel_type_{scenario}_{ECONOMY_GROUPING}_{transport_type}{extra_identifier}.html'))
             
             if INDEPENDENT_AXIS:
                 fig.update_yaxes(matches=None)
                 fig.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
                 
                 #save to html
-                fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\emissions_by_fuel_type_{scenario}_{economy_grouping_name}_{transport_type}_indep_axis.html')
+                fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'emissions_by_fuel_type_{scenario}_{ECONOMY_GROUPING}_{transport_type}_indep_axis.html'))
                     
             
         elif transport_type == 'all':
@@ -5523,18 +5385,18 @@ def emissions_by_fuel_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name,
             # fig.update_layout(yaxis_range=(0, y_axis_max))
                             
             #save to html
-            fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\emissions_by_fuel_type_{scenario}_{economy_grouping_name}_{transport_type}{extra_identifier}.html')
+            fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'emissions_by_fuel_type_{scenario}_{ECONOMY_GROUPING}_{transport_type}{extra_identifier}.html'))
             if INDEPENDENT_AXIS:
                 fig.update_yaxes(matches=None)
                 fig.for_each_yaxis(lambda yaxis: yaxis.update(showticklabels=True))
                 
                 #save to html
-                fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\emissions_by_fuel_type_{scenario}_{economy_grouping_name}_{transport_type}_indep_axis.html')
+                fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'emissions_by_fuel_type_{scenario}_{ECONOMY_GROUPING}_{transport_type}_indep_axis.html'))
         else:
             raise ValueError('transport_type must be passenger, all or freight')
     return
             
-def share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES(config, economy_grouping_name, emissions_factors, model_output_with_fuels_df, colors_dict, AGG_OF_ALL_ECONOMIES, USE_AVG_GENERATION_EMISSIONS_FACTOR=True, ONLY_AGG_OF_ALL=False):
+def share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES(config, ECONOMY_GROUPING, emissions_factors, model_output_with_fuels_df, colors_dict, AGG_OF_ALL_ECONOMIES, USE_AVG_GENERATION_EMISSIONS_FACTOR=True, ONLY_AGG_OF_ALL=False):
     extra_identifier = ''
     model_output_with_fuels = model_output_with_fuels_df.copy()
     # drop non road:
@@ -5557,7 +5419,7 @@ def share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES(config, economy_gr
         gen='_gen'
         extra_identifier+=gen
         #pull in the 8th outlook emissions factors by year, then use that to claculate the emissions for electricity.
-        emissions_factor_elec = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\outlook_8th_emissions_factors_with_electricity.csv')#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
+        emissions_factor_elec = pd.read_csv(os.path.join(config.root_dir, 'input_data', 'from_8th', 'outlook_8th_emissions_factors_with_electricity.csv'))#c:\Users\finbar.maunsell\github\aperc-emissions\output_data\outlook_8th_emissions_factors_with_electricity.csv
         #extract the emissions factor for elctricity for each economy
         emissions_factor_elec = emissions_factor_elec[emissions_factor_elec.fuel_code=='17_electricity'].copy()
         #rename Carbon Neutral Scenario to Target
@@ -5586,35 +5448,48 @@ def share_of_emissions_by_vehicle_type_FOR_MULTIPLE_ECONOMIES(config, economy_gr
 
     #grab the emissions by vehicle type and sum them
     emissions_by_vehicle_type = emissions_by_vehicle_type.groupby(['Economy', 'Scenario', 'Date', 'Vehicle Type']).sum().reset_index()
-    
-    #calcaulte total if AGG_OF_ALL_ECONOMIES
-    if AGG_OF_ALL_ECONOMIES:
-        emissions_by_vehicle_type_all = emissions_by_vehicle_type.groupby(['Scenario', 'Date', 'Vehicle Type']).sum().reset_index()
+    ###############################
+    extra_identifier = ''
+    if ECONOMY_GROUPING != 'all':
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, ECONOMY_GROUPING)
+        emissions_by_vehicle_type_economy_grouping = emissions_by_vehicle_type.copy()
+        emissions_by_vehicle_type_economy_grouping['Economy'] = emissions_by_vehicle_type_economy_grouping['Economy'].replace(ECONOMY_GROUPING_DICT)
+        emissions_by_vehicle_type_economy_grouping = emissions_by_vehicle_type_economy_grouping.groupby(['Scenario', 'Economy', 'Date', 'Vehicle Type']).sum().reset_index()
+    if AGG_OF_ALL_ECONOMIES or ONLY_AGG_OF_ALL:
+        ECONOMY_GROUPING_DICT = extract_economy_grouping_dict_from_yml(config, 'all')
+        emissions_by_vehicle_type_all = emissions_by_vehicle_type.copy()
         emissions_by_vehicle_type_all['Economy'] = 'all'
-        if ONLY_AGG_OF_ALL:
-            emissions_by_vehicle_type = emissions_by_vehicle_type_all.copy()
-        else:
-            emissions_by_vehicle_type = pd.concat([emissions_by_vehicle_type, emissions_by_vehicle_type_all])  
-        
+        emissions_by_vehicle_type_all = emissions_by_vehicle_type_all.groupby(['Scenario', 'Date', 'Economy',  'Vehicle Type']).sum().reset_index()
+    if ECONOMY_GROUPING != 'all':
+        emissions_by_vehicle_type = emissions_by_vehicle_type_economy_grouping
+        extra_identifier += f'_{ECONOMY_GROUPING}'
+    if AGG_OF_ALL_ECONOMIES:
+        emissions_by_vehicle_type = pd.concat([emissions_by_vehicle_type_all, emissions_by_vehicle_type])
+    if ONLY_AGG_OF_ALL:
+        emissions_by_vehicle_type = emissions_by_vehicle_type_all.copy()
+        extra_identifier = '_agg'
+    #################################
+    
     #grab the total emissions for each date and economy
     total_emissions = emissions_by_vehicle_type.groupby(['Economy', 'Scenario', 'Date']).sum().reset_index()  
     
     #merge the two dataframes and then calcaulte the share of emissions by vehicle type
     emissions_by_vehicle_type = emissions_by_vehicle_type.merge(total_emissions, on=['Economy', 'Scenario', 'Date'], how='left', suffixes=('', '_total'))
     emissions_by_vehicle_type['Share of emissions'] = emissions_by_vehicle_type['Emissions'] / emissions_by_vehicle_type['Emissions_total']
-    if AGG_OF_ALL_ECONOMIES and ONLY_AGG_OF_ALL:
-        extra_identifier += '_agg'
     #plot the data
     for scenario in emissions_by_vehicle_type['Scenario'].unique():
         emissions_by_vehicle_type_scenario = emissions_by_vehicle_type.loc[emissions_by_vehicle_type['Scenario']==scenario].copy()
         title_text = 'Share of emissions by vehicle type - {}'.format(scenario)
-        fig = px.line(emissions_by_vehicle_type_scenario, x='Date', y='Share of emissions', color='Fuel',  title=title_text, color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=8)
+        fig = px.line(emissions_by_vehicle_type_scenario, x='Date', y='Share of emissions', color='Vehicle Type',  title=title_text, color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=8)
         #save to html
-        fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\share_of_emissions_by_vehicle_type_{scenario}_{economy_grouping_name}{extra_identifier}.html')
+        fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'share_of_emissions_by_vehicle_type_{scenario}_{ECONOMY_GROUPING}{extra_identifier}.html'))
     return
 
         
-def prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES(config,  economy_grouping_name, model_output_with_fuels, colors_dict, ECONOMY_IDs,  transport_type, medium, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL):
+def prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES(config,  ECONOMY_GROUPING, model_output_with_fuels, colors_dict, ECONOMY_IDs,  transport_type, medium, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL):
+    #as of yet, dont think tehres any point in doing economy groupings sincethey are better calcaulted in the calcualtion phase thanhere
+    if ECONOMY_GROUPING !='all':
+        return
     PLOTTED=True
     extra_identifier = ''
     if AGG_OF_ALL_ECONOMIES:
@@ -5635,9 +5510,9 @@ def prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES(config,  economy_gro
                 if economy == 'all':
                     #search in folder 'APEC' and use APEC instead of economy in file_id
                     file_identifier = f'APEC_{scenario}_{transport_type}_{medium_id}_2_Energy use_Hierarchical_2070_multiplicative'
-                    lmdi_data_economy = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\APEC\\{file_identifier}.csv')
+                    lmdi_data_economy = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI', 'APEC', f'{file_identifier}.csv'))
                 else:
-                    lmdi_data_economy = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\{economy}\\{file_identifier}.csv')
+                    lmdi_data_economy = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI', economy, f'{file_identifier}.csv'))
             except:
                 if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
                     breakpoint()
@@ -5666,11 +5541,13 @@ def prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES(config,  economy_gro
 
         fig = px.line(lmdi_data_melt,  x="Date", y='Value',  color='Effect', line_dash='line_dash', title=title_text, color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=8)
         #save to html
-        fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\lmdi_multiplicative_{scenario}_{economy_grouping_name}{extra_identifier}.html')
-
+        fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'lmdi_multiplicative_{scenario}_{ECONOMY_GROUPING}{extra_identifier}.html'))
     return 
 
-def produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES(config,  economy_grouping_name, model_output_with_fuels, colors_dict, ECONOMY_IDs, medium, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL):
+def produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES(config,  ECONOMY_GROUPING, model_output_with_fuels, colors_dict, ECONOMY_IDs, medium, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL):
+    #as of yet, dont think tehres any point in doing economy groupings sincethey are better calcaulted in the calcualtion phase thanhere
+    if ECONOMY_GROUPING !='all':
+        return
     PLOTTED=True
     extra_identifier = ''
     if AGG_OF_ALL_ECONOMIES:
@@ -5692,9 +5569,9 @@ def produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES(config,  economy_grouping_
                 if economy == 'all':
                     #search in folder 'APEC' and use APEC instead of economy in file_id
                     file_identifier = f'APEC_{scenario}_{medium_id}_2_Energy use_Hierarchical_2070_concatenated_additive'
-                    lmdi_data_economy = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\APEC\\{file_identifier}.csv')
+                    lmdi_data_economy = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI','APEC', f'{file_identifier}.csv'))
                 else:
-                    lmdi_data_economy = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\LMDI\\{economy}\\{file_identifier}.csv')
+                    lmdi_data_economy = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI', economy, f'{file_identifier}.csv'))
                 
             except:
                 if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
@@ -5750,6 +5627,13 @@ def produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES(config,  economy_grouping_
 
         fig = px.bar(lmdi_data_melt,  x="Effect", y='Value',  color='Effect', title=title_text, color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=8)
         #save to html
-        fig.write_html(config.root_dir + '\\' +f'plotting_output\\dashboards\\multiple_economy_dashboards\\lmdi_additive_{scenario}_{economy_grouping_name}{extra_identifier}.html')
-            
-    return
+        fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'lmdi_additive_{scenario}_{ECONOMY_GROUPING}{extra_identifier}.html'))
+    return 
+
+def extract_economy_grouping_dict_from_yml(config, ECONOMY_GROUPING):
+    #do an aggregate by econmoy grouping too.
+    ECONOMY_GROUPING_DICT = yaml.load(open(os.path.join(config.root_dir, 'config','parameters.yml')), Loader=yaml.FullLoader)['ECONOMY_GROUPING_DICTS']
+    if ECONOMY_GROUPING not in ECONOMY_GROUPING_DICT.keys():
+        raise ValueError(f'{ECONOMY_GROUPING} not in ECONOMY_GROUPING_DICT.keys()')
+    ECONOMY_GROUPING_DICT = ECONOMY_GROUPING_DICT[ECONOMY_GROUPING]
+    return ECONOMY_GROUPING_DICT

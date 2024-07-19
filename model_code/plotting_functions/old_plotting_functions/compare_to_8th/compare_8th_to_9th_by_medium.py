@@ -6,7 +6,7 @@
 import os
 import sys
 import re
-sys.path.append(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
+sys.path.append(os.path.join(re.split('transport_model_9th_edition', os.getcwd())[0], 'transport_model_9th_edition'))
 from runpy import run_path
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
@@ -15,7 +15,7 @@ import re
 #################
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{config.root_dir}\\code")
+    sys.path.append(os.path.join(f"{config.root_dir}", "code"))
     import utility_functions
 else:
     # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
@@ -48,8 +48,8 @@ import plotly.io as pio
 #%%
 #compare model output to 8th edition output. If there are any differences, print them
 #laod output from 8th edition
-model_output = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}'.format(config.model_output_file_name))
-model_output_8th = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\activity_efficiency_energy_road_stocks.csv')
+model_output = pd.read_csv(os.path.join(config.root_dir,  'output_data', 'model_output_detailed', '{}'.format(config.model_output_file_name)))
+model_output_8th = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'activity_efficiency_energy_road_stocks.csv'))
 
 #%%
 #keep only columns in model_output_8th
@@ -93,8 +93,8 @@ fig = px.line(model_output_concat_sum_other_regions, x="Date", y="Energy", color
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
 
-plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=os.path.join(config.root_dir,  'plotting_output', '{}.html'.format(title)), auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(os.path.join(config.root_dir,  'plotting_output', 'static', '{}.png'.format(title)), scale=1, width=2000, height=800)
 
 
 #%%
@@ -107,8 +107,8 @@ fig = px.line(model_output_concat_sum, x="Date", y="Energy", color="Medium_Scena
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=os.path.join(config.root_dir,  'plotting_output', '{}.html'.format(title)), auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(os.path.join(config.root_dir,  'plotting_output', 'static', '{}.png'.format(title)), scale=1, width=2000, height=800)
 
 #%%
 ################################################################################################################################################################
@@ -122,8 +122,8 @@ fig = px.line(model_output_concat_sum_other_regions, x="Date", y="Activity", col
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
 
-plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=os.path.join(config.root_dir,  'plotting_output', '{}.html'.format(title)), auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(os.path.join(config.root_dir,  'plotting_output', 'static', '{}.png'.format(title)), scale=1, width=2000, height=800)
 
 #%%
 ################################################################################
@@ -136,8 +136,8 @@ fig = px.line(model_output_concat_sum, x="Date", y="Activity", color="Medium_Sce
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
 
-plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=os.path.join(config.root_dir,  'plotting_output', '{}.html'.format(title)), auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(os.path.join(config.root_dir,  'plotting_output', 'static', '{}.png'.format(title)), scale=1, width=2000, height=800)
 
 
 #%%
@@ -159,8 +159,8 @@ fig = px.line(model_output_concat_sum_stocks_other_regions, x="Date", y="Stocks"
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + title + '.png', scale=1, width=2000, height=800)
+plotly.offline.plot(fig, filename=os.path.join(config.root_dir,  'plotting_output', '{}.html'.format(title)), auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(os.path.join(config.root_dir,  'plotting_output', 'static', '{}.png'.format(title)), scale=1, width=2000, height=800)
 
 #%%
 ################################################################################################################################################################
@@ -174,8 +174,5 @@ fig = px.line(model_output_concat_sum_stocks, x="Date", y="Stocks", color="Vehic
              #category_orders={"Scenario": ["Reference", "Carbon Neutral"]})
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))#remove 'Economy=X' from titles
 
-plotly.offline.plot(fig, filename=config.root_dir + '\\' + 'plotting_output\\' + title + '.html', auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
-fig.write_image(config.root_dir + '\\' + "\\plotting_output\\static\\" + title + '.png', scale=1, width=2000, height=800)
-
-#%%
-
+plotly.offline.plot(fig, filename=os.path.join(config.root_dir,  'plotting_output', '{}.html'.format(title)), auto_open=AUTO_OPEN_PLOTLY_GRAPHS)
+fig.write_image(os.path.join(config.root_dir,  'plotting_output', 'static', '{}.png'.format(title)), scale=1, width=2000, height=800)

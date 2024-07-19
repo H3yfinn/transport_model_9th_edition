@@ -53,7 +53,7 @@ def create_all_concordances(config, USE_LATEST_CONCORDANCES=False):
     #update this with the transport categories you want to use in the transport model and they should flow through so that the inputs and outputs of the model need to be like that.
     if check_for_and_save_previous_concordances(config, USE_LATEST_CONCORDANCES):
         return
-    manually_defined_transport_categories = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\manually_defined_transport_categories.csv')
+    manually_defined_transport_categories = pd.read_csv(os.path.join(config.root_dir,  'config', 'concordances_and_config_data', 'manually_defined_transport_categories.csv'))
             
     #drop duplicates
     manually_defined_transport_categories.drop_duplicates(inplace=True)
@@ -77,9 +77,9 @@ def create_all_concordances(config, USE_LATEST_CONCORDANCES=False):
     model_concordances['Frequency'] = 'Yearly'
     #save model_concordances with date
     #check the folder exists
-    # if not os.path.exists(config.root_dir + '\\' + 'config\\concordances_and_config_data\\computer_generated_concordances'):
-        # os.makedirs('config\\concordances_and_config_data\\computer_generated_concordances')
-    model_concordances.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name), index=False)
+    # if not os.path.exists(os.path.join(config.root_dir,  'config', 'concordances_and_config_data', 'computer_generated_concordances')):
+        # os.makedirs('config', 'concordances_and_config_data', 'computer_generated_concordances')
+    model_concordances.to_csv(os.path.join(config.root_dir,  'intermediate_data', 'computer_generated_concordances', '{}'.format(config.model_concordances_file_name)), index=False)
 
     ################################################################################################################################################################
     
@@ -89,7 +89,7 @@ def create_all_concordances(config, USE_LATEST_CONCORDANCES=False):
 
     #thsi is important to keep up to date because it will be used to create the user input spreadsheet for the demand side fuel mixing (involving removing the biofuels as they will be stated in the supply sdide fuel mixing)
     #load csv of drive_type_to_fuel
-    drive_type_to_fuel_df = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\drive_type_to_fuel.csv')
+    drive_type_to_fuel_df = pd.read_csv(os.path.join(config.root_dir,  'config', 'concordances_and_config_data', 'drive_type_to_fuel.csv'))
 
     #make a version of the df with no biofuels
     drive_type_to_fuel_df_NO_BIOFUELS = drive_type_to_fuel_df[~drive_type_to_fuel_df['Fuel'].str.contains('bio')]
@@ -100,8 +100,8 @@ def create_all_concordances(config, USE_LATEST_CONCORDANCES=False):
     model_concordances_fuels_NO_BIOFUELS = pd.merge(model_concordances_fuels_NO_BIOFUELS, drive_type_to_fuel_df_NO_BIOFUELS, how='left', on=['Drive'])
 
     #save
-    model_concordances_fuels.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels), index=False)
-    model_concordances_fuels_NO_BIOFUELS.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels_NO_BIOFUELS), index=False)
+    model_concordances_fuels.to_csv(os.path.join(config.root_dir,  'intermediate_data', 'computer_generated_concordances', '{}'.format(config.model_concordances_file_name_fuels)), index=False)
+    model_concordances_fuels_NO_BIOFUELS.to_csv(os.path.join(config.root_dir,  'intermediate_data', 'computer_generated_concordances', '{}'.format(config.model_concordances_file_name_fuels_NO_BIOFUELS)), index=False)
 
     ########################################################################################################################################################################
     
@@ -145,7 +145,7 @@ def create_all_concordances(config, USE_LATEST_CONCORDANCES=False):
     # #TEMP Over
     
     #now save
-    model_concordances_BASE_YEAR_measures.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_base_year_measures_file_name), index=False)
+    model_concordances_BASE_YEAR_measures.to_csv(os.path.join(config.root_dir,  'intermediate_data', 'computer_generated_concordances', '{}'.format(config.model_concordances_base_year_measures_file_name)), index=False)
 
     ########################################################################################################################################################################
     #create a model concordance for growth rates and user defined inputs 
@@ -174,10 +174,10 @@ def create_all_concordances(config, USE_LATEST_CONCORDANCES=False):
     model_concordances_user_input_and_growth_rates = model_concordances_user_input_and_growth_rates[model_concordances_user_input_and_growth_rates['Date'] != config.DEFAULT_BASE_YEAR]
     #make units = %
     model_concordances_user_input_and_growth_rates['Unit'] = '%'
-    #where the measure is Gompertz_gamma then set unit to Stocks_per_thousand_capita
-    model_concordances_user_input_and_growth_rates.loc[model_concordances_user_input_and_growth_rates['Measure'] == 'Gompertz_gamma', 'Unit'] = 'Stocks_per_thousand_capita'
+    #where the measure is Stocks_per_capita then set unit to Stocks_per_thousand_capita
+    model_concordances_user_input_and_growth_rates.loc[model_concordances_user_input_and_growth_rates['Measure'] == 'Stocks_per_capita', 'Unit'] = 'Stocks_per_thousand_capita'
     #and drop freight  from it
-    model_concordances_user_input_and_growth_rates = model_concordances_user_input_and_growth_rates[~((model_concordances_user_input_and_growth_rates['Measure'] == 'Gompertz_gamma') & (model_concordances_user_input_and_growth_rates['Transport Type'] == 'freight'))]
+    model_concordances_user_input_and_growth_rates = model_concordances_user_input_and_growth_rates[~((model_concordances_user_input_and_growth_rates['Measure'] == 'Stocks_per_capita') & (model_concordances_user_input_and_growth_rates['Transport Type'] == 'freight'))]
     
     # #where measure is Occupancy_growth, remove rows where transport type is freight
     # model_concordances_user_input_and_growth_rates = model_concordances_user_input_and_growth_rates[~((model_concordances_user_input_and_growth_rates['Measure'] == 'Occupancy_growth') & (model_concordances_user_input_and_growth_rates['Transport Type'] == 'freight'))]
@@ -187,32 +187,32 @@ def create_all_concordances(config, USE_LATEST_CONCORDANCES=False):
     ##########################
 
     # #SETUP TEMP FIX FOR GOMEPRTZ PARAMETERS:
-    # #since these use a bit different conventions we will treat them uniquely. 
+    # #since these use a bit different conventions we will treat them uniquely.
     # ##set medium to road, vehicle type to all, transport type to passenger and freight, unit to Parameter and drive to all
     # #first filter for where measure startswith Gompertz
-    # model_concordances_GOMPERTZ = model_concordances_user_input_and_growth_rates[model_concordances_user_input_and_growth_rates['Measure'].str.startswith('Gompertz')]
-    # model_concordances_user_input_and_growth_rates = model_concordances_user_input_and_growth_rates[~(model_concordances_user_input_and_growth_rates['Measure'].str.startswith('Gompertz'))]
-    # model_concordances_GOMPERTZ['Medium'] = 'road'
-    # model_concordances_GOMPERTZ['Vehicle Type'] = 'all'
-    # model_concordances_GOMPERTZ['Unit'] = 'Parameter'
-    # model_concordances_GOMPERTZ['Drive'] = 'all'
+    model_concordances_GOMPERTZ = model_concordances_user_input_and_growth_rates[model_concordances_user_input_and_growth_rates['Measure'].str.startswith('Gompertz')]
+    model_concordances_user_input_and_growth_rates = model_concordances_user_input_and_growth_rates[~(model_concordances_user_input_and_growth_rates['Measure'].str.startswith('Gompertz'))]
+    model_concordances_GOMPERTZ['Medium'] = 'road'
+    model_concordances_GOMPERTZ['Vehicle Type'] = 'all'
+    model_concordances_GOMPERTZ['Unit'] = 'Parameter'
+    model_concordances_GOMPERTZ['Drive'] = 'all'
     
     
-    # model_concordances_GOMPERTZ_p = model_concordances_GOMPERTZ.copy()
-    # model_concordances_GOMPERTZ_p['Transport Type'] = 'passenger'
-    # model_concordances_GOMPERTZ_f = model_concordances_GOMPERTZ.copy()
-    # model_concordances_GOMPERTZ_f['Transport Type'] = 'freight'
+    model_concordances_GOMPERTZ_p = model_concordances_GOMPERTZ.copy()
+    model_concordances_GOMPERTZ_p['Transport Type'] = 'passenger'
+    model_concordances_GOMPERTZ_f = model_concordances_GOMPERTZ.copy()
+    model_concordances_GOMPERTZ_f['Transport Type'] = 'freight'
     
-    # #drop duplicates
-    # model_concordances_GOMPERTZ_p.drop_duplicates(inplace=True)
-    # model_concordances_GOMPERTZ_f.drop_duplicates(inplace=True)
-    # #now add to the road_user_input_and_growth_rates df
-    # model_concordances_user_input_and_growth_rates = pd.concat([model_concordances_user_input_and_growth_rates, model_concordances_GOMPERTZ_p, model_concordances_GOMPERTZ_f], ignore_index=True)
+    #drop duplicates
+    model_concordances_GOMPERTZ_p.drop_duplicates(inplace=True)
+    model_concordances_GOMPERTZ_f.drop_duplicates(inplace=True)
+    #now add to the road_user_input_and_growth_rates df
+    model_concordances_user_input_and_growth_rates = pd.concat([model_concordances_user_input_and_growth_rates, model_concordances_GOMPERTZ_p, model_concordances_GOMPERTZ_f], ignore_index=True)
 
     ##########################
     #now save
     
-    model_concordances_user_input_and_growth_rates.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_user_input_and_growth_rates_file_name), index=False)
+    model_concordances_user_input_and_growth_rates.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_user_input_and_growth_rates_file_name), index=False)
 
     #run create_fuel_mixing_concordances(config) to create the fuel mixing concordances. It is seperate because occasionally it will need to be done right after creating new fuel mixing inputs
     create_fuel_mixing_concordances(config, model_concordances_fuels)
@@ -237,11 +237,11 @@ def create_fuel_mixing_concordances(config, model_concordances_fuels):
     #     Medium	Transport Type	Vehicle Type	Drive	Date	Economy	Scenario	Frequency	Fuel	New_fuel	Supply_side_fuel_share
     # air	freight	all	air_av_gas	2017	01_AUS	Reference	Yearly	07_02_aviation_gasoline	16_07_bio_jet_kerosene	0
     
-    drive_type_to_fuel_df = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\drive_type_to_fuel.csv')
+    drive_type_to_fuel_df = pd.read_csv(os.path.join(config.root_dir, 'config', 'concordances_and_config_data', 'drive_type_to_fuel.csv'))
     
     #load in concordances and then keep only data that is in the drive_type_to_fuel_df:
     
-    # model_concordances_fuels = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
+    # model_concordances_fuels = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_file_name_fuels))
     
     #first do demand side fuel mixing:
     drive_type_to_fuel_df_demand = drive_type_to_fuel_df[drive_type_to_fuel_df['Demand_side_fuel_mixing'].isin(['Original fuel', 'New fuel'])].copy()
@@ -303,23 +303,23 @@ def create_fuel_mixing_concordances(config, model_concordances_fuels):
         raise ValueError('There are duplicates in the supply side fuel mixing. Please check the drive_type_to_fuel_df and model_concordances_fuels')
 
     #save
-    demand.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_demand_side_fuel_mixing_file_name), index=False)
-    supply.to_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_supply_side_fuel_mixing_file_name), index=False)
+    demand.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_demand_side_fuel_mixing_file_name), index=False)
+    supply.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_supply_side_fuel_mixing_file_name), index=False)
 
 
 def check_for_and_save_previous_concordances(config, USE_LATEST_CONCORDANCES):
     if USE_LATEST_CONCORDANCES:
         #check if we have concordances available to copy to save on time:
-        file_date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\', 'model_concordances_', file_name_end='.csv')
+        file_date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances'), 'model_concordances_', file_name_end='.csv')
         if file_date_id == config.FILE_DATE_ID:
             return True
         elif file_date_id:
             #just copy all the cocordances we'd save now to the folder with current file_date_id
-            shutil.copyfile(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels.replace(file_date_id, config.FILE_DATE_ID)), config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
-            shutil.copyfile(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_base_year_measures_file_name.replace(file_date_id, config.FILE_DATE_ID)), config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_base_year_measures_file_name))
-            shutil.copyfile(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_user_input_and_growth_rates_file_name.replace(file_date_id, config.FILE_DATE_ID)), config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))
-            shutil.copyfile(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_demand_side_fuel_mixing_file_name.replace(file_date_id, config.FILE_DATE_ID)), config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_demand_side_fuel_mixing_file_name))
-            shutil.copyfile(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_supply_side_fuel_mixing_file_name.replace(file_date_id, config.FILE_DATE_ID)), config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_supply_side_fuel_mixing_file_name))
+            shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_file_name_fuels.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_file_name_fuels))
+            shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_base_year_measures_file_name.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_base_year_measures_file_name))
+            shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_user_input_and_growth_rates_file_name.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_user_input_and_growth_rates_file_name))
+            shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_demand_side_fuel_mixing_file_name.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_demand_side_fuel_mixing_file_name))
+            shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_supply_side_fuel_mixing_file_name.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_supply_side_fuel_mixing_file_name))
             return True
         else:
             return False

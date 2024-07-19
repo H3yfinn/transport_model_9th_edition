@@ -1,5 +1,3 @@
-#main function as sued in general_run.py is saved here for ease of use
-
 import os
 import pandas as pd
 import numpy as np
@@ -58,8 +56,8 @@ def run_divisia(config, data_title, extra_identifier, activity_data, energy_data
         
         ###################################
         #save data:
-        lmdi_output_additive.to_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier), index=False)
-        lmdi_output_multiplicative.to_csv('{}\\{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier), index=False)
+        lmdi_output_additive.to_csv(os.path.join(output_data_folder,'{}{}_additive.csv'.format(data_title, extra_identifier)), index=False)
+        lmdi_output_multiplicative.to_csv(os.path.join(output_data_folder,'{}{}_multiplicative.csv'.format(data_title, extra_identifier)), index=False)
 
         # print('Done {}'.format(data_title, extra_identifier))
 
@@ -116,8 +114,8 @@ def run_divisia(config, data_title, extra_identifier, activity_data, energy_data
         ##################################
 
         #save data:
-        lmdi_output_additive.to_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier), index=False)
-        lmdi_output_multiplicative.to_csv('{}\\{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier), index=False)
+        lmdi_output_additive.to_csv(os.path.join(output_data_folder,'{}{}_additive.csv'.format(data_title, extra_identifier)), index=False)
+        lmdi_output_multiplicative.to_csv(os.path.join(output_data_folder,'{}{}_multiplicative.csv'.format(data_title, extra_identifier)), index=False)
 
         # print('Done {}'.format(data_title, extra_identifier))
 
@@ -144,8 +142,8 @@ def run_divisia(config, data_title, extra_identifier, activity_data, energy_data
         hierarchical_multiplicative_output = pd.merge(hierarchical_multiplicative_output,total_activity,on=[time_variable], how='left')
         
         ###################################
-        hierarchical_additive_output.to_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier), index=False)
-        hierarchical_multiplicative_output.to_csv('{}\\{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier), index=False)
+        hierarchical_additive_output.to_csv(os.path.join(output_data_folder,'{}{}_additive.csv'.format(data_title, extra_identifier)), index=False)
+        hierarchical_multiplicative_output.to_csv(os.path.join(output_data_folder,'{}{}_multiplicative.csv'.format(data_title, extra_identifier)), index=False)
     
     elif emissions_divisia==True and hierarchical==True:
         #run hierarchical fully from a separate script in LMDI_functions.py
@@ -166,8 +164,7 @@ def run_divisia(config, data_title, extra_identifier, activity_data, energy_data
         hierarchical_multiplicative_output = pd.merge(hierarchical_multiplicative_output,total_activity,on=[time_variable], how='left')
         
         ###################################
-        hierarchical_additive_output.to_csv('{}\\{}{}_additive.csv'.format(output_data_folder,data_title, extra_identifier), index=False)
-        hierarchical_multiplicative_output.to_csv('{}\\{}{}_multiplicative.csv'.format(output_data_folder,data_title, extra_identifier), index=False)
+        hierarchical_additive_output.to_csv(os.path.join(output_data_folder,'{}{}_additive.csv'.format(data_title, extra_identifier)), index=False)
+        hierarchical_multiplicative_output.to_csv(os.path.join(output_data_folder,'{}{}_multiplicative.csv'.format(data_title, extra_identifier)), index=False)
         
         print('Please note that hierarchical LMDI for emissions is EXPERIMENTAL. If you dont have much confidence in the resutls please use the other method.')
-#%%

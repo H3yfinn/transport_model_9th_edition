@@ -2,7 +2,7 @@
 import os
 import sys
 import re
-sys.path.append(re.split('transport_model_9th_edition', os.getcwd())[0]+'\\transport_model_9th_edition')
+sys.path.append(os.path.join(re.split('transport_model_9th_edition', os.getcwd())[0], 'transport_model_9th_edition'))
 from runpy import run_path
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
@@ -11,7 +11,7 @@ import re
 #################
 if __name__ == "__main__": #this allows the script to be run directly or from the main.py file as you cannot use relative imports when running a script directly
     # Modify sys.path to include the directory where utility_functions is located
-    sys.path.append(f"{config.root_dir}\\code")
+    sys.path.append(os.path.join(config.root_dir, 'code'))
     import utility_functions
 else:
     # Assuming the script is being run from main.py located at the root of the project, we want to avoid using sys.path.append and instead use relative imports 
@@ -44,15 +44,15 @@ save_fig=False
 
 #%%
 #laod data from 
-# road_model_input = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\road_model_input_wide.csv')
+# road_model_input = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', 'road_model_input_wide.csv'))
 
-# growth_forecasts = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\growth_forecasts.csv')
+# growth_forecasts = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', 'growth_forecasts.csv'))
 
-# non_road_model_input = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\non_road_model_input_wide.csv')
+# non_road_model_input = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', 'non_road_model_input_wide.csv'))
 
-road_model_input_wide = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\road_model_input_wide.csv')
-growth_forecasts = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\growth_forecasts.csv')
-non_road_model_input_wide = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\non_road_model_input_wide.csv')
+road_model_input_wide = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', 'road_model_input_wide.csv'))
+growth_forecasts = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', 'growth_forecasts.csv'))
+non_road_model_input_wide = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', 'non_road_model_input_wide.csv'))
 
 #%%
 ################################################################################################################################################################
@@ -67,7 +67,7 @@ x = x.dropna()
 import plotly.express as px
 fig = px.bar(x, x="Economy", y="Mileage_growth", color='Transport Type', facet_col="Transport Type", facet_col_wrap=3)
 #save to html
-fig.write_html("plotting_output\\input_exploration\\road_mileage_by_economy.html", auto_open=True)
+fig.write_html(os.path.join("plotting_output", "input_exploration", "road_mileage_by_economy.html"), auto_open=True)
 #%%
 #plot mileage by economy (facets) using plotl;y
 #sum uo average mileage for each vehicle typew
@@ -80,5 +80,5 @@ x = x.dropna()
 import plotly.express as px
 fig = px.bar(x, x="Economy", y="Mileage", color='Transport Type', facet_col="Transport Type", facet_col_wrap=3)
 #save to html
-fig.write_html("plotting_output\\input_exploration\\road_mileage_by_economy.html", auto_open=True)
+fig.write_html(os.path.join("plotting_output", "input_exploration", "road_mileage_by_economy.html"), auto_open=True)
 ################################################################################################################################################################

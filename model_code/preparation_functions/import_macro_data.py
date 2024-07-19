@@ -4,6 +4,7 @@ import os
 import sys
 import re
 #################
+from os.path import join
 from .. import utility_functions
 #################
 
@@ -30,8 +31,8 @@ def import_macro_data(config, UPDATE_INDUSTRY_VALUES, PLOT=False):
     #from 
     # Modelling/Data/Gdp/Gdp projections 9th/Gdp_estimates/Gdp_estimates_12May2023/data
     
-    macro_date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + 'input_data\\macro', 'APEC_GDP_data_')
-    macro = pd.read_csv(config.root_dir + '\\' +f'input_data\\macro\\APEC_GDP_data_{macro_date_id}.csv')
+    macro_date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'input_data', 'macro'), 'APEC_GDP_data_')
+    macro = pd.read_csv(os.path.join(config.root_dir, 'input_data', 'macro', f'APEC_GDP_data_{macro_date_id}.csv'))
     
     #convert 17_SIN to 17_SGP, as well as 15_RP to 15_PHL
     if '17_SIN' in macro.economy_code.unique():
@@ -46,12 +47,12 @@ def import_macro_data(config, UPDATE_INDUSTRY_VALUES, PLOT=False):
 
     #import coeffficients prodcuied in create_growth_parameters:
     # 'input_data\\growth_coefficients_by_region.csv'
-    growth_coeff = pd.read_csv(config.root_dir + '\\' + 'input_data\\growth_coefficients_by_region.csv')
+    growth_coeff = pd.read_csv(os.path.join(config.root_dir, 'input_data', 'growth_coefficients_by_region.csv'))
     #drop Region	alpha	r2	Model
     growth_coeff = growth_coeff.drop(columns=['Region', 'alpha', 'r2', 'Model'])
     growth_coeff.rename(columns={'Economy':'economy'}, inplace=True)
     #pull in activity_growth 
-    activity_growth_8th = pd.read_csv(config.root_dir + '\\' + 'input_data\\from_8th\\reformatted\\activity_growth_8th.csv')
+    activity_growth_8th = pd.read_csv(os.path.join(config.root_dir, 'input_data', 'from_8th', 'reformatted', 'activity_growth_8th.csv'))
 
     #pivot so each measure in the vairable column is its own column.
     macro = macro.pivot_table(index=['economy_code', 'economy', 'year'], columns='variable', values='value').reset_index()
@@ -158,7 +159,7 @@ def import_macro_data(config, UPDATE_INDUSTRY_VALUES, PLOT=False):
     #slightly increase PNG growth rates.
     macro3 = update_png_growth_rates(config, macro2, PLOT=PLOT)
     
-    macro3.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\regression_based_growth_estimates.csv', index=False)
+    macro3.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', 'regression_based_growth_estimates.csv'), index=False)
 
 
 def update_png_growth_rates(config, macro2, PLOT=True):
@@ -227,7 +228,7 @@ def plot_png_growth(config, png_growth):
     # Create a facet grid plot with plotly
     fig = px.line(png_growth_melt, x='Date', y='Growth Rate', color='Measure', facet_row='Transport Type', title='Growth Rates Over Time')
     #write html to plotting_output/growth_analysis/png_growth_rates.html
-    fig.write_html(config.root_dir + '\\' + 'plotting_output\\growth_analysis\\png_growth_rates.html', auto_open=True) 
+    fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'growth_analysis', 'png_growth_rates.html'), auto_open=True) 
     
     return png_growth_melt
     
@@ -235,13 +236,13 @@ def tie_freight_growth_to_gdp_growth(config, macro1, UPDATE_INDUSTRY_VALUES):
     #after realising that freight and stocks per cpita arent a great mix for estimaitn freight growth, i figured basing it off gdp growth  would be better. this was because i found that my growth rates were realtively similar anyway, and then research online suggested that people use elasticity of freight transport demand relative to GDP. So by setting this manully, based on what i think an economy is like, i can get a better estimate of freight growth.
     
     #frist take in freight_to_gdp_growth_ratio from parameters.xlsx
-    # freight_to_gdp_growth_ratio = pd.read_excel(config.root_dir + '\\' + 'input_data\\parameters.xlsx', sheet_name='freight_to_gdp_growth_ratio')
+    # freight_to_gdp_growth_ratio = pd.read_excel(os.path.join(config.root_dir, 'input_data', 'parameters.xlsx'), sheet_name='freight_to_gdp_growth_ratio')
     #take in services and industry share of gdp from industry model:
     freight_to_gdp_growth_ratio = grab_gdp_shares_from_industry(config, UPDATE_INDUSTRY_VALUES)
     
     #add a specified amount to the freight_to_gdp_growth_ratio for each economy to represent freight not connected to industry growth (eg. deliveries to homes, etc.)
     
-    NON_INDUSTRY_FREIGHT_ADDITION =  yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['NON_INDUSTRY_FREIGHT_ADDITION']
+    NON_INDUSTRY_FREIGHT_ADDITION =  yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['NON_INDUSTRY_FREIGHT_ADDITION']
     for economy in freight_to_gdp_growth_ratio.Economy.unique():
         addition = NON_INDUSTRY_FREIGHT_ADDITION[economy]
         freight_to_gdp_growth_ratio.loc[freight_to_gdp_growth_ratio['Economy']==economy, 'freight_growth_to_gdp_growth_ratio'] = freight_to_gdp_growth_ratio.loc[freight_to_gdp_growth_ratio['Economy']==economy, 'freight_growth_to_gdp_growth_ratio'] + addition
@@ -274,10 +275,10 @@ def grab_gdp_shares_from_industry(config, UPDATE_INDUSTRY_VALUES):
         root_local = f'input_data\\macro\\industry_gdp_shares\\'
         industry_filename = f'{economy}_NV.IND.TOTL.ZS.csv'
         manu_filename = f'{economy}_NV.IND.MANF.ZS.csv'
-        industry_path_onedrive = root_onedrive  + '\\' + economy + '\\' + industry_filename
-        industry_path_local = config.root_dir + '\\' +  root_local + industry_filename
-        manu_path_onedrive = root_onedrive + '\\' + economy + '\\' + manu_filename
-        manu_path_local = config.root_dir + '\\' + root_local + manu_filename
+        industry_path_onedrive = os.path.join(root_onedrive, economy, industry_filename)
+        industry_path_local = os.path.join(config.root_dir, root_local, industry_filename)
+        manu_path_onedrive = os.path.join(root_onedrive, economy, manu_filename)
+        manu_path_local = os.path.join(config.root_dir, root_local, manu_filename)
         
         if UPDATE_INDUSTRY_VALUES:
             
@@ -303,8 +304,8 @@ def grab_gdp_shares_from_industry(config, UPDATE_INDUSTRY_VALUES):
                         '17_SGP': '17_SIN'
                     }
                     alt_econ_name = a[economy]
-                    alt_ind_filepath = root_onedrive +  alt_econ_name + '\\' + f'{alt_econ_name}_NV.IND.TOTL.ZS.csv'
-                    alt_manu_filepath = root_onedrive +  alt_econ_name + '\\' + f'{alt_econ_name}_NV.IND.MANF.ZS.csv'
+                    alt_ind_filepath = os.path.join(root_onedrive, alt_econ_name, f'{alt_econ_name}_NV.IND.TOTL.ZS.csv')
+                    alt_manu_filepath = os.path.join(root_onedrive, alt_econ_name, f'{alt_econ_name}_NV.IND.MANF.ZS.csv')
                     try:
                         df = pd.read_csv(alt_ind_filepath)
                         df['economy_code'] = economy
@@ -354,12 +355,12 @@ def grab_gdp_shares_from_industry(config, UPDATE_INDUSTRY_VALUES):
     all_shares = calculate_VN_share(config, all_shares)    
     # all_shares['Measure'] = 'Industry_gdp_share'
     #save to intermediate_data/model_inputs/industry_gdp_shares.csv for use in future
-    all_shares.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\industry_gdp_shares.csv', index=False)
+    all_shares.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', 'industry_gdp_shares.csv'), index=False)
     
     if UPDATE_INDUSTRY_VALUES:
         #plot the gdp shares for each economy suing a line plot
         fig = px.line(all_shares, x='Date', y='freight_growth_to_gdp_growth_ratio', color='Economy')
-        fig.write_html(config.root_dir + '\\' + 'plotting_output\\growth_analysis\\industry_gdp_shares.html', auto_open=True)
+        fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'growth_analysis', 'industry_gdp_shares.html'), auto_open=True)
         
     return all_shares   
         
@@ -377,20 +378,20 @@ def calculate_VN_share(config, all_shares):
     sea_economies = ['07_INA', '10_MAS', '15_PHL', '19_THA']
     manu_diffs = pd.DataFrame()
     for economy in sea_economies:
-        df = pd.read_csv(config.root_dir + '\\' +f'input_data\\macro\\industry_gdp_shares\\{economy}_NV.IND.MANF.ZS.csv').rename(columns={'value': 'manu_share', 'year':'Date'})
+        df = pd.read_csv(os.path.join(config.root_dir, 'input_data', 'macro', 'industry_gdp_shares', f'{economy}_NV.IND.MANF.ZS.csv')).rename(columns={'value': 'manu_share', 'year':'Date'})
         #grab the industry data
         ind_df = all_shares.loc[all_shares['Economy']==economy].copy()
         #join on date
-        df = pd.merge(df, ind_df, on=['Date'], how='left')
+        df = pd.merge(df, ind_df, on=[os.path.join('Date')], how='left')
         #calculate the difference between manu and industry
         df['diff'] = df['freight_growth_to_gdp_growth_ratio'] - (df['manu_share']/100)
         #add to manu_diffs
-        manu_diffs = pd.concat([manu_diffs, df[['Date', 'diff']]])
+        manu_diffs = pd.concat([manu_diffs, df[[os.path.join('Date'), 'diff']]])
     #calculate the average difference
-    manu_diffs = manu_diffs.groupby(['Date']).mean().reset_index()
+    manu_diffs = manu_diffs.groupby([os.path.join('Date')]).mean().reset_index()
     #set economy to VN then join to all_shares
     manu_diffs['Economy'] = '21_VN'
-    all_shares = pd.merge(all_shares, manu_diffs, on=['Economy', 'Date'], how='left')
+    all_shares = pd.merge(all_shares, manu_diffs, on=['Economy', os.path.join('Date')], how='left')
     #set all_shares['diff'] to 0 if it is na
     all_shares['diff'] = all_shares['diff'].fillna(0)
     #add the diff to the manu share
@@ -401,9 +402,3 @@ def calculate_VN_share(config, all_shares):
 #%%
 # import_macro_data(config, True, PLOT=False)
 #%%
-
-
-
-
-
-

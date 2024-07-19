@@ -30,7 +30,7 @@ from plotly.subplots import make_subplots
 #%%
 def apply_fuel_mix_supply_side(config, model_output_with_fuel_mixing, ECONOMY_ID, supply_side_fuel_mixing=None):
     if supply_side_fuel_mixing is None:
-        supply_side_fuel_mixing = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+        supply_side_fuel_mixing = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', '{}'.format(config.FILE_DATE_ID), '{}_supply_side_fuel_mixing.csv'.format(ECONOMY_ID)))
     model_output = model_output_with_fuel_mixing.copy()
     
     #merge the supply side fuel mixing data on the fuel column. This will result in a new supply side fuel column which reflects the splitting of the fuel into many types. We will replace the value in the fuel column with the value in the supply side fuel column, and times the energy value by the share. and Where the suply side fuel column contains no value (an NA) then the fuel and its energy use will be unchanged.
@@ -95,7 +95,7 @@ def apply_fuel_mix_supply_side(config, model_output_with_fuel_mixing, ECONOMY_ID
     #set frequency to 'Yearly'#jsut to be safe.
     model_output_with_fuel_mixing['Frequency'] = 'Yearly'
     
-    supply_side_fuel_share_output.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_supply_side_fuel_shares_{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID), index=False)
+    supply_side_fuel_share_output.to_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_outputs', '{}_supply_side_fuel_shares_{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID)), index=False)
     return model_output_with_fuel_mixing
     
 #%%

@@ -66,19 +66,19 @@ def adjust_data_to_match_esto_handler(config, BASE_YEAR, ECONOMY_ID, road_model_
     energy_use_esto = format_9th_input_energy_from_esto(config, ECONOMY_ID=ECONOMY_ID)#Economy missing in here
     
     #move electricity use in road to rail. This is based on the parameters the user has set. It should generally default to False unless the user things that Elec use in road is overexaggerated.
-    ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR']
+    ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR']
     if ECONOMY_TO_MOVE_ROAD_ELEC_USE_TO_RAIL_FOR[ECONOMY_ID]:
         USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=True
         energy_use_esto = move_electricity_use_in_road_to_rail_esto(config, energy_use_esto, ECONOMY_ID)
     else:
         USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=False 
             
-    input_data_based_on_previous_model_run = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_detailed\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
-    energy_use_output = pd.read_csv(config.root_dir + '\\' + 'output_data\\model_output_with_fuels\\{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    input_data_based_on_previous_model_run = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', '{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name)))
+    energy_use_output = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', '{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name)))
     
     #save them for archiving because they will be overwritten later
-    input_data_based_on_previous_model_run.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_input_data_based_on_previous_model_run_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
-    energy_use_output.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_energy_use_output_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    input_data_based_on_previous_model_run.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_outputs', '{}_input_data_based_on_previous_model_run_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name)))
+    energy_use_output.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_outputs', '{}_energy_use_output_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, config.model_output_file_name)))
     
     #double check that the max and min dates for the input data match the BASEYEAR AND config.OUTLOOK_BASE_YEAR, OTHERWISE THE USER NEEDS TO RUN THE MODEL WITH ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR SET TO FALSE AGAIN:
     if input_data_based_on_previous_model_run['Date'].max() != config.OUTLOOK_BASE_YEAR or input_data_based_on_previous_model_run['Date'].min() != BASE_YEAR:
@@ -111,11 +111,11 @@ def adjust_data_to_match_esto_handler(config, BASE_YEAR, ECONOMY_ID, road_model_
     #############################
     #OPTIMISATION STEP: (use optimisation to find the best balance of changes to make the data we have in input_data_new_road equate to match the energy from ESTO.)
     input_data_new_road = required_energy_use_by_drive.loc[required_energy_use_by_drive['Medium'] == 'road'].copy()  
-    #find the latest LATEST_FILE_DATE_ID for this file f'intermediate_data\\input_data_optimisations\\optimised_data_{ECONOMY_ID}_{LATEST_FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.pkl'
+    #find the latest LATEST_FILE_DATE_ID for this file f'intermediate_data/input_data_optimisations/optimised_data_{ECONOMY_ID}_{LATEST_FILE_DATE_ID}_{config.transport_data_system_FILE_DATE_ID}.pkl'
     
-    date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + f'intermediate_data\\input_data_optimisations\\', f'optimised_data_{ECONOMY_ID}_', file_name_end=f'_{config.transport_data_system_FILE_DATE_ID}.pkl') 
+    date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, f'intermediate_data', 'input_data_optimisations'), f'optimised_data_{ECONOMY_ID}_', file_name_end=f'_{config.transport_data_system_FILE_DATE_ID}.pkl') 
     if USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT and date_id is not None:
-        filename = config.root_dir + '\\' + f'intermediate_data\\input_data_optimisations\\optimised_data_{ECONOMY_ID}_{date_id}_{config.transport_data_system_FILE_DATE_ID}.pkl'
+        filename = os.path.join(config.root_dir, f'intermediate_data', 'input_data_optimisations', f'optimised_data_{ECONOMY_ID}_{date_id}_{config.transport_data_system_FILE_DATE_ID}.pkl')
         #LOAD PREVIOUS OPT RESULTS INSTEAD OF RECALCULATING. THIS HELPS TO KEEP CONSISETNCY BETWEEN THE RESULTS AS WELL AS REDUCING RUN TIME
         optimised_data = pd.read_pickle(filename)
     else:
@@ -244,8 +244,8 @@ def spread_non_specified_and_separate_pipeline_from_esto_transport_energy(config
     return energy_use_esto, energy_use_esto_pipeline, energy_use_esto_nonspecified
 
 def format_energy_use_for_rescaling(config, energy_use_esto, energy_use_output, SPREAD_NON_SPECIFIED_AND_SEPARATE_PIPELINE = False, REMOVE_ANNOYING_FUELS=False):
-    """this function formats the energy use data from the esto data set so that it can be compared to the energy use data from the model. 
-    frist, if  SPREAD_NON_SPECIFIED_AND_SEPARATE_PIPELINE it will remove the pipeline and nonspecified mediums in energy_use_esto, as we dont want to consider those. they might be dealt with by the transport model at a later date... It also adds Fuel 07_08_fuel_oil and 07_06_kerosene use in road to the non specified amount and spread it with nonspecifieds energy use. This is because we dont have any info on these uses and they are minmimal so mimght as well drop them in with the nonspecifieds. It also spreads energy_use_esto_nonspecified among all mediums for that fuel, eocnomy and date. Use the % of each energy use to the total energy use for that fuel, economy and date to do this. It also calculates the total energy use for each fuel, scenario, medium, economy and date in energy_use_output (so it can be compared to the esto data).
+    """this function formats the energy use data from the esto data set so that it can be compared to the energy use data from the model.
+frist, if  SPREAD_NON_SPECIFIED_AND_SEPARATE_PIPELINE it will remove the pipeline and nonspecified mediums in energy_use_esto, as we dont want to consider those. they might be dealt with by the transport model at a later date... It also adds Fuel 07_08_fuel_oil and 07_06_kerosene use in road to the non specified amount and spread it with nonspecifieds energy use. This is because we dont have any info on these uses and they are minmimal so mimght as well drop them in with the nonspecifieds. It also spreads energy_use_esto_nonspecified among all mediums for that fuel, eocnomy and date. Use the % of each energy use to the total energy use for that fuel, economy and date to do this. It also calculates the total energy use for each fuel, scenario, medium, economy and date in energy_use_output (so it can be compared to the esto data).
 
     Args:
         energy_use_esto (_type_): _description_
@@ -329,7 +329,7 @@ def calculate_required_energy_use_by_drive(config, input_data_based_on_previous_
     #To make it a bit more simple, lets called Energy, Energy old. Then when we calcualte Energy*ratio it can be called Energy new. then rename it to energy and drop energy old before we move on:
     required_energy_use_by_drive_and_fuel.rename(columns={'Energy': 'Energy_old'}, inplace=True)   
     
-    #do the ratio times enegry calc":
+    #do the ratio times enegry calc
     required_energy_use_by_drive_and_fuel['Energy_new'] = required_energy_use_by_drive_and_fuel['Energy_old']*required_energy_use_by_drive_and_fuel['ratio']
 
     #additions need to be split equally where they are made. do this using the proprtion of each energy use out of the total energy use for that fuel, scveanrio, medium, economy and date to do this:
@@ -396,8 +396,7 @@ def merge_and_replace_old_input_data_with_new_input_data(config, input_data_new_
     road_all_wide = road_all_wide.loc[:,~road_all_wide.columns.str.endswith('_new')].copy()
     #and then concat road_model_input_wide to road_all_wide fopr the missing dates in road_all_wide:
     missing_dates = [date for date in road_model_input_wide['Date'].unique().tolist() if date not in road_all_wide['Date'].unique().tolist()]
-    road_all_wide = pd.concat([road_all_wide, road_model_input_wide.loc[road_model_input_wide['Date'].isin(missing_dates)]])    
-    
+    road_all_wide = pd.concat([road_all_wide, road_model_input_wide.loc[road_model_input_wide['Date'].isin(missing_dates)]])
     
     #NOW FOR NON ROAD    
     non_road_all_wide = input_data_new_non_road.copy()
@@ -462,7 +461,7 @@ def incorporate_fuel_mixing_before_recalculating_stocks(config, required_energy_
     required_energy_use_by_drive_and_fuel = required_energy_use_by_drive_and_fuel.drop(columns=['ratio','addition','proportion_of_group', 'Energy_esto', 'Energy_model'])
     
     
-    drive_type_to_fuel = pd.read_csv(config.root_dir + '\\' + 'config\\concordances_and_config_data\\drive_type_to_fuel.csv')
+    drive_type_to_fuel = pd.read_csv(os.path.join(config.root_dir, 'config', 'concordances_and_config_data', 'drive_type_to_fuel.csv'))
     #first supply side so we dont mix any biofuels with electricity which came from demand side fuel mixing:
     supply_side_fuel_mixing_drives = drive_type_to_fuel.loc[drive_type_to_fuel['Supply_side_fuel_mixing'] != False][['Drive','Fuel','Supply_side_fuel_mixing']].drop_duplicates()
     
@@ -561,14 +560,14 @@ def test_output_matches_expectations(config, ECONOMY_ID, supply_side_fuel_mixing
         diff_percent = (sum(diff_percent['Energy'].dropna())/2) / (sum(diff_percent['Energy_esto'].dropna())/2)#div by two to show avg diff across scenarios
     except ZeroDivisionError:
         if sum(diff_percent['Energy'].dropna()) == 0 and sum(diff_percent['Energy_esto'].dropna()) == 0:
-            diff_percent = 1
+                diff_percent = 1
         else:
             diff_percent = 100#x/0 is essentially infinity, so just set it to 100
         
     if diff_percent > 1.01 or diff_percent < 0.99:
         breakpoint()
         #saev output to csv
-        # diff_percent.to_csv(config.root_dir + '\\' + 'intermediate_data\\errors\\ajust_data_to_match_esto_energy_use_diff.csv')
+        # diff_percent.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'errors', 'ajust_data_to_match_esto_energy_use_diff.csv'))
         # raise ValueError('energy use does not match esto, proportion difference is  {}'.format(diff_percent))
         print('energy use does not match esto, proportion difference is  {}'.format(diff_percent))
         
@@ -621,14 +620,14 @@ def format_9th_input_energy_from_esto(config, ECONOMY_ID=None, REDO_SAME_DATE_ID
     
     #take in data from the EBT system of 9th and format it so that it can be used to create the energy data to whcih the model will be rescaled:
     #load the 9th data
-    date_id = utility_functions.get_latest_date_for_data_file(config.root_dir + '\\' + 'input_data\\9th_model_inputs', 'model_df_wide_')
-    energy_use_esto = pd.read_csv(config.root_dir + '\\' +f'input_data\\9th_model_inputs\\model_df_wide_{date_id}.csv')
+    date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'input_data', '9th_model_inputs'), 'model_df_wide_')
+    energy_use_esto = pd.read_csv(os.path.join(config.root_dir, 'input_data', '9th_model_inputs', f'model_df_wide_{date_id}.csv'))
     #check that that matches config.latest_esto_data_FILE_DATE_ID. if not then jsut notify user
     if date_id != config.latest_esto_data_FILE_DATE_ID:
         print('WARNING: the date_id for the 9th model inputs does not match the latest esto data date_id. This is okay for now but it should be fixed later')
     #now check if we've already created an output for this file. if so then we dont need to do it again:energy_use_esto
-    if os.path.exists(config.root_dir + '\\' + f'intermediate_data\\model_inputs_{date_id}.csv') and not REDO_SAME_DATE_ID:
-        energy_use_esto = pd.read_csv(config.root_dir + '\\' + f'intermediate_data\\model_inputs_{date_id}.csv')
+    if os.path.exists(os.path.join(config.root_dir, f'intermediate_data', f'model_inputs_{date_id}.csv')) and not REDO_SAME_DATE_ID:
+        energy_use_esto = pd.read_csv(os.path.join(config.root_dir, f'intermediate_data', f'model_inputs_{date_id}.csv'))
         if ECONOMY_ID != None:
             energy_use_esto = energy_use_esto.loc[energy_use_esto['Economy'] == ECONOMY_ID].copy()
         return energy_use_esto
@@ -724,7 +723,7 @@ def format_9th_input_energy_from_esto(config, ECONOMY_ID=None, REDO_SAME_DATE_ID
             energy_use_esto.loc[(energy_use_esto['Medium'] == medium) & (energy_use_esto['Fuel'] == fuel), 'Fuel'] = new_fuel_and_medium[0]
             energy_use_esto.loc[(energy_use_esto['Medium'] == medium) & (energy_use_esto['Fuel'] == fuel), 'Medium'] = new_fuel_and_medium[1]
     
-    concordances_fuels = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
+    concordances_fuels = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', '{}'.format(config.model_concordances_file_name_fuels)))
     concordances_fuels = concordances_fuels[['Fuel', 'Medium']].drop_duplicates()
     energy_use_esto_fuel_medium = energy_use_esto[['Fuel', 'Medium']].drop_duplicates()
     #drop nonspecified and pipeline from energy_use_esto_fuel_medium
@@ -762,7 +761,7 @@ def format_9th_input_energy_from_esto(config, ECONOMY_ID=None, REDO_SAME_DATE_ID
     energy_use_esto.rename(columns={'Energy_esto': 'Energy'}, inplace=True)
     
     #save the file to the intermediate_data folder
-    energy_use_esto.to_csv(config.root_dir + '\\' + f'intermediate_data\\model_inputs_{date_id}.csv', index=False)
+    energy_use_esto.to_csv(os.path.join(config.root_dir, f'intermediate_data\\model_inputs_{date_id}.csv'), index=False)
     
     if ECONOMY_ID != None:
         energy_use_esto = energy_use_esto.loc[energy_use_esto['Economy'] == ECONOMY_ID].copy()
@@ -804,7 +803,7 @@ def plot_optimised_results(config, input_data_new_road_copy, new_measures_cols, 
     #and sort by them so 
     fig = px.strip(plotting_df, x='Vehicle Type', y='% change', color='Drive', title=title, facet_col='Transport Type', facet_row='Measure', hover_data=['New', 'Old'])
     #write to html in plotting_output/input_exploration/esto_reestimations
-    fig.write_html(config.root_dir + '\\' + 'plotting_output\\input_exploration\\esto_reestimations\\{}_{}_{}.html'.format(id, economy, title), auto_open=False)
+    fig.write_html(os.path.join(config.root_dir, 'plotting_output\\input_exploration\\esto_reestimations\\{}_{}_{}.html'.format(id, economy, title)), auto_open=False)
     #remember to set input_data_new_road_copy to input_data_new_road once we are happy with the results 
     
 
@@ -842,7 +841,7 @@ def match_optimised_results_to_required_energy_use_exactly(config, input_data_ne
     #calcualte ratio
     input_data_new_road_recalculated_no_vtype_ttype['ratio'] = input_data_new_road_recalculated_no_vtype_ttype['Energy_new']/input_data_new_road_recalculated_no_vtype_ttype['Energy_new_required']#replace nas with 1
     input_data_new_road_recalculated_no_vtype_ttype['ratio'] = input_data_new_road_recalculated_no_vtype_ttype['ratio'].fillna(1)
-    
+
     #identify any infs. it seems that as a result of adding the new function move_electricity_use_in_road_to_rail_esto(config) we started getting infs for phevs because we were removing elec use in road but somewhere along the line (probably in the phev fucntion:replace_zero_elec_phevs()) we set the energy use by phevs to somethign where it shouldnt be anything (because we moved all elec use in road to rail). Anyway, its such a small amount, we will just set the inf to 1 and leave it. but make sureits noted for future reference:
     if len(input_data_new_road_recalculated_no_vtype_ttype.loc[input_data_new_road_recalculated_no_vtype_ttype['ratio'] == np.inf]) > 0:
         if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
@@ -853,7 +852,7 @@ def match_optimised_results_to_required_energy_use_exactly(config, input_data_ne
         else:
             pass
         input_data_new_road_recalculated_no_vtype_ttype['ratio'] = input_data_new_road_recalculated_no_vtype_ttype['ratio'].replace(np.inf, 1)        
-    
+
     #keep only the cols we need
     input_data_new_road_recalculated_no_vtype_ttype = input_data_new_road_recalculated_no_vtype_ttype[['Economy', 'Date', 'Medium', 'Drive', 'Scenario', 'ratio']].copy()
     #merge ratio to input_data_new_road_recalculated
@@ -866,14 +865,14 @@ def match_optimised_results_to_required_energy_use_exactly(config, input_data_ne
     #rename sotkcs to stocks old
     input_data_new_road_recalculated.rename(columns={'Stocks': 'Stocks_old'}, inplace=True)
     input_data_new_road_recalculated['Travel_km'] = input_data_new_road_recalculated['Energy_new'] * input_data_new_road_recalculated['Efficiency']
-    
+
     input_data_new_road_recalculated['Activity'] = input_data_new_road_recalculated['Travel_km'] * input_data_new_road_recalculated['Occupancy_or_load']
 
     input_data_new_road_recalculated['Stocks'] = input_data_new_road_recalculated['Activity'] / (input_data_new_road_recalculated['Mileage'] * input_data_new_road_recalculated['Occupancy_or_load'])
     input_data_new_road_recalculated.rename(columns={'Energy_new': 'Energy'}, inplace=True)
     #drop energy old if ti exists    
     input_data_new_road_recalculated = input_data_new_road_recalculated.drop(columns=['Energy_old'], errors='ignore')
-    
+
     return input_data_new_road_recalculated
 #%%
 #%%

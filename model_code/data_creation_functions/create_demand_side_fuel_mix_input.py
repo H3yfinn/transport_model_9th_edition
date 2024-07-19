@@ -38,18 +38,18 @@ from plotly.subplots import make_subplots
 def create_demand_side_fuel_mixing_input(config, ECONOMY_ID, X_ORDER = 1):
     """Could do with some fixing up but for now it works"""
     #load model concordances for filling in 
-    model_concordances_fuels = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
+    model_concordances_fuels = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'computer_generated_concordances', '{}'.format(config.model_concordances_file_name_fuels)))
     #filter for the Economy id
     model_concordances_fuels = model_concordances_fuels[model_concordances_fuels['Economy'] == ECONOMY_ID]
     #keep only the cols ['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Fuel']
     model_concordances_fuels = model_concordances_fuels[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Fuel']].drop_duplicates()
     
-    mixing_assumptions = pd.read_excel(config.root_dir + '\\' + 'input_data\\fuel_mixing_assumptions.xlsx',sheet_name='demand_side')
+    mixing_assumptions = pd.read_excel(os.path.join(config.root_dir,  'input_data', 'fuel_mixing_assumptions.xlsx'), sheet_name='demand_side')
     #drop comment col
     mixing_assumptions.drop(columns=['Comment'], inplace=True)
     #cols Region	Fuel	New_fuel	Date	Reference	Target
 
-    regions = pd.read_excel(config.root_dir + '\\' + 'input_data\\fuel_mixing_assumptions.xlsx',sheet_name='regions_demand_side')
+    regions = pd.read_excel(os.path.join(config.root_dir,  'input_data', 'fuel_mixing_assumptions.xlsx'), sheet_name='regions_demand_side')
     
     #####################################
     #TEST
@@ -131,11 +131,10 @@ def create_demand_side_fuel_mixing_input(config, ECONOMY_ID, X_ORDER = 1):
     #####################
     #save as user input csv
     
-    demand_side_fuel_mixing.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    plot_user_input_data.plot_demand_side_fuel_mixing(config, demand_side_fuel_mixing,ECONOMY_ID)
+    demand_side_fuel_mixing.to_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', '{}'.format(config.FILE_DATE_ID), '{}_demand_side_fuel_mixing.csv'.format(ECONOMY_ID)), index=False)
+    plot_user_input_data.plot_demand_side_fuel_mixing(config, demand_side_fuel_mixing, ECONOMY_ID)
     
 #%%
 # create_demand_side_fuel_mixing_input(config, '08_JPN')
     
 #%%
-    

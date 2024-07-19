@@ -7,6 +7,7 @@ import os
 import sys
 import re
 #################
+from os.path import join as os_path_join
 from .. import utility_functions
 #################
 
@@ -57,11 +58,3 @@ def check_region(config, df_regions, data_df):
     if len(missing_regions2)>0:
         breakpoint()
         raise ValueError('The following regions are in the df_regions but not in the data_df: {}'.format(missing_regions2))
-    
-
-
-
-
-
-
-

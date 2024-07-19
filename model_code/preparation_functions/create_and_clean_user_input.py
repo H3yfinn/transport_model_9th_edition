@@ -50,16 +50,16 @@ def create_and_clean_user_input(config, ECONOMY_ID, ADVANCE_BASE_YEAR_TO_OUTLOOK
     # #first, prepare user input 
     # #load these files in and concat them
     # user_input = pd.DataFrame()
-    # print(f'There are {len(os.listdir(f"input_data\\user_input_spreadsheets\\{ECONOMY_ID}"))} user input files to import')
-    # for file in os.listdir(config.root_dir + '\\' + f'input_data\\user_input_spreadsheets\\{ECONOMY_ID}'):
+    # print(f'There are {len(os.listdir(os.path.join("input_data", "user_input_spreadsheets", ECONOMY_ID))} user input files to import')
+    # for file in os.listdir(os.path.join(config.root_dir, "input_data", "user_input_spreadsheets", ECONOMY_ID)):
     #     #check its a csv
     #     if file[-4:] != '.csv':
     #         continue
     #     print(f'Importing user input file: {file}')
-    #     user_input = pd.concat([user_input, pd.read_csv(config.root_dir + '\\' +f'input_data\\user_input_spreadsheets\\{ECONOMY_ID}\\{file}')])
+    #     user_input = pd.concat([user_input, pd.read_csv(os.path.join(config.root_dir, "input_data", "user_input_spreadsheets", ECONOMY_ID, file))])
     
     #laod concordances for checking
-    model_concordances_user_input_and_growth_rates = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))#seems we're missing ghompertz hbere?
+    model_concordances_user_input_and_growth_rates = pd.read_csv(os.path.join(config.root_dir, "intermediate_data", "computer_generated_concordances", config.model_concordances_user_input_and_growth_rates_file_name))#seems we're missing ghompertz hbere?
     model_concordances_user_input_and_growth_rates = model_concordances_user_input_and_growth_rates[model_concordances_user_input_and_growth_rates.Economy == ECONOMY_ID]
     #print then remove any measures not in model_concordances_user_input_and_growth_rates
     if len(user_input[~user_input.Measure.isin(model_concordances_user_input_and_growth_rates.Measure)]) >0:
@@ -170,7 +170,7 @@ def create_and_clean_user_input(config, ECONOMY_ID, ADVANCE_BASE_YEAR_TO_OUTLOOK
             #identify the rows where there are still nas in the Value col:
             user_input_new_nas = user_input_new[user_input_new.Value.isna()]
             #save them to csv
-            user_input_new_nas.to_csv(config.root_dir + '\\' + 'intermediate_data\\errors\\user_input_new_nas.csv', index=False)
+            user_input_new_nas.to_csv(os.path.join(config.root_dir, "intermediate_data", "errors", "user_input_new_nas.csv"), index=False)
             raise ValueError('There are still some rows where Value is NA. Please check this.')
         # #there will be soe cases where there are still nas because there are nas for every year in the group of config.INDEX_COLS_no_date. We will check for these cases and separate them for analysis. THen identify any extra cases where there are still nas in the Value col. these are problematic and we will raise an error
         # user_input_new_groups_with_all_nas = user_input_new.groupby(config.INDEX_COLS_no_date).apply(lambda group: group.isna().all()).reset_index()
@@ -189,17 +189,17 @@ def create_and_clean_user_input(config, ECONOMY_ID, ADVANCE_BASE_YEAR_TO_OUTLOOK
     #     file_date = datetime.datetime.now().strftime("%Y%m%d")
     #     FILE_DATE_ID_x = '_{}'.format(file_date)
     #     #save the original user_input_spreadsheet to the archive with the File date
-    #     shutil.copy('input_data\\user_input_spreadsheet.xlsx', 'input_data\\archive\\user_input_spreadsheet{}.xlsx'.format(FILE_DATE_ID_x))
+    #     shutil.copy(os.path.join('input_data', 'user_input_spreadsheet.xlsx'), os.path.join('input_data', 'archive', 'user_input_spreadsheet{}.xlsx'.format(FILE_DATE_ID_x)))
     #     #remove the original user_input_spreadsheet
-    #     os.remove('input_data\\user_input_spreadsheet.xlsx')
-    #     with pd.ExcelWriter('input_data\\user_input_spreadsheet.xlsx') as writer:
+    #     os.remove(os.path.join('input_data', 'user_input_spreadsheet.xlsx'))
+    #     with pd.ExcelWriter(os.path.join('input_data', 'user_input_spreadsheet.xlsx')) as writer:
     #         for sheet in user_input_new.Measure.unique():
     #             print('Saving user input sheet: {}'.format(sheet))
     #             sheet_data = user_input_new[user_input_new.Measure == sheet]
     #             sheet_data.to_excel(writer, sheet_name=sheet, index=False)
     
     #the  data is probably missing data for the years previous to OUTLOOK_BASE_YEAR. Where this is the case we will fill in the missing data with the earliest available value.
-    ECONOMY_BASE_YEARS_DICT = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMY_BASE_YEARS_DICT']
+    ECONOMY_BASE_YEARS_DICT = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['ECONOMY_BASE_YEARS_DICT']
     for economy in ECONOMY_BASE_YEARS_DICT.keys():
         economy_df = user_input_new[user_input_new.Economy == economy]
         if len(economy_df) == 0:
@@ -219,17 +219,17 @@ def create_and_clean_user_input(config, ECONOMY_ID, ADVANCE_BASE_YEAR_TO_OUTLOOK
         user_input_new = pd.concat([user_input_new, economy_df])
         
     #save the new_user_inputs
-    user_input_new.to_csv(config.root_dir + '\\' +f'intermediate_data\\model_inputs\\{ECONOMY_ID}_user_inputs_and_growth_rates.csv', index=False)
+    user_input_new.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', '{}_user_inputs_and_growth_rates.csv'.format(ECONOMY_ID)), index=False)
 
 
 def extract_economy_data_from_user_input_spreadsheets(config, ECONOMY_ID):
     #spreadhsheets that are in input_data/user_input_spreadsheets contain all economies to make it easier to edit them all in one go. we will extract the economy specific data for use in the model    
     user_input_all = pd.DataFrame()
-    for file in os.listdir(config.root_dir + '\\' + f'input_data\\user_input_spreadsheets\\'):
+    for file in os.listdir(os.path.join(config.root_dir, 'input_data', 'user_input_spreadsheets')):
         #check its a csv
         if file[-4:] != '.csv':
             continue
-        user_input = pd.read_csv(config.root_dir + '\\' +f'input_data\\user_input_spreadsheets\\{file}')
+        user_input = pd.read_csv(os.path.join(config.root_dir, 'input_data', 'user_input_spreadsheets', file))
         #if there is a comment col, drop it
         if 'Comment' in user_input.columns:
             user_input.drop('Comment', axis=1, inplace=True)
@@ -250,7 +250,7 @@ def extract_economy_data_from_user_input_spreadsheets(config, ECONOMY_ID):
             # user_input.drop_duplicates(inplace=True)
             # user_input.to_csv(f'input_data\\user_input_spreadsheets\\{file}', index=False)
             
-        model_concordances_user_input_and_growth_rates_original= pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_user_input_and_growth_rates_file_name))
+        model_concordances_user_input_and_growth_rates_original= pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_user_input_and_growth_rates_file_name))
         user_input = user_input[user_input.Economy == ECONOMY_ID]
         #if any cols are missing from user input then deal with them:
         missing_cols = [col for col in config.INDEX_COLS if col not in user_input.columns]

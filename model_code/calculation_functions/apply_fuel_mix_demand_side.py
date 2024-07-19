@@ -36,13 +36,13 @@ def apply_fuel_mix_demand_side(config, model_output_all, ECONOMY_ID, demand_side
     model_output= model_output_all.copy()
     if demand_side_fuel_mixing is None:
         #note that these may have a lot of years filtered out becuase of how model strucutre works.
-        demand_side_fuel_mixing = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_aggregated_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+        demand_side_fuel_mixing = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', config.FILE_DATE_ID, '{}_aggregated_demand_side_fuel_mixing.csv'.format(ECONOMY_ID)))
     if supply_side_fuel_mixing is None:
-        supply_side_fuel_mixing =  pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID))
+        supply_side_fuel_mixing =  pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', config.FILE_DATE_ID, '{}_supply_side_fuel_mixing.csv'.format(ECONOMY_ID)))
     supply_side_fuel_mixing_fuels = supply_side_fuel_mixing['New_fuel'].unique().tolist()
     
     #load model concordances with fuels
-    model_concordances_fuels = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
+    model_concordances_fuels = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'computer_generated_concordances', '{}'.format(config.model_concordances_file_name_fuels)))
     model_concordances_fuels = model_concordances_fuels[model_concordances_fuels['Economy'] == ECONOMY_ID]
     
     #drop supply_side_fuel_mixing_fuels from model_concordances_fuels
@@ -74,7 +74,7 @@ def apply_fuel_mix_demand_side(config, model_output_all, ECONOMY_ID, demand_side
     
     return model_output_with_fuel_mixing
     # #save data
-    # new_df_with_fuels.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_output_with_fuels\\1_demand_side\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    # new_df_with_fuels.to_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_output_with_fuels', '1_demand_side', '{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
 
     
 #%%

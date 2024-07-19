@@ -7,8 +7,11 @@ from . import utility_functions
 
 class Config:
     def __init__(self, root_dir):
+        if os.name == 'nt':
+            self.slash = '\\'
+        else:
+            self.slash = '/'
         self.root_dir = root_dir
-        # Frequently changed config variables
         self.USE_LATEST_OUTPUT_DATE_ID = True
         self.NEW_SALES_SHARES = True
         self.NEW_FUEL_MIXING_DATA = True
@@ -18,10 +21,8 @@ class Config:
         self.PRINT_LESS_IMPORTANT_DETAILS = False
         self.PRINT_WARNINGS_FOR_FUTURE_WORK = False
 
-        # Libraries
         self._import_libraries()
 
-        # Important modelling variables
         self.DEFAULT_BASE_YEAR = 2017
         self.OUTLOOK_BASE_YEAR = 2021
         self.END_YEAR = 2100
@@ -35,12 +36,11 @@ class Config:
         self.INDEX_COLS_NO_MEASURE.remove('Unit')
         self.FILE_DATE_ID = self._set_FILE_DATE_ID(root_dir)
 
-        # Scenarios and Measures
-        self.SCENARIOS_LIST_file_path = 'config\\concordances_and_config_data\\scenarios_list.csv'
+        self.SCENARIOS_LIST_file_path = os.path.join('config', 'concordances_and_config_data', 'scenarios_list.csv')
         self.SCENARIOS_LIST = ['Reference', 'Target']
         self.SCENARIO_OF_INTEREST = 'Reference'
 
-        self.user_input_measures_list_ROAD = ['Vehicle_sales_share', 'New_vehicle_efficiency_growth', 'Occupancy_or_load_growth', 'Mileage_growth', 'Gompertz_gamma', 'Activity_efficiency_improvement']
+        self.user_input_measures_list_ROAD = ['Vehicle_sales_share', 'New_vehicle_efficiency_growth', 'Occupancy_or_load_growth', 'Mileage_growth', 'Stocks_per_capita', 'Activity_efficiency_improvement']
         self.user_input_measures_list_NON_ROAD = ['Vehicle_sales_share', 'Non_road_intensity_improvement']
         self.base_year_measures_list_ROAD = ['Activity', 'Energy', 'Stocks', 'Occupancy_or_load', 'New_vehicle_efficiency', 'Efficiency', 'Mileage', 'Average_age']
         self.base_year_measures_list_NON_ROAD = ['Activity', 'Energy', 'Intensity', 'Average_age']
@@ -51,10 +51,9 @@ class Config:
 
         self.NON_ROAD_MODEL_OUTPUT_COLS = ['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Activity', 'Average_age', 'Age_distribution', 'Energy', 'Intensity', 'Non_road_intensity_improvement', 'Surplus_stocks', 'Stocks', 'Vehicle_sales_share', 'Population', 'Gdp', 'Gdp_per_capita', 'Turnover_rate', 'Activity_per_Stock', 'Activity_growth', 'Stock_turnover', 'New_stocks_needed']
 
-        self.FACTOR_MEASURES = ['Gompertz_gamma', 'Intensity', 'Average_age', 'Turnover_rate', 'Activity_per_Stock', 'Efficiency', 'Mileage', 'Occupancy_or_load', 'New_vehicle_efficiency', 'Age_distribution', 'Intensity']
+        self.FACTOR_MEASURES = ['Stocks_per_capita', 'Intensity', 'Average_age', 'Turnover_rate', 'Activity_per_Stock', 'Efficiency', 'Mileage', 'Occupancy_or_load', 'New_vehicle_efficiency', 'Age_distribution', 'Intensity']
         self.GROWTH_MEASURES = ['Occupancy_or_load_growth', 'Mileage_growth', 'Activity_growth', 'Activity_efficiency_improvement', 'Non_road_intensity_improvement', 'New_vehicle_efficiency_growth']
 
-        # Data paths and files
         self.measure_to_unit_concordance = self._load_concordance_file('measure_to_unit_concordance.csv', root_dir)
         self.measure_to_unit_concordance_dict = self.measure_to_unit_concordance.set_index('Measure')['Magnitude_adjusted_unit'].to_dict()
         self.transport_categories = self._load_concordance_file('manually_defined_transport_categories.csv', root_dir)
@@ -65,11 +64,9 @@ class Config:
         self.economy_regions_path = self._construct_path('region_economy_mapping.csv', root_dir)
         self.ECONOMY_REGIONS = pd.read_csv(self.economy_regions_path)
 
-        # Graphing tools
         self.PLOTLY_COLORS_LIST = px.colors.qualitative.Plotly
         self.AUTO_OPEN_PLOTLY_GRAPHS = False
 
-        # Concordances file names
         self.model_concordances_version = self.FILE_DATE_ID
         self.model_concordances_file_name = 'model_concordances_{}.csv'.format(self.model_concordances_version)
         self.model_concordances_file_name_fuels = 'model_concordances_fuels_{}.csv'.format(self.model_concordances_version)
@@ -79,13 +76,10 @@ class Config:
         self.model_concordances_supply_side_fuel_mixing_file_name = 'model_concordances_{}_supply_side_fuel_mixing.csv'.format(self.model_concordances_version)
         self.model_concordances_demand_side_fuel_mixing_file_name = 'model_concordances_{}_demand_side_fuel_mixing.csv'.format(self.model_concordances_version)
 
-        # Economy-Scenario Concordance
         self.economy_scenario_concordance = self._create_economy_scenario_concordance()
 
-        # Ensure important folders exist
         self._check_folders(root_dir)
-            
-        # Mappings and concordances
+
         self.medium_mapping = {
             'air': '15_01_domestic_air_transport', 'road': '15_02_road', 'rail': '15_03_rail', 'ship': '15_04_domestic_navigation', 'pipeline':'15_05_pipeline_transport', 'nonspecified': '15_06_nonspecified_transport', 'international_shipping':'04_international_marine_bunkers', 'international_aviation':'05_international_aviation_bunkers'
         }
@@ -145,8 +139,7 @@ class Config:
             '15_02_01_05_06_plugin_hybrid_ev_diesel': 'phev_d',  
             '15_02_01_05_07_liquified_petroleum_gas': 'lpg', 
             '15_02_01_05_08_fuel_cell_ev': 'fcev',
-
-            '15_02_02_01_01_diesel_engine': 'ice_d', 
+'15_02_02_01_01_diesel_engine': 'ice_d', 
             '15_02_02_01_02_gasoline_engine': 'ice_g', 
             '15_02_02_01_03_battery_ev': 'bev', 
             '15_02_02_01_04_compressed_natual_gas': 'cng', 
@@ -275,7 +268,7 @@ class Config:
     
     def _set_FILE_DATE_ID(self, root_dir):    
         if self.USE_LATEST_OUTPUT_DATE_ID:
-            data_folder_path = self.root_dir + '\\output_data\\model_output\\'
+            data_folder_path = os.path.join(root_dir, 'output_data', 'model_output')
             file_name = 'model_output'
             FILE_DATE_ID = utility_functions.get_latest_date_for_data_file(data_folder_path, file_name)
             if FILE_DATE_ID is None:
@@ -285,11 +278,11 @@ class Config:
         return FILE_DATE_ID
         
     def _load_concordance_file(self, file_name, root_dir):
-        file_path = os.path.join(root_dir, 'config\\concordances_and_config_data', file_name)
+        file_path = os.path.join(root_dir, 'config', 'concordances_and_config_data', file_name)
         return pd.read_csv(file_path)
 
     def _construct_path(self, file_name, root_dir):
-        return os.path.join(root_dir, 'config\\concordances_and_config_data', file_name)
+        return os.path.join(root_dir, 'config', 'concordances_and_config_data', file_name)
 
     def _create_economy_scenario_concordance(self):
         economy_scenario_concordance = pd.DataFrame(columns=['Economy', 'Scenario'])
@@ -299,7 +292,7 @@ class Config:
         return economy_scenario_concordance
 
     def _check_folders(self, root_dir):
-        model_inputs_path = os.path.join(root_dir, "intermediate_data\\model_inputs\\{}".format(self.FILE_DATE_ID))
+        model_inputs_path = os.path.join(root_dir, "intermediate_data", "model_inputs", self.FILE_DATE_ID)
         if not os.path.exists(model_inputs_path):
             os.makedirs(model_inputs_path)
 
@@ -309,35 +302,7 @@ class Config:
                 setattr(self, key, value)
             else:
                 raise AttributeError(f"{key} is not a valid attribute of Config")
-    
-        
-    # def get_latest_date_for_data_file(self, data_folder_path, file_name_start, file_name_end=None, EXCLUDE_DATE_STR_START=False):
-    #     #note this is a copy of same function in utility_functions.py
-    #     """Note that if file_name_end is not specified then it will just take the first file that matches the file_name_start, eben if that matches the end if the file name as well. This is because the file_name_end is not always needed, and this cahnge was made post hoc, so we want to keep the old functionality.
-
-    #     Args:
-    #         data_folder_path (_type_): _description_
-    #         file_name_start (_type_): _description_
-    #         file_name_end (_type_, optional): _description_. Defaults to None.
-    #         EXCLUDE_DATE_STR_START if true, if there is DATE at th start of a file_date_id dont treat it as a date. Defaults to False.
-
-    #     Returns:
-    #         _type_: _description_
-    #     """
-    #     regex_pattern_date = r'\d{8}'
-    #     if EXCLUDE_DATE_STR_START:
-    #         regex_pattern_date = r'(?<!DATE)\d{8}'
-        
-    #     #get list of all files in the data folder
-    #     all_files = os.listdir(data_folder_path)
-    #     #filter for only the files with the correct file extension
-    #     if file_name_end is None:
-    #         all_files = [file for file in all_files if file_name_start in file]
-    #     else:
-    #         all_files = [file for file in all_files if file_name_start in file and file_name_end in file]
-    #     #drop any files with no date in the name
-    #     all_files = [file for file in all_files if re.search(regex_pattern_date, file)]
-    #     #get the date from the file name
+#     #get the date from the file name
     #     all_files = [re.search(regex_pattern_date, file).group() for file in all_files]
     #     #convert the dates to datetime objects
     #     all_files = [datetime.datetime.strptime(date, '%Y%m%d') for date in all_files]

@@ -22,6 +22,7 @@ import plotly.io as pio
 import plotly.graph_objects as go
 import matplotlib
 import matplotlib.pyplot as plt
+import glob
 from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 from scipy.optimize import minimize
@@ -70,7 +71,7 @@ def run_road_model_for_year_y(config, year, previous_year_main_dataframe, main_d
         #recalcualte activity using this new value for mileage, as if it was the previous year, when covid was having an effect on activity (specifically mileage). this is jsut to prevent comaprisons between growth*activity and calcaulkted activity form breaking
         change_dataframe['Activity'] = change_dataframe['Mileage'] * change_dataframe['Occupancy_or_load'] * change_dataframe['Stocks']
         
-    # LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED']
+    # LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = yaml.load(open(config.root_dir + config.slash + os.path.join('config', 'parameters.yml')), Loader=yaml.FullLoader)['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED']
     # EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID_PASSENGER
 
     # year_after_covid = max(config.LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED[economy])+1
@@ -104,11 +105,10 @@ def run_road_model_for_year_y(config, year, previous_year_main_dataframe, main_d
     #basedon the sceanrio we need to change the midpoint. so we will split df into scnearios, calcalte turnover rate, then join back together
     for scenario in change_dataframe['Scenario'].unique():
         scenario_df = change_dataframe.loc[change_dataframe['Scenario'] == scenario].copy()
-    
         if scenario == 'Reference':
-            turnover_rate_midpoint_mult_adjustment_road = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_REFERENCE']
+            turnover_rate_midpoint_mult_adjustment_road = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_REFERENCE']
         elif scenario == 'Target':
-            turnover_rate_midpoint_mult_adjustment_road = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET']
+            turnover_rate_midpoint_mult_adjustment_road = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET']
         else:
             raise ValueError('Scenario not recognised')
         
@@ -245,7 +245,7 @@ def run_road_model_for_year_y(config, year, previous_year_main_dataframe, main_d
             #CALCUALTE AVERAGE AGE OF STOCKS
             change_dataframe_t = recalculate_age_distribution(config, change_dataframe_t)
             #TODO adjust efficiency by x percent to simulate aging of all vehicles by 1 year (the result would be a log eff curve based on age of vehicles)
-            YEARLY_EFFICIENCY_DEGRADATION_RATE = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['YEARLY_EFFICIENCY_DEGRADATION_RATE'][economy]
+            YEARLY_EFFICIENCY_DEGRADATION_RATE = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['YEARLY_EFFICIENCY_DEGRADATION_RATE'][economy]
             
             change_dataframe_t['Efficiency'] = change_dataframe_t['Efficiency'] * (1-YEARLY_EFFICIENCY_DEGRADATION_RATE)
             #check for any types of stocks that have stopped being used
@@ -316,7 +316,7 @@ def run_road_model_for_year_y(config, year, previous_year_main_dataframe, main_d
         year_counter = year - config.DEFAULT_BASE_YEAR
         if year_counter % 10 == 0:
             print('The year is at the end of a ten year block, in year {}, saving interemediate results to csv.'.format(year))
-            low_ram_file_name = 'intermediate_data\\main_dataframe_10_year_blocks\\main_dataframe_years_{}_to_{}.csv'.format(previous_10_year_block, year)
+            low_ram_file_name = os.path.join('intermediate_data', 'main_dataframe_10_year_blocks', 'main_dataframe_years_{}_to_{}.csv'.format(previous_10_year_block, year))
             main_dataframe.to_csv(low_ram_file_name, index=False)
             low_ram_computer_files_list.append(low_ram_file_name)
 
@@ -325,130 +325,11 @@ def run_road_model_for_year_y(config, year, previous_year_main_dataframe, main_d
 
         elif year == config.END_YEAR:
             print('The year is at the end of the simulation, saving intermediate results to csv.')
-            low_ram_file_name = 'intermediate_data\\main_dataframe_10_year_blocks\\main_dataframe_years_{}_to_{}.csv'.format(previous_10_year_block, year)
+            low_ram_file_name = os.path.join('intermediate_data', 'main_dataframe_10_year_blocks', 'main_dataframe_years_{}_to_{}.csv'.format(previous_10_year_block, year))
             main_dataframe.to_csv(low_ram_file_name, index=False)
             low_ram_computer_files_list.append(low_ram_file_name)
             
     return main_dataframe,previous_year_main_dataframe, low_ram_computer_files_list, change_dataframe_aggregation,  previous_10_year_block
-
-
-# def adjust_mileage_to_account_for_covid(config, economy, change_dataframe, main_dataframe, transport_type, current_year):
-#     """Revert the decrease in mileage due to covid.
-    
-#     Raises:
-#         ValueError: _description_
-#     """
-            
-#     if transport_type =='passenger':
-            
-#         LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIEDPASSENGER']
-
-#         EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID_PASSENGER']
-#         #There could be a number of years over which the decrease will be reverted, for which we will spread the increase over.
-#         N = EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID[economy]
-        
-#         years_after_covid = [max(LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED[economy]) + i + 1 for i in range(N)]
-        
-#         #load ECONOMIES_WITH_STOCKS_PER_CAPITA_REACHED from parameters.yml
-#         EXPECTED_ENERGY_DECREASE_FROM_COVID = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER']
-#         X = EXPECTED_ENERGY_DECREASE_FROM_COVID[economy]
-        
-#     elif transport_type =='freight':
-        
-#         LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIEDFREIGHT']
-
-#         EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID_FREIGHT']
-#         #There could be a number of years over which the decrease will be reverted, for which we will spread the increase over.
-#         N = EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID[economy]
-        
-#         years_after_covid = [max(LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED[economy]) + i + 1 for i in range(N)]
-        
-#         #load ECONOMIES_WITH_STOCKS_PER_CAPITA_REACHED from parameters.yml
-#         EXPECTED_ENERGY_DECREASE_FROM_COVID = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT']
-#         X = EXPECTED_ENERGY_DECREASE_FROM_COVID[economy]
-    
-#     if current_year in years_after_covid:
-#         #INTERPOLATE (i.e. find the expected decrease if it occured all at once, then draw a line from that point to the current point, and find the point on that line that is N years away from the current point. This is the point that we will revert the decrease to)
-#         year_index = sorted(years_after_covid).index(current_year)
-#         # Calculate the recovery factor for the current year
-#         recovery_factor = (year_index / len(years_after_covid)) 
-#         # # Calculate expected mileage for the current year as if recovering linearly from the decrease
-#         initial_mileage = main_dataframe.loc[(main_dataframe['Transport Type'] == transport_type) & (main_dataframe['Date'] == max(LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED[economy]))].copy()
-#         initial_mileage['final_mileage'] = initial_mileage['Mileage'] * (1 - X)
-#         # EXPECTED_ENERGY_DECREASE_FROM_COVID
-#         initial_mileage['Mileage'] = initial_mileage['final_mileage'] + (initial_mileage['Mileage'] - initial_mileage['final_mileage']) * recovery_factor
-#         # merge the calculated mileage
-#         change_dataframe = change_dataframe.merge(initial_mileage[['Economy', 'Scenario', 'Drive', 'Vehicle Type', 'Transport Type', 'Date', 'Mileage']], on=['Economy', 'Scenario', 'Drive', 'Vehicle Type', 'Transport Type', 'Date'], how='left', suffixes=('_old', ''))
-        
-#         breakpoint()
-#         change_dataframe.drop(columns=['Mileage_old'], inplace=True)
-        
-#         #recalcualte activity using this new value for mileage, as if it was the previous year, when covid was having an effect on activity (specifically mileage). this is jsut to prevent comaprisons between growth*activity and calcaulkted activity form breaking
-#         change_dataframe['Activity'] = change_dataframe['Mileage'] * change_dataframe['Occupancy_or_load'] * change_dataframe['Stocks']
-#     return change_dataframe
-
-
-# def adjust_mileage_to_account_for_covid(config, economy, dataframe, transport_type, current_year, measure_column = 'Mileage'):
-#     """
-#     Intention:
-#     create a fucntion that can calcualte what the mileage should be in the current year, if the year is within one of the covid years or one of the years during which mileage was returning to normal. This is assuming that normal mileage is the miealge in the input data to this function, which reflects mileage during the year before covid or one of the years after everythign has returned to normal.
-    
-#     So we will check if config.OUTLOOK_BASE_YEAR <= last_covid_year +EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID: 
-#     if current year is <= last_covid_year, adjust the mielage by EXPECTED_ENERGY_DECREASE_FROM_COVID.
-#     if current year is > last_covid_year, but <= last_covid_year +EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID then we will adjust the mileage by the expected increase in mileage after covid, which is spread over the number of years that we expect it to take to return to normal. This will use cumulative growth to work out what the annual growth rate should be in the current year to achieve the expected increase in mileage after covid.
-#     if current year is > last_covid_year +EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID, then we will not use this function, as the mileage in the input data is already set to what it should be in a year after covid.
-    
-#     Note that this function is intended to be used for multiple scripts/fucntions, for exmaple in calcualting mileage in the 'code\\calculation_functions\\optimise_to_calculate_base_data.py' file, as well as the road and non-road model scripts. 
-    
-#     Args:
-#         economy: The economy for which to revert mileage decreases.
-#         change_dataframe: DataFrame with changes to apply.
-#         main_dataframe: Main DataFrame containing mileage data.
-#         transport_type: Type of transport, 'passenger' or 'freight'.
-#         current_year: The current year being processed.
-#         measure_column: this can be changed so that for exmaple in non road we can set it to acitivty, and then we can use this function to adjust activity to account for covid, producing the same effect as adjusting mileage to account for covid.
-
-#     Raises:
-#         ValueError: If the transport type is not recognized.
-#     """
-#     # Load configuration parameters
-#     parameters = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)
-#     if transport_type == 'passenger':
-#         LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = parameters['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_PASSENGER']
-#         EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID = parameters['EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID_PASSENGER']
-#         EXPECTED_ENERGY_DECREASE_FROM_COVID = parameters['EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER']
-#         last_covid_year = max(parameters['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIEDPASSENGER'][economy])
-#         EXPECTED_RETURN_TO_NORMAL_MILEAGE_FROM_COVID = parameters['EXPECTED_RETURN_TO_NORMAL_MILEAGE_FROM_COVID_PASSENGER']
-#     elif transport_type == 'freight':
-#         LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = parameters['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIEDFREIGHT']
-#         EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID = parameters['EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID_FREIGHT']
-#         EXPECTED_ENERGY_DECREASE_FROM_COVID = parameters['EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT']
-#         last_covid_year = max(parameters['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_FREIGHT'][economy])
-#         EXPECTED_RETURN_TO_NORMAL_MILEAGE_FROM_COVID = parameters['EXPECTED_RETURN_TO_NORMAL_MILEAGE_FROM_COVID_FREIGHT']
-#     else:
-#         raise ValueError("Transport type must be 'passenger' or 'freight'.")
-
-#     # find the number of years and the reduction factor
-#     N = EXPECTED_YEARS_TO_RETURN_TO_NORMAL_MILEAGE_FROM_COVID[economy]
-#     X = EXPECTED_ENERGY_DECREASE_FROM_COVID[economy]
-#     A = EXPECTED_RETURN_TO_NORMAL_MILEAGE_FROM_COVID[economy]
-#     years_after_covid = [max(LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED[economy]) + i + 1 for i in range(N)]
-    
-#     #if the year is in the list of years after covid, then we just need to apply the yearly_increase to the current mileage (which is the year before's mileage). If the year is not in the list of years after covid, then we dont need to do anything.
-#     if current_year in years_after_covid:
-#         EXPECTED_ENERGY_INCREASE_FACTOR =((((1/(1-X)) -1)* A)+1)
-#         #this is the factor by which we need to increase the mileage to get it back to normal. its just reversing the %decrease that was applied to the mileage to get it to the current level.
-#         #spread the increase over the number of years by finding its Nth root and applying it to the current mileage for this year.
-#         yearly_increase = (EXPECTED_ENERGY_INCREASE_FACTOR ** (1/N))
-#         #apply the increase to the mileage
-#         dataframe.loc[(dataframe['Economy'] == economy) & (dataframe['Transport Type'] == transport_type), measure_column] *= yearly_increase
-#     elif current_year > max(years_after_covid):
-#         pass
-#     elif current_year <= last_covid_year:
-#         #apply the decrease to the mileage
-#         dataframe.loc[(dataframe['Economy'] == economy) & (dataframe['Transport Type'] == transport_type), measure_column]  * (1-X)
-#     return dataframe
-        
 
 def adjust_mileage_to_account_for_covid(config, economy, dataframe, transport_type, current_year, measure_column = 'Activity'):
     """    
@@ -479,7 +360,7 @@ def adjust_mileage_to_account_for_covid(config, economy, dataframe, transport_ty
     """
         
     # Load configuration parameters
-    parameters = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)
+    parameters = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)
     
     for medium in dataframe.Medium.unique():
         # Construct the suffix for parameter keys based on transport type and medium
@@ -560,7 +441,7 @@ def prepare_road_model_inputs(config, road_model_input, ECONOMY_ID, low_ram_comp
     
     #GOMPERTZ PARAMETERS ARE USED TO SET A LIMIT ON STOCKS PER CPITA. WE NEED TO LOAD THEM IN HERE AND MERGE THEM ONTO THE MAIN DATAFRAME.      
     # We also need to set them to be non nan for the base year, as the base year has its values for inputs set to nan.
-    gompertz_parameters = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_stocks_per_capita_threshold.csv'.format(config.FILE_DATE_ID,ECONOMY_ID))
+    gompertz_parameters = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', config.FILE_DATE_ID, '{}_stocks_per_capita_threshold.csv'.format(ECONOMY_ID)))
     #filter for economy id only:
     gompertz_parameters = gompertz_parameters[gompertz_parameters['Economy']==ECONOMY_ID].copy()
     base_year = road_model_input.Date.min()
@@ -593,7 +474,7 @@ def prepare_road_model_inputs(config, road_model_input, ECONOMY_ID, low_ram_comp
         previous_10_year_block = road_model_input.Date.min()
         low_ram_computer_files_list = []
         #remove files from main_dataframe_10_year_blocks for previous runs
-        for file in glob.glob(os.path.join(config.root_dir + '\\' + 'intermediate_data\\main_dataframe_10_year_blocks\\', '*.csv')):
+        for file in glob.glob(os.path.join(config.root_dir,  'intermediate_data', 'main_dataframe_10_year_blocks', '*.csv')):
             os.remove(file)
     else:
         previous_10_year_block = None
@@ -605,10 +486,10 @@ def prepare_road_model_inputs(config, road_model_input, ECONOMY_ID, low_ram_comp
 
 def join_and_save_road_model_outputs(config, ECONOMY_ID, main_dataframe, low_ram_computer, low_ram_computer_files_list, change_dataframe_aggregation, first_model_run_bool):
     if first_model_run_bool:
-        new_output_file = config.root_dir + '\\' + 'intermediate_data\\road_model\\first_run_{}_{}'.format(ECONOMY_ID, config.model_output_file_name)
+        new_output_file = os.path.join(config.root_dir,  'intermediate_data', 'road_model', 'first_run_{}_{}'.format(ECONOMY_ID, config.model_output_file_name))
     else:
         #this will be the name of the output file
-        new_output_file = config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name)
+        new_output_file = os.path.join(config.root_dir,  'intermediate_data', 'road_model', '{}_{}'.format(ECONOMY_ID, config.model_output_file_name))
 
     #now, we will save the main dataframe to a csv file. if the computer is low ram, we will create the file from the already saved 10 year block interval files
     if low_ram_computer == True:
@@ -636,7 +517,7 @@ def join_and_save_road_model_outputs(config, ECONOMY_ID, main_dataframe, low_ram
 
 
     #save dataframe
-    change_dataframe_aggregation.to_csv(config.root_dir + '\\' + f'intermediate_data\\road_model\\change_dataframe_aggregation_{ECONOMY_ID}.csv', index=False)
+    change_dataframe_aggregation.to_csv(os.path.join(config.root_dir,  f'intermediate_data', 'road_model', f'change_dataframe_aggregation_{ECONOMY_ID}.csv'), index=False)
 
     return main_dataframe
 

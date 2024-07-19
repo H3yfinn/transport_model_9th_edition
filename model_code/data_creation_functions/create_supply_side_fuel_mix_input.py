@@ -1,4 +1,3 @@
-
 #this will apply any fuel mixing on the supply side. This is currently only biofuel mixing to petroleum products but could include other fuel types in the future
 
 #this will merge a fuel sharing dataframe onto the model output, by the fuel column, and apply the shares by doing that. There will be a new fuel column after this
@@ -36,16 +35,16 @@ from plotly.subplots import make_subplots
 def create_supply_side_fuel_mixing_input(config, ECONOMY_ID, X_ORDER='linear', AUTO_OPEN=False, PLOT=False):
             
     #load model concordances with fuels
-    model_concordances_fuels = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\computer_generated_concordances\\{}'.format(config.model_concordances_file_name_fuels))
+    model_concordances_fuels = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_file_name_fuels))
     #filter for the Economy id
     model_concordances_fuels = model_concordances_fuels[model_concordances_fuels['Economy'] == ECONOMY_ID]
     
-    mixing_assumptions = pd.read_excel(config.root_dir + '\\' + 'input_data\\fuel_mixing_assumptions.xlsx',sheet_name='supply_side')
+    mixing_assumptions = pd.read_excel(os.path.join(config.root_dir, 'input_data', 'fuel_mixing_assumptions.xlsx'), sheet_name='supply_side')
     #drop comment col
     mixing_assumptions.drop(columns=['Comment'], inplace=True)
     #cols Region	Fuel	New_fuel	Date	Reference	Target
 
-    regions = pd.read_excel(config.root_dir + '\\' + 'input_data\\fuel_mixing_assumptions.xlsx',sheet_name='regions')
+    regions = pd.read_excel(os.path.join(config.root_dir, 'input_data', 'fuel_mixing_assumptions.xlsx'), sheet_name='regions')
 
     #####################################
     #TEST
@@ -173,10 +172,10 @@ def create_supply_side_fuel_mixing_input(config, ECONOMY_ID, X_ORDER='linear', A
     archiving_folder = archiving_scripts.create_archiving_folder_for_FILE_DATE_ID(config)
     
     #save the variables we used to calculate the data by savinbg the 'input_data\\vehicle_sales_share_inputs.xlsx' file
-    shutil.copy(config.root_dir + '\\' +  'input_data\\fuel_mixing_assumptions.xlsx', archiving_folder + '\\fuel_mixing_assumptions.xlsx')
+    shutil.copy(os.path.join(config.root_dir, 'input_data', 'fuel_mixing_assumptions.xlsx'), os.path.join(archiving_folder, 'fuel_mixing_assumptions.xlsx'))
 
     #save as user input csv
-    supply_side_fuel_mixing.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    supply_side_fuel_mixing.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', config.FILE_DATE_ID, '{}_supply_side_fuel_mixing.csv'.format(ECONOMY_ID)), index=False)
 
     if PLOT:
         plotting_functions.plot_user_input_data.plot_supply_side_fuel_mixing(config, supply_side_fuel_mixing,ECONOMY_ID, AUTO_OPEN=AUTO_OPEN)

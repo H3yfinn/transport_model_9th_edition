@@ -10,6 +10,7 @@ import os
 import sys
 import re
 #################
+from os.path import join
 from .. import utility_functions
 from .. import plotting_functions
 from . import road_model_functions
@@ -86,12 +87,12 @@ def calculate_inputs_for_model(config, road_model_input_wide, non_road_model_inp
         #use teh funcitons in adjust_data_to_match_esto.py to adjust the energy use to match the esto data in the MODEL_BASE_YEAR. To do this we will have needed to run the model up ot htat year already, and saved the results. We will then use the results to adjust the energy use to match the esto data. This is so that we can make sure that stocks, mileage and efficiency are still relatively close to their previous estiamtes while energy use is equal to the esto data. Currently this is done with optimisation in the optimise_to_calcualte_base_data.py file.
         
         # #save non_road_model_input_wide
-        # non_road_model_input_wide.to_csv(config.root_dir + '\\' + '1_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+        # non_road_model_input_wide.to_csv(config.root_dir + config.slash + '1_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
         
         road_model_input_wide, non_road_model_input_wide, supply_side_fuel_mixing = adjust_data_to_match_esto.adjust_data_to_match_esto_handler(config, BASE_YEAR, ECONOMY_ID, road_model_input_wide,non_road_model_input_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, TESTING=adjust_data_to_match_esto_TESTING, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS)
         
         #save non_road_model_input_wide
-        # non_road_model_input_wide.to_csv(config.root_dir + '\\' + '2_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+        # non_road_model_input_wide.to_csv(config.root_dir + config.slash + '2_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
         
     #set New_vehicle_efficiency now, since it may have been affected by efficie4ncy adjsutments in adjust_data_to_match_esto.py
     road_model_input_wide['New_vehicle_efficiency'] = road_model_input_wide['Efficiency'] *1.15#seems like new vehicles are 15% more efficient than the average vehicle (which is probasbly about 10 years old. this would make sense with an avg 1.5% efficiency improvement per year (leading to about 16% improvement).
@@ -100,11 +101,11 @@ def calculate_inputs_for_model(config, road_model_input_wide, non_road_model_inp
     road_model_input_wide, growth_forecasts_wide = apply_activity_efficiency_improvements(config, road_model_input_wide, growth_forecasts_wide)#todo check that growth_forecasts_wide is being used in foloowing functions
     
     #save
-    supply_side_fuel_mixing.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_supply_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    demand_side_fuel_mixing.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_demand_side_fuel_mixing.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    growth_forecasts_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_growth_forecasts_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-    non_road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+    supply_side_fuel_mixing.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', config.FILE_DATE_ID, '{}_supply_side_fuel_mixing.csv'.format(ECONOMY_ID)), index=False)
+    demand_side_fuel_mixing.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', config.FILE_DATE_ID, '{}_demand_side_fuel_mixing.csv'.format(ECONOMY_ID)), index=False)
+    growth_forecasts_wide.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', config.FILE_DATE_ID, '{}_growth_forecasts_wide.csv'.format(ECONOMY_ID)), index=False)
+    road_model_input_wide.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', config.FILE_DATE_ID, '{}_road_model_input_wide.csv'.format(ECONOMY_ID)), index=False)
+    non_road_model_input_wide.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', config.FILE_DATE_ID, '{}_non_road_model_input_wide.csv'.format(ECONOMY_ID)), index=False)
     
     if ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR:
         #because we jsut made changes to the input data we should adjsut the vehicle sales shares so that they are consistent with the new data. We'll do this now out of simplicity:
@@ -121,8 +122,8 @@ def calculate_inputs_for_model(config, road_model_input_wide, non_road_model_inp
         non_road_model_input_wide = non_road_model_input_wide.drop(columns=['Vehicle_sales_share'])
         non_road_model_input_wide = non_road_model_input_wide.merge(sales_share_data, on=['Economy', 'Scenario', 'Date', 'Transport Type','Vehicle Type', 'Medium', 'Drive'], how='left')
                 
-        road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
-        non_road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_inputs\\{}\\{}_non_road_model_input_wide.csv'.format(config.FILE_DATE_ID, ECONOMY_ID), index=False)
+        road_model_input_wide.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', config.FILE_DATE_ID, '{}_road_model_input_wide.csv'.format(ECONOMY_ID)), index=False)
+        non_road_model_input_wide.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', config.FILE_DATE_ID, '{}_non_road_model_input_wide.csv'.format(ECONOMY_ID)), index=False)
 #%%
 
 
@@ -219,6 +220,3 @@ def apply_activity_efficiency_improvements(config, road_model_input_wide, growth
     growth_forecasts_wide['Activity_growth'] = growth_forecasts_wide['Activity_growth'] - (growth_forecasts_wide['Activity_efficiency']-1)
     
     return road_model_input_wide, growth_forecasts_wide
-
-
-    

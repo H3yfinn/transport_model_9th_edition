@@ -1,4 +1,3 @@
-
 #######################################################################
 #%%
 ###IMPORT GLOBAL VARIABLES FROM config.py
@@ -6,6 +5,7 @@ import os
 import sys
 import re
 #################
+from os.path import join
 from .. import utility_functions
 from ..plotting_functions import plot_logistic_fitting_data
 #################
@@ -68,13 +68,13 @@ def logistic_fitting_function_handler(config, ECONOMY_ID, model_data, show_plots
     #EXTRACT PARAMETERS FOR LOGISTIC FUNCTION:
     parameters_estimates, new_stocks_per_capita_estimates, date_where_gamma_is_reached = find_parameters_for_logistic_function(config, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA, PROPORTION_BELOW_GAMMA, EXTRA_YEARS_TO_REACH_GAMMA, INTERPOLATE_ALL_DATES)
     #some parameters will be np.nan because we dont need to fit the curve for all economies. We will drop these and not recalculate the growth rate for these economies
-    parameters_estimates = parameters_estimates.dropna(subset=['Gompertz_gamma'])
+    parameters_estimates = parameters_estimates.dropna(subset=['Stocks_per_capita'])
     #grab only cols we need
-    new_model_data = new_model_data[['Date', 'Economy', 'Scenario','Transport Type', 'Stocks', 'Occupancy_or_load', 'Mileage', 'Population', 'Gdp_per_capita','Activity', 'Travel_km','Gompertz_gamma']]
+    new_model_data = new_model_data[['Date', 'Economy', 'Scenario','Transport Type', 'Stocks', 'Occupancy_or_load', 'Mileage', 'Population', 'Gdp_per_capita','Activity', 'Travel_km','Stocks_per_capita']]
     #join the params on:
-    new_model_data.drop(columns=['Gompertz_gamma'], inplace=True)
+    new_model_data.drop(columns=['Stocks_per_capita'], inplace=True)
     new_model_data = new_model_data.merge(parameters_estimates, on=['Economy', 'Scenario','Transport Type'], how='inner')
-    #sum stocks,'Activity', Travel_km, , with any NAs set to 0
+    #sum stocks,'Activity', Travel_km, with any NAs set to 0
     new_model_data['Stocks'] = new_model_data['Stocks'].fillna(0)
     new_model_data['Activity'] = new_model_data['Activity'].fillna(0)
     new_model_data['Travel_km'] = new_model_data['Travel_km'].fillna(0)
@@ -111,7 +111,7 @@ def logistic_fitting_function_handler(config, ECONOMY_ID, model_data, show_plots
     activity_growth_estimates.drop(columns=['Activity_growth_old'], inplace=True)
 
     #save parameters_estimates. at the very elast we will plot these later
-    parameters_estimates.to_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_parameters_estimates_{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID), index=False)
+    parameters_estimates.to_csv(os.path.join(config.root_dir,  'intermediate_data', 'road_model', '{}_parameters_estimates_{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID)), index=False)
         
     return activity_growth_estimates 
 
@@ -150,10 +150,10 @@ def calculate_vehicles_per_stock_parameters(config, model_data, ECONOMY_ID, car_
         #load in the mean values for each vehicle type
         mean_df = pd.DataFrame()
         for economy in config.economy_scenario_concordance['Economy'].unique():
-            # if os.path.exists(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters_{}.csv'.format(economy, 'passenger_only')) & ONLY_PASSENGER_VEHICLES:
-            #     e = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters_{}.csv'.format(economy, 'passenger_only'))
-            if os.path.exists(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters.csv'.format(economy)):
-                e = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters.csv'.format(economy))
+            # if os.path.exists(os.path.join(config.root_dir,  'intermediate_data', 'road_model', '{}_vehicles_per_stock_parameters_{}.csv'.format(economy, 'passenger_only')) & ONLY_PASSENGER_VEHICLES:
+            #     e = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'road_model', '{}_vehicles_per_stock_parameters_{}.csv'.format(economy, 'passenger_only'))
+            if os.path.exists(os.path.join(config.root_dir,  'intermediate_data', 'road_model', '{}_vehicles_per_stock_parameters.csv'.format(economy))):
+                e = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'road_model', '{}_vehicles_per_stock_parameters.csv'.format(economy)))
             else:
                 continue
             #calc mean while ignoring date and scenario
@@ -164,6 +164,7 @@ def calculate_vehicles_per_stock_parameters(config, model_data, ECONOMY_ID, car_
         #now join on mean values
         vehicles_per_stock_parameters = vehicles_per_stock_parameters.merge(mean_df, on=['Vehicle Type','Transport Type'], how='left', suffixes=('', '_mean'))
         #fill na with mean
+        vehicles_per_stock_parameters['gompertz_vehicles_per_stock'] = vehicles_per_stock_parameters['gompertz_vehicles_per_stock'].fillna(vehicles_per_stock_parameters['gompertz_vehicles_per_stock_mean'])
         vehicles_per_stock_parameters['gompertz_vehicles_per_stock'] = vehicles_per_stock_parameters['gompertz_vehicles_per_stock'].fillna(vehicles_per_stock_parameters['gompertz_vehicles_per_stock_mean'])
         #drop mean
         vehicles_per_stock_parameters.drop(columns=['gompertz_vehicles_per_stock_mean'], inplace=True) 
@@ -181,9 +182,9 @@ def calculate_vehicles_per_stock_parameters(config, model_data, ECONOMY_ID, car_
     
     #save for later use
     # if ONLY_PASSENGER_VEHICLES:
-    #     vehicles_per_stock_parameters.to_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters_{}_{}.csv'.format(ECONOMY_ID, 'passenger_only'), index=False)
+    #     vehicles_per_stock_parameters.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'road_model', '{}_vehicles_per_stock_parameters_{}_{}.csv'.format(ECONOMY_ID, 'passenger_only')), index=False)
     # else:
-    vehicles_per_stock_parameters.to_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_vehicles_per_stock_parameters.csv'.format(ECONOMY_ID), index=False)
+    vehicles_per_stock_parameters.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'road_model', '{}_vehicles_per_stock_parameters.csv'.format(ECONOMY_ID)), index=False)
     
     return vehicles_per_stock_parameters
     
@@ -228,7 +229,7 @@ def prepare_data_for_logistic_fitting(config, model_data, ECONOMY_ID):
 
     #extract other values we'll need but ont want to sum (because they are constant for each economy and year)
     non_summed_values = model_data.copy()
-    non_summed_values = non_summed_values[cols_to_sum_by+['Population','Gompertz_gamma','Gdp_per_capita']].drop_duplicates()
+    non_summed_values = non_summed_values[cols_to_sum_by+['Population','Stocks_per_capita','Gdp_per_capita']].drop_duplicates()
 
     #now join all values together with a merge
     new_model_data = new_stocks.merge(non_summed_values, on = cols_to_sum_by, how = 'left')
@@ -432,7 +433,7 @@ def create_new_dataframe_with_logistic_predictions(config, new_model_data, new_s
     
     if FIT_LOGISTIC_CURVE_TO_DATA:
         #apply logistic_function to each row
-        model_data_logistic_predictions['New_Stocks_per_thousand_capita'] = model_data_logistic_predictions.apply(lambda row: logistic_function(row['Gdp_per_capita'], row['Gompertz_gamma'], row['Gompertz_beta'], row['Gompertz_alpha']), axis=1)
+        model_data_logistic_predictions['New_Stocks_per_thousand_capita'] = model_data_logistic_predictions.apply(lambda row: logistic_function(row['Gdp_per_capita'], row['Stocks_per_capita'], row['Gompertz_beta'], row['Gompertz_alpha']), axis=1)
     else:
         #join on the new_stocks_per_capita_estimates 
         new_stocks_per_capita_estimates.rename(columns={'Stocks_per_thousand_capita':'New_Stocks_per_thousand_capita'}, inplace=True)
@@ -445,8 +446,7 @@ def create_new_dataframe_with_logistic_predictions(config, new_model_data, new_s
     model_data_logistic_predictions['New_Travel_km'] = model_data_logistic_predictions.apply(lambda row: row['New_Stocks'] * row['Mileage'], axis=1)
     #calculate new activity:
     model_data_logistic_predictions['New_Activity'] = model_data_logistic_predictions.apply(lambda row: row['New_Travel_km'] * row['Occupancy_or_load'], axis=1)
-    
-    # model_data_logistic_predictions.to_csv(config.root_dir + '\\' + 'b.csv')
+# model_data_logistic_predictions.to_csv(os.path.join(config.root_dir, 'b.csv'))
     #repalce Thousand_stocks_per_capita, Stocks_per_thousand_capita, stocks, activity and travel km with new values
     model_data_logistic_predictions['Stocks'] = model_data_logistic_predictions['New_Stocks']
     model_data_logistic_predictions['Activity'] = model_data_logistic_predictions['New_Activity']
@@ -461,11 +461,11 @@ def create_new_dataframe_with_logistic_predictions(config, new_model_data, new_s
 
 def find_parameters_for_logistic_function(config, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA, PROPORTION_BELOW_GAMMA, EXTRA_YEARS_TO_REACH_GAMMA, INTERPOLATE_ALL_DATES):
     #load ECONOMIES_WITH_STOCKS_PER_CAPITA_REACHED from parameters.yml
-    ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED =  yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED']
+    ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED =  yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED']
     
     #loop through economies and transport types and perform the clacualtions ti find the parameters for the logistic function
     #create empty dataframe to store results
-    parameters_estimates = pd.DataFrame(columns=['Gompertz_gamma', 'Economy', 'Transport Type', 'Scenario'])
+    parameters_estimates = pd.DataFrame(columns=['Stocks_per_capita', 'Economy', 'Transport Type', 'Scenario'])
     new_stocks_per_capita_estimates = pd.DataFrame(columns=['Date', 'Economy', 'Transport Type', 'Scenario', 'Stocks_per_thousand_capita'])
     date_where_gamma_is_reached = pd.DataFrame(columns=['Date', 'Economy', 'Transport Type', 'Scenario'])
     for economy in new_model_data['Economy'].unique():
@@ -473,7 +473,7 @@ def find_parameters_for_logistic_function(config, new_model_data, show_plots, ma
             new_model_data_economy_ttype = new_model_data[(new_model_data['Economy']==economy) & (new_model_data['Transport Type']==transport_type)].copy()
             #if gamma is same for both scenarios, we should only run it once, otherwise we have changces of getting different results which isnt really right.
             
-            if new_model_data_economy_ttype['Gompertz_gamma'].nunique()==1:
+            if new_model_data_economy_ttype['Stocks_per_capita'].nunique()==1:
                 ONE_SCENARIO = True
                 scenario = new_model_data_economy_ttype['Scenario'].unique()[0]
                 other_scenarios = new_model_data_economy_ttype['Scenario'].unique()[1:].tolist()
@@ -487,7 +487,7 @@ def find_parameters_for_logistic_function(config, new_model_data, show_plots, ma
                 new_model_data_economy_scenario_ttype = new_model_data_economy_ttype[new_model_data['Scenario']==scenario].copy()
 
                 #filter for cols we need:
-                new_model_data_economy_scenario_ttype = new_model_data_economy_scenario_ttype[['Date', 'Transport Type', 'Economy','Scenario', 'Stocks', 'Gdp_per_capita','Population', 'Gompertz_gamma', 'Travel_km', 'Mileage', 'Activity']].drop_duplicates()
+                new_model_data_economy_scenario_ttype = new_model_data_economy_scenario_ttype[['Date', 'Transport Type', 'Economy','Scenario', 'Stocks', 'Gdp_per_capita','Population', 'Stocks_per_capita', 'Travel_km', 'Mileage', 'Activity']].drop_duplicates()
 
                 #sum stocks,'Activity', Travel_km, , with any NAs set to 0
                 new_model_data_economy_scenario_ttype['Stocks'] = new_model_data_economy_scenario_ttype['Stocks'].fillna(0)
@@ -509,7 +509,7 @@ def find_parameters_for_logistic_function(config, new_model_data, show_plots, ma
 
                 #find date where stocks per cpaita passes gamma, then find a proportion below that and set that as gamma_threshold, which is used in a few ways
                 #find the date where stocks per capita passes gamma
-                gamma = new_model_data_economy_scenario_ttype['Gompertz_gamma'].unique()[0]
+                gamma = new_model_data_economy_scenario_ttype['Stocks_per_capita'].unique()[0]
                 gamma_minus_PROPORTION_BELOW_GAMMA = gamma - (gamma * PROPORTION_BELOW_GAMMA)
                 
                 gamma_threshold = new_model_data_economy_scenario_ttype[new_model_data_economy_scenario_ttype['Stocks_per_thousand_capita'] > gamma_minus_PROPORTION_BELOW_GAMMA]['Date'].min()
@@ -520,7 +520,7 @@ def find_parameters_for_logistic_function(config, new_model_data, show_plots, ma
                 if np.isnan(gamma_threshold):
                     if FIT_LOGISTIC_CURVE_TO_DATA:
                         #set parameters to nan so that we can filter them out later
-                        params = pd.DataFrame({'Gompertz_beta':np.nan, 'Gompertz_alpha':np.nan, 'Gompertz_gamma':np.nan, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])
+                        params = pd.DataFrame({'Gompertz_beta':np.nan, 'Gompertz_alpha':np.nan, 'Stocks_per_capita':np.nan, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])
                         #concat to parameters_estimates
                         parameters_estimates = pd.concat([parameters_estimates, params], axis=0).reset_index(drop=True)
                     else:
@@ -572,7 +572,7 @@ def find_parameters_for_logistic_function(config, new_model_data, show_plots, ma
                     cubic=False#not working yet
                     if cubic:
                         #Now we have a gap between the starting year and the year where we reach gamma+EXTRA_YEARS_TO_REACH_GAMMA. We will fill this gap with a quadratic interpolation between the starting year and the year where we reach gamma. It will be important that the curve is smooth and constant.
-                        # new_model_data_economy_scenario_ttype['Stocks_per_thousand_capita'] = new_model_data_economy_scenario_ttype['Stocks_per_thousand_capita'].interpolate(method='quadratic')
+# new_model_data_economy_scenario_ttype['Stocks_per_thousand_capita'] = new_model_data_economy_scenario_ttype['Stocks_per_thousand_capita'].interpolate(method='quadratic')
                         from scipy.interpolate import CubicSpline     
                         # Separate the data into known and unknown points
                         known = new_model_data_economy_scenario_ttype.dropna(subset=['Stocks_per_thousand_capita'])
@@ -611,7 +611,7 @@ def find_parameters_for_logistic_function(config, new_model_data, show_plots, ma
                     gamma, growth_rate, midpoint = logistic_fitting_function(config, new_model_data_economy_scenario_ttype, gamma, economy_ttype_scenario, show_plots,matplotlib_bool=matplotlib_bool, plotly_bool=plotly_bool)
                     
                     #note midpoint is alpha, growth is beta
-                    params = pd.DataFrame({'Gompertz_beta':growth_rate, 'Gompertz_alpha':midpoint, 'Gompertz_gamma':gamma, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])
+                    params = pd.DataFrame({'Gompertz_beta':growth_rate, 'Gompertz_alpha':midpoint, 'Stocks_per_capita':gamma, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])
                     #concat to parameters_estimates
                     parameters_estimates = pd.concat([parameters_estimates, params], axis=0).reset_index(drop=True)
                     
@@ -621,7 +621,7 @@ def find_parameters_for_logistic_function(config, new_model_data, show_plots, ma
                     new_stocks_per_capita_estimates = pd.concat([new_stocks_per_capita_estimates, new_model_data_economy_scenario_ttype[['Date', 'Economy', 'Transport Type', 'Scenario', 'Stocks_per_thousand_capita']]], axis=0).reset_index(drop=True)
                     
                     #fill params with gamma, set otehrs to nan
-                    params = pd.DataFrame({'Gompertz_beta':np.nan, 'Gompertz_alpha':np.nan, 'Gompertz_gamma':gamma, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])
+                    params = pd.DataFrame({'Gompertz_beta':np.nan, 'Gompertz_alpha':np.nan, 'Stocks_per_capita':gamma, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])
                     parameters_estimates = pd.concat([parameters_estimates, params], axis=0).reset_index(drop=True)
                     
                     date_where_gamma_is_reached = pd.concat([date_where_gamma_is_reached, pd.DataFrame({'Date': date_where_stocks_per_capita_passes_gamma+EXTRA_YEARS_TO_REACH_GAMMA, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])], axis=0).reset_index(drop=True)
@@ -747,7 +747,7 @@ def custom_interpolate_bezier(config, x1, y1, x2, y2, initial_gradient, n_points
 
 def piecewise_linear_interpolation(config, df, column_name, n_pieces, gradients_list):
     # Sort DataFrame by Date
-    df.sort_values(['Date'], inplace=True)
+    df.sort_values([os.path.join('Date')], inplace=True)
     
     # Find the first and last NaN points
     first_nan_idx = df[column_name].index[df[column_name].isna()].min()

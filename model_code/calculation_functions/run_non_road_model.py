@@ -49,24 +49,24 @@ def load_non_road_model_data(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_
     """
     #load all data except activity data (which is calcualteed separately to other calcualted inputs)
     if USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD:
-        growth_forecasts = pd.read_pickle(config.root_dir + '\\' + f'intermediate_data\\road_model\\{ECONOMY_ID}_final_road_growth_forecasts.pkl')
+        growth_forecasts = pd.read_pickle(os.path.join(config.root_dir,  f'intermediate_data', 'road_model', f'{ECONOMY_ID}_final_road_growth_forecasts.pkl'))
     else:
-        growth_forecasts = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\model_inputs\\{config.FILE_DATE_ID}\\{ECONOMY_ID}_growth_forecasts_wide.csv')
+        growth_forecasts = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', config.FILE_DATE_ID, f'{ECONOMY_ID}_growth_forecasts_wide.csv'))
     #load all other data
-    non_road_model_input = pd.read_csv(config.root_dir + '\\' +f'intermediate_data\\model_inputs\\{config.FILE_DATE_ID}\\{ECONOMY_ID}_non_road_model_input_wide.csv')
+    non_road_model_input = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'model_inputs', config.FILE_DATE_ID, f'{ECONOMY_ID}_non_road_model_input_wide.csv'))
 
     #Merge growth forecasts with non_road_model_input:
     non_road_model_input.drop(columns=['Activity_growth'], inplace=True)
     non_road_model_input = non_road_model_input.merge(growth_forecasts[['Date', 'Economy','Scenario','Transport Type','Activity_growth']].drop_duplicates(), on=['Date', 'Economy','Scenario','Transport Type'], how='left')
     
     #load the parameters from the config file
-    turnover_rate_parameters_dict = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['turnover_rate_parameters_dict']
+    turnover_rate_parameters_dict = yaml.load(open(os.path.join(config.root_dir,  'config', 'parameters.yml')), Loader=yaml.FullLoader)['turnover_rate_parameters_dict']
     turnover_rate_steepness = turnover_rate_parameters_dict['turnover_rate_steepness_non_road']
     turnover_rate_max_value = turnover_rate_parameters_dict['turnover_rate_max_value_non_road']
     turnover_rate_midpoint = turnover_rate_parameters_dict['turnover_rate_midpoint_non_road']
         
-    turnover_rate_midpoint_mult_adjustment_road_reference = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_NON_ROAD_REFERENCE']
-    turnover_rate_midpoint_mult_adjustment_road_target = yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET']
+    turnover_rate_midpoint_mult_adjustment_road_reference = yaml.load(open(os.path.join(config.root_dir,  'config', 'parameters.yml')), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_NON_ROAD_REFERENCE']
+    turnover_rate_midpoint_mult_adjustment_road_target = yaml.load(open(os.path.join(config.root_dir,  'config', 'parameters.yml')), Loader=yaml.FullLoader)['TURNOVER_RATE_MIDPOINT_MULT_ADJUSTMENT_ROAD_TARGET']
     
     #extract the value for the economy, if it exists
     if ECONOMY_ID in turnover_rate_midpoint_mult_adjustment_road_reference.keys():
@@ -85,7 +85,7 @@ def load_non_road_model_data(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_
     
 
 def run_non_road_model(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD = True, USE_COVID_RELATED_MILEAGE_CHANGE = True):
-    output_file_name = config.root_dir + '\\' +'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name)
+    output_file_name = os.path.join(config.root_dir,  'intermediate_data', 'non_road_model', '{}_{}'.format(ECONOMY_ID, config.model_output_file_name))
     
     non_road_model_input, turnover_rate_steepness, turnover_rate_midpoint_reference, turnover_rate_midpoint_target, turnover_rate_max_value = load_non_road_model_data(config, ECONOMY_ID,USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD)
     
@@ -236,7 +236,7 @@ def run_non_road_model(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NO
         output_df.drop(columns=diff_cols, inplace=True)
         # raise ValueError("The columns in the output_df are not what we expect. {} are the extra cols. Please check the config file or any changes made to run_non_road_model.py".format(diff_cols))
     
-    # output_df.to_csv(config.root_dir + '\\' + 'a.csv', index=False)
+    # output_df.to_csv(os.path.join(config.root_dir, 'a.csv'), index=False)
     output_df.to_csv(output_file_name, index=False)
     
     
@@ -251,10 +251,10 @@ def run_non_road_model(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NO
             
 #         if transport_type =='passenger':
 #             #load ECONOMIES_WITH_STOCKS_PER_CAPITA_REACHED from parameters.yml
-#             EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER =  yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER']
+#             EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER =  yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER']
 #             X = EXPECTED_ENERGY_DECREASE_FROM_COVID_PASSENGER[economy]
 #         elif transport_type =='freight':
-#             EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT =  yaml.load(open(config.root_dir + '\\' + 'config\\parameters.yml'), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT']
+#             EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT =  yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT']
 #             X = EXPECTED_ENERGY_DECREASE_FROM_COVID_FREIGHT[economy]
         
 #         #now revert decreaing mileage by a factor of 1-X
@@ -263,4 +263,4 @@ def run_non_road_model(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NO
     
 #%%
 # run_non_road_model(config, '01_AUS', USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD = True, USE_COVID_RELATED_MILEAGE_CHANGE = True)
-#%%
+#%#

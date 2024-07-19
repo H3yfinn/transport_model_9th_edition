@@ -1,4 +1,4 @@
-#this will apply any fuel mixing on the demand side. This is can include, the use of different fule types for each drive type, for example, electricity vs oil in phev's, or even treating rail as a drive type, and splitting demand into electricity, coal and dieel rpoprtions. 
+#this will apply any fuel mixing on the demand side. This is can include, the use of different fule types for each drive type, for example, electricity vs oil in phev's, or even treating rail as a drive type, and splitting demand into electricity, coal and dieel rpoprtions.
 
 #as such, this will merge a fuel mixing dataframe onto the model output, by the Drive column, and apply the shares by doing that, resulting in a fuel column.
 #this means that the supply side fuel mixing needs to occur after this script, because it will be merging on the fuel column.
@@ -32,8 +32,8 @@ from plotly.subplots import make_subplots
 #%%
 def concatenate_model_output(config, ECONOMY_ID, SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_NON_ROAD=True, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=False):
     #load model output
-    road_model_output = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name))#TODO WHY IS MEASURE A COLUMN IN HERE?
-    non_road_model_output = pd.read_csv(config.root_dir + '\\' + 'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name))
+    road_model_output = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'road_model', '{}_{}'.format(ECONOMY_ID, config.model_output_file_name)))#TODO WHY IS MEASURE A COLUMN IN HERE?
+    non_road_model_output = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'non_road_model', '{}_{}'.format(ECONOMY_ID, config.model_output_file_name)))
     
     # check if there are any NA's in any columns in the output dataframes. If there are, print them out
     if road_model_output.isnull().values.any():
@@ -59,11 +59,11 @@ def concatenate_model_output(config, ECONOMY_ID, SHIFT_YEARLY_GROWTH_RATE_FROM_R
     model_output_all = pd.concat([road_model_output, non_road_model_output])
     
     #save
-    model_output_all.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    model_output_all.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_outputs', '{}_{}'.format(ECONOMY_ID, config.model_output_file_name)), index=False)
     # breakpoint()
     if SHIFT_YEARLY_GROWTH_RATE_FROM_ROAD_TO_NON_ROAD and not PROJECT_TO_JUST_OUTLOOK_BASE_YEAR:
         #no point in doing this if we are projecting to just the outlook base year (i.e. creating input data)
-        df_adjustments = pd.read_excel(config.root_dir + '\\' + 'input_data\\post_hoc_adjustments\\growth_rate_adjustments.xlsx')
+        df_adjustments = pd.read_excel(os.path.join(config.root_dir, 'input_data', 'post_hoc_adjustments', 'growth_rate_adjustments.xlsx'))
         model_output_all = transfer_growth_between_mediums(config, model_output_all, df_adjustments, ECONOMY_ID)               
     return model_output_all
 
@@ -109,7 +109,7 @@ def transfer_growth_between_mediums(config, model_output_all, df_adjustments, EC
     model_output_all, activity_change_all = apply_change_in_activity_TO_medium(config, model_output_all, activity_change_all,  very_original_activity)
     
     model_output_all = recalculate_metrics(config, model_output_all)
-    activity_change_all.to_csv(config.root_dir + '\\' + 'intermediate_data\\model_outputs\\{}_medium_to_medium_activity_change_for_plotting{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID), index=False)
+    activity_change_all.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_outputs', '{}_medium_to_medium_activity_change_for_plotting{}.csv'.format(ECONOMY_ID, config.FILE_DATE_ID)), index=False)
     return model_output_all
 
 
@@ -188,7 +188,7 @@ def apply_change_in_activity_TO_medium(config, model_output_all, activity_change
             model_output_to_medium['GROWTH_RATE_TOO_HIGH'] = model_output_to_medium['Activity'] < 0
             model_output_to_medium.loc[model_output_to_medium['Activity'] < 0, 'Activity'] = 0
             model_output_to_medium['Change_in_activity'] = np.where(model_output_to_medium['GROWTH_RATE_TOO_HIGH'], model_output_to_medium['Original_activity'], model_output_to_medium['Change_in_activity'])
-            model_output_to_medium['Adjusted'] =True
+            model_output_to_medium['Adjusted'] = True
             # Update the main model_output_all DataFrame
             model_output_all.update(model_output_to_medium[['Activity', 'Adjusted']])
             #TODO TEST THAT UPDATE WORKS OK HERE. NOT SURE IF INDEX GETS MUCKED UP
@@ -246,11 +246,11 @@ def fill_missing_output_cols_with_nans(config, ECONOMY_ID, road_model_input_wide
             non_road_model_input_wide[col] = np.nan
             
     #save to file
-    road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
-    non_road_model_input_wide.to_csv(config.root_dir + '\\' + 'intermediate_data\\non_road_model\\{}_{}'.format(ECONOMY_ID, config.model_output_file_name), index=False)
+    road_model_input_wide.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'road_model', '{}_{}'.format(ECONOMY_ID, config.model_output_file_name)), index=False)
+    non_road_model_input_wide.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'non_road_model', '{}_{}'.format(ECONOMY_ID, config.model_output_file_name)), index=False)
 
 
 #%%
 # a = concatenate_model_output(config, '05_PRC')#dont think its working aye
 
-#%%
+#%#
