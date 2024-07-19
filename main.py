@@ -135,7 +135,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     progress += increment
     update_progress(progress)
     FOUND = False
-    RUN_MODEL = False#set me
+    RUN_MODEL = True#set me
     if not RUN_MODEL:
         MODEL_RUN_1  = False
         MODEL_RUN_2  = False
