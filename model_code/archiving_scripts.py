@@ -56,6 +56,8 @@ def recursively_save_file(source_dir, dest_dir, file_extension='*', exclude_arch
                 full_file_path = os.path.join(dirpath, filename)
                 if keep_folder_structure:
                     folder_structure = os.path.relpath(dirpath, source_dir)
+                    if folder_structure == '.': # If the folder is the source folder
+                        folder_structure = ''
                     dest_dir2 = os.path.join(dest_dir, folder_structure)
                     if not os.path.exists(dest_dir2):
                         os.makedirs(dest_dir2)
@@ -174,7 +176,7 @@ def save_economy_projections_and_all_inputs(config, ECONOMY_ID, ZIP_UP_ARCHIVE_F
     sometimes_files = [os.path.join('intermediate_data', 'model_outputs', f'{ECONOMY_ID}_medium_to_medium_activity_change_for_plotting{config.FILE_DATE_ID}.csv')]
     for file in sometimes_files:
         if os.path.exists(os.path.join(config.root_dir, file)):
-            files_list.append(os.path.join(config.root_dir, file))
+            files_list.append(file)
 
     for file in files_list:
         dotdot = False
@@ -192,9 +194,9 @@ def save_economy_projections_and_all_inputs(config, ECONOMY_ID, ZIP_UP_ARCHIVE_F
             source_path = os.path.abspath(os.path.join(config.root_dir, '..', file))
             destination_path = os.path.join(archive_folder_name, file)
             shutil.copyfile(source_path, destination_path)
-            # shutil.copyfile(os.path.join(config.root_dir, '..', file), os.path.join(archive_folder_name, file))
         else:
             shutil.copyfile(os.path.join(config.root_dir, file), os.path.join(archive_folder_name, file))
+
 
     date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'input_data', '9th_model_inputs'), 'model_df_wide_')
     if not os.path.exists(os.path.join(archive_folder_name, 'input_data', '9th_model_inputs')):
@@ -209,6 +211,8 @@ def save_economy_projections_and_all_inputs(config, ECONOMY_ID, ZIP_UP_ARCHIVE_F
     optimisation_data_date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'intermediate_data', 'input_data_optimisations'), f'optimised_data_{ECONOMY_ID}_', f'_{transport_data_system_FILE_DATE_ID_2}.pkl', EXCLUDE_DATE_STR_START=True)
     if not os.path.exists(os.path.join(config.root_dir, 'intermediate_data', 'input_data_optimisations', f'optimised_data_{ECONOMY_ID}_{optimisation_data_date_id}_{transport_data_system_FILE_DATE_ID_2}.pkl')):
         raise Exception(f'No optimised_data_{ECONOMY_ID}_{optimisation_data_date_id}_{transport_data_system_FILE_DATE_ID_2}.pkl found in intermediate_data/input_data_optimisations')
+    if not os.path.exists(os.path.join(archive_folder_name, 'intermediate_data', 'input_data_optimisations')):
+        os.makedirs(os.path.join(archive_folder_name, 'intermediate_data', 'input_data_optimisations'))
     shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'input_data_optimisations', f'optimised_data_{ECONOMY_ID}_{optimisation_data_date_id}_{transport_data_system_FILE_DATE_ID_2}.pkl'), os.path.join(archive_folder_name, 'intermediate_data', 'input_data_optimisations', f'optimised_data_{ECONOMY_ID}_{optimisation_data_date_id}_{transport_data_system_FILE_DATE_ID_2}.pkl'))
 
     date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'output_data', 'for_other_modellers', 'output_for_outlook_data_system'), f'{ECONOMY_ID}_international_bunker_energy_use_')

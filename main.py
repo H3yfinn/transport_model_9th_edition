@@ -303,7 +303,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main('01_AUS')#, root_dir_param=root_dir_param)
+        main('all')#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%
@@ -338,4 +338,4 @@ if __name__ == "__main__":
 #   '18_CT': 1
 #   '19_THA': 1
 #   '20_USA': 1
-#   '21_VN': 1
+#   '21_VN': 1  n
