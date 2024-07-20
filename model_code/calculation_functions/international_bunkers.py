@@ -45,7 +45,8 @@ def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', tur
     international_fuel_shares = calculate_missing_drive_shares_from_manually_inputted_data(config, international_fuel_shares)
         
     #calcualte avergae growth rate from domestic non road energy use:
-    non_road_activity, non_road_intensity = extract_non_road_modelled_data(config)#, drive_to_fuel_mapping
+    non_road_activity, non_road_intensity = extract_non_road_modelled_data(config, USE_PREVIOUS_DATA=False)
+    
     non_road_activity_growth_rate = calculate_non_road_activity_growth_rate(config, non_road_activity)
     #check for duplcaites: 
     check_for_duplicates_in_all_datasets(config, energy_use_esto_bunkers_tall, international_fuel_shares, non_road_activity_growth_rate, non_road_intensity, international_supply_side_fuel_mixing)
@@ -472,7 +473,7 @@ def get_economies_to_base_energy_use_off_of(config):
     # Filter for only economies with a value of True
     return [economy for economy in ECONOMIES_TO_BASE_ENERGY_USE_OFF_OF if ECONOMIES_TO_BASE_ENERGY_USE_OFF_OF[economy] == True]
 
-def extract_non_road_modelled_data(config):
+def extract_non_road_modelled_data(config, USE_PREVIOUS_DATA=False):
     #NOTE THAT IF WE ARE MISSING DATA FOR AN ECONOMY WE WILL BASE THIS OFF OF THE DATA WE HAVE SAVED IN A PREVIOUS RUN (WHICH IS SAVED ON THE GIT REPO TOO)
     #get non road intensity and activity projections. the activity will be used to get the growth rate for energy use in the whole of apec, the intensity will be timesed by energy to get activity.
     #and extract intensity and activity from the model output:
@@ -495,12 +496,11 @@ def extract_non_road_modelled_data(config):
                 ECONOMY_MISSING=True
                 break
             
-    if ECONOMY_MISSING:
+    if ECONOMY_MISSING or USE_PREVIOUS_DATA:
         #load the data for all economies and reutnr that:
         non_road_intensity = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_intensity.csv'))
         non_road_activity = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_activity.csv'))
-        return non_road_intensity, non_road_activity
-        
+        return non_road_activity, non_road_intensity        
     if len(model_output_detailed) == 0:
         breakpoint()
         raise Exception('There is no data in the model_output_detailed df. Please check the data and try again.')
@@ -553,8 +553,8 @@ def extract_non_road_modelled_data(config):
     plot_non_road_intensity(config, non_road_intensity)
     
     #save these to intermediate data for use in case we cannot access the model output later on:
-    non_road_activity.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_activity.csv'))
-    non_road_intensity.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_intensity.csv'))
+    non_road_activity.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_activity.csv'), index=False)
+    non_road_intensity.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_intensity.csv'), index=False)
     return non_road_activity, non_road_intensity
 
 # def backcalculate_domestic_covid_effect(non_road_activity):
