@@ -314,13 +314,16 @@ def check_for_and_save_previous_concordances(config, USE_LATEST_CONCORDANCES):
         if file_date_id == config.FILE_DATE_ID:
             return True
         elif file_date_id:
-            #just copy all the cocordances we'd save now to the folder with current file_date_id
-            shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_file_name_fuels.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_file_name_fuels))
-            shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_base_year_measures_file_name.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_base_year_measures_file_name))
-            shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_user_input_and_growth_rates_file_name.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_user_input_and_growth_rates_file_name))
-            shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_demand_side_fuel_mixing_file_name.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_demand_side_fuel_mixing_file_name))
-            shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_supply_side_fuel_mixing_file_name.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_supply_side_fuel_mixing_file_name))
-            return True
+            try:
+                #just copy all the cocordances we'd save now to the folder with current file_date_id
+                shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_file_name_fuels.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_file_name_fuels))
+                shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_base_year_measures_file_name.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_base_year_measures_file_name))
+                shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_user_input_and_growth_rates_file_name.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_user_input_and_growth_rates_file_name))
+                shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_demand_side_fuel_mixing_file_name.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_demand_side_fuel_mixing_file_name))
+                shutil.copyfile(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_supply_side_fuel_mixing_file_name.replace(file_date_id, config.FILE_DATE_ID)), os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_supply_side_fuel_mixing_file_name))
+                return True
+            except FileNotFoundError:
+                return False
         else:
             return False
 #%%

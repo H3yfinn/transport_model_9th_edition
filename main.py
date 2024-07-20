@@ -237,7 +237,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     progress += increment
     update_progress(progress)
     
-    SETUP_AND_RUN_MULTI_ECONOMY_PLOTS = False
+    SETUP_AND_RUN_MULTI_ECONOMY_PLOTS = True
     if concatenate_output_data(config):
         international_bunker_share_calculation_handler(config)
         if SETUP_AND_RUN_MULTI_ECONOMY_PLOTS:
@@ -297,13 +297,13 @@ if __name__ == "__main__":
             economy_to_run = sys.argv[1]
             print('Running model for economy {}'.format(economy_to_run), 'in root directory {}'.format(root_dir_param))
             main(economy_to_run=economy_to_run, root_dir_param=root_dir_param, script_dir_param=root_dir_param) #e.g. python transport_model_9th_edition\main.py all C:\Users\finbar.maunsell\github\transport_model_9th_edition
-            #e.g. python transport_model_9th_edition\main.py all \var\www\transport-modeling-guide\transport_model_9th_edition
+            #e.g. python transport_model_9th_edition/main.py all /var/www/transport-modeling-guide/transport_model_9th_edition
             # os.chdir('C:\\Users\\finbar.maunsell\\github')
             # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main('all')#, root_dir_param=root_dir_param)
+        main('01_AUS')#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%
