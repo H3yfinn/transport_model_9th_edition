@@ -164,7 +164,7 @@ def archive_inputs_and_previous_results(config, ECONOMY_ID, new_sales_shares_all
         shutil.copy(filepath, os.path.join(archiving_folder, '{}'.format(filename)))
         
     #save data so it can be used for plotting and such:
-    new_sales_shares_all_new.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', '{}_{}_vehicle_sales_share.csv'.format(config.FILE_DATE_ID, ECONOMY_ID)), index = False)  
+    new_sales_shares_all_new.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', config.FILE_DATE_ID, '{}_vehicle_sales_share.csv'.format(ECONOMY_ID)), index = False)  
     
 def format_and_check_current_and_historical_shares(config, ECONOMY_ID, new_transport_data_system_df, CURRENT_BASE_YEAR):
         
