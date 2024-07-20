@@ -54,7 +54,7 @@ def write_graph_to_html(config, filename, graph_type, plot_data, economy, x=None
 
     # Update layout with y_axes_title and legend_title
     fig.update_layout(yaxis_title=y_axes_title, legend_title=legend_title,font_size=font_size)   
-    fig.write_html(os.path.join(config.root_dir,  'plotting_output', 'dashboards', economy, 'transport_type_intensity_analysis', filename))
+    fig.write_html(os.path.join(config.root_dir,  'plotting_output', 'dashboards', economy, 'individual_graphs', filename))
     
     
 def remap_vehicle_types(config, df, value_col='Value', new_index_cols = ['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive'], vehicle_type_mapping_set='simplified', include_non_road=True, aggregation_type=('sum', )):
@@ -2933,9 +2933,9 @@ def plot_energy_efficiency_timeseries(config, ECONOMY_IDs, model_output_detailed
                 
                 ######TEMPORARY: save the df to a csv so we can compare scenarios
                 #save the df to a csv
-                # energy_eff_by_scen_by_economy.to_csv(f'plotting_output\\dashboards\\{economy}\\transport_type_intensity_analysis\\{scenario}_{economy}_energy_efficiency_timeseries_{transport_type}_no_HEVs.csv')
+                # energy_eff_by_scen_by_economy.to_csv(f'plotting_output\\dashboards\\{economy}\\individual_graphs\\{scenario}_{economy}_energy_efficiency_timeseries_{transport_type}_no_HEVs.csv')
                 #load the df from the csv and merge it but label it as 'no HEV's'
-                # energy_eff_by_scen_by_economy_no_HEVS = pd.read_csv(config.root_dir + config.slash +f'plotting_output\\dashboards\\{economy}\\transport_type_intensity_analysis\\{scenario}_{economy}_energy_efficiency_timeseries_{transport_type}_no_HEVs.csv')
+                # energy_eff_by_scen_by_economy_no_HEVS = pd.read_csv(config.root_dir + config.slash +f'plotting_output\\dashboards\\{economy}\\individual_graphs\\{scenario}_{economy}_energy_efficiency_timeseries_{transport_type}_no_HEVs.csv')
                 # energy_eff_by_scen_by_economy['line_type'] = 'HEVs'
                 # energy_eff_by_scen_by_economy_no_HEVS['line_type'] = 'no_HEVs'
                 # energy_eff_by_scen_by_economy = pd.concat([energy_eff_by_scen_by_economy, energy_eff_by_scen_by_economy_no_HEVS])
@@ -3177,7 +3177,7 @@ def sales_and_turnover_lines(config, ECONOMY_IDs, model_output_detailed_df, fig_
             fig_dict[economy][scenario][f'sales_and_turnover_lines_{transport_type}'] = [fig, title, PLOTTED]
             
             if WRITE_HTML:
-                filename = 'transport_type_intensity_analysis', f'sales_and_turnover_lines_{transport_type}_{scenario}_{economy}.html'
+                filename = 'individual_graphs', f'sales_and_turnover_lines_{transport_type}_{scenario}_{economy}.html'
                 write_graph_to_html(config, filename=filename, graph_type='line', plot_data=sales_and_turnover_by_scen_by_economy, economy=economy, x='Date', y='Value', color='Drive', title=title, y_axes_title='Value', legend_title='Drive', font_size=30, colors_dict=colors_dict)
                 
     
@@ -4696,7 +4696,7 @@ def plot_new_vehicle_emissions_intensity_by_vehicle_type(config, fig_dict, ECONO
                 # fig.update_traces(line=dict(width=10))
                 # #drop legend
                 # fig.update_layout(showlegend=False)
-                # fig.write_html(config.root_dir + config.slash +f'plotting_output\\dashboards\\{economy}\\transport_type_intensity_analysis\\{scenario}_{economy}_new_vehicle_emissions_intensity_timeseries_{transport_type}.html')
+                # fig.write_html(config.root_dir + config.slash +f'plotting_output\\dashboards\\{economy}\\individual_graphs\\{scenario}_{economy}_new_vehicle_emissions_intensity_timeseries_{transport_type}.html')
                 
                 write_graph_to_html(config, filename =f'{scenario}_new_vehicle_emissions_intensity_timeseries_{transport_type}.html', graph_type='line', plot_data=emissions_intensity_by_scen_by_economy, economy=economy, x='Date', y='New_vehicle_emissions_intensity', color='Vehicle Type', title=title, line_dash='ICE_ONLY', y_axes_title='MtC02 per km', legend_title='', font_size=30, marker_line_width=2.5, line_width=10, colors_dict=colors_dict)
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:

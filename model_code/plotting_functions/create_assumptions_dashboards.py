@@ -162,7 +162,7 @@ colors_dict = {
     
 }
 
-def prepare_fig_dict_and_subfolders(config, ECONOMY_IDs, plots, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR):
+def prepare_fig_dict_and_subfolders(config, ECONOMY_IDs, plots, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, WRITE_INDIVIDUAL_HTMLS):
     """
     Prepares a dictionary of figures and creates subfolders for each economy.
 
@@ -189,6 +189,11 @@ def prepare_fig_dict_and_subfolders(config, ECONOMY_IDs, plots, ADVANCE_BASE_YEA
             elif ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR and not os.path.exists(os.path.join(config.root_dir, 'plotting_output', 'dashboards', economy)):
                 os.makedirs(os.path.join(config.root_dir, 'plotting_output', 'dashboards', economy))
 
+            #and if WRITE_INDIVIDUAL_HTMLS is True, create a folder called individual_graphs in each economy folder:
+            if WRITE_INDIVIDUAL_HTMLS:
+                if not os.path.exists(os.path.join(config.root_dir, 'plotting_output', 'dashboards', economy, 'individual_graphs')):
+                    os.makedirs(os.path.join(config.root_dir, 'plotting_output', 'dashboards', economy, 'individual_graphs'))
+                    
             fig_dict[economy] = {}
             for scenario in config.economy_scenario_concordance['Scenario'].unique():
                 fig_dict[economy][scenario] = {}
@@ -214,7 +219,7 @@ def create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors
         None
     """
     color_preparation_list = []
-    fig_dict = prepare_fig_dict_and_subfolders(config, ECONOMY_IDs, plots,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
+    fig_dict = prepare_fig_dict_and_subfolders(config, ECONOMY_IDs, plots,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
 
     #get the plots:
     fig_dict, color_preparation_list = plotting_handler(config, ECONOMY_IDs, plots, fig_dict,  color_preparation_list, colors_dict, DROP_NON_ROAD_TRANSPORT,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
@@ -1214,7 +1219,7 @@ ECONOMY_ID (str or None): The ID of the economy for which the dashboard is being
     plots = ['energy_use_by_fuel_type_all_all', 'emissions_by_fuel_type_all_gen','passenger_km_by_drive_road','freight_tonne_km_by_drive_road', 'share_of_vehicle_type_by_transport_type_all','share_of_vehicle_type_activity_all', 'line_turnover_rate_by_vtype_all_road','avg_age_road',  'lmdi_freight_road',  'lmdi_passenger_road', 'energy_efficiency_timeseries_all','INTENSITY_ANALYSIS_timeseries_freight','INTENSITY_ANALYSIS_timeseries_passenger', 'share_of_vehicle_type_by_transport_type_freight_INTENSITY_ANALYSIS', 'share_of_vehicle_type_by_transport_type_passenger_INTENSITY_ANALYSIS', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_all', 'lifecycle_emissions_of_cars', 'box_turnover_rate_by_drive_all', 'turnover_rate_age_curve']
     
     CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT = {'transport_type':'all', 'mediums':['road']}
-    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'transport_type_intensity_analysis',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS,CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PRODUCE_AS_SINGLE_POTS=True, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS,SAVE_AS_WEB_PLOTS=False)
+    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'individual_graphs',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS,CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PRODUCE_AS_SINGLE_POTS=True, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS,SAVE_AS_WEB_PLOTS=False)
     
     
     
