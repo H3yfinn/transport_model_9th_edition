@@ -271,8 +271,8 @@ def grab_gdp_shares_from_industry(config, UPDATE_INDUSTRY_VALUES):
             continue
         avg_df = False
         
-        root_onedrive = f'C:\\Users\\finbar.maunsell\\OneDrive - APERC\\outlook 9th\\Modelling\\Sector models\\Industry\\Interim production\\1_industry_interim1\\'
-        root_local = f'input_data\\macro\\industry_gdp_shares\\'
+        root_onedrive = os.path.join('C:', 'Users', 'finbar.maunsell', 'OneDrive - APERC', 'outlook 9th', 'Modelling', 'Sector models', 'Industry', 'Interim production', '1_industry_interim1')
+        root_local = os.path.join('input_data', 'macro', 'industry_gdp_shares')
         industry_filename = f'{economy}_NV.IND.TOTL.ZS.csv'
         manu_filename = f'{economy}_NV.IND.MANF.ZS.csv'
         industry_path_onedrive = os.path.join(root_onedrive, economy, industry_filename)
