@@ -1,3 +1,112 @@
+# Existing LFS configurations
 input_data/** filter=lfs diff=lfs merge=lfs -text
 intermediate_data/input_data_optimisations/** filter=lfs diff=lfs merge=lfs -text
+intermediate_data/international_bunkers/non_road_activity.csv filter=lfs diff=lfs merge=lfs -text
+intermediate_data/international_bunkers/non_road_intensity.csv filter=lfs diff=lfs merge=lfs -text
 config/** filter=lfs diff=lfs merge=lfs -text
+
+# HTML files added to LFS
+plotting_output/dashboards/01_AUS/WEB_01_AUS_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/01_AUS/WEB_01_AUS_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/01_AUS/WEB_01_AUS_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/01_AUS/WEB_01_AUS_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/02_BD/WEB_02_BD_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/02_BD/WEB_02_BD_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/02_BD/WEB_02_BD_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/02_BD/WEB_02_BD_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/03_CDA/WEB_03_CDA_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/03_CDA/WEB_03_CDA_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/03_CDA/WEB_03_CDA_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/03_CDA/WEB_03_CDA_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/04_CHL/WEB_04_CHL_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/04_CHL/WEB_04_CHL_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/04_CHL/WEB_04_CHL_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/04_CHL/WEB_04_CHL_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/05_PRC/WEB_05_PRC_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/05_PRC/WEB_05_PRC_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/05_PRC/WEB_05_PRC_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/05_PRC/WEB_05_PRC_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/06_HKC/WEB_06_HKC_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/06_HKC/WEB_06_HKC_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/06_HKC/WEB_06_HKC_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/06_HKC/WEB_06_HKC_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/07_INA/WEB_07_INA_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/07_INA/WEB_07_INA_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/07_INA/WEB_07_INA_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/07_INA/WEB_07_INA_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/08_JPN/WEB_08_JPN_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/08_JPN/WEB_08_JPN_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/08_JPN/WEB_08_JPN_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/08_JPN/WEB_08_JPN_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/09_ROK/WEB_09_ROK_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/09_ROK/WEB_09_ROK_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/09_ROK/WEB_09_ROK_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/09_ROK/WEB_09_ROK_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/10_MAS/WEB_10_MAS_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/10_MAS/WEB_10_MAS_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/10_MAS/WEB_10_MAS_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/10_MAS/WEB_10_MAS_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/11_MEX/WEB_11_MEX_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/11_MEX/WEB_11_MEX_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/11_MEX/WEB_11_MEX_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/11_MEX/WEB_11_MEX_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/12_NZ/WEB_12_NZ_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/12_NZ/WEB_12_NZ_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/12_NZ/WEB_12_NZ_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/12_NZ/WEB_12_NZ_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/13_PNG/WEB_13_PNG_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/13_PNG/WEB_13_PNG_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/13_PNG/WEB_13_PNG_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/13_PNG/WEB_13_PNG_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/14_PE/WEB_14_PE_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/14_PE/WEB_14_PE_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/14_PE/WEB_14_PE_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/14_PE/WEB_14_PE_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/15_PHL/WEB_15_PHL_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/15_PHL/WEB_15_PHL_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/15_PHL/WEB_15_PHL_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/15_PHL/WEB_15_PHL_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/16_RUS/WEB_16_RUS_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/16_RUS/WEB_16_RUS_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/16_RUS/WEB_16_RUS_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/16_RUS/WEB_16_RUS_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/17_SGP/WEB_17_SGP_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/17_SGP/WEB_17_SGP_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/17_SGP/WEB_17_SGP_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/17_SGP/WEB_17_SGP_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/18_CT/WEB_18_CT_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/18_CT/WEB_18_CT_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/18_CT/WEB_18_CT_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/18_CT/WEB_18_CT_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/19_THA/WEB_19_THA_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/19_THA/WEB_19_THA_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/19_THA/WEB_19_THA_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/19_THA/WEB_19_THA_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/20_USA/WEB_20_USA_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/20_USA/WEB_20_USA_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/20_USA/WEB_20_USA_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/20_USA/WEB_20_USA_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+
+plotting_output/dashboards/21_VN/WEB_21_VN_Low_Carbon_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/21_VN/WEB_21_VN_Low_Carbon_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/21_VN/WEB_21_VN_Business_as_Usual_dashboard_results.html filter=lfs diff=lfs merge=lfs -text
+plotting_output/dashboards/21_VN/WEB_21_VN_Business_as_Usual_dashboard_secondary_results.html filter=lfs diff=lfs merge=lfs -text
