@@ -312,7 +312,11 @@ def check_for_and_save_previous_concordances(config, USE_LATEST_CONCORDANCES):
         #check if we have concordances available to copy to save on time:
         file_date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances'), 'model_concordances_', file_name_end='.csv')
         if file_date_id == config.FILE_DATE_ID:
-            return True
+            #check for all the oqther concordances
+            if os.path.exists(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_file_name)) and os.path.exists(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_file_name_fuels)) and os.path.exists(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_base_year_measures_file_name)) and os.path.exists(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_user_input_and_growth_rates_file_name)) and os.path.exists(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_demand_side_fuel_mixing_file_name)) and os.path.exists(os.path.join(config.root_dir, 'intermediate_data', 'computer_generated_concordances', config.model_concordances_supply_side_fuel_mixing_file_name)):
+                return True
+            else:
+                return False
         elif file_date_id:
             try:
                 #just copy all the cocordances we'd save now to the folder with current file_date_id
