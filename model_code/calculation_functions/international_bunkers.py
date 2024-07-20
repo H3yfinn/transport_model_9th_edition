@@ -473,6 +473,7 @@ def get_economies_to_base_energy_use_off_of(config):
     return [economy for economy in ECONOMIES_TO_BASE_ENERGY_USE_OFF_OF if ECONOMIES_TO_BASE_ENERGY_USE_OFF_OF[economy] == True]
 
 def extract_non_road_modelled_data(config):
+    #NOTE THAT IF WE ARE MISSING DATA FOR AN ECONOMY WE WILL BASE THIS OFF OF THE DATA WE HAVE SAVED IN A PREVIOUS RUN (WHICH IS SAVED ON THE GIT REPO TOO)
     #get non road intensity and activity projections. the activity will be used to get the growth rate for energy use in the whole of apec, the intensity will be timesed by energy to get activity.
     #and extract intensity and activity from the model output:
     # model_output_detailed = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', 'all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name)))
@@ -481,17 +482,25 @@ def extract_non_road_modelled_data(config):
     #until we ahve completed all economies, we should just load data from what economies we have completed:
     with open(os.path.join(config.root_dir, 'config', 'parameters.yml'), 'r') as file:
         ECONOMIES_WITH_MODELLING_COMPLETE_DICT = yaml.load(file, Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
+    ECONOMY_MISSING= False
     for economy in ECONOMIES_WITH_MODELLING_COMPLETE_DICT.keys():
         if ECONOMIES_WITH_MODELLING_COMPLETE_DICT[economy]:
             #since we are often only running the model for one economy each day, just do a try, except here:
-            try:
-                latest_date = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'output_data', 'model_output_detailed'), f'{economy}_NON_ROAD_DETAILED_model_output')
-                
+            latest_date = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'output_data', 'model_output_detailed'), f'{economy}_NON_ROAD_DETAILED_model_output')
+            if latest_date is not None:
                 #load data for that economy and concat it onto non_road
                 model_output_detailed_ = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', f'{economy}_NON_ROAD_DETAILED_model_output{latest_date}.csv'))
                 model_output_detailed = pd.concat([model_output_detailed, model_output_detailed_])
-            except:
-                pass
+            else:
+                ECONOMY_MISSING=True
+                break
+            
+    if ECONOMY_MISSING:
+        #load the data for all economies and reutnr that:
+        non_road_intensity = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_intensity.csv'))
+        non_road_activity = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_activity.csv'))
+        return non_road_intensity, non_road_activity
+        
     if len(model_output_detailed) == 0:
         breakpoint()
         raise Exception('There is no data in the model_output_detailed df. Please check the data and try again.')
@@ -543,6 +552,9 @@ def extract_non_road_modelled_data(config):
     
     plot_non_road_intensity(config, non_road_intensity)
     
+    #save these to intermediate data for use in case we cannot access the model output later on:
+    non_road_activity.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_activity.csv'))
+    non_road_intensity.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_intensity.csv'))
     return non_road_activity, non_road_intensity
 
 # def backcalculate_domestic_covid_effect(non_road_activity):
