@@ -65,10 +65,10 @@ import ctypes
 import os
 import warnings
 
-warnings.simplefilter(action='ignore', category=pd.errors.DtypeWarning)
-
 USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=True
 USE_SAVED_OPT_PARAMATERS=True   
+
+warnings.simplefilter(action='ignore', category=pd.errors.DtypeWarning)
 #%%
 def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback):
     #setup the root and script directories which will be passed into functions to know where to look for files. This allwos for multiple threads of this module to be run at the same time without setting the root and script directories as global variables or including them all in sys.path
@@ -107,7 +107,7 @@ def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_ca
     
     return increment, progress, update_progress, config
 
-def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
+def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None,  RUN_FINAL_FORMATTING = False):
     error_message = None
     increment, progress, update_progress, config = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
 
@@ -121,7 +121,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     #Things to do once a day:
     do_these_once_a_day = True
     if do_these_once_a_day:
-        create_all_concordances(config, USE_LATEST_CONCORDANCES=False)
+        create_all_concordances(config, USE_LATEST_CONCORDANCES=True)
     
     PREPARE_DATA = True#only needs to be done if the macro or transport system data changes
     if PREPARE_DATA:
@@ -225,42 +225,42 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                         breakpoint()
                     pass
                 dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS) 
-            
-            progress += increment
-            update_progress(progress)
-            copy_required_output_files_to_one_folder(config, ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\\for_other_modellers')
-    
-    print('\nFinished running model for all economies, now doing final formatting\n')
-    
-    concatenate_outlook_data_system_outputs(config)
-    
-    progress += increment
-    update_progress(progress)
         
-    SETUP_AND_RUN_MULTI_ECONOMY_PLOTS = True
-    if concatenate_output_data(config):
-        international_bunker_share_calculation_handler(config)
-        if SETUP_AND_RUN_MULTI_ECONOMY_PLOTS:
-            try:
-                produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
-            except:
-                breakpoint()
-                print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
-                raise Exception('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
-                # produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
-            try:
-                PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES = True
-                setup_and_run_multi_economy_plots(config,ONLY_AGG_OF_ALL=PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES)
-                setup_and_run_multi_economy_plots(config,  ECONOMY_GROUPING='passenger_transport_style')
-            except:
-                breakpoint()
-                print('setup_and_run_multi_economy_plots() not working for {}'.format(ECONOMY_ID)) 
-                raise Exception('setup_and_run_multi_economy_plots() not working for {}'.format(ECONOMY_ID))
-                # PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES = True
-                # setup_and_run_multi_economy_plots(config,ONLY_AGG_OF_ALL=PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES)
-                
-    copy_required_output_files_to_one_folder(config, output_folder_path=os.path.join('output_data', 'for_other_modellers'))
+        progress += increment
+        update_progress(progress)
+        copy_required_output_files_to_one_folder(config, ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\\for_other_modellers')
     
+    if RUN_FINAL_FORMATTING:
+        print('\nFinished running model for all economies, now doing final formatting\n')
+        
+        concatenate_outlook_data_system_outputs(config)
+        
+        progress += increment
+        update_progress(progress)
+        SETUP_AND_RUN_MULTI_ECONOMY_PLOTS=True
+        if concatenate_output_data(config):
+            international_bunker_share_calculation_handler(config)
+            if SETUP_AND_RUN_MULTI_ECONOMY_PLOTS:
+                try:
+                    produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
+                except:
+                    breakpoint()
+                    print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
+                    raise Exception('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
+                    # produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
+                try:
+                    PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES = True
+                    setup_and_run_multi_economy_plots(config,ONLY_AGG_OF_ALL=PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES)
+                    setup_and_run_multi_economy_plots(config,  ECONOMY_GROUPING='passenger_transport_style')
+                except:
+                    breakpoint()
+                    print('setup_and_run_multi_economy_plots() not working for {}'.format(ECONOMY_ID)) 
+                    raise Exception('setup_and_run_multi_economy_plots() not working for {}'.format(ECONOMY_ID))
+                    # PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES = True
+                    # setup_and_run_multi_economy_plots(config,ONLY_AGG_OF_ALL=PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES)
+                    
+        copy_required_output_files_to_one_folder(config, output_folder_path=os.path.join('output_data', 'for_other_modellers'))
+        
     progress += increment
     update_progress(progress)
     # ARCHIVE_INPUT_DATA = False
@@ -268,7 +268,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     #     #set up archive folder:
     #     archiving_folder = archiving_scripts.create_archiving_folder_for_FILE_DATE_ID(config)
     #     archiving_scripts.archive_lots_of_files(config, archiving_folder)    
-    ARCHIVE_RESULTS=True
+    ARCHIVE_RESULTS=False
     if ARCHIVE_RESULTS:
         economies_to_archive = ['01_AUS']#, '21_VN', '07_INA']
         for economy in economies_to_archive:
@@ -296,18 +296,29 @@ if __name__ == "__main__":
             root_dir_param = sys.argv[2]
             economy_to_run = sys.argv[1]
             print('Running model for economy {}'.format(economy_to_run), 'in root directory {}'.format(root_dir_param))
-            main(economy_to_run=economy_to_run, root_dir_param=root_dir_param, script_dir_param=root_dir_param) #e.g. python transport_model_9th_edition\main.py all C:\Users\finbar.maunsell\github\transport_model_9th_edition
-            #e.g. python transport_model_9th_edition\main.py all \var\www\transport-modeling-guide\transport_model_9th_edition
+            main(economy_to_run=economy_to_run, root_dir_param=root_dir_param, script_dir_param=root_dir_param, RUN_FINAL_FORMATTING = True) #e.g. python transport_model_9th_edition\main.py all C:\Users\finbar.maunsell\github\transport_model_9th_edition
+            #e.g. python transport_model_9th_edition/main.py all /var/www/transport-modeling-guide/transport_model_9th_edition
             # os.chdir('C:\\Users\\finbar.maunsell\\github')
             # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main('12_NZ')#, root_dir_param=root_dir_param)
+        main('01_AUS', RUN_FINAL_FORMATTING = True)#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%
-#   '01_AUS': 1
+
+# def group_economies_with_dict():
+#     economy_grouping_dict_all = {'all':ECONOMY_IDs} 
+#     economy_grouping_dict_west_sea_latin_china_jk_rus = {'low_density_rich': ['01_AUS', '03_CDA', '08_NZ', '12_USA'],
+#                                                          'city_state' 
+#     'sea_latam': ['14_IDN', '15_MYS', '16_RUS', '17_SGP', '18_THA', '19_VNM'], 
+#     'china': ['20_CHN'], 
+#     'japkor': ['21_JK'],
+#     'rus': ['16_RUS'],
+#     'png': ['13_PNG']}
+    
+# #   '01_AUS': 1
 #   '02_BD': 1
 #   '03_CDA': 1 #canada return is super weird. it goes higher than it was prevoouisly. so just dropping it to 0.5 compared to 1 for everyone else
 #   '04_CHL': 1
@@ -327,4 +338,4 @@ if __name__ == "__main__":
 #   '18_CT': 1
 #   '19_THA': 1
 #   '20_USA': 1
-#   '21_VN': 1
+#   '21_VN': 1  n

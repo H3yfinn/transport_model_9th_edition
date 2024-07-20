@@ -107,7 +107,7 @@ def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_ca
     
     return increment, progress, update_progress, config
 
-def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
+def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None,  RUN_FINAL_FORMATTING = False):
     error_message = None
     increment, progress, update_progress, config = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
 
@@ -229,38 +229,38 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         progress += increment
         update_progress(progress)
         copy_required_output_files_to_one_folder(config, ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\\for_other_modellers')
-
-    print('\nFinished running model for all economies, now doing final formatting\n')
     
-    concatenate_outlook_data_system_outputs(config)
-    
-    progress += increment
-    update_progress(progress)
-    
-    SETUP_AND_RUN_MULTI_ECONOMY_PLOTS = True
-    if concatenate_output_data(config):
-        international_bunker_share_calculation_handler(config)
-        if SETUP_AND_RUN_MULTI_ECONOMY_PLOTS:
-            try:
-                produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
-            except:
-                breakpoint()
-                print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
-                raise Exception('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
-                # produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
-            try:
-                PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES = True
-                setup_and_run_multi_economy_plots(config,ONLY_AGG_OF_ALL=PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES)
-                setup_and_run_multi_economy_plots(config,  ECONOMY_GROUPING='passenger_transport_style')
-            except:
-                breakpoint()
-                print('setup_and_run_multi_economy_plots() not working for {}'.format(ECONOMY_ID)) 
-                raise Exception('setup_and_run_multi_economy_plots() not working for {}'.format(ECONOMY_ID))
-                # PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES = True
-                # setup_and_run_multi_economy_plots(config,ONLY_AGG_OF_ALL=PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES)
-                
-    copy_required_output_files_to_one_folder(config, output_folder_path=os.path.join('output_data', 'for_other_modellers'))
-    
+    if RUN_FINAL_FORMATTING:
+        print('\nFinished running model for all economies, now doing final formatting\n')
+        
+        concatenate_outlook_data_system_outputs(config)
+        
+        progress += increment
+        update_progress(progress)
+        SETUP_AND_RUN_MULTI_ECONOMY_PLOTS=True
+        if concatenate_output_data(config):
+            international_bunker_share_calculation_handler(config)
+            if SETUP_AND_RUN_MULTI_ECONOMY_PLOTS:
+                try:
+                    produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
+                except:
+                    breakpoint()
+                    print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
+                    raise Exception('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
+                    # produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
+                try:
+                    PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES = True
+                    setup_and_run_multi_economy_plots(config,ONLY_AGG_OF_ALL=PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES)
+                    setup_and_run_multi_economy_plots(config,  ECONOMY_GROUPING='passenger_transport_style')
+                except:
+                    breakpoint()
+                    print('setup_and_run_multi_economy_plots() not working for {}'.format(ECONOMY_ID)) 
+                    raise Exception('setup_and_run_multi_economy_plots() not working for {}'.format(ECONOMY_ID))
+                    # PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES = True
+                    # setup_and_run_multi_economy_plots(config,ONLY_AGG_OF_ALL=PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES)
+                    
+        copy_required_output_files_to_one_folder(config, output_folder_path=os.path.join('output_data', 'for_other_modellers'))
+        
     progress += increment
     update_progress(progress)
     # ARCHIVE_INPUT_DATA = False
@@ -296,14 +296,14 @@ if __name__ == "__main__":
             root_dir_param = sys.argv[2]
             economy_to_run = sys.argv[1]
             print('Running model for economy {}'.format(economy_to_run), 'in root directory {}'.format(root_dir_param))
-            main(economy_to_run=economy_to_run, root_dir_param=root_dir_param, script_dir_param=root_dir_param) #e.g. python transport_model_9th_edition\main.py all C:\Users\finbar.maunsell\github\transport_model_9th_edition
+            main(economy_to_run=economy_to_run, root_dir_param=root_dir_param, script_dir_param=root_dir_param, RUN_FINAL_FORMATTING = True) #e.g. python transport_model_9th_edition\main.py all C:\Users\finbar.maunsell\github\transport_model_9th_edition
             #e.g. python transport_model_9th_edition/main.py all /var/www/transport-modeling-guide/transport_model_9th_edition
             # os.chdir('C:\\Users\\finbar.maunsell\\github')
             # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main('01_AUS')#, root_dir_param=root_dir_param)
+        main('01_AUS', RUN_FINAL_FORMATTING = True)#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%
