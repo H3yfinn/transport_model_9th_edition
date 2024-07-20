@@ -3919,7 +3919,7 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
                 if WRITE_HTML:    
                     #make line thicker
                     
-                    write_graph_to_html(config, filename= f'INTENSITY_ANALYSIS_sales_share_by_transport_type_all_{scenario}', graph_type='line',economy=economy, plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename= f'INTENSITY_ANALYSIS_sales_share_by_transport_type_all_{scenario}.html', graph_type='line',economy=economy, plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
                     
                 #add fig to dictionary for scenario and economy:
                 fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_all'] = [fig, title, PLOTTED]
