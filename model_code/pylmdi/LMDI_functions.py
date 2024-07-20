@@ -1124,7 +1124,7 @@ def hierarchical_LMDI_emissions(config, energy_data, emissions_data, activity_da
                 
                 successive_structural_level_drivers['energy_intensity_driver_{}'.format(str(structure_variable_index))] = successive_structural_level_drivers['energy_intensity_driver_{}'.format(str(structure_variable_index))] * successive_structural_level_drivers['weighting_value_{}'.format(hierarchy_variable)]
 
-                successive_structural_level_drdrivers['structural_driver_{}'.format(str(structure_variable_index))] = successive_structural_level_drivers['structural_driver_{}'.format(str(structure_variable_index))] * successive_structural_level_drivers['weighting_value_{}'.format(hierarchy_variable)]
+                successive_structural_level_drivers['structural_driver_{}'.format(str(structure_variable_index))] = successive_structural_level_drivers['structural_driver_{}'.format(str(structure_variable_index))] * successive_structural_level_drivers['weighting_value_{}'.format(hierarchy_variable)]
                 
                 # remove the current hierarchy variable from the mini_hierarchy_list now that we have done the calc for it
                 mini_hierarchy_list.remove(hierarchy_variable)
@@ -1135,21 +1135,21 @@ def hierarchical_LMDI_emissions(config, energy_data, emissions_data, activity_da
         # times the weighting value for the first_structure_variable by the newly calculated value
         successive_structural_level_drivers = pd.merge(successive_structural_level_drivers, weighting_df, on=[time_variable, structure_variables_list[0]])
 
-        successive_structural_level_drdrivers['emissions_intensity_driver_{}'.format(str(structure_variable_index))] = successive_structural_level_drdrivers['emissions_intensity_driver_{}'.format(str(structure_variable_index))] * successive_structural_level_drdrivers['weighting_value_first_str_variable']
+        successive_structural_level_drivers['emissions_intensity_driver_{}'.format(str(structure_variable_index))] = successive_structural_level_drivers['emissions_intensity_driver_{}'.format(str(structure_variable_index))] * successive_structural_level_drivers['weighting_value_first_str_variable']
         
-        successive_structural_level_drdrivers['energy_intensity_driver_{}'.format(str(structure_variable_index))] = successive_structural_level_drdrivers['energy_intensity_driver_{}'.format(str(structure_variable_index))] * successive_structural_level_drdrivers['weighting_value_first_str_variable']
+        successive_structural_level_drivers['energy_intensity_driver_{}'.format(str(structure_variable_index))] = successive_structural_level_drivers['energy_intensity_driver_{}'.format(str(structure_variable_index))] * successive_structural_level_drivers['weighting_value_first_str_variable']
 
-        successive_structural_level_drdrivers['structural_driver_{}'.format(str(structure_variable_index))] = successive_structural_level_drdrivers['structural_driver_{}'.format(str(structure_variable_index))] * successive_structural_level_drdrivers['weighting_value_first_str_variable']
+        successive_structural_level_drivers['structural_driver_{}'.format(str(structure_variable_index))] = successive_structural_level_drivers['structural_driver_{}'.format(str(structure_variable_index))] * successive_structural_level_drivers['weighting_value_first_str_variable']
         
-        # sum the successive_structural_level_drdrivers by year
-        successive_structural_level_drdrivers = successive_structural_level_drdrivers[[time_variable, 'emissions_intensity_driver_{}'.format(str(structure_variable_index)), 'energy_intensity_driver_{}'.format(str(structure_variable_index)), 'structural_driver_{}'.format(str(structure_variable_index))]].groupby(time_variable).sum(numeric_only=True).reset_index()
+        # sum the successive_structural_level_drivers by year
+        successive_structural_level_drivers = successive_structural_level_drivers[[time_variable, 'emissions_intensity_driver_{}'.format(str(structure_variable_index)), 'energy_intensity_driver_{}'.format(str(structure_variable_index)), 'structural_driver_{}'.format(str(structure_variable_index))]].groupby(time_variable).sum(numeric_only=True).reset_index()
 
         # calc the exponential
-        successive_structural_level_drdrivers['emissions_intensity_driver_{}'.format(str(structure_variable_index))] = np.exp(successive_structural_level_drdrivers['emissions_intensity_driver_{}'.format(str(structure_variable_index))])
-        successive_structural_level_drdrivers['energy_intensity_driver_{}'.format(str(structure_variable_index))] = np.exp(successive_structural_level_drdrivers['energy_intensity_driver_{}'.format(str(structure_variable_index))])
-        successive_structural_level_drdrivers['structural_driver_{}'.format(str(structure_variable_index))] = np.exp(successive_structural_level_drdrivers['structural_driver_{}'.format(str(structure_variable_index))])
+        successive_structural_level_drivers['emissions_intensity_driver_{}'.format(str(structure_variable_index))] = np.exp(successive_structural_level_drivers['emissions_intensity_driver_{}'.format(str(structure_variable_index))])
+        successive_structural_level_drivers['energy_intensity_driver_{}'.format(str(structure_variable_index))] = np.exp(successive_structural_level_drivers['energy_intensity_driver_{}'.format(str(structure_variable_index))])
+        successive_structural_level_drivers['structural_driver_{}'.format(str(structure_variable_index))] = np.exp(successive_structural_level_drivers['structural_driver_{}'.format(str(structure_variable_index))])
         # add to the dictionary using index as key
-        successive_structural_level_drdrivers_dict[structure_variable_index] = successive_structural_level_drdrivers
+        successive_structural_level_drivers_dict[structure_variable_index] = successive_structural_level_drivers
 
         # add structure variable to the hierarchy list
         hierarchy_list.append(structure_variable)
@@ -1163,7 +1163,7 @@ def hierarchical_LMDI_emissions(config, energy_data, emissions_data, activity_da
     drivers_df = drivers_df.merge(first_structural_level_structural_driver, on=time_variable)
     for structure_variable in structure_variables_list[1:]:
         structure_variable_index = structure_variables_list.index(structure_variable)
-        drivers_df = drivers_df.merge(successive_structural_level_drdrivers_dict[structure_variable_index], on=time_variable)
+        drivers_df = drivers_df.merge(successive_structural_level_drivers_dict[structure_variable_index], on=time_variable)
 
     # now calculate the ratio between other years and base years in total energy
     mult_change = emissions_data.groupby([time_variable])[emissions_variable].sum().reset_index()
