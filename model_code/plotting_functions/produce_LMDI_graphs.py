@@ -72,8 +72,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
                     datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_road_2_Emissions_Hierarchical_{END_DATE}')
                 datasets_to_produce.append(f'{economy}_{scenario}_road_1_Energy use_{END_DATE}')
                 datasets_to_produce.append(f'{economy}_{scenario}_road_2_Energy use_Hierarchical_{END_DATE}')
-            datasets_to_produce.append(f'{economy}_road_1_Energy use_{END_DATE}')
-            datasets_to_produce.append(f'{economy}_road_2_Energy use_Hierarchical_{END_DATE}')
+            # datasets_to_produce.append(f'{economy}_road_1_Energy use_{END_DATE}')#thse dont have a scenario so not sure if they are useful
+            # datasets_to_produce.append(f'{economy}_road_2_Energy use_Hierarchical_{END_DATE}')#thse dont have a scenario so not sure if they are useful
             if ECONOMY_ID == 'all':
                 break
     elif not NOT_JUST_DASHBOARD_DATASETS and USE_LIST_OF_DATASETS_TO_PRODUCE:
@@ -86,8 +86,9 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
                 for transport_type in all_data['Transport Type'].unique():
                     for medium in ['road', 'all_mediums']:
                         datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_{medium}_2_Energy use_Hierarchical_{END_DATE}')
-                        #to produce the concatenated one we actaully just need to produce the individual transport types versions:
-                        datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_{medium}_2_Energy use_Hierarchical_{END_DATE}')# datasets_to_produce.append(f'{economy}_{scenario}_{medium}_2_Energy use_Hierarchical_{END_DATE}_concatenated_additive')
+                        #to produce the concatenated one we actaully just need to produce the individual transport types versions as well:
+                        datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_{medium}_2_Energy use_Hierarchical_{END_DATE}')
+                        datasets_to_produce.append(f'{economy}_{scenario}_{medium}_2_Energy use_Hierarchical_{END_DATE}')
             if ECONOMY_ID == 'all':
                 break
     else:
@@ -231,9 +232,9 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
     #create loop to run through the combinations
     i=0
     #checkl that our datasets_to_produce are all in the combination_dict_list, otherwise this wont work as expected:
-    if not all([dataset in [x['extra_identifier'] for x in combination_dict_list] for dataset in datasets_to_produce]):
+    if not all([dataset in [x['extra_identifier'] for x in combination_dict_list]+[a for a in combined_transport_type_waterfall_inputs.keys()] for dataset in datasets_to_produce]):
         breakpoint()
-        missing_datasets = [dataset for dataset in datasets_to_produce if dataset not in [x['extra_identifier'] for x in combination_dict_list]]
+        missing_datasets = [dataset for dataset in datasets_to_produce if dataset not in [x['extra_identifier'] for x in combination_dict_list]+[a for a in combined_transport_type_waterfall_inputs.keys()]]
         raise ValueError('The following datasets are not in the combination_dict_list: {}'.format(missing_datasets))
     for combination_dict in combination_dict_list:
         try:
