@@ -231,20 +231,20 @@ def estimate_ev_stocks_given_chargers(config, df, economy, date, scenario, param
 # %%
 
 #%%
-calculate_evs_given_chargers = False 
-if calculate_evs_given_chargers:
-    economy= '08_JPN'
-    date=2030
-    scenario='Target'
-    number_of_fast_chargers = 4000
-    number_of_non_fast_chargers = 150000 - number_of_fast_chargers
-    number_of_chargers = 0
+# calculate_evs_given_chargers = False 
+# if calculate_evs_given_chargers:
+#     economy= '08_JPN'
+#     date=2030
+#     scenario='Target'
+#     number_of_fast_chargers = 4000
+#     number_of_non_fast_chargers = 150000 - number_of_fast_chargers
+#     number_of_chargers = 0
     
-    df, parameters, colors_dict, INCORPORATE_UTILISATION_RATE = prepare_inputs_for_estimating_charging_requirements(config, ECONOMY_ID=economy)
+#     df, parameters, colors_dict, INCORPORATE_UTILISATION_RATE = prepare_inputs_for_estimating_charging_requirements(config, ECONOMY_ID=economy)
     
-    ev_stocks_and_chargers = estimate_ev_stocks_given_chargers(config, df, economy, date, scenario, parameters, number_of_non_fast_chargers=number_of_non_fast_chargers, number_of_fast_chargers=number_of_fast_chargers, number_of_chargers=number_of_chargers)
+#     ev_stocks_and_chargers = estimate_ev_stocks_given_chargers(config, df, economy, date, scenario, parameters, number_of_non_fast_chargers=number_of_non_fast_chargers, number_of_fast_chargers=number_of_fast_chargers, number_of_chargers=number_of_chargers)
     
-    plot_charging_graphs.plot_required_evs(config, ev_stocks_and_chargers,colors_dict, economy, date, scenario)
+#     plot_charging_graphs.plot_required_evs(config, ev_stocks_and_chargers,colors_dict, economy, date, scenario)
      
         
 

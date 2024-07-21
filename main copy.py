@@ -223,7 +223,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                 PLOT_MINOR_OUTPUTS = False
                 NOT_JUST_DASHBOARD_DATASETS = False
             if ANALYSE_OUTPUT: 
-                estimate_kw_of_required_chargers(config, ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
+                estimate_kw_of_required_chargers(config, ECONOMY_ID)
                 if PLOT_MINOR_OUTPUTS:
                     plot_required_chargers(config, ECONOMY_ID)
                 calculate_and_plot_oil_displacement(config, ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)  
@@ -311,7 +311,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main('all')#, root_dir_param=root_dir_param)
+        main('19_THA')#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%
