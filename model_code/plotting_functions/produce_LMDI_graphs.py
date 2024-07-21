@@ -58,7 +58,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
             charts_to_produce.append(f'{economy}_road_2_Energy use_Hierarchical_{END_DATE}')
             if ECONOMY_ID == 'all':
                 break
-    
+    else:
+        charts_to_produce = []
     if USE_LIST_OF_DATASETS_TO_PRODUCE and NOT_JUST_DASHBOARD_DATASETS:
         datasets_to_produce = []
         for economy in all_data.Economy.unique():
@@ -87,8 +88,11 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
                         datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_{medium}_2_Energy use_Hierarchical_{END_DATE}_multiplicative')
                         #to produce the concatenated one we actaully just need to produce the individual transport types versions:
                         datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_{medium}_2_Energy use_Hierarchical_{END_DATE}_additive')# datasets_to_produce.append(f'{economy}_{scenario}_{medium}_2_Energy use_Hierarchical_{END_DATE}_concatenated_additive')
+            if ECONOMY_ID == 'all':
+                break
     else:
         datasets_to_produce = []
+        
     #drop duplicates
     datasets_to_produce = list(set(datasets_to_produce))
     # #simplify by filtering for road medium only

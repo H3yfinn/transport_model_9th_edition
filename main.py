@@ -250,7 +250,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             international_bunker_share_calculation_handler(config)
             if SETUP_AND_RUN_MULTI_ECONOMY_PLOTS:
                 try:
-                    produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
+                    produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060)
                 except:
                     breakpoint()
                     print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
