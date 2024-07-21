@@ -27,7 +27,7 @@ from plotly.subplots import make_subplots
 
 # This code is designed to calculate and visualize the displacement of oil use due to electric vehicles (EVs) and fuel cell electric vehicles (FCEVs). It does this by estimating how much oil would have been used if these vehicles were powered by internal combustion engines (ICEs) instead. 
 #%%
-def calculate_and_plot_oil_displacement(config, ECONOMY_ID, CHART_OPTION='stacked_bar', COMBINE_LPVS = True, bar_graph_year_intervals=False, INCLUDE_VTYPES = False, INCLUDE_OIL_USE=True):
+def calculate_and_plot_oil_displacement(config, ECONOMY_ID, CHART_OPTION='stacked_bar', COMBINE_LPVS = True, bar_graph_year_intervals=False, INCLUDE_VTYPES = False, INCLUDE_OIL_USE=True, PLOT_MINOR_OUTPUTS=True):
         
     AUTO_OPEN_PLOTLY_GRAPHS = False
     dont_overwrite_existing_graphs = False
@@ -371,10 +371,12 @@ def calculate_and_plot_oil_displacement(config, ECONOMY_ID, CHART_OPTION='stacke
                 # if any(ice_bev['Difference']<0):
                 #     print('negative difference for {}'.format((economy, t_type, scenario, 'bev')))
                 #     continue
+                
+                breakpoint()#is there a way i can create an oil displacement graph in dashboarsd
                 ############plotting
-                if CHART_OPTION == 'stacked_area_with_difference':
+                if CHART_OPTION == 'stacked_area_with_difference' and PLOT_MINOR_OUTPUTS:
                     plot_stacked_area_with_difference(config, ice_bev, v_types, color_map, default_save_folder,t_type,  economy, scenario,  AUTO_OPEN_PLOTLY_GRAPHS, drive = 'bev')
-                elif CHART_OPTION == 'stacked_bar':
+                elif CHART_OPTION == 'stacked_bar' and PLOT_MINOR_OUTPUTS:
                     plot_stacked_bar(config, ice_bev, v_types, color_map, default_save_folder, t_type, economy, scenario, AUTO_OPEN_PLOTLY_GRAPHS, drive='bev', INCLUDE_OIL_USE=INCLUDE_OIL_USE)
                             
 
@@ -447,11 +449,11 @@ def calculate_and_plot_oil_displacement(config, ECONOMY_ID, CHART_OPTION='stacke
                 # if any(ice_fcev['Difference']<0):
                 #     print('negative difference for {}'.format((economy, t_type, scenario, 'fcev')))
                 #     continue
-
+                breakpoint()#is there a way i can create an oil displacement graph in dashboarsd
                 ############plotting
-                if CHART_OPTION == 'stacked_area_with_difference':
+                if CHART_OPTION == 'stacked_area_with_difference' and PLOT_MINOR_OUTPUTS:
                     plot_stacked_area_with_difference(config, ice_fcev, v_types, color_map, default_save_folder,t_type,  economy, scenario,  AUTO_OPEN_PLOTLY_GRAPHS, drive = 'fcev')
-                elif CHART_OPTION == 'stacked_bar':
+                elif CHART_OPTION == 'stacked_bar' and PLOT_MINOR_OUTPUTS:
                     plot_stacked_bar(config, ice_fcev, v_types, color_map, default_save_folder, t_type, economy, scenario, AUTO_OPEN_PLOTLY_GRAPHS, drive='fcev', INCLUDE_OIL_USE=INCLUDE_OIL_USE)
 
 def plot_stacked_area_with_difference(config, df, v_types, color_map, default_save_folder, t_type, economy, scenario, AUTO_OPEN_PLOTLY_GRAPHS, drive):

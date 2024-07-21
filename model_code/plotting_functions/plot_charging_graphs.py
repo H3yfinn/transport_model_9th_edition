@@ -26,11 +26,10 @@ from plotly.subplots import make_subplots
 
 
 #%%    
-def plot_required_chargers(config, ECONOMY_ID):
+def plot_required_chargers(config, ECONOMY_ID,):
     # total_kwh_of_battery_capacity.to_csv(os.path.join('output_data', 'for_other_modellers', 'estimated_number_of_chargers.csv'), index=False) 
     #grab colors dict:
     df, parameters, colors_dict, INCORPORATE_UTILISATION_RATE = estimate_charging_requirements.prepare_inputs_for_estimating_charging_requirements(config, ECONOMY_ID)
-    
     total_kwh_of_battery_capacity = pd.read_csv(os.path.join(config.root_dir, f'output_data', 'for_other_modellers', 'charging', f'{ECONOMY_ID}_estimated_number_of_chargers.csv'))
 
     #use plotly to plot the number of chargers required for each economy, date and scenario and also by vehicle type.

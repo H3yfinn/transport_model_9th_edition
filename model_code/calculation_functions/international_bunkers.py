@@ -29,7 +29,7 @@ from plotly.subplots import make_subplots
 #%%
 #%%
     
-def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', turnover_rate=0.1):
+def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', turnover_rate=0.1, PLOT_MINOR_OUTPUTS=True):
     #start tuimer so we can see how long thsings take:
     # config.FILE_DATE_ID = '20230803'
     # config.model_output_file_name = 'model_output20230803.csv'
@@ -45,9 +45,9 @@ def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', tur
     international_fuel_shares = calculate_missing_drive_shares_from_manually_inputted_data(config, international_fuel_shares)
         
     #calcualte avergae growth rate from domestic non road energy use:
-    non_road_activity, non_road_intensity = extract_non_road_modelled_data(config, USE_PREVIOUS_DATA=False)
+    non_road_activity, non_road_intensity = extract_non_road_modelled_data(config, USE_PREVIOUS_DATA=False, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
     
-    non_road_activity_growth_rate = calculate_non_road_activity_growth_rate(config, non_road_activity)
+    non_road_activity_growth_rate = calculate_non_road_activity_growth_rate(config, non_road_activity, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
     #check for duplcaites: 
     check_for_duplicates_in_all_datasets(config, energy_use_esto_bunkers_tall, international_fuel_shares, non_road_activity_growth_rate, non_road_intensity, international_supply_side_fuel_mixing)
     #merge all data
@@ -78,7 +78,7 @@ def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', tur
     #all done i thnk (:
     new_esto_data = remap_to_esto_mapping(config, international_bunker_energy, energy_use_esto_mapping)
     
-    if ECONOMY_ID=='all':
+    if ECONOMY_ID=='all' and PLOT_MINOR_OUTPUTS:
         #plot as line graph:
         plot_international_bunker_energy(config, international_bunker_energy)
         plot_international_bunker_activity(config, international_bunker_outputs)
@@ -473,7 +473,7 @@ def get_economies_to_base_energy_use_off_of(config):
     # Filter for only economies with a value of True
     return [economy for economy in ECONOMIES_TO_BASE_ENERGY_USE_OFF_OF if ECONOMIES_TO_BASE_ENERGY_USE_OFF_OF[economy] == True]
 
-def extract_non_road_modelled_data(config, USE_PREVIOUS_DATA=False):
+def extract_non_road_modelled_data(config, USE_PREVIOUS_DATA=False, PLOT_MINOR_OUTPUTS=True):
     #NOTE THAT IF WE ARE MISSING DATA FOR AN ECONOMY WE WILL BASE THIS OFF OF THE DATA WE HAVE SAVED IN A PREVIOUS RUN (WHICH IS SAVED ON THE GIT REPO TOO)
     #get non road intensity and activity projections. the activity will be used to get the growth rate for energy use in the whole of apec, the intensity will be timesed by energy to get activity.
     #and extract intensity and activity from the model output:
@@ -550,7 +550,8 @@ def extract_non_road_modelled_data(config, USE_PREVIOUS_DATA=False):
         fuels_missing = non_road_intensity.loc[non_road_intensity['Intensity'].isnull()]['Drive'].unique()
         raise Exception(f'There are some fuels in the non_road_intensity data that do not have intensity values. Please check the data and see about creating intensity data for them, {fuels_missing}')
     
-    plot_non_road_intensity(config, non_road_intensity)
+    if PLOT_MINOR_OUTPUTS:
+        plot_non_road_intensity(config, non_road_intensity)
     
     #save these to intermediate data for use in case we cannot access the model output later on:
     non_road_activity.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_activity.csv'), index=False)
@@ -661,7 +662,7 @@ def plot_intensity_from_output_data(config, international_bunker_energy, non_roa
         fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'international_energy_use', f'comparison_intensity_for_{scenario}_{config.FILE_DATE_ID}.html'))
     
     
-def calculate_non_road_activity_growth_rate(config, non_road_activity, PLOT=True):
+def calculate_non_road_activity_growth_rate(config, non_road_activity, PLOT_MINOR_OUTPUTS=True):
     #calculate the average growth rate for each scenario. we will combine it by medium rather than keepign ti separate
     # if PLOT:
     #     plot_non_road_activity(config, non_road_activity)
@@ -685,7 +686,7 @@ def calculate_non_road_activity_growth_rate(config, non_road_activity, PLOT=True
     non_road_activity = non_road_activity.sort_values(by=['Scenario', 'Transport Type', 'Date'])
     non_road_activity['Growth Rate'] = non_road_activity.groupby(['Scenario', 'Transport Type'])['Activity'].pct_change()
     
-    if PLOT:
+    if PLOT_MINOR_OUTPUTS:
         plot_non_road_activity(config, non_road_activity)
     ##############################
     #drop non needed cols. we will drop transport type now that the transport types can be compared as %, where previously fregith tonne km and passenger km could not be compared
@@ -693,7 +694,7 @@ def calculate_non_road_activity_growth_rate(config, non_road_activity, PLOT=True
     #to avoid the effect of covid in the years before 2025, we will set the growth rate for 2025 to the average growth rate for 2026-2036
     non_road_activity_growth_rate.loc[non_road_activity_growth_rate['Date'] <= 2025, 'Growth Rate'] = non_road_activity_growth_rate.loc[((non_road_activity_growth_rate['Date'] > 2025) & (non_road_activity_growth_rate['Date'] < 2037)), 'Growth Rate'].mean()
     #and plot the growth rate
-    if PLOT:
+    if PLOT_MINOR_OUTPUTS:
         plot_non_road_activity_growth(config, non_road_activity_growth_rate)
     
     return non_road_activity_growth_rate

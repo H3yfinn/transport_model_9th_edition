@@ -1426,7 +1426,7 @@ def prodcue_LMDI_mutliplicative_plot(config, ECONOMY_IDs, fig_dict, colors_dict,
             else:
                 medium_id = 'road'
             # breakpoint()
-            file_identifier = f'{economy}_{scenario}_{transport_type}_{medium_id}_2_Energy use_Hierarchical_2070_multiplicative'
+            file_identifier = f'{economy}_{scenario}_{transport_type}_{medium_id}_2_Energy use_Hierarchical_2060_multiplicative'
             try:
                 lmdi_data = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI', economy, f'{file_identifier}.csv'))
             except:
@@ -1471,7 +1471,7 @@ def produce_LMDI_additive_plot(config, ECONOMY_IDs, fig_dict, colors_dict, mediu
             else:
                 medium_id = 'road'
             # breakpoint()
-            file_identifier = f'{economy}_{scenario}_{medium_id}_2_Energy use_Hierarchical_2070_concatenated_additive'
+            file_identifier = f'{economy}_{scenario}_{medium_id}_2_Energy use_Hierarchical_2060_concatenated_additive'
             lmdi_data = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI', economy, f'{file_identifier}.csv'))
             #melt data so we have the different components of the LMDI as rows. eg. for freight the cols are: Date	Change in Energy	Energy intensity effect	freight_tonne_km effect	Engine type effect	Total Energy	Total_freight_tonne_km
             #we want to drop the last two plots, then melt the data so we have the different components of the LMDI as rows. eg. for freight the cols will end up as: Date	Effect. Then we will also create a line dash col and if the Effect is Change in Energy then the line dash will be solid, otherwise it will be dotted
@@ -5505,11 +5505,11 @@ def prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES(config,  ECONOMY_GRO
             else:
                 medium_id = 'road'
             # breakpoint()
-            file_identifier = f'{economy}_{scenario}_{transport_type}_{medium_id}_2_Energy use_Hierarchical_2070_multiplicative'
+            file_identifier = f'{economy}_{scenario}_{transport_type}_{medium_id}_2_Energy use_Hierarchical_2060_multiplicative'
             try:
                 if economy == 'all':
                     #search in folder 'APEC' and use APEC instead of economy in file_id
-                    file_identifier = f'APEC_{scenario}_{transport_type}_{medium_id}_2_Energy use_Hierarchical_2070_multiplicative'
+                    file_identifier = f'APEC_{scenario}_{transport_type}_{medium_id}_2_Energy use_Hierarchical_2060_multiplicative'
                     lmdi_data_economy = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI', 'APEC', f'{file_identifier}.csv'))
                 else:
                     lmdi_data_economy = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI', economy, f'{file_identifier}.csv'))
@@ -5564,11 +5564,11 @@ def produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES(config,  ECONOMY_GROUPING,
             else:
                 medium_id = 'road'
             # breakpoint()
-            file_identifier = f'{economy}_{scenario}_{medium_id}_2_Energy use_Hierarchical_2070_concatenated_additive'
+            file_identifier = f'{economy}_{scenario}_{medium_id}_2_Energy use_Hierarchical_2060_concatenated_additive'
             try:
                 if economy == 'all':
                     #search in folder 'APEC' and use APEC instead of economy in file_id
-                    file_identifier = f'APEC_{scenario}_{medium_id}_2_Energy use_Hierarchical_2070_concatenated_additive'
+                    file_identifier = f'APEC_{scenario}_{medium_id}_2_Energy use_Hierarchical_2060_concatenated_additive'
                     lmdi_data_economy = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI','APEC', f'{file_identifier}.csv'))
                 else:
                     lmdi_data_economy = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI', economy, f'{file_identifier}.csv'))

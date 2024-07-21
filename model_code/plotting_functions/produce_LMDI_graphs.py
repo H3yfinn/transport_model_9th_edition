@@ -25,7 +25,7 @@ from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 
 #%%
-def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = False, PLOTTING = False, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070, PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR=True, INCLUDE_LIFECYCLE_EMISSIONS=True, PLOT_EMISSIONS_FACTORS=False, SET_START_DATE_TO_AFTER_COVID=True):
+def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = False, PLOTTING = False, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060, PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR=True, INCLUDE_LIFECYCLE_EMISSIONS=True, PLOT_EMISSIONS_FACTORS=False, SET_START_DATE_TO_AFTER_COVID=True, NOT_JUST_DASHBOARD_DATASETS=True):
     #take in energy and activity data 
     if ECONOMY_ID == 'all':
         all_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output', f'all_economies_{config.FILE_DATE_ID}_{config.model_output_file_name}'))
@@ -59,7 +59,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
             if ECONOMY_ID == 'all':
                 break
     
-    if USE_LIST_OF_DATASETS_TO_PRODUCE:
+    if USE_LIST_OF_DATASETS_TO_PRODUCE and NOT_JUST_DASHBOARD_DATASETS:
         datasets_to_produce = []
         for economy in all_data.Economy.unique():
             if ECONOMY_ID == 'all':
@@ -75,6 +75,20 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
             datasets_to_produce.append(f'{economy}_road_2_Energy use_Hierarchical_{END_DATE}')
             if ECONOMY_ID == 'all':
                 break
+    elif not NOT_JUST_DASHBOARD_DATASETS and USE_LIST_OF_DATASETS_TO_PRODUCE:
+        datasets_to_produce = []
+        #jsut create the ones we willa ctually use:
+        for economy in all_data.Economy.unique():
+            if ECONOMY_ID == 'all':
+                economy = 'all'
+            for scenario in all_data.Scenario.unique():
+                for transport_type in all_data['Transport Type'].unique():
+                    for medium in ['road', 'all_mediums']:
+                        datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_{medium}_2_Energy use_Hierarchical_{END_DATE}_multiplicative')
+                        datasets_to_produce.append(f'{economy}_{scenario}_{medium}_2_Energy use_Hierarchical_{END_DATE}_concatenated_additive')
+    else:
+        datasets_to_produce = []
+        
     # #simplify by filtering for road medium only
     # all_data = all_data[all_data['Medium'] == 'road']
     #make drive and vehicle type = medium where it is no road

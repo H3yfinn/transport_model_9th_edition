@@ -81,11 +81,16 @@ def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_ca
         if os.name == 'nt':#if we are on windows, we need to add the \\?\ prefix to the root_dir to allow for long file paths
             if "\\\\?\\" not in root_dir:
                 root_dir =  "\\\\?\\" + root_dir
+                USING_LINUX_WEB_APP=False
+        else:
+            USING_LINUX_WEB_APP=True
     else:
         if os.name == 'nt':
             root_dir =  "\\\\?\\" + re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+            USING_LINUX_WEB_APP=False
         else:
             root_dir = re.split('transport_model_9th_edition', script_dir)[0] + 'transport_model_9th_edition'
+            USING_LINUX_WEB_APP=True
 
     config = configurations.Config(root_dir)
     
@@ -105,19 +110,17 @@ def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_ca
     else:
         raise Exception('Somethings going wrong with the economy_to_run variable')
     
-    return increment, progress, update_progress, config
+    return increment, progress, update_progress, config, USING_LINUX_WEB_APP
 
-def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None,  RUN_FINAL_FORMATTING = False):
+def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
     error_message = None
-    increment, progress, update_progress, config = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
+    increment, progress, update_progress, config, USING_LINUX_WEB_APP = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
 
     # Prevent the system from going to sleep
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
     # To restore the original state, use:
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
 
-    # Your long-running code here
-    # try:
     #Things to do once a day:
     do_these_once_a_day = True
     if do_these_once_a_day:
@@ -210,27 +213,32 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
 
             ANALYSE_OUTPUT = True
             ARCHIVE_PREVIOUS_DASHBOARDS = False
+            #we'll check if we're using windows or linux. if linux this is probably on the web and we dont want to prodcue too much. But if its windows, we're probably running this locally and we want to produce all the outputs:
+            if not USING_LINUX_WEB_APP:
+                SAVE_AS_WEB_PLOTS = True
+                PLOT_MINOR_OUTPUTS = True
+                NOT_JUST_DASHBOARD_DATASETS=True
+            else:
+                SAVE_AS_WEB_PLOTS=False
+                PLOT_MINOR_OUTPUTS = False
+                NOT_JUST_DASHBOARD_DATASETS = False
             if ANALYSE_OUTPUT: 
-                estimate_kw_of_required_chargers(config, ECONOMY_ID)
-                plot_required_chargers(config, ECONOMY_ID)
-                calculate_and_plot_oil_displacement(config, ECONOMY_ID)  
+                estimate_kw_of_required_chargers(config, ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
+                if PLOT_MINOR_OUTPUTS:
+                    plot_required_chargers(config, ECONOMY_ID)
+                calculate_and_plot_oil_displacement(config, ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)  
                 ###################do bunkers calc for this economy###################
-                international_bunker_share_calculation_handler(config, ECONOMY_ID=ECONOMY_ID)
+                international_bunker_share_calculation_handler(config, ECONOMY_ID=ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
                 ###################do bunkers calc for this economy###################
-                # try:
-                produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2070)
-                # except:
-                #     print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
-                #     if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
-                #         breakpoint()
-                #     pass
-                dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS) 
+                produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = PLOT_MINOR_OUTPUTS, PLOTTING = PLOT_MINOR_OUTPUTS, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060, NOT_JUST_DASHBOARD_DATASETS=NOT_JUST_DASHBOARD_DATASETS)
+                dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, SAVE_AS_WEB_PLOTS=SAVE_AS_WEB_PLOTS) 
         
         progress += increment
         update_progress(progress)
-        copy_required_output_files_to_one_folder(config, ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\\for_other_modellers')
+        if not USING_LINUX_WEB_APP:#no need if we're on linux web app
+            copy_required_output_files_to_one_folder(config, ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\\for_other_modellers')
     
-    if RUN_FINAL_FORMATTING:
+    if not USING_LINUX_WEB_APP:
         print('\nFinished running model for all economies, now doing final formatting\n')
         
         concatenate_outlook_data_system_outputs(config)
@@ -296,14 +304,14 @@ if __name__ == "__main__":
             root_dir_param = sys.argv[2]
             economy_to_run = sys.argv[1]
             print('Running model for economy {}'.format(economy_to_run), 'in root directory {}'.format(root_dir_param))
-            main(economy_to_run=economy_to_run, root_dir_param=root_dir_param, script_dir_param=root_dir_param, RUN_FINAL_FORMATTING = True) #e.g. python transport_model_9th_edition\main.py all C:\Users\finbar.maunsell\github\transport_model_9th_edition
+            main(economy_to_run=economy_to_run, root_dir_param=root_dir_param, script_dir_param=root_dir_param) #e.g. python transport_model_9th_edition\main.py all C:\Users\finbar.maunsell\github\transport_model_9th_edition
             #e.g. python transport_model_9th_edition/main.py all /var/www/transport-modeling-guide/transport_model_9th_edition
             # os.chdir('C:\\Users\\finbar.maunsell\\github')
             # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main('19_THA', RUN_FINAL_FORMATTING = True)#, root_dir_param=root_dir_param)
+        main('all')#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%
