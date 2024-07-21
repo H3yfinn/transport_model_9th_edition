@@ -85,14 +85,13 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
             for scenario in all_data.Scenario.unique():
                 for transport_type in all_data['Transport Type'].unique():
                     for medium in ['road', 'all_mediums']:
-                        datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_{medium}_2_Energy use_Hierarchical_{END_DATE}_multiplicative')
+                        datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_{medium}_2_Energy use_Hierarchical_{END_DATE}')
                         #to produce the concatenated one we actaully just need to produce the individual transport types versions:
-                        datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_{medium}_2_Energy use_Hierarchical_{END_DATE}_additive')# datasets_to_produce.append(f'{economy}_{scenario}_{medium}_2_Energy use_Hierarchical_{END_DATE}_concatenated_additive')
+                        datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_{medium}_2_Energy use_Hierarchical_{END_DATE}')# datasets_to_produce.append(f'{economy}_{scenario}_{medium}_2_Energy use_Hierarchical_{END_DATE}_concatenated_additive')
             if ECONOMY_ID == 'all':
                 break
     else:
         datasets_to_produce = []
-        
     #drop duplicates
     datasets_to_produce = list(set(datasets_to_produce))
     # #simplify by filtering for road medium only
@@ -231,14 +230,17 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
     ###########################################################################
     #create loop to run through the combinations
     i=0
-    
+    #checkl that our datasets_to_produce are all in the combination_dict_list, otherwise this wont work as expected:
+    if not all([dataset in [x['extra_identifier'] for x in combination_dict_list] for dataset in datasets_to_produce]):
+        breakpoint()
+        missing_datasets = [dataset for dataset in datasets_to_produce if dataset not in [x['extra_identifier'] for x in combination_dict_list]]
+        raise ValueError('The following datasets are not in the combination_dict_list: {}'.format(missing_datasets))
     for combination_dict in combination_dict_list:
         try:
             if USE_LIST_OF_DATASETS_TO_PRODUCE and combination_dict['extra_identifier'] not in datasets_to_produce:
                 # if 
                 # print('skipping {}'.format(combination_dict['extra_identifier']))
                 continue
-            
             i+=1
             # print('\n\nRunning lmdi method for {}th iteration for '.format(i,combination_dict['extra_identifier']))
             # if combination_dict['extra_identifier'] == '15_PHL_Reference_passenger_road_2_Energy use_Hierarchical':
