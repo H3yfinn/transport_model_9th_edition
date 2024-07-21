@@ -85,10 +85,14 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
                 for transport_type in all_data['Transport Type'].unique():
                     for medium in ['road', 'all_mediums']:
                         datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_{medium}_2_Energy use_Hierarchical_{END_DATE}_multiplicative')
+                        
+                        #to produce this one we also need to produce the individual transport types versions:
                         datasets_to_produce.append(f'{economy}_{scenario}_{medium}_2_Energy use_Hierarchical_{END_DATE}_concatenated_additive')
+                        datasets_to_produce.append(f'{economy}_{scenario}_{transport_type}_{medium}_2_Energy use_Hierarchical_{END_DATE}_additive')
     else:
         datasets_to_produce = []
-        
+    #drop duplicates
+    datasets_to_produce = list(set(datasets_to_produce))
     # #simplify by filtering for road medium only
     # all_data = all_data[all_data['Medium'] == 'road']
     #make drive and vehicle type = medium where it is no road
