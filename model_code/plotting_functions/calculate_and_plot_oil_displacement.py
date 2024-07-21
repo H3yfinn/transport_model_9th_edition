@@ -371,8 +371,8 @@ def calculate_and_plot_oil_displacement(config, ECONOMY_ID, CHART_OPTION='stacke
                 # if any(ice_bev['Difference']<0):
                 #     print('negative difference for {}'.format((economy, t_type, scenario, 'bev')))
                 #     continue
-                
-                breakpoint()#is there a way i can create an oil displacement graph in dashboarsd
+                if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                    breakpoint()#is there a way i can create an oil displacement graph in dashboarsd
                 ############plotting
                 if CHART_OPTION == 'stacked_area_with_difference' and PLOT_MINOR_OUTPUTS:
                     plot_stacked_area_with_difference(config, ice_bev, v_types, color_map, default_save_folder,t_type,  economy, scenario,  AUTO_OPEN_PLOTLY_GRAPHS, drive = 'bev')
@@ -449,7 +449,9 @@ def calculate_and_plot_oil_displacement(config, ECONOMY_ID, CHART_OPTION='stacke
                 # if any(ice_fcev['Difference']<0):
                 #     print('negative difference for {}'.format((economy, t_type, scenario, 'fcev')))
                 #     continue
-                breakpoint()#is there a way i can create an oil displacement graph in dashboarsd
+                
+                if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+                    breakpoint()#is there a way i can create an oil displacement graph in dashboarsd
                 ############plotting
                 if CHART_OPTION == 'stacked_area_with_difference' and PLOT_MINOR_OUTPUTS:
                     plot_stacked_area_with_difference(config, ice_fcev, v_types, color_map, default_save_folder,t_type,  economy, scenario,  AUTO_OPEN_PLOTLY_GRAPHS, drive = 'fcev')
