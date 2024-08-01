@@ -3980,6 +3980,10 @@ def plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs, activity_ch
     # breakpoint()#somethign weird going on for mas?
     #grab Activity_efficiency_improvement, activity and activity growth from model_output_detailed. backcalcualte activity if the activity efficiency is 1, by calcualting cumprod of Activity_efficiency_improvement and multiplying by activity. Then plot the activity vs the backcalculated activity for each transpott type
     activity_change_for_plotting = activity_change_for_plotting_df.copy()
+    
+    #filter for <=2070
+    activity_change_for_plotting = activity_change_for_plotting.loc[activity_change_for_plotting['Date']<=config.GRAPHING_END_YEAR].copy()
+    
     activity_change_for_plotting = activity_change_for_plotting[['Date', 'Scenario', 'Economy', 'Transport Type', 'TO_or_FROM', 'Original_activity', 'New_activity', 'To_medium', 'From_medium', 'Very_original_activity']]
     
     #if TO_or_FROM is from then set medium to from_medium, else set medium to to_medium
@@ -4014,6 +4018,8 @@ def plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs, activity_ch
             # .astype(str).replace('False', '').replace('True', 'GROWTH_RATE_TOO_HIGH')
             #plot the data
             #add text to the hover data so that the user can see what the medium_to_medium and TO_or_FROM are
+            #sort by date col
+            activity_econ_scen.sort_values(by=['Date'], inplace=True)
             
             title = f'Shifted activity between mediums'
             fig = px.line(activity_econ_scen, x='Date', y='Activity', color='Transport Type', line_dash='Activity_type', title=title, color_discrete_map=colors_dict, hover_data=['medium_to_medium', 'TO_or_FROM'])
@@ -5636,4 +5642,6 @@ def extract_economy_grouping_dict_from_yml(config, ECONOMY_GROUPING):
     if ECONOMY_GROUPING not in ECONOMY_GROUPING_DICT.keys():
         raise ValueError(f'{ECONOMY_GROUPING} not in ECONOMY_GROUPING_DICT.keys()')
     ECONOMY_GROUPING_DICT = ECONOMY_GROUPING_DICT[ECONOMY_GROUPING]
-    return ECONOMY_GROUPING_DICT
+    #now reverse it so the values in lists in .values() are now keys and the keys are the values:
+    ECONOMY_GROUPING_DICT_rev = {v: k for k in ECONOMY_GROUPING_DICT for v in ECONOMY_GROUPING_DICT[k]}
+    return ECONOMY_GROUPING_DICT_rev

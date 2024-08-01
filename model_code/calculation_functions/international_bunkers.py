@@ -61,7 +61,6 @@ def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', tur
     international_supply_side_fuel_mixing = check_and_fill_missing_fuel_mixing_dates(config, international_bunker_inputs,  international_supply_side_fuel_mixing)
     #interpolate the fuel shares to get a value for every year:
     #print time
-        
     international_bunker_inputs, international_supply_side_fuel_mixing = interpolate_bunker_shares_and_mixing(config, international_bunker_inputs, international_supply_side_fuel_mixing)
     #pritn time
     #and check it all matches wat we expect (we wont bother with international_supply_side_fuel_mixing since we checked it earlier in check_and_fill_missing_fuel_mixing_dates)
@@ -967,7 +966,7 @@ def calculate_base_year_fuel_shares(config, international_fuel_shares, energy_us
     fuel_shares = energy_use_esto_bunkers_tall.loc[energy_use_esto_bunkers_tall['Date'] == config.OUTLOOK_BASE_YEAR].copy()
     # #remove the fuel mixing fuels. Even though we set these to 0 in calculate_base_year_fuel_mixing, its safer to remove them manully here so they dont get into the fuel shares data
     # fuel_shares = fuel_shares.loc[~fuel_shares.Fuel.isin(international_supply_side_fuel_mixing['New_fuel'].unique().tolist())]
-    fuel_shares['Total fuel use'] = fuel_shares.groupby(['Economy', 'Medium', 'Drive', 'Date'])['Energy'].transform('sum')
+    fuel_shares['Total fuel use'] = fuel_shares.groupby(['Economy', 'Medium', 'Date', 'Scenario'])['Energy'].transform('sum')#maybe if we drop drive here?'Drive', 
     
     #now divide the Value by the Total fuel use to get the share:
     fuel_shares['Share'] = fuel_shares['Energy'] / fuel_shares['Total fuel use']

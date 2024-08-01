@@ -201,7 +201,7 @@ def prepare_fig_dict_and_subfolders(config, ECONOMY_IDs, plots, ADVANCE_BASE_YEA
                     fig_dict[economy][scenario][plot] = None
     return fig_dict
 
-def create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id, hidden_legend_names, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS, CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=None, PRODUCE_AS_SINGLE_POTS=False, PREVIOUS_PROJECTION_FILE_DATE_ID=None, WRITE_INDIVIDUAL_HTMLS=False,SAVE_AS_WEB_PLOTS=False):
+def create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id, hidden_legend_names, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS, CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=None, PREVIOUS_PROJECTION_FILE_DATE_ID=None, WRITE_INDIVIDUAL_HTMLS=False,SAVE_AS_WEB_PLOTS=False):
     """
     Creates an assumptions dashboard for the specified economies and plots.
 
@@ -223,15 +223,13 @@ def create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors
 
     #get the plots:
     fig_dict, color_preparation_list = plotting_handler(config, ECONOMY_IDs, plots, fig_dict,  color_preparation_list, colors_dict, DROP_NON_ROAD_TRANSPORT,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS)
+    
+    if dashboard_name_id == 'individual_graphs':#we dont want to produce the dashboard for this
+        return fig_dict
+    
     check_colors_in_color_preparation_list(config, color_preparation_list, colors_dict)
     #now create the dashboards:
-    for economy in fig_dict.keys():
-            
-        if PRODUCE_AS_SINGLE_POTS:
-            #check that there is a folder with the name of the dashboard_name_id to put the single plots in
-            if not os.path.exists(os.path.join(config.root_dir, 'plotting_output', 'dashboards', economy, dashboard_name_id)):
-                os.makedirs(os.path.join(config.root_dir, 'plotting_output', 'dashboards', economy, dashboard_name_id))
-                
+    for economy in fig_dict.keys():                
         for scenario in fig_dict[economy].keys():
             #extract titles:
             titles= []
@@ -277,18 +275,6 @@ def create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors
                 for trace in fig_dict[economy][scenario][plot][0]['data']:
                     #we need to change the line_dash in the sales shares data and this is the only way i could find how:
                     fig.add_trace(trace, row=row, col=col)
-                if PRODUCE_AS_SINGLE_POTS:
-                    #check that there is a folder for 
-                    #write the plot to png for use in a presentation:
-                    #PLEASE NOTE THAT THIS WONT SAVE ANYTHING UNLESS YOU ARE RUNNING PYTHON FILES FROM THE COMMAND LINE, I THINK.
-                    fig_dict[economy][scenario][plot][0].write_image( os.path.join(config.root_dir, 'plotting_output', 'dashboards', economy, dashboard_name_id, f'{plot}_graph_{scenario}.png'), engine="kaleido")
-                    #write as html
-                    # pio.write_html(fig_dict[economy][scenario][plot][0], 'plotting_output\\dashboards\\{}\\{}\\{}_graph_{}.html'.format(economy,dashboard_name_id, plot, scenario))
-                # fig.update_layout(fig_dict[economy][scenario][plot]['layout'])
-                # fig.add_trace(fig_dict[economy][scenario][plot], row=row, col=col)
-                # fig.update_layout(fig_dict[economy][scenario][plot]['layout'])#dont know why copliot rec'd this. could be sueful
-                #this is a great function to remove duplicate legend items
-
             names = set()
             fig.for_each_trace(
                 lambda trace:
@@ -1223,7 +1209,7 @@ ECONOMY_ID (str or None): The ID of the economy for which the dashboard is being
     plots = ['energy_use_by_fuel_type_all_all', 'emissions_by_fuel_type_all_gen','passenger_km_by_drive_road','freight_tonne_km_by_drive_road', 'share_of_vehicle_type_by_transport_type_all','share_of_vehicle_type_activity_all', 'line_turnover_rate_by_vtype_all_road','avg_age_road',  'lmdi_freight_road',  'lmdi_passenger_road', 'energy_efficiency_timeseries_all','INTENSITY_ANALYSIS_timeseries_freight','INTENSITY_ANALYSIS_timeseries_passenger', 'share_of_vehicle_type_by_transport_type_freight_INTENSITY_ANALYSIS', 'share_of_vehicle_type_by_transport_type_passenger_INTENSITY_ANALYSIS', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_all', 'lifecycle_emissions_of_cars', 'box_turnover_rate_by_drive_all', 'turnover_rate_age_curve']
     
     CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT = {'transport_type':'all', 'mediums':['road']}
-    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'individual_graphs',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS,CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT, PRODUCE_AS_SINGLE_POTS=True, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS,SAVE_AS_WEB_PLOTS=False)
+    create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'individual_graphs',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS,CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT,WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS,SAVE_AS_WEB_PLOTS=False)
     
 
 def plot_multi_economy_plots(config, ECONOMY_IDs, ECONOMY_GROUPING, plots, colors_dict, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=True, PREVIOUS_PROJECTION_FILE_DATE_ID=None, ONLY_AGG_OF_ALL=False):

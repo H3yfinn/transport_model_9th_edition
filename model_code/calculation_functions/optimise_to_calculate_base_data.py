@@ -40,7 +40,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 #trust-constr has been useful occasionaly. kinda fast. but i think doesnt work anymore since things got more complex
 
 #these ranges will be iterated through during optimisation until one combination is found that works.
-def objective_function(config, x, df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants):
+def objective_function(x, config, df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants):
     # Weighting factors
     w_mse_stocks = parameters_dict['w_mse_stocks']
     w_mse_mileage = parameters_dict['w_mse_mileage']
@@ -225,7 +225,7 @@ def calculate_stocks_per_capita_mse(config, stocks_df, stocks_per_capita_constan
         
     return mse_diff_spc
 
-def constraint_function(config, x, actual_energy_by_drive, df_transport, parameters_dict, bounds):
+def constraint_function(x, config, actual_energy_by_drive, df_transport, parameters_dict, bounds):
     df_transport['Value'] = x
     try:
         df_transport_upper_bounds = df_transport.copy()
@@ -498,6 +498,7 @@ def optimise_to_find_base_year_values(config, input_data_new_road, ECONOMY_ID, m
     df_transport, df_transport_copy, actual_values, actual_energy_by_drive, initial_values, time_start, results_dict, UPPER, sum_energy_new, input_data_new_road_non_major_drives, input_data_new_road_zeros, economy, year, scenario = format_and_prepare_inputs_for_optimisation(config, ECONOMY_ID, input_data_new_road,REMOVE_NON_MAJOR_VARIABLES, REMOVE_ZEROS, methods, all_parameters_dicts)
     success = False
     methods_and_params = list(product(methods, all_parameters_dicts))#ESTIMATE STOCKS PER CAPITA FOR THIS ECONOMY USING THE DATA WE HAVE RIGHT NOW. WE WILL TRY TO KEEP THIS CONSTANT THROUGHOUT THE OPTIMISATION, UNLESS THE ECONOMY IS ONE WE EXPECT TO HAVE HIGH UNCERTAINTY ABOUT ITS STOCKS PER CAPITA IN WHICH CASE WE CAN SET THE STOCKS_PER_CAPITA_PCT_DIFF_THRESHOLD VALUE TO 1 TO ALLOW ANY STOCKS PER CAPITA TO PASS THE THRESHOLD (E.G. PNG)
+    
     stocks_per_capita_constants = calculate_and_format_stocks_per_capita_constants(config, input_data_new_road, ECONOMY_ID)#todo make sure no issues are cuased by having population in input_data_new_road
     i = 0
     df_transport_copy2=df_transport.copy()
@@ -664,6 +665,7 @@ def format_and_check_optimisation_results_before_finalising(config, result, df_t
     
     #put them in the df and then concat to the new df
     if len(optimized_x) != len(df_transport):
+        breakpoint()
         raise ValueError(f'length of optimized_x must be the same as the length of df_transport for {economy}, {year}, {scenario}')
         # return None, results_dict
     try:
@@ -694,6 +696,7 @@ def format_and_check_optimisation_results_before_finalising(config, result, df_t
             return df_transport, results_dict, True
     
     except:#is a bit not neat but just want to catch any errors and return None rather than get an error while running and ahve to run again
+        breakpoint()
         raise ValueError(f'length of optimized_x must be the same as the length of df_transport for {economy}, {year}, {scenario}')
     
 # def incorporate_covid_mileage_decrease(economy, input_data_new_road):#economy, dataframe, transport_type, current_year
@@ -762,6 +765,7 @@ def check_results_difference_after_optimisation(config, df_transport, df_transpo
     sum_optimised_energy = df_transport.loc[df_transport['Measure'] == 'Energy_new', 'Value'].sum()
     sum_actual_energy = df_transport_copy.loc[df_transport_copy['Measure'] == 'Energy_new', 'Value'].sum()
     difference = abs(sum_optimised_energy - sum_actual_energy)
+    
     if difference > sum_actual_energy * 0.1:# parameters_dict['tolerance_pct']:#testing 10% diff just to see  what soltuions looks like
         print(f'SOLUTION NOT VALID: Difference between optimised energy and actual energy is {difference} which is greater than {parameters_dict["tolerance_pct"]*100}% for {economy}, {year}, {scenario}')
         if IGNORE_LARGE_ENERGY_RESIDUALS:
@@ -778,8 +782,8 @@ def check_results_difference_after_optimisation(config, df_transport, df_transpo
             #and save the optimised data (df_transport)
             df_transport.to_csv(os.path.join(config.root_dir, 'plotting_output', 'input_exploration', f'optimised_data_{economy}_{year}_{scenario}_{results_dict["file_id"]}_UNSUCCESSFUL.csv'))
             return df_transport, results_dict, False #None, None
-        else:
-            return df_transport, results_dict, True
+    else:
+        return df_transport, results_dict, True
     
 def objective_function_handler(config, method, initial_values, df_transport, actual_values, parameters_dict, actual_energy_by_drive, constraints, bounds, stocks_per_capita_constants):
     """
@@ -820,7 +824,7 @@ def objective_function_handler(config, method, initial_values, df_transport, act
         maxiter *= parameters_dict['iteration_multiplier']
     if method == 'differential_evolution':
         result = differential_evolution(objective_function,
-            args=(df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants),
+            args=(config, df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants),
             bounds=bounds, maxiter=maxiter)
     elif method == 'basinhopping':
         result = basinhopping(
@@ -828,13 +832,13 @@ def objective_function_handler(config, method, initial_values, df_transport, act
             x0=initial_values, 
             minimizer_kwargs={
                 "method": "L-BFGS-B", 
-                "args": (df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants)
+                "args": (config, df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants)
             },
             niter=maxiter
         )
     elif method == 'shgo':
         result = shgo(objective_function,
-            args=(df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants), 
+            args=(config,  df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants), 
             bounds=bounds, 
             constraints=constraints)
 
@@ -847,10 +851,11 @@ def objective_function_handler(config, method, initial_values, df_transport, act
     elif method in ['L-BFGS-B', 'TNC']:
         #try this and if the result is not good then retry with 'w_mse_stocks' set to 0 and then w_mse_oppsoite_drive_types set to 0 and then both:
         try:
+              
             result = minimize(
                 objective_function,
                 initial_values,
-                args=(df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants),
+                args=(config, df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants),
                 bounds=bounds,
                 method=method,
                 options={"maxiter": maxiter}
@@ -863,7 +868,7 @@ def objective_function_handler(config, method, initial_values, df_transport, act
         result = minimize(
             objective_function,
             initial_values,
-            args=(df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants),
+            args=(config, df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants),
             bounds=bounds,
             constraints=constraints,
             method=method,
@@ -875,7 +880,7 @@ def objective_function_handler(config, method, initial_values, df_transport, act
         result = minimize(
             objective_function,
             initial_values,
-            args=(df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants),
+            args=(config,  df_transport, actual_values, actual_energy_by_drive, parameters_dict, bounds, stocks_per_capita_constants),
             method=method,
             options={"maxiter": maxiter}
         )
