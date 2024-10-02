@@ -82,6 +82,12 @@ def remap_vehicle_types(config, df, value_col='Value', new_index_cols = ['Scenar
         vehicle_type_combinations = {'lt':'lpv', 'suv':'lpv', 'car':'lpv', 'ht':'trucks', 'mt':'trucks', 'bus':'bus_2w', '2w':'bus_2w', 'lcv':'lcv'}
     elif vehicle_type_mapping_set == 'similar_trajectories_lpv_detailed':
         vehicle_type_combinations = {'lt':'lt', 'suv':'suv', 'car':'car', 'ht':'trucks', 'mt':'trucks', 'bus':'bus_2w', '2w':'bus_2w', 'lcv':'lcv'}
+    elif vehicle_type_mapping_set == 'lpv_only':
+        vehicle_type_combinations = {'lt':'lpv', 'suv':'lpv', 'car':'lpv'}
+        df = df.loc[(df['Vehicle Type'].isin(['car', 'suv', 'lt']))].copy()
+    elif vehicle_type_mapping_set == 'light_vehicles_and_buses_vs_heavy_trucks':
+        vehicle_type_combinations = {'lt':'Light vehicles & buses', 'suv':'Light vehicles & buses', 'car':'Light vehicles & buses', 'ht':'Heavy trucks', 'mt':'Heavy trucks', 'bus':'Light vehicles & buses', '2w':'Light vehicles & buses', 'lcv':'Light vehicles & buses'}
+        
     if include_non_road:
         vehicle_type_combinations['rail'] = 'rail'
         vehicle_type_combinations['ship'] = 'ship'
@@ -114,16 +120,18 @@ def remap_vehicle_types(config, df, value_col='Value', new_index_cols = ['Scenar
         
     elif aggregation_type[0]=='sum':
         df = df.groupby(new_index_cols, group_keys=False).sum(numeric_only=True).reset_index()
-        
     return df
     
 def remap_drive_types(config, df, value_col='Value', new_index_cols = ['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive'], drive_type_mapping_set='original', aggregation_type=('sum', ), include_non_road=True):
     if drive_type_mapping_set == 'original':
-        drive_type_combinations = {'ice_g':'ice_g', 'ice_d':'ice_d', 'phev_d':'phev_d', 'phev_g':'phev_g', 'bev':'bev', 'fcev':'fcev', 'cng':'cng', 'lpg':'lpg'}
+        drive_type_combinations = {'ice_g':'ice_g', 'ice_d':'ice_d', 'phev_d':'phev_d', 'phev_g':'phev_g', 'bev':'bev', 'fcev':'fcev', 'cng':'cng', 'lpg':'lpg', 'lng':'lng'}
     elif drive_type_mapping_set == 'simplified':
-        drive_type_combinations = {'ice_g':'ice', 'ice_d':'ice', 'phev_d':'phev', 'phev_g':'phev', 'bev':'bev', 'fcev':'fcev', 'cng':'gas', 'lpg':'gas'}
+        drive_type_combinations = {'ice_g':'ice', 'ice_d':'ice', 'phev_d':'phev', 'phev_g':'phev', 'bev':'bev', 'fcev':'fcev', 'cng':'gas', 'lpg':'gas', 'lng':'gas'}
     elif drive_type_mapping_set == 'extra_simplified':
-        drive_type_combinations = {'ice_g':'ice', 'ice_d':'ice', 'phev_d':'phev', 'phev_g':'phev', 'bev':'bev', 'fcev':'fcev', 'cng':'ice', 'lpg':'ice'}
+        drive_type_combinations = {'ice_g':'ice', 'ice_d':'ice', 'phev_d':'phev', 'phev_g':'phev', 'bev':'bev', 'fcev':'fcev', 'cng':'ice', 'lpg':'ice', 'lng':'ice'}
+    elif drive_type_mapping_set == 'bev_fcev_only':
+        drive_type_combinations = {'ice_g':'ice', 'ice_d':'ice', 'phev_d':'ice', 'phev_g':'ice', 'bev':'bev', 'fcev':'fcev', 'cng':'ice', 'lpg':'ice', 'lng':'ice'}
+        
     if include_non_road:
         drive_type_combinations['rail'] = 'rail'
         drive_type_combinations['ship'] = 'ship'
@@ -153,8 +161,53 @@ def remap_drive_types(config, df, value_col='Value', new_index_cols = ['Scenario
         df.drop(columns=['Weighted Value', aggregation_type[1] + ' copy'], inplace=True)
         
     elif aggregation_type[0]=='sum':
-        df = df.groupby(new_index_cols).sum().reset_index()
+        df = df.groupby(new_index_cols, group_keys=False).sum(numeric_only=True).reset_index()
     return df
+
+def remap_transport_type(config, df, value_col='Value', new_index_cols = ['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive'], transport_type_mapping_set='original', aggregation_type=('sum', ), include_non_road=True):
+    if transport_type_mapping_set == 'all':
+        df["Transport Type"] = 'all'
+        
+        if aggregation_type[0] == 'weighted_average':
+            df['Weighted Value'] = df[value_col] * df[aggregation_type[1]]
+            #create copy of aggregation_type[1] spo we can set it to 1 if it is 0
+            df[aggregation_type[1] + ' copy'] = df[aggregation_type[1]]
+            #sum weighted values and weights so we can calculate weighted average:
+            df = df.groupby(new_index_cols).sum().reset_index()
+            #fill 0 with 1
+            df[aggregation_type[1] + ' copy'] = df[aggregation_type[1] + ' copy'].replace(0,1)
+            #calculate weighted average
+            df[value_col] = df['Weighted Value']/df[aggregation_type[1] + ' copy']
+            #drop the columns we don't need anymore
+            df.drop(columns=['Weighted Value', aggregation_type[1] + ' copy'], inplace=True)
+        
+        elif aggregation_type[0]=='sum':
+            df = df.groupby(new_index_cols, group_keys=False).sum(numeric_only=True).reset_index()
+        return df
+    elif transport_type_mapping_set == 'light_vehicles_and_buses_vs_heavy_trucks':
+        df["Transport Type"] = df['Vehicle Type'].replace({'bus':'Light vehicles & buses', '2w':'Light vehicles & buses', 'lt':'Light vehicles & buses', 'suv':'Light vehicles & buses', 'car':'Light vehicles & buses', 'ht':'Heavy trucks', 'mt':'Heavy trucks', 'trucks':'heavy_trucks', 'lcv':'Light vehicles & buses'})
+        df['Vehicle Type'] = df['Transport Type']
+        if aggregation_type[0] == 'weighted_average':
+            df['Weighted Value'] = df[value_col] * df[aggregation_type[1]]
+            #create copy of aggregation_type[1] spo we can set it to 1 if it is 0
+            df[aggregation_type[1] + ' copy'] = df[aggregation_type[1]]
+            #sum weighted values and weights so we can calculate weighted average:
+            df = df.groupby(new_index_cols).sum().reset_index()
+            #fill 0 with 1
+            df[aggregation_type[1] + ' copy'] = df[aggregation_type[1] + ' copy'].replace(0,1)
+            #calculate weighted average
+            df[value_col] = df['Weighted Value']/df[aggregation_type[1] + ' copy']
+            #drop the columns we don't need anymore
+            df.drop(columns=['Weighted Value', aggregation_type[1] + ' copy'], inplace=True)
+        
+        elif aggregation_type[0]=='sum':
+            df = df.groupby(new_index_cols, group_keys=False).sum(numeric_only=True).reset_index()
+        return df
+    else:
+        raise ValueError('transport_type_mapping_set not valid')
+
+
+
 
 def map_fuels(config, energy_use_by_fuel_type, value_col='Energy', index_cols=['Economy', 'Scenario', 'Date', 'Dataset', 'Fuel'], mapping_type='simplified'):
     #grab Fuel = 17_electricity, hydrogens, biofuels, oil, gas:
@@ -202,7 +255,7 @@ def identify_high_2w_economies(config, stocks_df):
 def identify_high_gas_reliance_economies(config, stocks_df, X=.2):
     #remap drive types only for econmoys where the gas drive type makes up more than X% of stocks. This way, tehre wont be too many lines on the plot that arent near 0.#we will spit the data into two dataframes, one with high gas and one without, then remap the drive types for the one with high gas, then concat them back together
     #first define gas mapping
-    gas_drives = {'cng':'gas', 'lpg':'gas'}
+    gas_drives = {'cng':'gas', 'lpg':'gas', 'lng':'gas'}
     #map gas to gas
     stocks_df['Drive'] = stocks_df['Drive'].replace(gas_drives)
     stocks_sum = stocks_df.groupby(['Economy', 'Drive'])['Value'].sum().reset_index().copy()
@@ -241,12 +294,15 @@ def remap_stocks_and_sales_based_on_economy(config, stocks, new_sales_shares_all
         return None, None #havent implemented this yet
     
 ###################################################
-def plot_share_of_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=True):
+def plot_share_of_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, VEHICLE_TYPE_AGGREGATION='light_vehicles_and_buses_vs_heavy_trucks',WRITE_HTML=True):
     PLOTTED=True
     stocks = stocks_df.copy()
     new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df.copy()
     breakpoint()#how to change drive to allow for gas here?
     stocks, new_sales_shares_all_plot_drive_shares = remap_stocks_and_sales_based_on_economy(config, stocks, new_sales_shares_all_plot_drive_shares)
+    if VEHICLE_TYPE_AGGREGATION == 'light_vehicles_and_buses_vs_heavy_trucks' and share_of_transport_type_type == 'all':
+        stocks = remap_transport_type(config, stocks, value_col='Value', new_index_cols = ['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type']+['Measure'], transport_type_mapping_set='light_vehicles_and_buses_vs_heavy_trucks')
+        new_sales_shares_all_plot_drive_shares = remap_transport_type(config, new_sales_shares_all_plot_drive_shares, value_col='Value', new_index_cols = ['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type']+['Measure'], transport_type_mapping_set='light_vehicles_and_buses_vs_heavy_trucks')
     # #sum up all the sales shares for each drive type
     new_sales_shares_all_plot_drive_shares['line_dash'] = 'sales'
     #now calucalte share of total stocks as a proportion like the sales share
@@ -277,7 +333,10 @@ def plot_share_of_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_
             plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='phev') | (plot_data['Drive']=='fcev')].copy()
 
             #concat drive and vehicle type
-            plot_data['Drive'] = plot_data['Drive'] + ' ' + plot_data['Vehicle Type']
+            if VEHICLE_TYPE_AGGREGATION=='light_vehicles_and_buses_vs_heavy_trucks' and share_of_transport_type_type == 'all':
+                plot_data['Drive'] = plot_data['Drive'] + ' ' + plot_data['Transport Type'] 
+            else:
+                plot_data['Drive'] = plot_data['Drive'] + ' ' + plot_data['Vehicle Type']
             #sort by date col and line_dash
             plot_data.sort_values(by=['Date'], inplace=True)
             
@@ -309,7 +368,6 @@ def plot_share_of_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_
                     write_graph_to_html(config, filename=f'share_of_transport_type_freight{scenario}.html', graph_type='line', plot_data=plot_data,economy=economy, x='Date', y='Value', color='Drive', title='Default Title', line_dash='line_dash', y_axes_title='Y Axis', legend_title='', font_size=30, marker_line_width=2.5, line_width=10, colors_dict=colors_dict)
             
             elif share_of_transport_type_type == 'all':
-                
                 # sum up, because 2w are used in freight and passenger:
                 plot_data = plot_data.groupby(['Scenario', 'Economy', 'Date', 'Drive','line_dash']).sum().reset_index()
                 fig = px.line(plot_data, x='Date', y='Value', color='Drive', title=title, line_dash='line_dash', color_discrete_map=colors_dict)
@@ -384,7 +442,7 @@ def plot_share_of_vehicle_type_by_transport_type(config, ECONOMY_IDs, new_sales_
         #use categories: gasoline, diesel, ev, fcev, other
         
         drive_mapping = {
-            'ice_g':'gasoline', 'ice_d':'diesel', 'phev_d':'new', 'phev_g':'new', 'bev':'new', 'fcev':'new', 'cng':'gas', 'lpg':'gas'}
+            'ice_g':'gasoline', 'ice_d':'diesel', 'phev_d':'new', 'phev_g':'new', 'bev':'new', 'fcev':'new', 'cng':'gas', 'lpg':'gas', 'lng':'gas'}
         new_sales_shares_all_plot_drive_shares['Drive'] = new_sales_shares_all_plot_drive_shares['Drive'].map(drive_mapping)
         # new_sales_shares_all_plot_drive_shares['Vehicle Type'] = new_sales_shares_all_plot_drive_shares['Drive'] + '_' + new_sales_shares_all_plot_drive_shares['Vehicle Type']
         
@@ -422,9 +480,9 @@ def plot_share_of_vehicle_type_by_transport_type(config, ECONOMY_IDs, new_sales_
             #drop all drives except bev and fcev
             if not INCLUDE_GENERAL_DRIVE_TYPES:
                 if economy in high_gas_reliance_economies:
-                    plot_data = plot_data.loc[(plot_data['Drive'].isin(['phev_g','phev','phev_d', 'bev','fcev','cng','lpg']))].copy()
+                    plot_data = plot_data.loc[(plot_data['Drive'].isin(['phev_g','phev','phev_d', 'bev','fcev','cng','lpg', 'lng']))].copy()
                     #map gas to gas
-                    plot_data['Drive'] = plot_data['Drive'].replace({'cng':'gas', 'lpg':'gas'})
+                    plot_data['Drive'] = plot_data['Drive'].replace({'cng':'gas', 'lpg':'gas', 'lng':'gas'})
                 else:
                     plot_data = plot_data.loc[(plot_data['Drive'].isin(['phev_g','phev','phev_d', 'bev','fcev']))].copy()
                     
@@ -522,7 +580,7 @@ def plot_share_of_vehicle_type_by_transport_type_both_on_one_graph(config, ECONO
             # #also plot the data like the iea does. So plot the data for 2022 and previous, then plot for the follwoign eyars: [2025, 2030, 2035, 2040, 2050, 2060]. This helps to keep the plot clean too
             # plot_data = plot_data.apply(lambda x: x if x['Date'] <= 2022 or x['Date'] in [2025, 2030, 2035, 2040, 2050, 2060, 2070, 2080,2090, 2100] else 0, axis=1)
             if economy in high_gas_reliance_economies:
-                plot_data['Drive'] = plot_data['Drive'].replace({'cng':'gas', 'lpg':'gas'})
+                plot_data['Drive'] = plot_data['Drive'].replace({'cng':'gas', 'lpg':'gas', 'lng':'gas'})
                 plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='fcev') | (plot_data['Drive']=='gas')].copy()
             else:
                 #drop all drives except bev and fcev
@@ -585,7 +643,7 @@ def share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs, new_sal
             # #also plot the data like the iea does. So plot the data for 2022 and previous, then plot for the follwoign eyars: [2025, 2030, 2035, 2040, 2050, 2060]. This helps to keep the plot clean too
             # plot_data = plot_data.apply(lambda x: x if x['Date'] <= 2022 or x['Date'] in [2025, 2030, 2035, 2040, 2050, 2060, 2070, 2080,2090, 2100] else 0, axis=1)
             if economy in high_gas_reliance_economies:
-                plot_data['Drive'] = plot_data['Drive'].replace({'cng':'gas', 'lpg':'gas'})
+                plot_data['Drive'] = plot_data['Drive'].replace({'cng':'gas', 'lpg':'gas', 'lng':'gas'})
                 plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='phev') | (plot_data['Drive']=='fcev') | (plot_data['Drive']=='gas')].copy()
             else:
                 #drop all drives except bev and fcev
@@ -666,6 +724,12 @@ def energy_use_by_fuel_type(config, ECONOMY_IDs, energy_output_for_outlook_data_
             groups = energy_use_by_fuel_type_economy.groupby('Fuel')
             energy_use_by_fuel_type_economy = groups.filter(lambda x: not all(x['Energy'] == 0))
             
+            if transport_type=='passenger':
+                energy_use_by_fuel_type_economy = energy_use_by_fuel_type_economy.loc[energy_use_by_fuel_type_economy['Transport Type']=='passenger']
+            elif transport_type == 'freight':
+                energy_use_by_fuel_type_economy = energy_use_by_fuel_type_economy.loc[energy_use_by_fuel_type_economy['Transport Type']=='freight']
+            else:
+                pass
             # calculate total 'Energy' for each 'Fuel' 
             total_energy_per_fuel = energy_use_by_fuel_type_economy.groupby('Fuel')['Energy'].sum()
             
@@ -675,7 +739,6 @@ def energy_use_by_fuel_type(config, ECONOMY_IDs, energy_output_for_outlook_data_
                 categories = total_energy_per_fuel.sort_values(ascending=False).index,
                 ordered=True
             )
-
             # Now sort the DataFrame by the 'Fuel' column:
             energy_use_by_fuel_type_economy.sort_values(by='Fuel', inplace=True)
             
@@ -817,7 +880,6 @@ def plot_share_of_vehicle_type_activity(config, ECONOMY_IDs, model_output_detail
 
 def freight_tonne_km_by_drive(config, ECONOMY_IDs, model_output_detailed, fig_dict, color_preparation_list, colors_dict, medium, WRITE_HTML=True):
     PLOTTED=True
-    
     fkm = model_output_detailed.loc[model_output_detailed['Transport Type']=='freight'].rename(columns={'Activity':'freight_tonne_km'}).copy()
     if medium == 'road':
         fkm = fkm.loc[fkm['Medium']=='road'].copy()
@@ -1596,8 +1658,6 @@ def plot_average_age_by_simplified_drive_type(config, ECONOMY_IDs, model_output_
     color_preparation_list.append(avg_age_economy['Drive'].unique().tolist())
     return fig_dict, color_preparation_list
  
-
-
 def plot_stocks_per_capita(config, ECONOMY_IDs, gompertz_parameters_df, model_output_detailed, first_road_model_run_data, fig_dict, color_preparation_list, colors_dict, PLOT_ANYWAY=True, WRITE_HTML=True):
     PLOTTED=True
     #load in ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED from yaml. if the econmoy is in this we should either not plot anything or just plot the stocks per cpita, no thresholds.
@@ -2387,6 +2447,7 @@ def emissions_by_fuel_type(config, ECONOMY_IDs, emissions_factors, model_output_
         gen=''
     #identify where there are no emissions factors:
     missing_emissions_factors = model_output_with_fuels_sum.loc[model_output_with_fuels_sum['Emissions factor (MT/PJ)'].isna()].copy()
+    breakpoint()
     if len(missing_emissions_factors)>0:
         breakpoint()
         time.sleep(1)
@@ -3648,7 +3709,7 @@ def plot_age_distributions(config, ECONOMY_IDs, model_output_detailed_detailed_n
     return fig_dict, color_preparation_list
 
     
-def plot_intensity_timeseries_INTENSITY_ANALYSIS(config, ECONOMY_IDs, model_output_detailed, fig_dict, DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, transport_type, WRITE_HTML=True):
+def individual_graphs_plot_intensity_timeseries(config, ECONOMY_IDs, model_output_detailed, fig_dict, DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, transport_type, WRITE_HTML=True):
     PLOTTED=True
 
     #to help with checking that the data is realistic, plot growth in energy efficiency here:
@@ -3702,10 +3763,10 @@ def plot_intensity_timeseries_INTENSITY_ANALYSIS(config, ECONOMY_IDs, model_outp
             fig = px.line(energy_eff_by_scen_by_economy, x='Date', y='Intensity', color='Drive', title=title, color_discrete_map=colors_dict)#, line_dash='Vehicle Type')
 
             #add fig to dictionary for scenario and economy:
-            fig_dict[economy][scenario][f'INTENSITY_ANALYSIS_timeseries_{transport_type}'] = [fig, title, PLOTTED]
+            fig_dict[economy][scenario][f'individual_graphs_intensity_timeseries_{transport_type}'] = [fig, title, PLOTTED]
             
             if WRITE_HTML:
-                filename =  f'INTENSITY_ANALYSIS_timeseries_{transport_type}_{scenario}_{economy}.html'
+                filename =  f'individual_graphs_intensity_timeseries_{transport_type}_{scenario}_{economy}.html'
                 write_graph_to_html(config, filename=filename, graph_type='line', plot_data=energy_eff_by_scen_by_economy, economy=economy, x='Date', y='Intensity', color='Drive', title=title, y_axes_title='Intensity (Pj per Billion-km)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(energy_eff_by_scen_by_economy['Drive'].unique().tolist())
@@ -3810,47 +3871,58 @@ def line_energy_use_by_transport_type(config, ECONOMY_IDs, model_output_detailed
 
 
 
-def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=True, LPV_ONLY=True, SIMPLIFY_DRIVES=True):
+def individual_graphs_share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, VEHICLE_TYPE_AGGREGATION='light_vehicles_and_buses_vs_heavy_trucks', WRITE_HTML=True, LPV_ONLY=True, SIMPLIFY_DRIVES=True):
+    breakpoint()#cause of drive error?
     PLOTTED=True
+    # breakpoint()#why are we losing fcevs and stuff
     #i think that maybe stocks % can be higher than sales % here because of turnvoer rates. hard to get it correct right now
     new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df.copy()
     stocks = stocks_df.copy()
     if LPV_ONLY and share_of_transport_type_type == 'passenger':
         new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.loc[(new_sales_shares_all_plot_drive_shares['Vehicle Type'].isin(['car', 'suv', 'lt']))].copy()
         stocks = stocks.loc[(stocks['Vehicle Type'].isin(['car', 'suv', 'lt']))].copy()
+
+    stocks = stocks[['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive','Value']].groupby(['Scenario', 'Economy', 'Date', 'Transport Type','Vehicle Type', 'Drive'], group_keys=False).sum().reset_index().copy()
+    
+    #We will need to calculate the weighted average sales share for each drive type, since vehicle type and transport type has different numbers of sales yet we want to compare their sales 'shares', so we should weight them by the number of stocks (or actually more acurate to do sales but thats too complicated to take out turnover (currently if we average the sales shares for each drive type, we will get a value that is not representative of the actual sales share). SO For this we will jsut use stocks rather than sales as the weighting factor:
+    new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(stocks, on=['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive'], how='left', suffixes=('_sales_share', '_stocks'))
+    #now we can calculate the weighted average sales share
+    new_sales_shares_all_plot_drive_shares['Weighted_value'] = (new_sales_shares_all_plot_drive_shares['Value_sales_share'] * new_sales_shares_all_plot_drive_shares['Value_stocks'])
+    
+    #NOW MAKE AGGREGATIONS:
     if SIMPLIFY_DRIVES:
         #make phev_d and phev_g into phev
         new_sales_shares_all_plot_drive_shares.loc[(new_sales_shares_all_plot_drive_shares['Drive']=='phev_d') |(new_sales_shares_all_plot_drive_shares['Drive']=='phev_g'), 'Drive'] = 'phev'
         
-        new_sales_shares_all_plot_drive_shares.loc[(new_sales_shares_all_plot_drive_shares['Drive']=='lpg') |(new_sales_shares_all_plot_drive_shares['Drive']=='cng') |(new_sales_shares_all_plot_drive_shares['Drive']=='ice_d') | (new_sales_shares_all_plot_drive_shares['Drive']=='ice_g'), 'Drive'] = 'ice'
+        new_sales_shares_all_plot_drive_shares.loc[(new_sales_shares_all_plot_drive_shares['Drive']=='lng') |(new_sales_shares_all_plot_drive_shares['Drive']=='lpg') |(new_sales_shares_all_plot_drive_shares['Drive']=='cng') |(new_sales_shares_all_plot_drive_shares['Drive']=='ice_d') | (new_sales_shares_all_plot_drive_shares['Drive']=='ice_g'), 'Drive'] = 'ice'
         
         #make phev_d and phev_g into phev
-        stocks.loc[(stocks['Drive']=='lpg') |(stocks['Drive']=='cng') |(stocks['Drive']=='ice_d') | (stocks['Drive']=='ice_g'), 'Drive'] = 'ice'
+        stocks.loc[(stocks['Drive']=='lng') |(stocks['Drive']=='lpg') |(stocks['Drive']=='cng') |(stocks['Drive']=='ice_d') | (stocks['Drive']=='ice_g'), 'Drive'] = 'ice'
         
         stocks.loc[(stocks['Drive']=='phev_d') |(stocks['Drive']=='phev_g'), 'Drive'] = 'phev'
-
-    #sum up sales shares and stocks. useful in case they ahvent quite been summed yet anyways
-    new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares[['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive', 'Value']].groupby(['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive'], group_keys=False).sum().reset_index()
     
-    stocks = stocks[['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive','Value']].groupby(['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive'], group_keys=False).sum().reset_index()
-                
     if share_of_transport_type_type == 'all':
+        # breakpoint()#hmm how to get stock  to not be above sales shares?
         new_sales_shares_all_plot_drive_shares['Transport Type'] = 'all'
         stocks['Transport Type'] = 'all'
+        if VEHICLE_TYPE_AGGREGATION == 'light_vehicles_and_buses_vs_heavy_trucks':
+            stocks["Transport Type"] = stocks['Vehicle Type'].replace({'bus':'Light vehicles & buses', '2w':'Light vehicles & buses', 'lt':'Light vehicles & buses', 'suv':'Light vehicles & buses', 'car':'Light vehicles & buses', 'ht':'Heavy trucks', 'mt':'Heavy trucks', 'trucks':'Heavy trucks', 'lcv':'Light vehicles & buses'})
+            new_sales_shares_all_plot_drive_shares['Transport Type'] = new_sales_shares_all_plot_drive_shares['Vehicle Type'].replace({'bus':'Light vehicles & buses', '2w':'Light vehicles & buses', 'lt':'Light vehicles & buses', 'suv':'Light vehicles & buses', 'car':'Light vehicles & buses', 'ht':'Heavy trucks', 'mt':'Heavy trucks', 'trucks':'Heavy trucks', 'lcv':'Light vehicles & buses'})
+    else:
+        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.loc[new_sales_shares_all_plot_drive_shares['Transport Type']==share_of_transport_type_type].copy()
+        stocks = stocks.loc[stocks['Transport Type']==share_of_transport_type_type].copy()
         
-        #If we are setting the transport type to all, we will need to calculate the weighted average sales share for each drive type, since passenger sales are different to freigth sales and we dont want to skew the results. (currently if we average the sales shares for each drive type, we will get a value that is not representative of the actual sales share). For this we will jsut use stocks rather than sales as the weighting factor
-        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.merge(stocks, on=['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive'], how='left', suffixes=('_sales_share', '_stocks'))
-        #now we can calculate the weighted average sales share
-        new_sales_shares_all_plot_drive_shares['Weighted_value'] = (new_sales_shares_all_plot_drive_shares['Value_sales_share'] * new_sales_shares_all_plot_drive_shares['Value_stocks'])
-        new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares[['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive','Value_stocks', 'Weighted_value']].groupby(['Scenario', 'Economy', 'Date', 'Drive', 'Transport Type'], group_keys=False).sum(numeric_only=True).reset_index()
-        new_sales_shares_all_plot_drive_shares['Value'] = new_sales_shares_all_plot_drive_shares['Weighted_value'] / new_sales_shares_all_plot_drive_shares['Value_stocks']
-        #since we may be dividing by zero, we will sdet any values that are nan to 0
-        new_sales_shares_all_plot_drive_shares['Value'] = new_sales_shares_all_plot_drive_shares['Value'].fillna(0)
-        new_sales_shares_all_plot_drive_shares.drop(columns=['Value_stocks', 'Weighted_value'], inplace=True)
+    #NOW RECALCUALTE AFTER AGGREGATIONS
+    stocks = stocks[['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive','Value']].groupby(['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive'], group_keys=False).sum().reset_index().copy()
     
-    if LPV_ONLY or share_of_transport_type_type == 'all' or SIMPLIFY_DRIVES:
-        #Since we are dropping soem caterogires we will need to nomralise  sales shares so they add up to 1.
-        new_sales_shares_all_plot_drive_shares['Value'] = new_sales_shares_all_plot_drive_shares.groupby(['Scenario', 'Economy', 'Date', 'Transport Type'], group_keys=False)['Value'].transform(lambda x: x/x.sum())
+    new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares[['Scenario', 'Economy', 'Date', 'Transport Type','Drive','Value_stocks', 'Weighted_value']].groupby(['Scenario', 'Economy', 'Date', 'Drive', 'Transport Type'], group_keys=False).sum(numeric_only=True).reset_index()
+    
+    # new_sales_shares_all_plot_drive_shares['Value'] = new_sales_shares_all_plot_drive_shares['Weighted_value'] / new_sales_shares_all_plot_drive_shares['Value_stocks'] #i think with sales shares you dont even need to divide by weight. just normalize
+    #since we may be dividing by zero, we will sdet any values that are nan to 0
+    new_sales_shares_all_plot_drive_shares['Value'] = new_sales_shares_all_plot_drive_shares['Weighted_value'].fillna(0)
+    new_sales_shares_all_plot_drive_shares.drop(columns=['Value_stocks', 'Weighted_value'], inplace=True)
+    
+    new_sales_shares_all_plot_drive_shares['Value'] = new_sales_shares_all_plot_drive_shares.groupby(['Scenario', 'Economy', 'Date', 'Transport Type'], group_keys=False)['Value'].transform(lambda x: x/x.sum())
         
     # And then calcualte stocks shares 
     stocks['Value'] = stocks.groupby(['Scenario', 'Economy', 'Date', 'Transport Type'], group_keys=False)['Value'].apply(lambda x: x/x.sum(numeric_only=True))
@@ -3868,7 +3940,7 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
         
         #rename value to share
         new_sales_shares_all_plot_drive_shares_scenario.rename(columns={'Value':'Share'}, inplace=True)
-                
+        breakpoint()#where is fcev and phev??
         for economy in ECONOMY_IDs:
             plot_data =  new_sales_shares_all_plot_drive_shares_scenario.loc[(new_sales_shares_all_plot_drive_shares_scenario['Economy']==economy)].copy()
                     
@@ -3893,10 +3965,11 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
                 fig = px.line(plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Share', color='Drive', title=title, line_dash=' ', color_discrete_map=colors_dict)                
                 #prodcue individual graph
                 # WRITE_HTML=True
+                breakpoint()#does the graph blow turn out ok?
                 if WRITE_HTML:   
-                    write_graph_to_html(config, filename= f'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename= f'individual_graphs_sales_share_by_transport_type_passenger_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict, line_dash=' ')
                 #add fig to dictionary for scenario and economy:
-                fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger'] = [fig, title, PLOTTED]
+                fig_dict[economy][scenario]['individual_graphs_sales_share_by_transport_type_passenger'] = [fig, title, PLOTTED]
                 #############
             elif share_of_transport_type_type == 'freight':
                 title = f'Shares for freight (%)'
@@ -3904,25 +3977,28 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
                 fig = px.line(plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, line_dash=' ', color_discrete_map=colors_dict)             
                 #prodcue individual graph
                 if WRITE_HTML:  
-                    
-                    write_graph_to_html(config, filename= f'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                    write_graph_to_html(config, filename= f'individual_graphs_sales_share_by_transport_type_freight_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict, line_dash=' ')
                 
                 #add fig to dictionary for scenario and economy:
-                fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_freight'] = [fig, title, PLOTTED]
+                fig_dict[economy][scenario]['individual_graphs_sales_share_by_transport_type_freight'] = [fig, title, PLOTTED]
             elif share_of_transport_type_type == 'all':
                 title = f'Sales and Stock share of vehicles ({scenario})'
                 #drop data after 2050
                 plot_data = plot_data.loc[plot_data['Date']<=2060].copy()
-                fig = px.line(plot_data, x='Date', y='Share', color='Drive', title=title, line_dash=' ', color_discrete_map=colors_dict)
-                            
-                #prodcue individual graph
-                if WRITE_HTML:    
-                    #make line thicker
+                if VEHICLE_TYPE_AGGREGATION == 'light_vehicles_and_buses_vs_heavy_trucks':
+                    plot_data['Transport Type'] = plot_data['Drive'] + ' - ' + plot_data['Transport Type']
+                    if WRITE_HTML:    
+                        #make line thicker
+                        write_graph_to_html(config, filename= f'individual_graphs_sales_share_by_transport_type_all_{scenario}.html', graph_type='line',economy=economy, plot_data=plot_data, x='Date', y='Share', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict, line_dash=' ')
+                else:
+                    plot_data = plot_data[plot_data['Transport Type']=='all']
+                    fig = px.line(plot_data, x='Date', y='Share', color='Drive', title=title, line_dash=' ', color_discrete_map=colors_dict)
                     
-                    write_graph_to_html(config, filename= f'INTENSITY_ANALYSIS_sales_share_by_transport_type_all_{scenario}.html', graph_type='line',economy=economy, plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
-                    
+                    if WRITE_HTML:    
+                        #make line thicker
+                        write_graph_to_html(config, filename= f'individual_graphs_sales_share_by_transport_type_all_{scenario}.html', graph_type='line',economy=economy, plot_data=plot_data, x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict, line_dash=' ')                    
                 #add fig to dictionary for scenario and economy:
-                fig_dict[economy][scenario]['INTENSITY_ANALYSIS_sales_share_by_transport_type_all'] = [fig, title, PLOTTED]
+                fig_dict[economy][scenario]['individual_graphs_sales_share_by_transport_type_all'] = [fig, title, PLOTTED]
             else:
                 raise ValueError('share_of_transport_type_type must be passenger or freight')
             #############
@@ -3931,6 +4007,167 @@ def INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, E
     color_preparation_list.append(plot_data['Drive'].unique().tolist())
     
     return fig_dict, color_preparation_list
+
+
+def individual_graphs_share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs, model_output_detailed_df, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type,VEHICLE_TYPE_AGGREGATION='light_vehicles_and_buses_vs_heavy_trucks',WRITE_HTML=True, LPV_ONLY=True, SIMPLIFY_DRIVES=True):
+    PLOTTED=True
+    # breakpoint()#why are we losing fcevs and stuff
+    #i think that maybe stocks % can be higher than sales % here because of turnvoer rates. hard to get it correct right now
+    # new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df.copy()
+    stocks_9th = model_output_detailed_df.copy()
+    stocks_9th.loc[stocks_9th['Medium']=='road'].copy()
+    # stocks = stocks_df.copy()
+    # if LPV_ONLY and share_of_transport_type_type == 'passenger':
+    #     new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares.loc[(new_sales_shares_all_plot_drive_shares['Vehicle Type'].isin(['car', 'suv', 'lt']))].copy()
+    #     stocks = stocks.loc[(stocks['Vehicle Type'].isin(['car', 'suv', 'lt']))].copy()
+
+    # stocks = stocks[['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive','Value']].groupby(['Scenario', 'Economy', 'Date', 'Transport Type','Vehicle Type', 'Drive'], group_keys=False).sum().reset_index().copy()
+    
+    #recalculate sales shares by finding the change in stocks per year + turnover. We can use this to get an estimate of sales shares
+    # model_output_detailed = model_output_detailed[['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive','Turnover']].groupby(['Scenario', 'Economy', 'Date', 'Transport Type','Vehicle Type', 'Drive'], group_keys=False).sum().reset_index().copy()
+    
+    stocks_9th = stocks_9th[['Scenario', 'Economy', 'Date', 'Transport Type', 'Vehicle Type', 'Drive','Stocks', 'Turnover_rate']].copy()
+    #shift turnover back by one year so we can calculate the turnover for the previous year, usign the year afters turnover rate (this is jsut because of hwo the data is structured)
+        
+    stocks_9th['Turnover_rate'] = stocks_9th.groupby(['Scenario', 'Economy', 'Transport Type', 'Vehicle Type', 'Drive'])['Turnover_rate'].shift(-1)
+    #calcaulte turnover for stocks 9th
+    stocks_9th['Turnover'] = stocks_9th['Stocks'] * stocks_9th['Turnover_rate']
+    
+    #calculate sales. First calcualte stocks after turnover by subtracting turnover from stocks. then calcalte sales by subtracting stocks after turnover from  stocks after turnover  from previous year:
+    stocks_9th['stocks_after_turnover'] = stocks_9th['Stocks'] - stocks_9th['Turnover'] 
+    
+    #sales is the stocks before turnover in this year, minus the stocks after turnover in the previous yea
+    stocks_9th['previous_year_stocks_after_turnover'] = stocks_9th.groupby(['Scenario', 'Economy', 'Transport Type', 'Vehicle Type', 'Drive'])['stocks_after_turnover'].shift(1)
+    stocks_9th['Sales'] = stocks_9th['Stocks'] - stocks_9th['previous_year_stocks_after_turnover']
+    
+    #melt
+    stocks_9th =stocks_9th[['Economy', 'Date', 'Scenario','Transport Type', 'Vehicle Type', 'Drive', 'Stocks', 'Sales']]
+    stocks_9th = stocks_9th.melt(id_vars=['Economy', 'Date', 'Scenario', 'Transport Type', 'Vehicle Type', 'Drive'], value_vars=['Stocks', 'Sales'], var_name='Measure', value_name='Value')
+    #group similar vehicle types:
+    stocks = stocks_9th[stocks_9th.Measure=='Stocks'].copy()
+    sales = stocks_9th[stocks_9th.Measure=='Sales'].copy()
+
+    #remap drive types to simplified:
+    if SIMPLIFY_DRIVES and share_of_transport_type_type == 'all':
+        stocks = remap_drive_types(config, stocks, value_col='Value', new_index_cols = ['Economy', 'Date', 'Scenario','Transport Type', 'Vehicle Type', 'Drive']+['Measure'], drive_type_mapping_set='bev_fcev_only', include_non_road=False)
+        sales = remap_drive_types(config, sales, value_col='Value', new_index_cols = ['Economy', 'Date', 'Scenario','Transport Type', 'Vehicle Type', 'Drive']+['Measure'], drive_type_mapping_set='bev_fcev_only', include_non_road=False)
+    elif SIMPLIFY_DRIVES:
+        stocks = remap_drive_types(config, stocks, value_col='Value', new_index_cols = ['Economy', 'Date', 'Scenario','Transport Type', 'Vehicle Type', 'Drive']+['Measure'], drive_type_mapping_set='simplified', include_non_road=False)
+        sales = remap_drive_types(config, sales, value_col='Value', new_index_cols = ['Economy', 'Date', 'Scenario','Transport Type', 'Vehicle Type', 'Drive']+['Measure'], drive_type_mapping_set='simplified', include_non_road=False)
+        
+    
+    if LPV_ONLY and share_of_transport_type_type == 'passenger':
+        stocks = remap_vehicle_types(config, stocks, value_col='sales', new_index_cols = ['Economy', 'Date', 'Scenario','Transport Type', 'Vehicle Type', 'Drive']+['Measure'], vehicle_type_mapping_set='lpv_only')
+        sales = remap_vehicle_types(config, sales, value_col='sales', new_index_cols = ['Economy', 'Date', 'Scenario','Transport Type', 'Vehicle Type', 'Drive']+['Measure'], vehicle_type_mapping_set='lpv_only')
+    elif share_of_transport_type_type == 'all' and VEHICLE_TYPE_AGGREGATION == 'light_vehicles_and_buses_vs_heavy_trucks':
+        pass#sort it out in next step
+    else:
+        stocks = remap_vehicle_types(config, stocks, value_col='sales', new_index_cols = ['Economy', 'Date', 'Scenario','Transport Type', 'Vehicle Type', 'Drive']+['Measure'], vehicle_type_mapping_set='simplified')
+        sales = remap_vehicle_types(config, sales, value_col='sales', new_index_cols = ['Economy', 'Date', 'Scenario','Transport Type', 'Vehicle Type', 'Drive']+['Measure'], vehicle_type_mapping_set='simplified')
+    
+    
+    if share_of_transport_type_type =='all' and VEHICLE_TYPE_AGGREGATION == 'light_vehicles_and_buses_vs_heavy_trucks':
+        stocks = remap_transport_type(config, stocks, value_col='Value', new_index_cols = ['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive']+['Measure'], transport_type_mapping_set='light_vehicles_and_buses_vs_heavy_trucks')
+        sales = remap_transport_type(config, sales, value_col='Value', new_index_cols = ['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive']+['Measure'], transport_type_mapping_set='light_vehicles_and_buses_vs_heavy_trucks')
+    elif share_of_transport_type_type =='all':
+        stocks = remap_transport_type(config, stocks, value_col='Value', new_index_cols = ['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive']+['Measure'], transport_type_mapping_set='all')
+        sales = remap_transport_type(config, sales, value_col='Value', new_index_cols = ['Scenario', 'Economy', 'Date', 'Transport Type', 'Drive']+['Measure'], transport_type_mapping_set='all')
+    else:
+        stocks = stocks.loc[stocks['Transport Type']==share_of_transport_type_type].copy()
+        sales = sales.loc[sales['Transport Type']==share_of_transport_type_type].copy()
+        
+    #CALC SHARES
+    
+    stocks['Value'] = stocks.groupby(['Scenario', 'Economy', 'Date', 'Transport Type'], group_keys=False)['Value'].transform(lambda x: x/x.sum())
+        
+    # And then calcualte stocks shares 
+    sales['Value'] = sales.groupby(['Scenario', 'Economy', 'Date', 'Transport Type'], group_keys=False)['Value'].apply(lambda x: x/x.sum(numeric_only=True))
+    
+    stocks[' '] = 'Stock share' 
+    sales[' '] = 'Sales share'
+    
+    # #concat sales and stocks
+    # stocks = pd.concat([stocks, sales])
+    
+        
+    for scenario in stocks['Scenario'].unique():
+        sales_scen = sales.loc[(sales['Scenario']==scenario)]
+        stocks_scen = stocks.loc[(stocks['Scenario']==scenario)].copy()
+        ###
+        
+        #then concat the two dataframes
+        sales_scen = pd.concat([sales_scen, stocks_scen])
+        
+        #rename value to share
+        sales_scen.rename(columns={'Value':'Share'}, inplace=True)
+        for economy in ECONOMY_IDs:
+            plot_data =  sales_scen.loc[(sales_scen['Economy']==economy)].copy()
+            
+            #drop ice drive from the data since its implied by the bev fcev sales share:
+            if SIMPLIFY_DRIVES and share_of_transport_type_type == 'all':  
+                plot_data = plot_data.loc[plot_data['Drive']!='ice'].copy()
+            # if share_of_transport_type_type =='passenger':
+            #     #after recalcualting, drop all drives except bev, ice and phev isnce the others are not used in passenger transport (except for a few rural fcev buses and gas cars). This means the mising share is obviously from these types but wont be noticeabnle except under inspection, which is good (we want to be able to notice it under inspection)
+            #     if SIMPLIFY_DRIVES:
+            #         plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='ice') | (plot_data['Drive']=='phev')].copy()
+            #     else:
+            #         plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='ice') | (plot_data['Drive']=='phev_g') | (plot_data['Drive']=='phev_d')].copy()
+            
+            # Group by 'Drive' and filter out groups where all 'Energy' values are 0
+            groups = plot_data.groupby(['Drive', ' '])
+            plot_data = groups.filter(lambda x: not all(x['Share'] == 0))
+            
+            #sort by date col
+            plot_data.sort_values(by=['Date'], inplace=True)
+            #############
+            #now plot
+            if share_of_transport_type_type == 'passenger':
+                
+                title = f'Shares for passenger (%)'
+                fig = px.line(plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Share', color='Drive', title=title, line_dash=' ', color_discrete_map=colors_dict)                
+                if WRITE_HTML:   
+                    write_graph_to_html(config, filename= f'individual_graphs_sales_share_by_transport_type_passenger_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='passenger'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict, line_dash=' ')
+                #add fig to dictionary for scenario and economy:
+                fig_dict[economy][scenario]['individual_graphs_sales_share_by_transport_type_passenger'] = [fig, title, PLOTTED]
+                #############
+            elif share_of_transport_type_type == 'freight':
+                title = f'Shares for freight (%)'
+
+                fig = px.line(plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, line_dash=' ', color_discrete_map=colors_dict)      
+                if WRITE_HTML:  
+                    
+                    write_graph_to_html(config, filename= f'individual_graphs_sales_share_by_transport_type_freight_{scenario}.html', graph_type='line', economy=economy,plot_data=plot_data[plot_data['Transport Type']=='freight'], x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict, line_dash=' ')
+                
+                #add fig to dictionary for scenario and economy:
+                fig_dict[economy][scenario]['individual_graphs_sales_share_by_transport_type_freight'] = [fig, title, PLOTTED]
+            elif share_of_transport_type_type == 'all':
+                title = f'Sales and Stock share of vehicles ({scenario})'
+                #drop data after 2050
+                plot_data = plot_data.loc[plot_data['Date']<=2060].copy()
+                if VEHICLE_TYPE_AGGREGATION=='light_vehicles_and_buses_vs_heavy_trucks':
+                    plot_data['Transport Type'] = plot_data['Transport Type'] + ' - ' + plot_data['Drive'] 
+                    fig = px.line(plot_data, x='Date', y='Share', color='Transport Type', title=title, line_dash=' ', color_discrete_map=colors_dict)
+                    if WRITE_HTML:    
+                        write_graph_to_html(config, filename= f'individual_graphs_sales_share_by_transport_type_all_{scenario}.html', graph_type='line',economy=economy, plot_data=plot_data, x='Date', y='Share', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict, line_dash=' ')
+                else:
+                    plot_data = plot_data[plot_data['Transport Type']=='all']
+                    fig = px.line(plot_data, x='Date', y='Share', color='Drive', title=title, line_dash=' ', color_discrete_map=colors_dict)
+                    if WRITE_HTML:    
+                        write_graph_to_html(config, filename= f'individual_graphs_sales_share_by_transport_type_all_{scenario}.html', graph_type='line',economy=economy, plot_data=plot_data, x='Date', y='Share', color='Drive', title=title, font_size=30, line_width=10, colors_dict=colors_dict, line_dash=' ')
+                    
+                #add fig to dictionary for scenario and economy:
+                fig_dict[economy][scenario]['individual_graphs_sales_share_by_transport_type_all'] = [fig, title, PLOTTED]
+            else:
+                raise ValueError('share_of_transport_type_type must be passenger or freight')
+            #############
+
+    #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
+    color_preparation_list.append(plot_data['Drive'].unique().tolist())
+    
+    return fig_dict, color_preparation_list
+
+
+
 
 def plot_decrease_in_activity_from_activity_efficiency(config, ECONOMY_IDs, model_output_detailed_df, fig_dict, color_preparation_list, colors_dict, WRITE_HTML=True):
     #grab Activity_efficiency_improvement, activity and activity growth from model_output_detailed. backcalcualte activity if the activity efficiency is 1, by calcualting cumprod of Activity_efficiency_improvement and multiplying by activity. Then plot the activity vs the backcalculated activity for each transpott type
@@ -3976,7 +4213,7 @@ def plot_decrease_in_activity_from_activity_efficiency(config, ECONOMY_IDs, mode
     
     return fig_dict, color_preparation_list
 
-def plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs, activity_change_for_plotting_df, fig_dict, color_preparation_list, colors_dict, WRITE_HTML=True):
+def plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs, activity_change_for_plotting_df, fig_dict, color_preparation_list, colors_dict, TRANSPORT_TYPE='all', MEDIUM_AGGREGATION='simplified', WRITE_HTML=True):
     # breakpoint()#somethign weird going on for mas?
     #grab Activity_efficiency_improvement, activity and activity growth from model_output_detailed. backcalcualte activity if the activity efficiency is 1, by calcualting cumprod of Activity_efficiency_improvement and multiplying by activity. Then plot the activity vs the backcalculated activity for each transpott type
     activity_change_for_plotting = activity_change_for_plotting_df.copy()
@@ -3988,6 +4225,7 @@ def plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs, activity_ch
     
     #if TO_or_FROM is from then set medium to from_medium, else set medium to to_medium
     activity_change_for_plotting['Medium'] = np.where(activity_change_for_plotting['TO_or_FROM']=='FROM', activity_change_for_plotting['From_medium'], activity_change_for_plotting['To_medium'])
+    
     #set medium_to_medium to activity_change_for_plotting['From_medium'] + '_to_' + activity_change_for_plotting['To_medium'], except if to_medium is na, in which case just set it to from_medium 
     activity_change_for_plotting['medium_to_medium'] = np.where(activity_change_for_plotting['To_medium'].isna(), activity_change_for_plotting['From_medium'], activity_change_for_plotting['From_medium'] + '_to_' + activity_change_for_plotting['To_medium'])
     
@@ -3996,9 +4234,23 @@ def plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs, activity_ch
     melted_df = activity_change_for_plotting.melt(id_vars=['Date', 'Scenario', 'Economy', 'Transport Type', 'Medium', 'medium_to_medium','TO_or_FROM'], value_vars=['Very_original_activity', 'New_activity'], var_name='Activity_type', value_name='Activity')
     
     #where activity type is Very_original_activity then set medium_to_medium to '' and to_or_from to '' then drop duplicates. this will mean we can only have one Very_original_activity line for each medium, scenario transpot type
-    melted_df.loc[melted_df['Activity_type']=='Very_original_activity', 'medium_to_medium'] = ''
+    melted_df.loc[melted_df['Activity_type']== 'Very_original_activity', 'medium_to_medium'] = ''
     melted_df.loc[melted_df['Activity_type']=='Very_original_activity', 'TO_or_FROM'] = ''
     melted_df = melted_df.drop_duplicates()
+    
+    melted_df.loc[melted_df['Activity_type']== 'Very_original_activity', 'Activity_type'] = 'Original activity'
+    melted_df.loc[melted_df['Activity_type']=='New_activity', 'Activity_type'] = 'New activity'
+    melted_df = melted_df.drop_duplicates()
+    
+    #group by Date	Scenario	Economy	Transport Type	Medium		TO_or_FROM	Activity_type	and take the lowest values for activity. this will remove duplicate liens which cause more confusion than they are worth
+    melted_df = melted_df.groupby(['Date', 'Scenario', 'Economy', 'Transport Type', 'Medium', 'TO_or_FROM', 'Activity_type'], as_index=False).min().copy() 
+    
+    if MEDIUM_AGGREGATION =='simplified':
+        #set medium to non-road and road, based on if the medium is road or not, then sum
+        melted_df['Medium'] = np.where(melted_df['Medium']=='road', 'road', 'non-road')
+        melted_df = melted_df.groupby(['Date', 'Scenario', 'Economy', 'Transport Type', 'Medium', 'TO_or_FROM', 'Activity_type'], as_index=False).sum(numeric_only=True)
+    if TRANSPORT_TYPE !='all':
+        melted_df = melted_df.loc[melted_df['Transport Type']==TRANSPORT_TYPE].copy()
     
     #plot the activity diff
     for scenario in melted_df['Scenario'].unique():
@@ -4022,11 +4274,11 @@ def plot_shifted_activity_from_medium_to_medium(config, ECONOMY_IDs, activity_ch
             activity_econ_scen.sort_values(by=['Date'], inplace=True)
             
             title = f'Shifted activity between mediums'
-            fig = px.line(activity_econ_scen, x='Date', y='Activity', color='Transport Type', line_dash='Activity_type', title=title, color_discrete_map=colors_dict, hover_data=['medium_to_medium', 'TO_or_FROM'])
+            fig = px.line(activity_econ_scen, x='Date', y='Activity', color='Transport Type', line_dash='Activity_type', title=title, color_discrete_map=colors_dict)
             #add fig to dictionary for scenario and economy:
             fig_dict[economy][scenario]['shifted_activity_from_medium_to_medium'] = [fig, title, PLOTTED]
             if WRITE_HTML:
-                write_graph_to_html(config, filename=f'shifted_activity_from_medium_to_medium_{scenario}_{economy}.html', graph_type='line', economy=economy,plot_data=activity_econ_scen, x='Date', y='Activity', color='Transport Type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=f'shifted_activity_from_medium_to_medium_{scenario}_{economy}.html', graph_type='line', economy=economy,plot_data=activity_econ_scen, x='Date', y='Activity', color='Transport Type', line_dash='Activity_type', title=title, font_size=30, line_width=10, colors_dict=colors_dict)
                                 
     return fig_dict, color_preparation_list
 
@@ -4921,9 +5173,9 @@ def plot_share_of_vehicle_type_by_transport_type_FOR_MULTIPLE_ECONOMIES(config, 
         #drop all drives except bev and fcev
         plot_data = new_sales_shares_all_plot_drive_shares_scenario.copy()
         if INCLUDE_OTHER_DRIVES:
-            mapping = {'bev':'bev', 'fcev':'fcev', 'phev_g':'phev', 'phev_d':'phev', 'cng':'gas', 'lpg':'gas'}
+            mapping = {'bev':'bev', 'fcev':'fcev', 'phev_g':'phev', 'phev_d':'phev', 'cng':'gas', 'lpg':'gas','lng':'gas',  'ice_d':'ice', 'ice_g':'ice'}
             plot_data['Drive'] = plot_data['Drive'].replace(mapping)
-            plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='fcev') | (plot_data['Drive']=='gas') | (plot_data['Drive']=='phev')].copy()
+            plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='fcev') | (plot_data['Drive']=='gas') | (plot_data['Drive']=='phev') | (plot_data['Drive']=='ice')].copy()
         else:
             plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='fcev')].copy()
 
@@ -5026,7 +5278,8 @@ def plot_share_transport_type_FOR_MULTIPLE_ECONOMIES(config, ECONOMY_GROUPING, n
         #drop all drives except bev and fcev
         plot_data = new_sales_shares_all_plot_drive_shares_scenario.copy()
         if INCLUDE_OTHER_DRIVES:
-            mapping = {'bev':'bev', 'fcev':'fcev', 'phev_g':'phev', 'phev_d':'phev', 'cng':'gas', 'lpg':'gas'}
+            mapping = {'bev':'bev', 'fcev':'fcev', 'phev_g':'phev', 'phev_d':'phev', 'cng':'gas', 'lpg':'gas','lng':'gas'}#, 'ice_d':'ice', 'ice_g':'ice'}
+            breakpoint()#is this necessary above? we were getting gas at 100% before but not sure if it was this cahrt in particulr
             plot_data['Drive'] = plot_data['Drive'].replace(mapping)
             plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='fcev') | (plot_data['Drive']=='gas') | (plot_data['Drive']=='phev')].copy()
         else:

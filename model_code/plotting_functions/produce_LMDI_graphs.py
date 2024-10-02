@@ -257,7 +257,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
             economy = combination_dict['economy']
             activity_variable = combination_dict['activity_variable']
             structure_variables_list = combination_dict['structure_variables_list']
-            graph_title = combination_dict['graph_title']
+            graph_title = ''#combination_dict['graph_title']
             extra_identifier = combination_dict['extra_identifier']
             data_title = ''
             energy_variable = 'Energy use'

@@ -263,6 +263,11 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                 except:
                     breakpoint()
                     print('setup_and_run_multi_economy_plots() not working for {}'.format(ECONOMY_ID)) 
+                    
+                    PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES = True
+                    setup_and_run_multi_economy_plots(config,ONLY_AGG_OF_ALL=PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES)
+                    breakpoint()
+                    setup_and_run_multi_economy_plots(config,  ECONOMY_GROUPING='passenger_transport_style')
                     raise Exception('setup_and_run_multi_economy_plots() not working for {}'.format(ECONOMY_ID))
                     # PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES = True
                     # setup_and_run_multi_economy_plots(config,ONLY_AGG_OF_ALL=PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES)
@@ -311,7 +316,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main('19_THA')#, root_dir_param=root_dir_param)
+        main(['21_VN'])#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%

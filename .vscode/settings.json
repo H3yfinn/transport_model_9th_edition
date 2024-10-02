@@ -2,5 +2,6 @@
     "python.analysis.extraPaths": [
         "./code/grooming_code"
     ],
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "python.analysis.typeCheckingMode": "basic"
 }

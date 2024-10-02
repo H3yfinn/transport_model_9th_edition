@@ -318,8 +318,8 @@ def format_and_prepare_inputs_for_optimisation(config, ECONOMY_ID, input_data_ne
     #since most of the neergy use is within one or two major drive types, we will just remove all energy use for gas and electricity, which is the drive types: bev, lpg and cng. Then we will also TENTATIVELY remove phev_g and phev_d rows since they are so minor (evenm though they take up gasoline and diesel fuel types). We will jsut be left with ice_g and iced_d which are the major drive types. This will make the optimisation much faster and will also make it more accurate since we are only optimising for the major drive types. We will then add the energy use for the minor drive types back in at the end. We will use their origianl intensity, the mileage used for ice_g and ice_d and then adjsut stocks so that the energy use is the same as the required (new) energy use.
     
     if REMOVE_NON_MAJOR_VARIABLES:
-        input_data_new_road_non_major_drives = input_data_new_road.loc[input_data_new_road['Drive'].isin(['bev', 'lpg', 'cng', 'phev_g', 'phev_d', 'fcev'])].copy()
-        input_data_new_road = input_data_new_road.loc[~input_data_new_road['Drive'].isin(['bev', 'lpg', 'cng', 'phev_g', 'phev_d', 'fcev'])].copy() 
+        input_data_new_road_non_major_drives = input_data_new_road.loc[input_data_new_road['Drive'].isin(['bev', 'lpg', 'cng','lng', 'phev_g', 'phev_d', 'fcev'])].copy()
+        input_data_new_road = input_data_new_road.loc[~input_data_new_road['Drive'].isin(['bev', 'lpg', 'cng', 'lng', 'phev_g', 'phev_d', 'fcev'])].copy() 
         if REMOVE_ZEROS:
             input_data_new_road_zeros = input_data_new_road.loc[input_data_new_road['Stocks'] == 0].copy()
             input_data_new_road = input_data_new_road.loc[input_data_new_road['Stocks'] != 0].copy()
@@ -415,7 +415,7 @@ def calculate_and_format_stocks_per_capita_constants(config, input_data_new_road
 def set_cng_lpg_stocks_to_zero_where_energy_is_zero(config, ECONOMY_ID, input_data_new_road):
     #because some economies have stocks in these but their energy for them is zero, its easier to set their stocks to 0 so that the optimisation doesnt have to deal with them.
     #there is also the option to move the stocks to diesel or gasoline depending on the vehicle type.
-    for cng_or_lpg_drive in ['cng', 'lpg']:
+    for cng_or_lpg_drive in ['cng','lng',  'lpg']:
         if input_data_new_road.loc[(input_data_new_road['Drive']==cng_or_lpg_drive) & (input_data_new_road['Economy'] == ECONOMY_ID), 'Energy_new'].sum() <= 1e-9:
             #vehicle type to ice_g or ice_d mappung:#lt, suv, ht, mt, lcv, car, bus, 2w
             vehicle_to_ice_g_or_ice_d = {
@@ -851,7 +851,8 @@ def objective_function_handler(config, method, initial_values, df_transport, act
     elif method in ['L-BFGS-B', 'TNC']:
         #try this and if the result is not good then retry with 'w_mse_stocks' set to 0 and then w_mse_oppsoite_drive_types set to 0 and then both:
         try:
-              
+            
+            breakpoint()
             result = minimize(
                 objective_function,
                 initial_values,
@@ -861,7 +862,7 @@ def objective_function_handler(config, method, initial_values, df_transport, act
                 options={"maxiter": maxiter}
             )  
         except Exception as e:
-            # breakpoint()     
+            breakpoint()     
             print('error while running L-BFGS-B or TNC' + str(e))
 
     elif method in ['SLSQP', 'trust-constr']:
@@ -1101,7 +1102,7 @@ def check_bounds_by_drive(config, df_transport, bounds, energy_target_by_drive, 
     elif len(drives) > 0 and double_check:
         BOUNDS_FIXED = False
         if check == 'upper':
-            bounds, BOUNDS_FIXED = fix_zero_stocks_for_drive_type(config, df_transport, parameters_dict, energy_by_drive_check, bounds, zero_drives=['cng', 'lpg'])
+            bounds, BOUNDS_FIXED = fix_zero_stocks_for_drive_type(config, df_transport, parameters_dict, energy_by_drive_check, bounds, zero_drives=['cng','lng',  'lpg'])
         if not BOUNDS_FIXED:
             breakpoint()
             raise ValueError(f'Bounds values do not meet the constraint even after increasing the bounds for {drives}')
@@ -1112,7 +1113,8 @@ def check_bounds_by_drive(config, df_transport, bounds, energy_target_by_drive, 
     return bounds
     
 
-def fix_zero_stocks_for_drive_type(config, df_transport, parameters_dict, energy_by_drive_check, bounds, zero_drives=['cng', 'lpg']):
+def fix_zero_stocks_for_drive_type(config, df_transport, parameters_dict, energy_by_drive_check, bounds, zero_drives=['cng', 'lpg', 'lng']):
+    #note, included lng in here too.
     #check the cause isnt specific, unlikely drive types liek cng and lpg arent zero for stocks for all road types. we need at least one row to be non zero or else we cant calculate energy. so check that cng and/or lpg dont sum to zero stocks, and if they do, find the avg amount of stocks using the avg mileage and intensity that would be required to make up for it. then make that the upper bounds for cng and/or lpg for every vehcile type.
     #get the sum of stocks for cng and lpg
     sum_stocks_cng_lpg = df_transport.loc[(df_transport['Measure'] == 'Stocks')&(df_transport['Vehicle Type'].isin(zero_drives))].groupby(['Economy', 'Drive'], as_index=False).agg({'Value':'sum'})

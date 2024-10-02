@@ -139,6 +139,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     update_progress(progress)
     FOUND = False
     RUN_MODEL = True#set me
+    LMDI_CHARTS = True
     if not RUN_MODEL:
         MODEL_RUN_1  = False
         MODEL_RUN_2  = False
@@ -203,6 +204,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             run_non_road_model(config, ECONOMY_ID,USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD=ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict[ECONOMY_ID])
             
             model_output_all = concatenate_model_output(config, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR)
+            
             model_output_with_fuel_mixing = apply_fuel_mix_demand_side(config, model_output_all,ECONOMY_ID=ECONOMY_ID)
             model_output_with_fuel_mixing = apply_fuel_mix_supply_side(config, model_output_with_fuel_mixing,ECONOMY_ID=ECONOMY_ID)
             
@@ -211,27 +213,29 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             #now concatenate all the model outputs together
             create_output_for_outlook_data_system(config, ECONOMY_ID)
 
-            ANALYSE_OUTPUT = True
-            ARCHIVE_PREVIOUS_DASHBOARDS = False
-            #we'll check if we're using windows or linux. if linux this is probably on the web and we dont want to prodcue too much. But if its windows, we're probably running this locally and we want to produce all the outputs:
-            if not USING_LINUX_WEB_APP:
-                SAVE_AS_WEB_PLOTS = True
-                PLOT_MINOR_OUTPUTS = True
-                NOT_JUST_DASHBOARD_DATASETS=True
-            else:
-                SAVE_AS_WEB_PLOTS=False
-                PLOT_MINOR_OUTPUTS = False
-                NOT_JUST_DASHBOARD_DATASETS = False
-            if ANALYSE_OUTPUT: 
-                estimate_kw_of_required_chargers(config, ECONOMY_ID)
-                if PLOT_MINOR_OUTPUTS:
-                    plot_required_chargers(config, ECONOMY_ID)
-                calculate_and_plot_oil_displacement(config, ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)  
-                ###################do bunkers calc for this economy###################
-                international_bunker_share_calculation_handler(config, ECONOMY_ID=ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
-                ###################do bunkers calc for this economy###################
+        ANALYSE_OUTPUT = True
+        ARCHIVE_PREVIOUS_DASHBOARDS = False
+        #we'll check if we're using windows or linux. if linux this is probably on the web and we dont want to prodcue too much. But if its windows, we're probably running this locally and we want to produce all the outputs:
+        if not USING_LINUX_WEB_APP:
+            SAVE_AS_WEB_PLOTS = True
+            PLOT_MINOR_OUTPUTS = True
+            NOT_JUST_DASHBOARD_DATASETS=True
+        else:
+            SAVE_AS_WEB_PLOTS=False
+            PLOT_MINOR_OUTPUTS = False
+            NOT_JUST_DASHBOARD_DATASETS = False
+        if ANALYSE_OUTPUT: 
+            estimate_kw_of_required_chargers(config, ECONOMY_ID)
+            if PLOT_MINOR_OUTPUTS:
+                plot_required_chargers(config, ECONOMY_ID)
+            calculate_and_plot_oil_displacement(config, ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)  
+            ###################do bunkers calc for this economy###################
+            international_bunker_share_calculation_handler(config, ECONOMY_ID=ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
+            ###################do bunkers calc for this economy###################
+            if LMDI_CHARTS:
                 produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = PLOT_MINOR_OUTPUTS, PLOTTING = PLOT_MINOR_OUTPUTS, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060, NOT_JUST_DASHBOARD_DATASETS=NOT_JUST_DASHBOARD_DATASETS)
-                dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, SAVE_AS_WEB_PLOTS=SAVE_AS_WEB_PLOTS) 
+            
+            dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, SAVE_AS_WEB_PLOTS=SAVE_AS_WEB_PLOTS) 
         
         progress += increment
         update_progress(progress)
@@ -245,12 +249,14 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         
         progress += increment
         update_progress(progress)
+        
         SETUP_AND_RUN_MULTI_ECONOMY_PLOTS=True
         if concatenate_output_data(config):
             international_bunker_share_calculation_handler(config)
             if SETUP_AND_RUN_MULTI_ECONOMY_PLOTS:
                 try:
-                    produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060)
+                    if LMDI_CHARTS:
+                        produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060)
                 except:
                     breakpoint()
                     print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
@@ -311,7 +317,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main(['all'])#, '09_ROK'])#, root_dir_param=root_dir_param)
+        main(['17_SGP', '08_JPN'])#, '09_ROK'])#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%

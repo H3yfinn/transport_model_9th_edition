@@ -16,7 +16,7 @@ class Config:
         self.NEW_SALES_SHARES = True
         self.NEW_FUEL_MIXING_DATA = True
         self.IMPORT_FROM_TRANSPORT_DATA_SYSTEM = False
-        self.transport_data_system_FILE_DATE_ID ='DATE20240731'# 'DATE20240612'
+        self.transport_data_system_FILE_DATE_ID ='DATE20240913'# 'DATE20240612'
         self.latest_esto_data_FILE_DATE_ID = '20231207'
         self.PRINT_LESS_IMPORTANT_DETAILS = False
         self.PRINT_WARNINGS_FOR_FUTURE_WORK = False
@@ -165,7 +165,8 @@ class Config:
             '15_02_02_03_06_plugin_hybrid_ev_diesel': 'phev_d',  
             '15_02_02_03_07_liquified_petroleum_gas': 'lpg', 
             '15_02_02_03_08_fuel_cell_ev': 'fcev', 
-
+            '15_02_02_03_09_lng': 'lng',   
+            
             '15_02_02_04_01_diesel_engine': 'ice_d', 
             '15_02_02_04_02_gasoline_engine': 'ice_g', 
             '15_02_02_04_03_battery_ev': 'bev', 
@@ -173,7 +174,8 @@ class Config:
             '15_02_02_04_05_plugin_hybrid_ev_gasoline': 'phev_g', 
             '15_02_02_04_06_plugin_hybrid_ev_diesel': 'phev_d',  
             '15_02_02_04_07_liquified_petroleum_gas': 'lpg', 
-            '15_02_02_04_08_fuel_cell_ev': 'fcev'
+            '15_02_02_04_08_fuel_cell_ev': 'fcev',
+            '15_02_02_04_09_lng': 'lng'   
         }
 
         self.subfuels_mapping = {

@@ -69,6 +69,7 @@ colors_dict = {
     'gas': '#7d2472',  # plum
     '07_09_lpg': '#E4a0dc',  # lightorchid
     '08_01_natural_gas': '#7d2472',  # plum
+    '08_02_lng' : '#800080',  # purple
 
     # Oil vehicles and related items (red shades)
     'ice': '#FF0000',  # red
@@ -158,7 +159,13 @@ colors_dict = {
     'lcv': '#0000FF',  # blue
     'truck': '#000000',  # black
     
-    'freight': '#0000FF'  # blue
+    'freight': '#0000FF',  # blue
+    
+    'Light vehicles & buses - bev': '#1488c6',  # aperc blue
+    'Light vehicles & buses - fcev': '#800080',  # purple
+    
+    'Heavy trucks - bev': '#05429b',  # quite dark blue
+    'Heavy trucks - fcev': '#8A2BE2',  # darkviolet
     
 }
 
@@ -664,19 +671,19 @@ def plotting_handler(config, ECONOMY_IDs, plots, fig_dict, color_preparation_lis
         for drive_type in INCLUDE_GENERAL_DRIVE_TYPES_list:
             if f'share_of_vehicle_type_by_transport_type_{share_of_transport_type_type}_{drive_type}' in plots:
                 INCLUDE_GENERAL_DRIVE_TYPES = True if drive_type == 'True' else False
-                fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_share_of_vehicle_type_by_transport_type(config, ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, INCLUDE_GENERAL_DRIVE_TYPES=INCLUDE_GENERAL_DRIVE_TYPES, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+                fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.plot_share_of_vehicle_type_by_transport_type(config, ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type=share_of_transport_type_type, INCLUDE_GENERAL_DRIVE_TYPES=INCLUDE_GENERAL_DRIVE_TYPES, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     # Sum of Vehicle Types by Transport Type
     sum_vehicle_types = ['passenger', 'freight', 'all']
     for share_of_transport_type_type in sum_vehicle_types:
         if f'sum_of_vehicle_types_by_transport_type_{share_of_transport_type_type}' in plots:
-            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type=share_of_transport_type_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     # Sum of Vehicle Types by Transport Type
     sum_vehicle_types = ['passenger', 'freight', 'all']
     for share_of_transport_type_type in sum_vehicle_types:
-        if f'INTENSITY_ANALYSIS_sales_share_by_transport_type_{share_of_transport_type_type}' in plots:
-            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        if f'individual_graphs_sales_share_by_transport_type_{share_of_transport_type_type}' in plots:
+            fig_dict, color_preparation_list = assumptions_dashboard_plotting_scripts.individual_graphs_share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs,model_output_detailed, new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type=share_of_transport_type_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     # Energy Use by Fuel Type
     energy_use_by_fuel_type_titles = [p for p in plots if 'energy_use_by_fuel_type' in p]
@@ -949,12 +956,12 @@ def plotting_handler(config, ECONOMY_IDs, plots, fig_dict, color_preparation_lis
         DROP_NON_ROAD_TRANSPORT=False
         fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_energy_efficiency_strip(config, ECONOMY_IDs,model_output_detailed_detailed_non_road_drives,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
-    if 'INTENSITY_ANALYSIS_timeseries_passenger' in plots:
+    if 'individual_graphs_intensity_timeseries_passenger' in plots:
         DROP_NON_ROAD_TRANSPORT=True
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.plot_intensity_timeseries_INTENSITY_ANALYSIS(config, ECONOMY_IDs,model_output_detailed,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, transport_type = 'passenger', WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.individual_graphs_plot_intensity_timeseries(config, ECONOMY_IDs,model_output_detailed,fig_dict,DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, transport_type = 'passenger', WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
-    if 'share_of_vehicle_type_by_transport_type_passenger_INTENSITY_ANALYSIS' in plots:
-        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.INTENSITY_ANALYSIS_share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs,new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
+    if 'share_of_vehicle_type_by_transport_type_passenger_individual_graphs' in plots:
+        fig_dict,color_preparation_list = assumptions_dashboard_plotting_scripts.individual_graphs_share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs,model_output_detailed, new_sales_shares_all_plot_drive_shares,stocks,fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type='passenger', WRITE_HTML=WRITE_INDIVIDUAL_HTMLS)
     #breakpoint()
     new_vehicle_efficiency_timeseries = [p for p in plots if 'new_vehicle_efficiency_timeseries_' in p]
     for plot in new_vehicle_efficiency_timeseries:
@@ -1206,9 +1213,9 @@ ECONOMY_ID (str or None): The ID of the economy for which the dashboard is being
     
     create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'detail_and_assumptions',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID,  WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS,SAVE_AS_WEB_PLOTS=SAVE_AS_WEB_PLOTS)
         
-    plots = ['energy_use_by_fuel_type_all_all', 'emissions_by_fuel_type_all_gen','passenger_km_by_drive_road','freight_tonne_km_by_drive_road', 'share_of_vehicle_type_by_transport_type_all','share_of_vehicle_type_activity_all', 'line_turnover_rate_by_vtype_all_road','avg_age_road',  'lmdi_freight_road',  'lmdi_passenger_road', 'energy_efficiency_timeseries_all','INTENSITY_ANALYSIS_timeseries_freight','INTENSITY_ANALYSIS_timeseries_passenger', 'share_of_vehicle_type_by_transport_type_freight_INTENSITY_ANALYSIS', 'share_of_vehicle_type_by_transport_type_passenger_INTENSITY_ANALYSIS', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_passenger', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_freight', 'INTENSITY_ANALYSIS_sales_share_by_transport_type_all', 'lifecycle_emissions_of_cars', 'box_turnover_rate_by_drive_all', 'turnover_rate_age_curve']
+    plots = ['energy_use_by_fuel_type_all_all', 'emissions_by_fuel_type_all_gen','passenger_km_by_drive_road','freight_tonne_km_by_drive_road', 'freight_tonne_km_by_drive_all','share_of_vehicle_type_by_transport_type_all','share_of_vehicle_type_activity_all', 'line_turnover_rate_by_vtype_all_road','avg_age_road',  'lmdi_freight_road',  'lmdi_passenger_road', 'energy_efficiency_timeseries_all','individual_graphs_intensity_timeseries_freight','individual_graphs_timeseries_passenger', 'share_of_vehicle_type_by_transport_type_freight_individual_graphs', 'share_of_vehicle_type_by_transport_type_passenger_individual_graphs', 'individual_graphs_sales_share_by_transport_type_passenger', 'individual_graphs_sales_share_by_transport_type_freight', 'individual_graphs_sales_share_by_transport_type_all', 'lifecycle_emissions_of_cars', 'box_turnover_rate_by_drive_all', 'turnover_rate_age_curve']
     
-    CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT = {'transport_type':'all', 'mediums':['road']}
+    CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT = None#{'transport_type':'all', 'mediums':['road']}
     create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'individual_graphs',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS,CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT=CREATE_SINGLE_TRANSPORT_TYPE_MEDIUM_PLOTS_DICT,WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS,SAVE_AS_WEB_PLOTS=False)
     
 

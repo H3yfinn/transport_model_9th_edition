@@ -13,6 +13,53 @@ import warnings
 
 warnings.filterwarnings('ignore', message='Calling int on a single element Series is deprecated') # from line ~190
 
+#can use the below as a quick way to fix the labels for the drivers in the lmdi output
+VARIABLES_TO_LABELS_DICT = {
+    'Vehicle Type': 'Vehicle size/type',
+    'Engine switching intensity': 'Other factors',
+    'Vehicle efficiency': 'Other factors',
+    'Engine switching': 'Engine type',
+    # 'Multiplicative change in Energy use': 'Multiplicative change in energy use',
+    'passenger_km': 'Activity',
+    'freight_tonne_km': 'Activity'
+}
+
+def format_exact_title(config, extra_identifier, energy_variable):
+    """
+    Generates a more specific chart title based on provided identifiers.
+    Args:
+        config: Configuration object containing paths and settings.
+        extra_identifier: A string containing additional identifiers.
+        energy_variable: The energy variable to be displayed.
+    Returns:
+        A formatted title string.
+    """
+    # Load economy codes and names
+    economy_code_to_name_dict = pd.read_csv(config.economy_codes_path).set_index('Economy')['Economy_name'].to_dict()
+    
+    # Extract economy name
+    economy = next((economy_code_to_name_dict[key] for key in economy_code_to_name_dict if key in extra_identifier), None)
+    
+    # Extract scenario, transport type, and medium
+    scenario = next((i for i in ['Reference', 'Target'] if i in extra_identifier), None)
+    transport_type = next((i for i in ['passenger', 'freight'] if i in extra_identifier), None)
+    medium = next((i for i in ['road', 'rail', 'air', 'ship'] if i in extra_identifier), None)
+    
+    # Build the title based on available components
+    parts = ["Drivers of"]
+    if medium:
+        parts.append(f"{medium.capitalize()}")
+    if transport_type:
+        parts.append(f"{transport_type.capitalize()}")
+    parts.append(f"{energy_variable.capitalize()}")
+    if economy:
+        parts.append(f"in {economy.capitalize()}")
+    if scenario:
+        parts.append(f"({scenario.capitalize()})")
+    
+    return " ".join(parts)
+    
+    
 def plot_multiplicative_timeseries(config, data_title, extra_identifier, structure_variables_list, activity_variable, energy_variable='Energy', emissions_variable='Emissions', emissions_divisia=False, time_variable='Year', graph_title='', residual_variable1='Energy intensity', residual_variable2='Emissions intensity', font_size=25, AUTO_OPEN=False, hierarchical=False, output_data_folder='output_data', plotting_output_folder='plotting_output', INCLUDE_EXTRA_FACTORS_AT_END=False):
     """
     data used by this function:
@@ -53,13 +100,16 @@ def plot_multiplicative_timeseries(config, data_title, extra_identifier, structu
         # create category based on whether data is driver or change in energy use
         mult_plot['Line type'] = mult_plot['Driver'].apply(lambda i: i if i == f'Multiplicative change in {energy_variable}' else 'Driver')
         # set title
-
         if graph_title == '':
-            title = f'{data_title}{extra_identifier} - Multiplicative LMDI'
+            title = format_exact_title(config, extra_identifier, energy_variable)#f'{data_title}{extra_identifier} - Multiplicative LMDI'
         else:
+            # title = format_exact_title_using_title(config, graph_title, economy, scenario, transport_type, medium, energy_variable)
             title = graph_title
             
-        # plot
+            
+        # plot       
+        mult_plot['Driver'] = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in mult_plot['Driver']]
+        driver_name_list = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in driver_name_list]
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash='Line type', title=title, category_orders={"Line type": [f'Multiplicative change in {energy_variable}', 'Driver'], "Driver": driver_name_list})
 
         fig.update_layout(
@@ -102,11 +152,13 @@ def plot_multiplicative_timeseries(config, data_title, extra_identifier, structu
 
         # set title
         if graph_title == '':
-            title = f'{data_title}{extra_identifier} - Multiplicative LMDI decomposition of emissions'
+            title = format_exact_title(config, extra_identifier, energy_variable)#f'{data_title}{extra_identifier} - Multiplicative LMDI decomposition of emissions'
         else:
             title = graph_title
             
         # plot
+        mult_plot['Driver'] = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in mult_plot['Driver']]
+        driver_name_list = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in driver_name_list]
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash='Line type', title=title, category_orders={"Line type": [f'Change in {emissions_variable}', 'Driver'], "Driver": driver_name_list})
 
         fig.update_layout(
@@ -148,11 +200,13 @@ def plot_multiplicative_timeseries(config, data_title, extra_identifier, structu
 
         # set title
         if graph_title == '':
-            title = f'{data_title}{extra_identifier} - Multiplicative LMDI'
+            title = format_exact_title(config, extra_identifier, energy_variable)#f'{data_title}{extra_identifier} - Multiplicative LMDI'
         else:
             title = graph_title
 
         # plot
+        mult_plot['Driver'] = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in mult_plot['Driver']]
+        driver_name_list = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in driver_name_list]
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash='Line type', category_orders={"Line type": ['', ' '], "Driver": driver_name_list}, title=title)
 
         fig.update_layout(
@@ -195,11 +249,13 @@ def plot_multiplicative_timeseries(config, data_title, extra_identifier, structu
 
         # set title
         if graph_title == '':
-            title = f'{data_title}{extra_identifier} - Multiplicative LMDI'
+            title = format_exact_title(config, extra_identifier, energy_variable)#f'{data_title}{extra_identifier} - Multiplicative LMDI'
         else:
             title = graph_title
 
         # plot
+        mult_plot['Driver'] = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in mult_plot['Driver']]
+        driver_name_list = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in driver_name_list]
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash='Line type', category_orders={"Line type": ['', ' '], "Driver": driver_name_list}, title=title)
 
         fig.update_layout(
@@ -247,8 +303,9 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
         mult_plot['Line type'] = mult_plot['Driver'].apply(lambda i: i if i == f'Additive change in {energy_variable}' else 'Driver')
         # set title
 
+        
         if graph_title == '':
-            title = f'{data_title}{extra_identifier} - additive LMDI'
+            title = format_exact_title(config, extra_identifier, energy_variable)#f'{data_title}{extra_identifier} - additive LMDI'
         else:
             title = graph_title
             
@@ -259,6 +316,8 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
             breakpoint()  # will this work
             driver_name_list += cols_after_total_var
         # plot
+        mult_plot['Driver'] = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in mult_plot['Driver']]
+        driver_name_list = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in driver_name_list]
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash='Line type', title=title, category_orders={"Line type": [f'Additive change in {energy_variable}', 'Driver'], "Driver": driver_name_list})
 
         fig.update_layout(
@@ -294,7 +353,7 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
 
         # set title
         if graph_title == '':
-            title = f'{data_title}{extra_identifier} - additive LMDI decomposition of emissions'
+            title = format_exact_title(config, extra_identifier, energy_variable)#f'{data_title}{extra_identifier} - additive LMDI decomposition of emissions'
         else:
             title = graph_title
 
@@ -305,6 +364,8 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
             driver_name_list += cols_after_total_var
             
         # plot
+        mult_plot['Driver'] = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in mult_plot['Driver']]
+        driver_name_list = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in driver_name_list]
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash='Line type', title=title, category_orders={"Line type": [f'Change in {emissions_variable}', 'Driver'], "Driver": driver_name_list})
 
         fig.update_layout(
@@ -349,13 +410,16 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
         # create category based on whether data is driver or change in energy use. because we don't want it to show in the graph we will just make driver a double space, and the change in energy a single space
         mult_plot['Line type'] = mult_plot['Driver'].apply(lambda i: '' if i == f'Additive change in {energy_variable}' else ' ')
 
+        
         # set title
         if graph_title == '':
-            title = f'{data_title}{extra_identifier} - additive LMDI'
+            title = format_exact_title(config, extra_identifier, energy_variable)#f'{data_title}{extra_identifier} - additive LMDI'
         else:
             title = graph_title
 
         # plot
+        mult_plot['Driver'] = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in mult_plot['Driver']]
+        driver_name_list = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in driver_name_list]
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash='Line type', category_orders={"Line type": ['', ' '], "Driver": driver_name_list}, title=title)
 
         fig.update_layout(
@@ -402,13 +466,16 @@ def plot_additive_timeseries(config, data_title, extra_identifier, structure_var
         # create category based on whether data is driver or change in energy use. because we don't want it to show in the graph we will just make driver a double space, and the change in energy a single space
         mult_plot['Line type'] = mult_plot['Driver'].apply(lambda i: '' if i == f'Additive change in {emissions_variable}' else ' ')
 
+        
         # set title
         if graph_title == '':
-            title = f'{data_title}{extra_identifier} - additive LMDI'
+            title = format_exact_title(config, extra_identifier, energy_variable)#f'{data_title}{extra_identifier} - additive LMDI'
         else:
             title = graph_title
 
         # plot
+        mult_plot['Driver'] = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in mult_plot['Driver']]
+        driver_name_list = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in driver_name_list]
         fig = px.line(mult_plot, x=time_variable, y="Value", color="Driver", line_dash='Line type', category_orders={"Line type": ['', ' '], "Driver": driver_name_list}, title=title)
 
         fig.update_layout(
@@ -478,8 +545,9 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
         #create a 'relative' vlaue  in the list for each driver in the dataset. to count the number of drivers, we can use the number of structure variables + 2 (activity and 2xresidual)
         measure_list = ['absolute'] + ['relative'] * (len(structure_variables_list) + 2) + ['total']
 
+        
         if graph_title == '':
-            title = '{}{} - Additive LMDI'.format(data_title, extra_identifier)
+            title = format_exact_title(config, extra_identifier, energy_variable)#'{}{} - Additive LMDI'.format(data_title, extra_identifier)
         else:
             title = graph_title
 
@@ -508,7 +576,8 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
             x += cols_after_total_var
             text += [str(int(add_plot[var].round(0).iloc[0])) for var in cols_after_total_var]
             
-        
+        #adjust x using VARIABLES_TO_LABELS_DICT:
+        x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
         fig = go.Figure(go.Waterfall(
             orientation = "v",
             measure = measure_list,
@@ -574,8 +643,9 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
         #create a 'relative' vlaue  in the list for each driver in the dataset. to count the number of drivers, we can use the number of structure variables + 2 (activity and 2xresidual)
         measure_list = ['absolute'] + ['relative'] * (len(structure_variables_list) + 3) + ['total']
 
+        
         if graph_title == '':
-            title = '{}{} - Additive LMDI'.format(data_title, extra_identifier)
+            title = format_exact_title(config, extra_identifier, energy_variable)#'{}{} - Additive LMDI'.format(data_title, extra_identifier)
         else:
             title = graph_title
             
@@ -596,6 +666,8 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
             x += cols_after_total_var
             # text += [str(int(add_plot[var].round(0).iloc[0])) for var in cols_after_total_var]
             
+        #adjust x using VARIABLES_TO_LABELS_DICT:
+        x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
         fig = go.Figure(go.Waterfall(
             orientation = "v",
             measure = measure_list,
@@ -668,7 +740,7 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
         measure_list = ['absolute'] + ['relative'] * (len(structure_variables_list) + 2) + ['total']
 
         if graph_title == '':
-            title = '{}{} - Additive hierarchical LMDI'.format(data_title, extra_identifier)
+            title = format_exact_title(config, extra_identifier, energy_variable)#'{}{} - Additive hierarchical LMDI'.format(data_title, extra_identifier)
         else:
             title = graph_title
         
@@ -697,6 +769,8 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
             x += cols_after_total_var
             text += [str(int(add_plot[var].round(0).iloc[0])) for var in cols_after_total_var]
         
+        #adjust x using VARIABLES_TO_LABELS_DICT:
+        x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
         fig = go.Figure(go.Waterfall(
             orientation = "v",
             measure = measure_list,
@@ -774,7 +848,7 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
         measure_list = ['absolute'] + ['relative'] * (len(structure_variables_list) + 3) + ['total']
 
         if graph_title == '':
-            title = '{}{} - Additive hierarchical LMDI'.format(data_title, extra_identifier)
+            title = format_exact_title(config, extra_identifier, energy_variable)# '{}{} - Additive hierarchical LMDI'.format(data_title, extra_identifier)
         else:
             title = graph_title
         
@@ -804,6 +878,8 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
             x += cols_after_total_var
             text += [str(int(add_plot[var].round(0).iloc[0])) for var in cols_after_total_var]
         
+        #adjust x using VARIABLES_TO_LABELS_DICT:
+        x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
         fig = go.Figure(go.Waterfall(
             orientation = "v",
             measure = measure_list,
@@ -953,10 +1029,10 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
             #create a 'relative' vlaue  in the list for each driver in the dataset. to count the number of drivers, we can use the number of structure variables + 2 (activity and 2xresidual)
             measure_list = ['absolute'] + ['relative'] * (len(structure_variables_list) + 2) + ['total']
 
-            # if graph_title == '':
-            #     title = '{}{} - Additive LMDI'.format(data_title, extra_identifier)
-            # else:
-            #     title = graph_title
+            if graph_title == '':
+                title = format_exact_title(config, extra_identifier, energy_variable)#'{}{} - Additive LMDI'.format(data_title, extra_identifier)
+            else:
+                title = graph_title
 
             y = [add_plot_first_year_energy-base_amount, 
             add_plot[activity_variable].iloc[0]] + add_plot[structure_variables_list].iloc[0].tolist() + [add_plot[residual_variable1].iloc[0],
@@ -975,6 +1051,8 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
             else:
                 text = None
             
+            #adjust x using VARIABLES_TO_LABELS_DICT:
+            x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
             # Create waterfall figure
             waterfall_fig = go.Waterfall(
                 orientation="v",
@@ -997,7 +1075,8 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
         fig.update_layout(
             font=dict(size=font_size),
             waterfallgap=0.01,
-            showlegend=False
+            showlegend=False,
+            title = graph_title
         )
         
         #create unit for y axis
@@ -1045,10 +1124,10 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
             #create a 'relative' vlaue  in the list for each driver in the dataset. to count the number of drivers, we can use the number of structure variables + 2 (activity and 2xresidual)
             measure_list = ['absolute'] + ['relative'] * (len(structure_variables_list) + 2) + ['total']
 
-            # if graph_title == '':
-            #     title = '{}{} - Additive LMDI'.format(data_title, extra_identifier)
-            # else:
-            #     title = graph_title
+            if graph_title == '':
+                title = format_exact_title(config, extra_identifier, energy_variable)#'{}{} - Additive LMDI'.format(data_title, extra_identifier)
+            else:
+                title = graph_title
             y = [add_plot_first_year_energy-base_amount, 
             add_plot[activity_variable].iloc[0]] + add_plot[structure_variables_list].iloc[0].tolist() + [add_plot[residual_variable1].iloc[0],
             add_plot["Total {}".format(energy_variable)].iloc[0]]
@@ -1066,6 +1145,8 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
             else:
                 text = None
             
+            #adjust x using VARIABLES_TO_LABELS_DICT:
+            x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
             # Create waterfall figure
             waterfall_fig = go.Waterfall(
                 orientation="v",
@@ -1088,7 +1169,8 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
         fig.update_layout(
             font=dict(size=font_size),
             waterfallgap=0.01,
-            showlegend=False
+            showlegend=False,
+            title = graph_title
         )
 
         #create unit for y axis
@@ -1142,10 +1224,10 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
             #create a 'relative' vlaue  in the list for each driver in the dataset. to count the number of drivers, we can use the number of structure variables + 2 (activity and 2xresidual)
             measure_list = ['absolute'] + ['relative'] * (len(structure_variables_list) + 3) + ['total']
 
-            # if graph_title == '':
-            #     title = '{}{} - Additive LMDI'.format(data_title, extra_identifier)
-            # else:
-            #     title = graph_title
+            if graph_title == '':
+                title = format_exact_title(config, extra_identifier, energy_variable)#'{}{} - Additive LMDI'.format(data_title, extra_identifier)
+            else:
+                title = graph_title
             y = [add_plot_first_year_emissions-base_amount, 
             add_plot[activity_variable].iloc[0]] + add_plot[structure_variables_list].iloc[0].tolist() + [add_plot[residual_variable1].iloc[0],add_plot[residual_variable2].iloc[0],
             add_plot["Total {}".format(emissions_variable)].iloc[0]]
@@ -1164,6 +1246,8 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
             else:
                 text = None
             
+            #adjust x using VARIABLES_TO_LABELS_DICT:
+            x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
             # Create waterfall figure
             waterfall_fig = go.Waterfall(
                 orientation="v",
@@ -1186,7 +1270,8 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
         fig.update_layout(
             font=dict(size=font_size),
             waterfallgap=0.01,
-            showlegend=False
+            showlegend=False,
+            title = graph_title
         )
 
         #create unit for y axis
@@ -1318,7 +1403,7 @@ def plot_additive_timeseries_WEIRD_COPY(config, data_title, extra_identifier, st
         #set title
 
         if graph_title == '':
-            title = '{}{} - Additive LMDI'.format(data_title, extra_identifier)
+            title = format_exact_title(config, extra_identifier, energy_variable)#'{}{} - Additive LMDI'.format(data_title, extra_identifier)
         else:
             title = graph_title
             
@@ -1327,7 +1412,10 @@ def plot_additive_timeseries_WEIRD_COPY(config, data_title, extra_identifier, st
             #add extra factors at the end of the graph. this allows for things like calcualting the effect of including the effect of electricity gernation emissions, which are treated as being independent of the other drivers (even though they are not - it would usually change the effect of the other drivers)
             cols_after_total_var = lmdi_output_additive.columns.tolist()[lmdi_output_additive.columns.tolist().index('Additive change in {}'.format(energy_variable))+1:]
             driver_name_list += cols_after_total_var
-        #plot
+        
+        # plot
+        timeseries_plot['Driver'] = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in timeseries_plot['Driver']]
+        driver_name_list = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in driver_name_list]
         fig = px.line(timeseries_plot, x=time_variable, y="Value", color="Driver", line_dash = 'Line type', title=title, category_orders={"Line type":['Additive change in {}'.format(energy_variable), 'Driver'],"Driver":driver_name_list})#,
 
         fig.update_layout(
@@ -1367,7 +1455,7 @@ def plot_additive_timeseries_WEIRD_COPY(config, data_title, extra_identifier, st
 
         #set title
         if graph_title == '':
-            title = '{}{} - Additive LMDI decomposition of emissions'.format(data_title, extra_identifier)
+            title = format_exact_title(config, extra_identifier, energy_variable)#'{}{} - Additive LMDI decomposition of emissions'.format(data_title, extra_identifier)
         else:
             title = graph_title
 
@@ -1378,6 +1466,8 @@ def plot_additive_timeseries_WEIRD_COPY(config, data_title, extra_identifier, st
             driver_name_list += cols_after_total_var
             
         #plot
+        timeseries_plot['Driver'] = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in timeseries_plot['Driver']]
+        driver_name_list = [VARIABLES_TO_LABELS_DICT.get(i, i) for i in driver_name_list]
         fig = px.line(timeseries_plot, x=time_variable, y="Value", color="Driver", line_dash = 'Line type', title=title, category_orders={"Line type":['Additive change in {}'.format(emissions_variable), 'Driver'],"Driver":driver_name_list})
 
         fig.update_layout(
