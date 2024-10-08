@@ -3009,12 +3009,6 @@ def plot_energy_efficiency_timeseries(config, ECONOMY_IDs, model_output_detailed
     
     return fig_dict, color_preparation_list
 
-
-import os
-import pandas as pd
-import numpy as np
-import plotly.express as px
-
 def plot_energy_efficiency_strip(config, ECONOMY_IDs, model_output_detailed, fig_dict, DROP_NON_ROAD_TRANSPORT, color_preparation_list, colors_dict, WRITE_HTML=True):
     PLOTTED=True
     #to help with checking that the data is realistic, plot energy efficiency here:
@@ -3062,7 +3056,10 @@ def plot_energy_efficiency_strip(config, ECONOMY_IDs, model_output_detailed, fig
                 fig_dict[economy][scenario]['energy_efficiency_all_strip'] = [fig, title, PLOTTED]
             
             if WRITE_HTML:
-                filename = f'energy_efficiency_all_strip_{scenario}_{economy}.html'
+                if DROP_NON_ROAD_TRANSPORT:
+                    filename = f'energy_efficiency_road_strip_{scenario}_{economy}.html'
+                else:
+                    filename = f'energy_efficiency_all_strip_{scenario}_{economy}.html'
                 write_graph_to_html(config, filename=filename, graph_type='strip', plot_data=energy_eff_by_scen_by_economy, economy=economy, x='Vehicle Type', y='Efficiency', color='Drive', title=title, y_axes_title='Efficiency (km per MJ)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
             
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
