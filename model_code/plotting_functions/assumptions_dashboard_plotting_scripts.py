@@ -2447,7 +2447,7 @@ def emissions_by_fuel_type(config, ECONOMY_IDs, emissions_factors, model_output_
         gen=''
     #identify where there are no emissions factors:
     missing_emissions_factors = model_output_with_fuels_sum.loc[model_output_with_fuels_sum['Emissions factor (MT/PJ)'].isna()].copy()
-    breakpoint()
+    
     if len(missing_emissions_factors)>0:
         breakpoint()
         time.sleep(1)

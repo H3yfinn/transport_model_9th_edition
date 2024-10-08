@@ -138,7 +138,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     progress += increment
     update_progress(progress)
     FOUND = False
-    RUN_MODEL = True#set me
+    RUN_MODEL = False#set me
     LMDI_CHARTS = True
     if not RUN_MODEL:
         MODEL_RUN_1  = False
@@ -317,7 +317,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main(['17_SGP', '08_JPN'])#, '09_ROK'])#, root_dir_param=root_dir_param)
+        main(['18_CT', '08_JPN'])#, '09_ROK'])#, root_dir_param=root_dir_param)
     # root_dir_param = 
 #%%
 # %%

@@ -327,10 +327,24 @@ def apply_fuel_mixing_to_energy(config, international_bunker_outputs, internatio
     
     #double check that total energy use is the same as before:
     if abs(international_bunker_energy['Energy'].sum() - international_bunker_outputs['Energy'].sum()) > 0.001:
+        
+        #sum up the 	 Energy data by Scenario	Medium	Economy	Drive	Date
+        #then merge them to see where the differences are:
+        international_bunker_energy = international_bunker_energy.groupby(['Scenario','Medium', 'Economy', 'Drive', 'Date'])['Energy'].sum().reset_index()
+        international_bunker_outputs = international_bunker_outputs.groupby(['Scenario','Medium', 'Economy', 'Drive', 'Date'])['Energy'].sum().reset_index()
+        #merge them:
+        international_bunker_energy_test = pd.merge(international_bunker_energy, international_bunker_outputs, how='left', on=['Scenario','Medium', 'Economy', 'Drive', 'Date'], suffixes=('_new', '_old'))
+        international_bunker_energy_test['Energy_diff'] = international_bunker_energy_test['Energy_new'] - international_bunker_energy_test['Energy_old']
+        #print where the differences are:
+        international_bunker_energy_test = international_bunker_energy_test.loc[international_bunker_energy_test['Energy_diff'] != 0]
+        print('there are differences for these drives:', international_bunker_energy_test)
+
         international_bunker_energy.to_csv(os.path.join(config.root_dir, 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))))
         breakpoint()
         time.sleep(1)
         raise Exception('The total energy use for the international_bunker_outputs df has changed after applying fuel mixing. Please check the data and remove duplicates, {}'.format(abs(international_bunker_energy['Energy'].sum() - international_bunker_outputs['Energy'].sum())))
+    
+    
     
     return international_bunker_energy
 
@@ -727,12 +741,12 @@ def calculate_non_road_activity_growth_rate(config, non_road_activity, PLOT_MINO
         non_road_activity = non_road_activity_new.copy()
     
     
-    non_road_activity = non_road_activity.sort_values(by=['Scenario', 'Transport Type', 'Date'])
-    non_road_activity_growth_rates = non_road_activity.dropna().groupby(['Scenario', 'Date', 'Transport Type'])['Activity'].sum().reset_index()
+    non_road_activity = non_road_activity.sort_values(by=['Scenario', 'Transport Type','Economy', 'Date'])
+    non_road_activity_growth_rates = non_road_activity.dropna().groupby(['Scenario', 'Date','Economy', 'Transport Type'])['Activity'].sum().reset_index()
     #sort
-    non_road_activity_growth_rates = non_road_activity_growth_rates.sort_values(by=['Scenario', 'Transport Type', 'Date'])
-    non_road_activity_growth_rates['Activity'] = non_road_activity_growth_rates.groupby(['Scenario', 'Transport Type'])['Activity'].pct_change()
-    non_road_activity_growth_rates_no_ttype = non_road_activity_growth_rates.groupby(['Scenario', 'Date'])['Activity'].mean().reset_index()
+    non_road_activity_growth_rates = non_road_activity_growth_rates.sort_values(by=['Scenario', 'Transport Type', 'Economy','Date'])
+    non_road_activity_growth_rates['Activity'] = non_road_activity_growth_rates.groupby(['Scenario','Economy', 'Transport Type'])['Activity'].pct_change()
+    non_road_activity_growth_rates_no_ttype_no_economy = non_road_activity_growth_rates.groupby(['Scenario', 'Date'])['Activity'].mean().reset_index()
     new_non_road_activity_growth_rates = pd.DataFrame()
     #will this work with the sum? and pct change in oe go? any need ot mean sthem?
     
@@ -740,42 +754,42 @@ def calculate_non_road_activity_growth_rate(config, non_road_activity, PLOT_MINO
     for economy in non_road_activity.Economy.unique():
         if drivers_dict[economy]['air_driver'] == 'economy_weighted':
             if drivers_dict[economy]['air_driver_ttype'] == 'all':
-                air_growth_rate = non_road_activity.loc[(non_road_activity['Economy'] == economy)].copy()
+                air_growth_rate = non_road_activity_growth_rates.loc[(non_road_activity_growth_rates['Economy'] == economy)].copy()
                 air_growth_rate = air_growth_rate.groupby(['Scenario', 'Date', 'Transport Type'])['Activity'].sum().pct_change().reset_index()
                 air_growth_rate = air_growth_rate.groupby(['Scenario', 'Date'])['Activity'].mean().reset_index()
                 #join on the growth rate for all economies anf then avgerage out
-                air_growth_rate = pd.concat([air_growth_rate, non_road_activity_growth_rates_no_ttype])
+                air_growth_rate = pd.concat([air_growth_rate, non_road_activity_growth_rates_no_ttype_no_economy])
                 air_growth_rate = air_growth_rate.groupby(['Scenario', 'Date'])['Activity'].mean().reset_index()
             elif drivers_dict[economy]['air_driver_ttype'] in (['freight', 'passenger']):
                 ttype = drivers_dict[economy]['air_driver_ttype']
-                air_growth_rate = non_road_activity.loc[(non_road_activity['Economy'] == economy) & (non_road_activity['Transport Type'] == ttype)].copy()
+                air_growth_rate = non_road_activity_growth_rates.loc[(non_road_activity_growth_rates['Economy'] == economy) & (non_road_activity_growth_rates['Transport Type'] == ttype)].copy()
                 air_growth_rate = air_growth_rate.groupby(['Scenario', 'Date'])['Activity'].mean().reset_index()
                 air_growth_rate = pd.concat([air_growth_rate, non_road_activity_growth_rates.loc[non_road_activity_growth_rates['Transport Type'] == ttype]])
                 air_growth_rate = air_growth_rate.groupby(['Scenario', 'Date'])['Activity'].mean().reset_index()
         else:
             if drivers_dict[economy]['air_driver_ttype'] == 'all':
-                air_growth_rate = non_road_activity_growth_rates_no_ttype.copy()
+                air_growth_rate = non_road_activity_growth_rates_no_ttype_no_economy.copy()
             elif drivers_dict[economy]['air_driver_ttype'].isin(['freight', 'passenger']):
                 ttype = drivers_dict[economy]['air_driver_ttype']
                 air_growth_rate = non_road_activity_growth_rates.loc[non_road_activity_growth_rates['Transport Type'] == ttype].drop(columns=['Transport Type']).copy()
         #now do the same for marine:
         if drivers_dict[economy]['marine_driver'] == 'economy_weighted':
             if drivers_dict[economy]['marine_driver_ttype'] == 'all':
-                marine_growth_rate = non_road_activity.loc[(non_road_activity['Economy'] == economy)].copy()
+                marine_growth_rate = non_road_activity_growth_rates.loc[(non_road_activity_growth_rates['Economy'] == economy)].copy()
                 marine_growth_rate = marine_growth_rate.groupby(['Scenario', 'Date', 'Transport Type'])['Activity'].sum().pct_change().reset_index()
                 marine_growth_rate = marine_growth_rate.groupby(['Scenario', 'Date'])['Activity'].mean().reset_index()
                 #join on the growth rate for all economies anf then avgerage out
-                marine_growth_rate = pd.concat([marine_growth_rate, non_road_activity_growth_rates_no_ttype])
+                marine_growth_rate = pd.concat([marine_growth_rate, non_road_activity_growth_rates_no_ttype_no_economy])
                 marine_growth_rate = marine_growth_rate.groupby(['Scenario', 'Date'])['Activity'].mean().reset_index()
             elif drivers_dict[economy]['marine_driver_ttype'] in ['freight', 'passenger']:
                 ttype = drivers_dict[economy]['marine_driver_ttype']
-                marine_growth_rate = non_road_activity.loc[(non_road_activity['Economy'] == economy) & (non_road_activity['Transport Type'] == ttype)].copy()
+                marine_growth_rate = non_road_activity_growth_rates.loc[(non_road_activity_growth_rates['Economy'] == economy) & (non_road_activity_growth_rates['Transport Type'] == ttype)].copy()
                 marine_growth_rate = marine_growth_rate.groupby(['Scenario', 'Date'])['Activity'].mean().reset_index()
                 marine_growth_rate = pd.concat([marine_growth_rate, non_road_activity_growth_rates.loc[non_road_activity_growth_rates['Transport Type'] == ttype]])
                 marine_growth_rate = marine_growth_rate.groupby(['Scenario', 'Date'])['Activity'].mean().reset_index()
         else:
             if drivers_dict[economy]['marine_driver_ttype'] == 'all':
-                marine_growth_rate = non_road_activity_growth_rates_no_ttype.copy()
+                marine_growth_rate = non_road_activity_growth_rates_no_ttype_no_economy.copy()
             elif drivers_dict[economy]['marine_driver_ttype'].isin(['freight', 'passenger']):
                 ttype = drivers_dict[economy]['marine_driver_ttype']
                 marine_growth_rate = non_road_activity_growth_rates.loc[non_road_activity_growth_rates['Transport Type'] == ttype].drop(columns=['Transport Type']).copy()
@@ -786,6 +800,7 @@ def calculate_non_road_activity_growth_rate(config, non_road_activity, PLOT_MINO
         non_road_activity_growth_rate_economy.rename(columns={'Activity': 'Growth Rate'}, inplace=True)
         new_non_road_activity_growth_rates = pd.concat([new_non_road_activity_growth_rates, non_road_activity_growth_rate_economy])
     non_road_activity_growth_rate = new_non_road_activity_growth_rates.copy()
+    
     
     ############################################
     #to avoid the effect of covid in the years before 2025, we will set the growth rate for 2025 to the average growth rate for 2026-2036
