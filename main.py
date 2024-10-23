@@ -138,7 +138,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     progress += increment
     update_progress(progress)
     FOUND = False
-    RUN_MODEL = False#set me
+    RUN_MODEL = True#set me
     LMDI_CHARTS = True
     if not RUN_MODEL:
         MODEL_RUN_1  = False
@@ -204,7 +204,6 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             run_non_road_model(config, ECONOMY_ID,USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD=ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict[ECONOMY_ID])
             
             model_output_all = concatenate_model_output(config, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR)
-            
             model_output_with_fuel_mixing = apply_fuel_mix_demand_side(config, model_output_all,ECONOMY_ID=ECONOMY_ID)
             model_output_with_fuel_mixing = apply_fuel_mix_supply_side(config, model_output_with_fuel_mixing,ECONOMY_ID=ECONOMY_ID)
             
@@ -317,8 +316,8 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main(['08_JPN'])#, '09_ROK'])#, root_dir_param=root_dir_param)
-    # root_dir_param = #'18_CT', 
+        main(['16_RUS'])#, '09_ROK'])#, root_dir_param=root_dir_param)
+    # root_dir_param = #'18_CT', 01_AUS
 #%%
 # %%
 

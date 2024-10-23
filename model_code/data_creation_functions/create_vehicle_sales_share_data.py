@@ -39,6 +39,7 @@ X_ORDER = 'linear'#set me to linear or the order for the spline
 def vehicle_sales_share_creation_handler(config, ECONOMY_ID, RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, USE_LARGE_EPSILON=False):
     """
     Args:
+    #REMEMBER THE THIS (incorporate_alternate_sales_shares()) MIGHT OVERWRITE WHAT IS SET IN VEHICLE_SALES_SHARE_INPUTS.XLSX!!
     """
     if ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR:    
         CURRENT_BASE_YEAR = config.OUTLOOK_BASE_YEAR
@@ -60,12 +61,12 @@ def vehicle_sales_share_creation_handler(config, ECONOMY_ID, RECALCULATE_SALES_S
     new_transport_data_system_df = new_transport_data_system_df.drop(columns=['road'])
     new_sales_shares_sum, model_concordances_user_input_and_growth_rates =   format_and_check_current_and_historical_shares(config, ECONOMY_ID,new_transport_data_system_df, CURRENT_BASE_YEAR)
     new_sales_shares_sum, new_sales_shares_sum_original = calculate_current_and_historical_shares(config, new_sales_shares_sum, CURRENT_BASE_YEAR)
+    #REMEMBER THE THIS MIGHT OVERWRITE WHAT IS SET IN VEHICLE_SALES_SHARE_INPUTS.XLSX!!
     alternate_sales_shares, alternate_filepaths = incorporate_alternate_sales_shares(config, ECONOMY_ID)
-    
+    #REMEMBER THE THIS MIGHT OVERWRITE WHAT IS SET IN VEHICLE_SALES_SHARE_INPUTS.XLSX!!
     passenger_drive_shares, freight_drive_shares = check_and_format_manually_specified_sales_shares(config, ECONOMY_ID)
     
     passenger_drive_shares, freight_drive_shares = incorporate_manually_specified_sales_shares(config, ECONOMY_ID, passenger_drive_shares, freight_drive_shares)
-    
     sales_shares =    merge_manually_specified_with_alternate_and_early_year_sales_shares(config, ECONOMY_ID, passenger_drive_shares, freight_drive_shares, alternate_sales_shares, new_sales_shares_sum)
     sales_shares = clean_and_format_sales_shares_before_calcualtions(config, ECONOMY_ID, sales_shares, CURRENT_BASE_YEAR)
     sales_shares = check_for_series_with_too_few_values_to_interpolate(config, sales_shares, CURRENT_BASE_YEAR)

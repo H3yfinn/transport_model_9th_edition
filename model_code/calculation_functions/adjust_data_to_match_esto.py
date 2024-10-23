@@ -526,7 +526,7 @@ def test_output_matches_expectations(config, ECONOMY_ID, supply_side_fuel_mixing
     #since we want to make sure that toal energy use for each fuel is the same then we will ahve to calcualte this first. this will involve fuel mixing calcs too:
     #first concat road and non road together
     energy_for_model_all  = pd.concat([road_all_wide, non_road_all_wide], axis=0)
-    model_output_with_fuel_mixing = apply_fuel_mix_demand_side.apply_fuel_mix_demand_side(config, energy_for_model_all, ECONOMY_ID,  demand_side_fuel_mixing=demand_side_fuel_mixing,supply_side_fuel_mixing=supply_side_fuel_mixing)
+    model_output_with_fuel_mixing = apply_fuel_mix_demand_side.apply_fuel_mix_demand_side(config, energy_for_model_all, ECONOMY_ID,  demand_side_fuel_mixing=demand_side_fuel_mixing)
     model_output_with_fuel_mixing = apply_fuel_mix_supply_side.apply_fuel_mix_supply_side(config, model_output_with_fuel_mixing, ECONOMY_ID, supply_side_fuel_mixing=supply_side_fuel_mixing)
     #double check the diff in enegry use is 0 between the two (since it shoudl be!)
     energy_diff = energy_for_model_all.Energy.sum(numeric_only=True) - model_output_with_fuel_mixing.Energy.sum(numeric_only=True)
