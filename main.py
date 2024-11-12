@@ -122,9 +122,9 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
 
     #Things to do once a day:
-    do_these_once_a_day = False
+    do_these_once_a_day = True
     if do_these_once_a_day:
-        create_all_concordances(config, USE_LATEST_CONCORDANCES=True)
+        create_all_concordances(config, USE_LATEST_CONCORDANCES=False)
     
     PREPARE_DATA = False#only needs to be done if the macro or transport system data changes
     if PREPARE_DATA:
@@ -140,13 +140,14 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     FOUND = False
     RUN_MODEL = True#set me
     LMDI_CHARTS = True
+    CALC_INT_BUNKERS = True
     if not RUN_MODEL:
         MODEL_RUN_1  = False
         MODEL_RUN_2  = False
     else:
         MODEL_RUN_1  = True#set me
         MODEL_RUN_2  = True#set me
-        
+    PREVIOUS_PROJECTION_FILE_DATE_ID =None# '20231128'
     for economy in ECONOMY_BASE_YEARS_DICT.keys():
         if economy_to_run == 'all' or 'all' in economy_to_run:
             pass
@@ -223,18 +224,20 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             SAVE_AS_WEB_PLOTS=False
             PLOT_MINOR_OUTPUTS = False
             NOT_JUST_DASHBOARD_DATASETS = False
+        
+        ###################do bunkers calc for this economy###################
+        if CALC_INT_BUNKERS:
+            international_bunker_share_calculation_handler(config, ECONOMY_ID=ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
+        ###################do bunkers calc for this economy###################
         if ANALYSE_OUTPUT: 
             estimate_kw_of_required_chargers(config, ECONOMY_ID)
             if PLOT_MINOR_OUTPUTS:
                 plot_required_chargers(config, ECONOMY_ID)
             calculate_and_plot_oil_displacement(config, ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)  
-            ###################do bunkers calc for this economy###################
-            international_bunker_share_calculation_handler(config, ECONOMY_ID=ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
-            ###################do bunkers calc for this economy###################
             if LMDI_CHARTS:
                 produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = PLOT_MINOR_OUTPUTS, PLOTTING = PLOT_MINOR_OUTPUTS, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060, NOT_JUST_DASHBOARD_DATASETS=NOT_JUST_DASHBOARD_DATASETS)
             
-            dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, SAVE_AS_WEB_PLOTS=SAVE_AS_WEB_PLOTS) 
+            dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, SAVE_AS_WEB_PLOTS=SAVE_AS_WEB_PLOTS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID)
         
         progress += increment
         update_progress(progress)
@@ -251,7 +254,13 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         
         SETUP_AND_RUN_MULTI_ECONOMY_PLOTS=True
         if concatenate_output_data(config):
-            international_bunker_share_calculation_handler(config)
+            
+            #setup outlook outputs for 00_APEC and other aggregations of economies
+            for aggregation in config.ECONOMY_AGGREGATIONS.keys():
+                create_output_for_outlook_data_system(config, ECONOMY_ID=aggregation,economies_in_regional_aggregation = config.ECONOMY_AGGREGATIONS[aggregation])
+            
+            if CALC_INT_BUNKERS:
+                international_bunker_share_calculation_handler(config)
             if SETUP_AND_RUN_MULTI_ECONOMY_PLOTS:
                 try:
                     if LMDI_CHARTS:
@@ -316,8 +325,19 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main(['16_RUS'])#, '09_ROK'])#, root_dir_param=root_dir_param)
-    # root_dir_param = #'18_CT', 01_AUS
+        main(['01_AUS', "02_BD", "03_CDA", "04_CHL", "05_PRC", "06_HKC", "07_INA","08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"])#, '09_ROK'])#, root_dir_param=root_dir_param)#'01_AUS',
+    # root_dir_param = #'18_CT', 01_AUS  # "02_BD", "03_CDA", "04_CHL", "05_PRC", "06_HKC", "07_INA",, "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
+#%%
+# economies_to_archive = ['01_AUS', "02_BD", "03_CDA", "04_CHL", "05_PRC", "06_HKC", "07_INA", "08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"]#"01_AUS",
+# # main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
+# economy_to_run='all'
+# progress_callback=None
+# root_dir_param=None
+# script_dir_param=None
+# error_message = None
+# for economy in economies_to_archive:
+#     increment, progress, update_progress, config, USING_LINUX_WEB_APP = setup_for_main(root_dir_param, script_dir_param, economy, progress_callback)
+#     folder_name = archiving_scripts.save_economy_projections_and_all_inputs(config, economy, ARCHIVED_FILE_DATE_ID='latest')
 #%%
 # %%
 

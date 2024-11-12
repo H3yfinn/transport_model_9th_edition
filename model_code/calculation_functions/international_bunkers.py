@@ -498,6 +498,7 @@ def extract_non_road_modelled_data(config, USE_PREVIOUS_DATA=False, PLOT_MINOR_O
     with open(os.path.join(config.root_dir, 'config', 'parameters.yml'), 'r') as file:
         ECONOMIES_WITH_MODELLING_COMPLETE_DICT = yaml.load(file, Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
     ECONOMY_MISSING= False
+    ALL_ECONS_MISSING =True
     for economy in ECONOMIES_WITH_MODELLING_COMPLETE_DICT.keys():
         if ECONOMIES_WITH_MODELLING_COMPLETE_DICT[economy]:
             #since we are often only running the model for one economy each day, just do a try, except here:
@@ -506,10 +507,12 @@ def extract_non_road_modelled_data(config, USE_PREVIOUS_DATA=False, PLOT_MINOR_O
                 #load data for that economy and concat it onto non_road
                 model_output_detailed_ = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', f'{economy}_NON_ROAD_DETAILED_model_output{latest_date}.csv'))
                 model_output_detailed = pd.concat([model_output_detailed, model_output_detailed_])
+                ALL_ECONS_MISSING=False
             else:
                 ECONOMY_MISSING=True
                 break
-            
+    if ALL_ECONS_MISSING:
+        raise Exception('There is no viable data to load into the international bunkers script. perhaps all ECONOMIES_WITH_MODELLING_COMPLETE_DICT are set to False?')
     if ECONOMY_MISSING or USE_PREVIOUS_DATA:
         #load the data for all economies and reutnr that:
         non_road_intensity = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_intensity.csv'))

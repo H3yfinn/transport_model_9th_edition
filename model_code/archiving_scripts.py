@@ -78,13 +78,24 @@ def zip_up_folder(config, archive_folder_name):
 def save_economy_projections_and_all_inputs(config, ECONOMY_ID, ZIP_UP_ARCHIVE_FOLDER=True, ARCHIVED_FILE_DATE_ID=None, transport_data_system_FILE_DATE_ID_2=None):
     if ARCHIVED_FILE_DATE_ID is None:
         ARCHIVED_FILE_DATE_ID = config.FILE_DATE_ID
+    elif ARCHIVED_FILE_DATE_ID == 'latest':
+        ARCHIVED_FILE_DATE_ID = utility_functions.get_latest_date_for_data_file(data_folder_path=os.path.join(config.root_dir, 'output_data', 'model_output'), file_name_start=f'{ECONOMY_ID}_model_output', file_name_end='.csv')
+        if ARCHIVED_FILE_DATE_ID == '':
+            raise Exception(f'No {ECONOMY_ID}_model_output_DATEID found in output_data/model_output')
     ARCHIVED_FILE_DATE_ID_2 = ARCHIVED_FILE_DATE_ID
     if transport_data_system_FILE_DATE_ID_2 is None:
         transport_data_system_FILE_DATE_ID_2 = config.transport_data_system_FILE_DATE_ID
         if not os.path.exists(os.path.join(config.root_dir, f'intermediate_data', 'input_data_optimisations', f'optimised_data_{ECONOMY_ID}_{ARCHIVED_FILE_DATE_ID}_{transport_data_system_FILE_DATE_ID_2}.pkl')):
-            ARCHIVED_FILE_DATE_ID_2 = utility_functions.get_latest_date_for_data_file(data_folder_path=os.path.join(config.root_dir, 'intermediate_data', 'input_data_optimisations'), file_name_start=f'optimised_data_{ECONOMY_ID}_', file_name_end=f'_{transport_data_system_FILE_DATE_ID_2}.pkl', EXCLUDE_DATE_STR_START=True)
-            if ARCHIVED_FILE_DATE_ID == '':
+            #find the latest date for the optimised data file in teh first date slot in the file name
+            ARCHIVED_FILE_DATE_ID_2 = utility_functions.get_latest_date_for_data_file(data_folder_path=os.path.join(config.root_dir, 'intermediate_data', 'input_data_optimisations'), file_name_start=f'optimised_data_{ECONOMY_ID}_', EXCLUDE_DATE_STR_START=True)
+            
+            if ARCHIVED_FILE_DATE_ID_2 == '':
                 raise Exception(f'No optimised_data_{ECONOMY_ID}_{ARCHIVED_FILE_DATE_ID}_ found in intermediate_data/input_data_optimisations')
+            
+        if not os.path.exists(os.path.join(config.root_dir, f'intermediate_data', 'input_data_optimisations', f'optimised_data_{ECONOMY_ID}_{ARCHIVED_FILE_DATE_ID_2}_{transport_data_system_FILE_DATE_ID_2}.pkl')):
+            transport_data_system_FILE_DATE_ID_2 = 'DATE'+ utility_functions.get_latest_date_for_data_file(data_folder_path=os.path.join(config.root_dir, 'intermediate_data', 'input_data_optimisations'), file_name_start=f'optimised_data_{ECONOMY_ID}_{ARCHIVED_FILE_DATE_ID_2}', EXCLUDE_DATE_STR_START=False, ONLY_WITH_DATE_STR_START=True)
+            if transport_data_system_FILE_DATE_ID_2 == 'DATE':
+                raise Exception(f'No optimised_data_{ECONOMY_ID}_{ARCHIVED_FILE_DATE_ID_2}_ found in intermediate_data/input_data_optimisations')
     
     archive_folder_name = os.path.join(config.root_dir, 'output_data', 'archived_runs', '{}_{}'.format(ECONOMY_ID, ARCHIVED_FILE_DATE_ID) + '_' + datetime.datetime.now().strftime("%H%M"))
     if not os.path.exists(archive_folder_name):

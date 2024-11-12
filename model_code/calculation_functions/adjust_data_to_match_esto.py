@@ -566,7 +566,8 @@ def test_output_matches_expectations(config, ECONOMY_ID, supply_side_fuel_mixing
             diff_percent = 100#x/0 is essentially infinity, so just set it to 100
         
     if diff_percent > 1.01 or diff_percent < 0.99:
-        breakpoint()
+        if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
+            breakpoint()
         #saev output to csv
         # diff_percent.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'errors', 'ajust_data_to_match_esto_energy_use_diff.csv'))
         # raise ValueError('energy use does not match esto, proportion difference is  {}'.format(diff_percent))

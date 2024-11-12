@@ -12,19 +12,28 @@ class Config:
         else:
             self.slash = '/'
         self.root_dir = root_dir
-        self.USE_LATEST_OUTPUT_DATE_ID = True
+        self.USE_LATEST_OUTPUT_DATE_ID = True#there are reasons why you should sometimes set this to true but i cant remember
         self.NEW_SALES_SHARES = True
         self.NEW_FUEL_MIXING_DATA = True
         self.IMPORT_FROM_TRANSPORT_DATA_SYSTEM = False
         self.transport_data_system_FILE_DATE_ID ='DATE20240913'# 'DATE20240612'
-        self.latest_esto_data_FILE_DATE_ID = '20231207'
+        self.latest_esto_data_FILE_DATE_ID = '20241111'#'20241111'#'20231207
         self.PRINT_LESS_IMPORTANT_DETAILS = False
         self.PRINT_WARNINGS_FOR_FUTURE_WORK = False
 
         self._import_libraries()
 
+        self.ECONOMY_AGGREGATIONS = {
+        '00_APEC': ['01_AUS', '02_BD', '03_CDA', '04_CHL', '05_PRC', '06_HKC', '07_INA', '08_JPN', '09_ROK', '10_MAS', '11_MEX', '12_NZ', '13_PNG', '14_PE', '15_PHL', '16_RUS', '17_SGP', '18_CT', '19_THA', '20_USA', '21_VN'],
+        '22_SEA': ['02_BD', '07_INA', '10_MAS', '15_PHL', '17_SGP', '19_THA', '21_VN'],
+        '23_NEA': ['05_PRC', '06_HKC', '08_JPN', '09_ROK', '18_CT'],
+        '23b_ONEA': ['01_AUS', '05_PRC', '06_HKC', '08_JPN', '09_ROK', '12_NZ', '13_PNG', '18_CT'],
+        '24_OAM': ['01_AUS', '03_CDA', '04_CHL', '11_MEX', '12_NZ', '13_PNG', '14_PE', '20_USA'],
+        '25_OCE': ['01_AUS', '02_BD', '05_PRC', '06_HKC', '07_INA', '08_JPN', '09_ROK', '10_MAS', '12_NZ', '13_PNG', '15_PHL', '17_SGP', '18_CT', '19_THA', '21_VN']
+        }
+
         self.DEFAULT_BASE_YEAR = 2017
-        self.OUTLOOK_BASE_YEAR = 2021
+        self.OUTLOOK_BASE_YEAR = 2022
         self.END_YEAR = 2100
         self.GRAPHING_END_YEAR = 2070
         self.USE_LOGISTIC_FUNCTION = True

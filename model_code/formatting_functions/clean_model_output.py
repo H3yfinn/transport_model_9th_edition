@@ -221,7 +221,6 @@ def concatenate_output_data(config):
     model_output_detailed_non_road.to_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', 'all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name)), index=False)
     model_output_non_detailed_non_road.to_csv(os.path.join(config.root_dir, 'output_data', 'model_output', 'all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name)), index=False)
     model_output_all_with_fuels_non_road.to_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', 'all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name)), index=False)
-    
     return True
 
 def create_output_for_cost_modelling(config, model_output_detailed, ECONOMY_ID):

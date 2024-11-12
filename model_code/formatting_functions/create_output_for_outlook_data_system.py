@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 ###
 
 #%%
-def create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=None, FILE_DATE_ID=None):
+def create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=None, FILE_DATE_ID=None,economies_in_regional_aggregation=None):
     """_summary_
 
     Args:
@@ -48,9 +48,13 @@ def create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_
         model_output_file_name = config.model_output_file_name
     if FILE_DATE_ID == None:
         FILE_DATE_ID = config.FILE_DATE_ID
-    model_output_all_with_fuels_df = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', '{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name)))
-    stocks_df = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', '{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name)))[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Stocks']]
-    activity_df = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', '{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name)))[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Activity']]
+        
+    if economies_in_regional_aggregation != None:
+        model_output_all_with_fuels_df, stocks_df, activity_df = load_in_and_aggregate_data_for_APEC_regional_aggregations(config, ECONOMY_ID, economies_in_regional_aggregation)
+    else:
+        model_output_all_with_fuels_df = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', '{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name)))
+        stocks_df = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', '{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name)))[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Stocks']]
+        activity_df = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', '{}_NON_ROAD_DETAILED_{}'.format(ECONOMY_ID, model_output_file_name)))[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Activity']]
     
     stock_shares_df = convert_stocks_to_stock_shares(config, stocks_df)
     
@@ -458,8 +462,12 @@ def concatenate_outlook_data_system_outputs(config):
                     continue
                 df = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'for_other_modellers', 'output_for_outlook_data_system', file))
                 final_df = pd.concat([final_df, df])
+                
+        #also double check that this is not a file with one of the aggregated economies in its economy column:
+        aggregate_economys = list(config.ECONOMY_AGGREGATIONS.keys())
+        
         #check that all economies are there:
-        if len(final_df['economy'].unique()) != len(config.ECONOMY_LIST):
+        if len(final_df['economy'].unique()) != len(config.ECONOMY_LIST) and final_df['economy'].isin(aggregate_economys).sum() == 0:
             missing_economies = [e for e in config.ECONOMY_LIST if e not in final_df['economy'].unique()]
             throw_error = False
             if throw_error:
@@ -488,11 +496,47 @@ def convert_stocks_to_stock_shares(config, stocks_df):
     #times by 100 to get percentage
     stock_shares_df['Stock_share'] = stock_shares_df['Stock_share']*100
     return stock_shares_df 
+
+
+def load_in_and_aggregate_data_for_APEC_regional_aggregations(config, ECONOMY_ID, economies_in_regional_aggregation):
+            
+    # Construct the base file path and common filename
+    base_dir = os.path.join(config.root_dir, 'output_data')
+    file_date_id = config.FILE_DATE_ID
+    model_output_file_name = config.model_output_file_name
+    # Define file paths for the required CSV files
     
+    model_output_path = os.path.join(base_dir, 'model_output_with_fuels', f'all_economies_NON_ROAD_DETAILED_{file_date_id}_{model_output_file_name}')
+    stocks_path = os.path.join(base_dir, 'model_output_detailed', f'all_economies_NON_ROAD_DETAILED_{file_date_id}_{model_output_file_name}')
+    activity_path = os.path.join(base_dir, 'model_output_detailed', f'all_economies_NON_ROAD_DETAILED_{file_date_id}_{model_output_file_name}')
+    
+    # Load in the CSVs as DataFrames
+    model_output_all_with_fuels_df = pd.read_csv(model_output_path)
+
+    # Only select specific columns for stocks and activity
+    stocks_df = pd.read_csv(stocks_path)[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Stocks']]
+    activity_df = pd.read_csv(activity_path)[['Date', 'Economy', 'Vehicle Type', 'Medium', 'Transport Type', 'Drive', 'Scenario', 'Activity']]
+
+    #filter for only the econmies in economies_in_regional_aggregation:
+    model_output_all_with_fuels_df = model_output_all_with_fuels_df.loc[model_output_all_with_fuels_df['Economy'].isin(economies_in_regional_aggregation)].copy()
+    stocks_df = stocks_df.loc[stocks_df['Economy'].isin(economies_in_regional_aggregation)].copy()
+    activity_df = activity_df.loc[activity_df['Economy'].isin(economies_in_regional_aggregation)].copy()
+    
+    #set the economy to 00_APEC in all the dfs and then sum up the values for each economy and scenario > note that this is only valud where values cols are stocks,energy and activity because theres a chance the others cannot be summed up and instead need weigted averaging - such as for stock shares.
+    model_output_all_with_fuels_df['Economy'] = ECONOMY_ID
+    stocks_df['Economy'] = ECONOMY_ID
+    activity_df['Economy'] = ECONOMY_ID        
+    #sum up the values for each economy and scenario
+    model_output_all_with_fuels_df = model_output_all_with_fuels_df.groupby(['Economy', 'Scenario', 'Date', 'Transport Type', 'Vehicle Type', 'Drive', 'Medium', 'Fuel']).sum(numeric_only=True).reset_index()
+    stocks_df = stocks_df.groupby(['Economy', 'Scenario', 'Date', 'Transport Type', 'Vehicle Type', 'Drive', 'Medium']).sum(numeric_only=True).reset_index()
+    activity_df = activity_df.groupby(['Economy', 'Scenario', 'Date', 'Transport Type', 'Vehicle Type', 'Drive', 'Medium']).sum(numeric_only=True).reset_index()
+    # Return the DataFrames
+    
+    return model_output_all_with_fuels_df, stocks_df, activity_df
 #%%
-model_output_file_name = 'model_output20240117.csv'
-FILE_DATE_ID = '20240117'
-ECONOMY_ID = '09_ROK'
+# model_output_file_name = 'model_output20240117.csv'
+# FILE_DATE_ID = '20240117'
+# ECONOMY_ID = '09_ROK'
 # create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_name=model_output_file_name, FILE_DATE_ID=FILE_DATE_ID)
 
 # model_output_file_name = 'model_output20240612.csv'

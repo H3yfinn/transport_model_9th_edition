@@ -852,7 +852,7 @@ def objective_function_handler(config, method, initial_values, df_transport, act
         #try this and if the result is not good then retry with 'w_mse_stocks' set to 0 and then w_mse_oppsoite_drive_types set to 0 and then both:
         try:
             
-            breakpoint()
+            
             result = minimize(
                 objective_function,
                 initial_values,
