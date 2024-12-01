@@ -37,8 +37,8 @@ def copy_required_output_files_to_one_folder(config, ECONOMY_ID='all', output_fo
                 useful_file_paths.append(os.path.join(config.root_dir,  'plotting_output', 'dashboards', economy, f'{economy}_{scenario}_dashboard_secondary_results.html'))
                 output_file_paths.append(os.path.join(config.root_dir,  output_folder_path, economy, f'{economy}_{scenario}_{config.FILE_DATE_ID}_dashboard_secondary_results.html'))
                 
-                useful_file_paths.append(os.path.join(config.root_dir,  'plotting_output', 'dashboards', economy, f'{economy}_{scenario}_dashboard_detail_and_secondary_results.html'))
-                output_file_paths.append(os.path.join(config.root_dir,  output_folder_path, economy, f'{economy}_{scenario}_{config.FILE_DATE_ID}_dashboard_detail_and_secondary_results.html'))
+                useful_file_paths.append(os.path.join(config.root_dir,  'plotting_output', 'dashboards', economy, f'{economy}_{scenario}_dashboard_detail_and_assumptions.html'))
+                output_file_paths.append(os.path.join(config.root_dir,  output_folder_path, economy, f'{economy}_{scenario}_{config.FILE_DATE_ID}_dashboard_detail_and_assumptions.html'))
                 
                 useful_file_paths.append(os.path.join(config.root_dir, f'output_data', 'for_other_modellers', 'output_for_outlook_data_system', f'{economy}_{config.FILE_DATE_ID}_transport_energy_use.csv'))
                 output_file_paths.append(os.path.join(config.root_dir,  output_folder_path, economy, f'{economy}_{config.FILE_DATE_ID}_transport_energy_use.csv'))

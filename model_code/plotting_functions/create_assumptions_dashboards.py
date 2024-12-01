@@ -398,9 +398,14 @@ def load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, E
     bunkers_data = pd.DataFrame()
     supply_side_fuel_mixing_output = pd.DataFrame()
     def assign_FILE_DATE_ID(ECONOMY_IDs):
+            
+        FINALISED_PROJECTIONS_FILE_DATE_IDS = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['FINALISED_PROJECTIONS_FILE_DATE_IDS']
         #in some cases we dont have the data for the file date id that is stated in the config.py file so this will first check that we have the data for the file date id, and if not, it will assign the latest file date id that we do have data for.
         ECONOMY_IDs_dict = {}
         for economy in ECONOMY_IDs:
+            if FINALISED_PROJECTIONS_FILE_DATE_IDS[economy]!=False:
+                ECONOMY_IDs_dict[economy] = FINALISED_PROJECTIONS_FILE_DATE_IDS[economy]
+                continue
             if os.path.exists(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', f'{economy}_{config.model_output_file_name}')):
                 ECONOMY_IDs_dict[economy] = config.FILE_DATE_ID
             else:
@@ -1210,6 +1215,11 @@ ECONOMY_ID (str or None): The ID of the economy for which the dashboard is being
     # if PREVIOUS_PROJECTION_FILE_DATE_ID != None:
     #     #since for results we drop stocks and include compare_energy_vs_previous_all, we will add stocks here instead
     #     plots.append(os.path.join(config.root_dir,  f'vehicle_type_stocks')
+    breakpoint()#look into adding specific charts into it for specific economys. e.g. we want to have a chart fir new_vehicle_emissions_intensity_timeseries_ for australia and other economys with a emisisons based policy.
+    if ECONOMY_IDs == ['01_AUS']:
+        #drop 'decrease_in_activity_from_activity_efficiency', and insert 'new_vehicle_emissions_intensity_timeseries_all'
+        plots.remove('decrease_in_activity_from_activity_efficiency')
+        plots.append('new_vehicle_emissions_intensity_timeseries_all')
     
     create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'detail_and_assumptions',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID,  WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS,SAVE_AS_WEB_PLOTS=SAVE_AS_WEB_PLOTS)
         

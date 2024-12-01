@@ -566,7 +566,11 @@ def check_and_format_manually_specified_sales_shares(config, ECONOMY_ID):
     
     passenger_drive_shares = pd.read_excel(os.path.join(config.root_dir, 'input_data', 'vehicle_sales_share_inputs.xlsx'),sheet_name='passenger_drive_shares').drop(columns=['Comment'])
     freight_drive_shares = pd.read_excel(os.path.join(config.root_dir, 'input_data', 'vehicle_sales_share_inputs.xlsx'),sheet_name='freight_drive_shares').drop(columns=['Comment'])    
-    
+    #double check the only cols we ahve are:Region	Medium	Vehicle Type	Drive	Date	Reference	Target
+    if not set(passenger_drive_shares.columns)==set(['Region', 'Medium', 'Vehicle Type', 'Drive', 'Date', 'Reference', 'Target']):
+        raise ValueError('The passenger_drive_shares sheet in vehicle_sales_share_inputs.xlsx does not have the correct columns. Please check it has the following columns: Region, Medium, Vehicle Type, Drive, Date, Reference, Target')
+    if not set(freight_drive_shares.columns)==set(['Region', 'Medium', 'Vehicle Type', 'Drive', 'Date', 'Reference', 'Target']):
+        raise ValueError('The freight_drive_shares sheet in vehicle_sales_share_inputs.xlsx does not have the correct columns. Please check it has the following columns: Region, Medium, Vehicle Type, Drive, Date, Reference, Target')
     #CHECK AND MAP REGIONS TO ECONOMIES:
     regions_passenger = pd.read_excel(os.path.join(config.root_dir, 'input_data', 'vehicle_sales_share_inputs.xlsx'),sheet_name='regions_passenger')
     regions_freight = pd.read_excel(os.path.join(config.root_dir, 'input_data', 'vehicle_sales_share_inputs.xlsx'),sheet_name='regions_freight')    
@@ -594,6 +598,7 @@ def check_and_format_manually_specified_sales_shares(config, ECONOMY_ID):
     # DOUBLE CHECK THAT THE SUM OF DRIVE SHARES FOR EACH DRIVE/TRANSPORT TYPE SUMS TO < 1
     passenger_drive_shares_ones = passenger_drive_shares.groupby(['Economy', 'Scenario', 'Date', 'Vehicle Type', 'Medium', 'Transport Type']).sum().reset_index()
     freight_drive_shares_ones = freight_drive_shares.groupby(['Economy', 'Scenario', 'Date', 'Vehicle Type', 'Medium', 'Transport Type']).sum().reset_index()
+    
     greater_than_1 = pd.concat([passenger_drive_shares_ones.loc[passenger_drive_shares_ones['Share']>1], freight_drive_shares_ones.loc[freight_drive_shares_ones['Share']>1]])
     if len(greater_than_1)>0:
         breakpoint()

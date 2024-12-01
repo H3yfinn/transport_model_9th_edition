@@ -58,7 +58,7 @@ def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', tur
     # COVID_YEARS = set([2020,2021])#PLEASE NOTE THAT THIS IS HARDCODED. WE WILL NEED TO CHANGE THIS TO A CONFIG PARAMETER OR SOMETHING MORE DETAILED LATER
     # if config.OUTLOOK_BASE_YEAR in COVID_YEARS:
     international_bunker_inputs = apply_covid_effect_to_growth_rate_by_medium(config, international_bunker_inputs)
-    
+    breakpoint()
     international_supply_side_fuel_mixing = check_and_fill_missing_fuel_mixing_dates(config, international_bunker_inputs,  international_supply_side_fuel_mixing)
     #interpolate the fuel shares to get a value for every year:
     #print time
@@ -494,15 +494,17 @@ def extract_non_road_modelled_data(config, USE_PREVIOUS_DATA=False, PLOT_MINOR_O
     # model_output_detailed = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', 'all_economies_NON_ROAD_DETAILED_{}_{}'.format(config.FILE_DATE_ID, config.model_output_file_name)))
     # non_road = model_output_detailed.loc[model_output_detailed['Medium'].isin(['air', 'ship'])]
     model_output_detailed = pd.DataFrame()
-    #until we ahve completed all economies, we should just load data from what economies we have completed:
-    with open(os.path.join(config.root_dir, 'config', 'parameters.yml'), 'r') as file:
-        ECONOMIES_WITH_MODELLING_COMPLETE_DICT = yaml.load(file, Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
+    #until we ahve completed all economies, we should just load data from what economies we have completed:    
+    FINALISED_PROJECTIONS_FILE_DATE_IDS = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['FINALISED_PROJECTIONS_FILE_DATE_IDS']
+    ECONOMIES_WITH_MODELLING_COMPLETE_DICT = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['ECONOMIES_WITH_MODELLING_COMPLETE']
     ECONOMY_MISSING= False
     ALL_ECONS_MISSING =True
     for economy in ECONOMIES_WITH_MODELLING_COMPLETE_DICT.keys():
         if ECONOMIES_WITH_MODELLING_COMPLETE_DICT[economy]:
-            #since we are often only running the model for one economy each day, just do a try, except here:
-            latest_date = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'output_data', 'model_output_detailed'), f'{economy}_NON_ROAD_DETAILED_model_output')
+            if FINALISED_PROJECTIONS_FILE_DATE_IDS[economy] is not False:
+                latest_date = FINALISED_PROJECTIONS_FILE_DATE_IDS[economy]
+            else:
+                latest_date = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'output_data', 'model_output_detailed'), f'{economy}_NON_ROAD_DETAILED_model_output')
             if latest_date is not None:
                 #load data for that economy and concat it onto non_road
                 model_output_detailed_ = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', f'{economy}_NON_ROAD_DETAILED_model_output{latest_date}.csv'))
@@ -589,71 +591,82 @@ def extract_non_road_modelled_data(config, USE_PREVIOUS_DATA=False, PLOT_MINOR_O
     non_road_activity.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_activity.csv'), index=False)
     non_road_intensity.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'international_bunkers', 'non_road_intensity.csv'), index=False)
     return non_road_activity, non_road_intensity
-
-# def backcalculate_domestic_covid_effect(non_road_activity):
-#     """Since we are basing the activity and intensity of bunkers data off domestic non road data but we are also using separate values to represrnt the effect of covid on international bunker data, we need to remove the effect of covid from the non_road data beofre extracting the activity growth rate. we can do this by backcalculating the activity in years where there is a covid effect (or at least an effect of returing to normal). To make this simple we will jsut take the average growth rate for the 10 years after covids effects and then use that to recalcualte the activity in the covid affected years. 
     
-#     Args:
-#         non_road_activity (_type_): _description_
-
-#     Raises:
-#         ValueError: _description_
-
-#     Returns:
-#         _type_: _description_
-#     """
-#     non_road_activity_copy = non_road_activity.copy()
-#     if non_road_activity['Date'].min() > 2025:
-#         return non_road_activity
-#     #first we need to get the average growth rate for the 10 years after covid effects. we will use this to backcalculate the activity during covid years:
-#     #to simplify things, we are jsut going to get the average growth rate between 2026 and 2036. we will use this to backcalculate the activity during any years beofre 2026:
-#     non_road_activity_avg_growth_rate = non_road_activity[['Date','Scenario', 'Transport Type', 'Economy', 'Activity']].copy()
-#     non_road_activity_avg_growth_rate = non_road_activity_avg_growth_rate.loc[(non_road_activity_avg_growth_rate['Date'] > 2025) & (non_road_activity_avg_growth_rate['Date'] < 2037)]
-#     #sum activity then get the avg growth rate
-#     non_road_activity_growth_rate = non_road_activity.groupby(['Date','Scenario', 'Transport Type', 'Economy'])['Activity'].sum().reset_index().copy()
-#     non_road_activity_growth_rate.sort_values(by=['Date'], inplace=True)
-#     non_road_activity_growth_rate['Growth Rate'] =  non_road_activity_growth_rate.groupby(['Scenario', 'Transport Type', 'Economy'])['Activity'].pct_change()
-#     non_road_activity_growth_rate = non_road_activity_growth_rate.loc[(non_road_activity_growth_rate['Growth Rate'] != 0) & (non_road_activity_growth_rate['Growth Rate'].notnull())]
-#     non_road_activity_growth_rate = non_road_activity_growth_rate.groupby(['Scenario', 'Transport Type', 'Economy', 'Date'])['Growth Rate'].mean().reset_index()
-#     #now backcalculate the activity for <2026. We will have to do this year by year to account for the cumulative effect of the growth rate:
-#     #merge
-#     non_road_activity = pd.merge(non_road_activity, non_road_activity_growth_rate, how='left', on=['Scenario', 'Transport Type', 'Economy', 'Date'])
-#     # power = 1 #I CANT WORK OUT WHAT I WAS USING POWER HERE FOR???
-#     # for year in range(2025, non_road_activity_growth_rate['Date'].min()-1, -1):
-#     dates =range(2025, non_road_activity_growth_rate['Date'].min()-1, -1)
-#     non_road_activity.loc[non_road_activity['Date'].isin(dates), 'Activity'] = non_road_activity[non_road_activity['Date'].isin(dates)]['Activity'] / (1 + non_road_activity[non_road_activity['Date'].isin(dates)]['Growth Rate'])#**power
-#     # power += 1
-#     breakpoint()
-#     #drop growth rate col
-#     non_road_activity = non_road_activity.drop(columns=['Growth Rate'])
-#     return non_road_activity
-
-def apply_covid_effect_to_growth_rate_by_medium(config, international_bunker_inputs):
-    # PLEASE NOTE THAT HIS FUNCTION IS SUPER SIMPLIFIED AND WILL NEED TO BE UPDATED TO BE MORE ACCURATE. IT IS JUST A QUICK ONE FOR NOW SINCE BUNKERS ARE NOT A PRIORITY
-    #economy by economy we will apply the covid effect to the growth rate for each medium.This is becasue some economys took longer to return to normal than others. It is debatable how much this affected international energy use but for now we will do it.
+def apply_covid_effect_to_growth_rate_by_medium(config, international_bunker_inputs, measure_column='Energy'):
+    #what this will do is find the expected return to normal energy use from covid for each economy and medium. Then recalculate the growth rate from that.
+    #filter for nz only so we can test
+    # international_bunker_inputs = pd.read_csv('international_bunker_inputs_before_covid_effect.csv')
+    # international_bunker_inputs = international_bunker_inputs.loc[international_bunker_inputs['Economy'] == '12_NZ']
+    #sort all the data by economy, medium and date 
+    international_bunker_inputs = international_bunker_inputs.sort_values(by=['Economy', 'Medium', 'Date', 'Scenario'])
+    international_bunker_inputs_copy = international_bunker_inputs.copy()
+    # Load configuration parameters
+    parameters = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)
+    #aggreagte international_bunker_inputs by economy, medium and date and scenario. so find the average Growth Rate and sum of energy
+    international_bunker_inputs = international_bunker_inputs.groupby(['Economy', 'Medium', 'Date', 'Scenario'])[[measure_column, 'Growth Rate']].agg({measure_column: 'sum', 'Growth Rate': 'mean'}).reset_index()
+    for economy in international_bunker_inputs['Economy'].unique():
+        for medium in international_bunker_inputs.Medium.unique():
+            # Construct the suffix for parameter keys based on transport type and medium
+            suffix = f"{medium.upper()}"
+            
+            # Dynamically construct parameter keys and fetch their values
+            listed_years_key = f"INTERNATIONAL_TRANSPORT_LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_{suffix}"
+            expected_years_key = f"INTERNATIONAL_TRANSPORT_EXPECTED_YEARS_TO_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_{suffix}"
+            energy_decrease_key = f"INTERNATIONAL_TRANSPORT_EXPECTED_ENERGY_DECREASE_FROM_COVID_{suffix}"
+            return_to_normal_key = f"INTERNATIONAL_TRANSPORT_EXPECTED_RETURN_TO_NORMAL_ACTIVITY_FROM_COVID_{suffix}"
+            
+            # Fetch values using constructed keys
+            LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED = parameters[listed_years_key]
+            EXPECTED_YEARS_TO_RETURN_TO_NORMAL_ENERGY_FROM_COVID = parameters[expected_years_key]
+            EXPECTED_ENERGY_DECREASE_FROM_COVID = parameters[energy_decrease_key]
+            last_covid_year = max(parameters[listed_years_key][economy])
+            EXPECTED_RETURN_TO_NORMAL_ENERGY_FROM_COVID = parameters[return_to_normal_key]
+            
+            # find the number of years and the reduction factor
+            N = EXPECTED_YEARS_TO_RETURN_TO_NORMAL_ENERGY_FROM_COVID[economy]
+            X = EXPECTED_ENERGY_DECREASE_FROM_COVID[economy]
+            A = EXPECTED_RETURN_TO_NORMAL_ENERGY_FROM_COVID[economy]
+            years_after_covid = [max(LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED[economy]) + i + 1 for i in range(N)]
+            
+            economy_medium_data = international_bunker_inputs.loc[(international_bunker_inputs['Economy'] == economy) & (international_bunker_inputs['Medium'] == medium)]
+            international_bunker_inputs = international_bunker_inputs.loc[~((international_bunker_inputs['Economy'] == economy) & (international_bunker_inputs['Medium'] == medium))]
+            #now loop throught th years in the df. if the year is in the list of years after covid, then we just need to apply the yearly_increase to the current mileage (which is the year before's mileage). If the year is not in the list of years after covid, and is more than their max, then continue the loop.
+            for scenario in economy_medium_data.loc[economy_medium_data['Economy'] == economy, 'Scenario'].unique():
+                for year in economy_medium_data.loc[economy_medium_data['Economy'] == economy, 'Date'].unique():
+                    #if its the first year then skip
+                    if year == economy_medium_data.loc[economy_medium_data['Economy'] == economy, 'Date'].min():
+                        continue
+                    
+                    mask = (economy_medium_data['Economy'] == economy) & (economy_medium_data['Medium'] == medium) & (economy_medium_data['Date'] == year) & (economy_medium_data['Scenario'] == scenario)
+                    mask_minus1 = (economy_medium_data['Economy'] == economy) & (economy_medium_data['Medium'] == medium) & (economy_medium_data['Date'] == year-1) & (economy_medium_data['Scenario'] == scenario)
+                    
+                    if year in years_after_covid:
+                        EXPECTED_ENERGY_INCREASE_FACTOR = ((((1/(1-X)) -1)* A)+1)
+                        #this is the factor by which we need to increase the mileage to get it back to normal. its just reversing the %decrease that was applied to the mileage to get it to the current level.
+                        #spread the increase over the number of years by finding its Nth root and applying it to the current mileage for this year.
+                        yearly_increase = (EXPECTED_ENERGY_INCREASE_FACTOR ** (1/N))
+                        #apply the increase to the measure_column for this year (using the year before's energy)
+                        economy_medium_data.loc[mask, measure_column] = economy_medium_data.loc[mask_minus1, measure_column].values[0] * yearly_increase * (1 + economy_medium_data.loc[mask, 'Growth Rate'].values[0])
+                    else:    
+                        #apply the growth rate too usign energy from the previous year
+                        economy_medium_data.loc[mask, measure_column] = economy_medium_data.loc[mask_minus1, measure_column].values[0] * (1 + economy_medium_data.loc[mask, 'Growth Rate'].values[0])
+                    
+            #now recalculate the growth rate for the whole period by finding the pct change each year:
+            economy_medium_data['new_growth_rate'] = economy_medium_data.groupby(['Economy', 'Medium', 'Scenario'])[measure_column].pct_change()
+            #set the growth rate to the new growth rate and repalce nas with 0
+            economy_medium_data['Growth Rate'] = economy_medium_data['new_growth_rate'].replace(np.nan, 0)
+            economy_medium_data = economy_medium_data.drop(columns=['new_growth_rate'])
+            
+            #now join back onto the original df
+            international_bunker_inputs = pd.concat([international_bunker_inputs, economy_medium_data])
+    #insert the new growth rate back into the original df hic has drvies and fuel mixes
+    international_bunker_inputs_copy = pd.merge(international_bunker_inputs_copy, international_bunker_inputs[['Economy', 'Medium','Scenario', 'Date', 'Growth Rate']], how='left', on=['Economy', 'Medium','Scenario' , 'Date'], suffixes=('', '_y'))
+    #set any nas to 0 and replace the growth rate with the new growth rate
+    international_bunker_inputs_copy['Growth Rate'] = international_bunker_inputs_copy['Growth Rate_y'].replace(np.nan, 0)
+    international_bunker_inputs_copy = international_bunker_inputs_copy.drop(columns=['Growth Rate_y'])
     
-    if config.PRINT_WARNINGS_FOR_FUTURE_WORK:
-        breakpoint()
-        print('WARNING: The apply_covid_effect_to_growth_rate_by_medium function is super simplified and will need to be updated to be more accurate. It is just a quick one for now since bunkers are not a priority')
-    INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH']
-    INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH']
-    LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_BUNKERS = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_BUNKERS']
-    INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH = pd.DataFrame(INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH, index=[0])
-    INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH = pd.DataFrame(INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH, index=[0])
-    INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH = pd.melt(INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH, var_name='Economy', value_name='covid_effect')
-    INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH['Medium'] = 'ship'
-    INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH = pd.melt(INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH, var_name='Economy', value_name='covid_effect')
-    INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH['Medium'] = 'air'
-    INTERNATIONAL_COVID_EFFECT = pd.concat([INTERNATIONAL_SHIP_POST_COVID_PCT_GROWTH, INTERNATIONAL_AIR_POST_COVID_PCT_GROWTH])
-    international_bunker_inputs = pd.merge(international_bunker_inputs, INTERNATIONAL_COVID_EFFECT, how='left', on=['Economy', 'Medium'])
-    #loop through economys and apply the covid effect to the growth rate for the year after the latest year in config.    
-    for economy in international_bunker_inputs.Economy.unique():
-        return_to_normal_year = max(LISTED_YEARS_WHEN_COVID_EFFECTS_APPLIED_BUNKERS[economy]) +1
-        international_bunker_inputs.loc[(international_bunker_inputs['Economy'] == economy) & (international_bunker_inputs['Date'] == return_to_normal_year), 'Growth Rate'] = international_bunker_inputs['Growth Rate'].replace(np.nan, 0) + international_bunker_inputs['covid_effect']
-    international_bunker_inputs.drop(columns=['covid_effect'], inplace=True)
-    return international_bunker_inputs
-    
-        
+    return international_bunker_inputs_copy
+
 def plot_non_road_activity(config, non_road_activity):
     
     #quickly plot the non road eneryg use so we can tell what the growth rate will be

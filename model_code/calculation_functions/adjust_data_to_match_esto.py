@@ -125,10 +125,13 @@ def adjust_data_to_match_esto_handler(config, BASE_YEAR, ECONOMY_ID, road_model_
         # if ECONOMY_ID == '04_CHL':
         #     breakpoint()#try work out why japan isnt calcualting well. 
         #     input_data_new_road.to_pickle('chl_input_to_optimisation.pkl')
-        #     optimised_data = optimise_to_calculate_base_data.optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=False, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='ALL2')
-        # else:
-        breakpoint()
-        optimised_data = optimise_to_calculate_base_data.optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=False, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='ALL')
+        #     optimised_data = optimise_to_calculate_base_data.
+        if ECONOMY_ID == '21_VN':
+            #trying to get vn to solve so that we arent changing the stocks
+            optimised_data = optimise_to_calculate_base_data.optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=False, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='ALL')
+        else:
+            breakpoint()
+            optimised_data = optimise_to_calculate_base_data.optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=False, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='ALL')
         
     input_data_new_road_recalculated = reformat_optimised_results(config, optimised_data, input_data_new_road)
     input_data_new_road_recalculated = match_optimised_results_to_required_energy_use_exactly(config, input_data_new_road_recalculated, input_data_new_road)

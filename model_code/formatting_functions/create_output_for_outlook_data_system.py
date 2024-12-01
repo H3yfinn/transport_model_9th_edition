@@ -480,6 +480,7 @@ def concatenate_outlook_data_system_outputs(config):
 def convert_stocks_to_stock_shares(config, stocks_df):
     #convert stocks to stock shares
     #first get the total stocks for each economy, scenario, date, and vehicle type
+    breakpoint()#WANT TO DOUBLE CHECK IF THERES NO WAY WE CAN DO THIS WITHIN EBT SYSTEM TO AVOID HAVING TO DO THIS
     total_stocks = stocks_df.groupby(['Economy', 'Scenario', 'Date', 'Transport Type', 'Medium'])['Stocks'].sum().reset_index()
     #now merge the total stocks with the stocks df
     stock_shares_df = stocks_df.merge(total_stocks, on=['Economy', 'Scenario', 'Date', 'Transport Type', 'Medium'], how='left').copy()

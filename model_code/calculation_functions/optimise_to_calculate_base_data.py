@@ -452,7 +452,7 @@ def load_in_optimisation_parameters(config, ECONOMY_ID):
     with open(os.path.join(config.root_dir, 'config', 'optimisation_parameters.yml')) as file:
         parameters_dict = yaml.load(file, Loader=yaml.FullLoader)
         #get the parameters for the economy
-        if ECONOMY_ID=='ALL' or ECONOMY_ID=='ALL2':
+        if ECONOMY_ID=='ALL' or ECONOMY_ID=='ALL2' or ECONOMY_ID=='ALL_VN':
             #this will be a ful set of different parameters to iterate over so we jsut load it in one big set
             
             parameters_dict = parameters_dict[ECONOMY_ID]

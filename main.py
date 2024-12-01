@@ -115,18 +115,20 @@ def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_ca
 def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
     error_message = None
     increment, progress, update_progress, config, USING_LINUX_WEB_APP = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
-
     # Prevent the system from going to sleep
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
     # To restore the original state, use:
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
-
+    
+    
+    # international_bunker_share_calculation_handler(config)
+    
     #Things to do once a day:
     do_these_once_a_day = True
     if do_these_once_a_day:
         create_all_concordances(config, USE_LATEST_CONCORDANCES=False)
     
-    PREPARE_DATA = False#only needs to be done if the macro or transport system data changes
+    PREPARE_DATA = True#only needs to be done if the macro or transport system data changes
     if PREPARE_DATA:
         import_macro_data(config, UPDATE_INDUSTRY_VALUES=False)
         import_transport_system_data(config)
@@ -134,6 +136,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     #since we're going to find that some economies have better base years than 2017 to start with, lets start changing the Base year vlaue and run the model economy by economy:
     ECONOMY_BASE_YEARS_DICT = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['ECONOMY_BASE_YEARS_DICT']
     ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD']
+    FINALISED_PROJECTIONS_FILE_DATE_IDS = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['FINALISED_PROJECTIONS_FILE_DATE_IDS']
     #####################################################################
     progress += increment
     update_progress(progress)
@@ -141,6 +144,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     RUN_MODEL = True#set me
     LMDI_CHARTS = True
     CALC_INT_BUNKERS = True
+    RUN_MODEL_PLACEHOLDER = RUN_MODEL
     if not RUN_MODEL:
         MODEL_RUN_1  = False
         MODEL_RUN_2  = False
@@ -157,7 +161,17 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             pass
         else:
             continue
-            
+        if FINALISED_PROJECTIONS_FILE_DATE_IDS[economy] is not False:
+            RUN_MODEL = False
+            config.FILE_DATE_ID = FINALISED_PROJECTIONS_FILE_DATE_IDS[economy]
+            THROW_ERROR = False
+            if THROW_ERROR:
+                raise Exception('Finalised projections already exist for {}. If you want to run the model, please set FINALISED_PROJECTIONS_FILE_DATE_IDS[{}] to None in parameters.yml'.format(economy, economy))
+            else:
+                print('Finalised projections already exist for {}. If you want to run tPlease set FINALISED_PROJECTIONS_FILE_DATE_IDS[{}] to None in parameters.yml'.format(economy, economy))
+        else:
+            RUN_MODEL = RUN_MODEL_PLACEHOLDER
+            config.FILE_DATE_ID = config.FILE_DATE_ID_PLACEHOLDER
         print('\nRunning model for {}\n'.format(economy))
         ECONOMY_ID = economy
         BASE_YEAR = ECONOMY_BASE_YEARS_DICT[economy]
@@ -243,6 +257,8 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         update_progress(progress)
         if not USING_LINUX_WEB_APP:#no need if we're on linux web app
             copy_required_output_files_to_one_folder(config, ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\\for_other_modellers')
+            
+    config.FILE_DATE_ID = config.FILE_DATE_ID_PLACEHOLDER
     
     if not USING_LINUX_WEB_APP:
         print('\nFinished running model for all economies, now doing final formatting\n')
@@ -290,9 +306,9 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     #     #set up archive folder:
     #     archiving_folder = archiving_scripts.create_archiving_folder_for_FILE_DATE_ID(config)
     #     archiving_scripts.archive_lots_of_files(config, archiving_folder)    
-    ARCHIVE_RESULTS=False
+    ARCHIVE_RESULTS=True
     if ARCHIVE_RESULTS:
-        economies_to_archive = ['01_AUS']#, '21_VN', '07_INA']
+        economies_to_archive = ['09_ROK', '18_CT']#, '21_VN', '07_INA']
         for economy in economies_to_archive:
             folder_name = archiving_scripts.save_economy_projections_and_all_inputs(config, economy, ARCHIVED_FILE_DATE_ID=config.FILE_DATE_ID)
     UNARCHIVE_RESULTS=False
@@ -325,7 +341,8 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main(['01_AUS', "02_BD", "03_CDA", "04_CHL", "05_PRC", "06_HKC", "07_INA","08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"])#, '09_ROK'])#, root_dir_param=root_dir_param)#'01_AUS',
+        main([ '21_VN'])#, '03_CDA'])#"18_CT",'01_AUS',"03_CDA", '02_BD',, '19_THA''09_ROK',"06_HKC"])#, '09_ROK'])#, root_dir_param=root_dir_param)#'01_AUS',
+        #  "02_BD", "04_CHL", "05_PRC", "06_HKC", "07_INA","08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
     # root_dir_param = #'18_CT', 01_AUS  # "02_BD", "03_CDA", "04_CHL", "05_PRC", "06_HKC", "07_INA",, "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
 #%%
 # economies_to_archive = ['01_AUS', "02_BD", "03_CDA", "04_CHL", "05_PRC", "06_HKC", "07_INA", "08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"]#"01_AUS",

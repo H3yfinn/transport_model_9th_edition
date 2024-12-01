@@ -109,7 +109,7 @@ def calculate_inputs_for_model(config, road_model_input_wide, non_road_model_inp
     
     if ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR:
         #because we jsut made changes to the input data we should adjsut the vehicle sales shares so that they are consistent with the new data. We'll do this now out of simplicity:
-        breakpoint()#probalby causing issues
+        
         sales_share_data =data_creation_functions.vehicle_sales_share_creation_handler(config, ECONOMY_ID, RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA = True, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, USE_LARGE_EPSILON=True)# create_vehicle_sales_share_input(ECONOMY_ID, 
         #RECALCULATE_SALES_SHARES_USING_RECALCULATED_INPUT_DATA=True)
         #drop sales share form the road model input wide and non road model input wide, then merge in the new sales share data
