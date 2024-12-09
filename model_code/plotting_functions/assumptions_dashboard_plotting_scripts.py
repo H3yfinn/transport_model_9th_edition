@@ -5800,7 +5800,7 @@ def prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES(config,  ECONOMY_GRO
         fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'dashboards', 'multiple_economy_dashboards', f'lmdi_multiplicative_{scenario}_{ECONOMY_GROUPING}{extra_identifier}.html'))
     return 
 
-def produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES(config,  ECONOMY_GROUPING, model_output_with_fuels, colors_dict, ECONOMY_IDs, medium, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL):
+def produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES(config,  ECONOMY_GROUPING, model_output_with_fuels, colors_dict, ECONOMY_IDs, medium, AGG_OF_ALL_ECONOMIES, ONLY_AGG_OF_ALL, FINAL_YEAR=2060):
     #as of yet, dont think tehres any point in doing economy groupings sincethey are better calcaulted in the calcualtion phase thanhere
     if ECONOMY_GROUPING !='all':
         return
@@ -5820,11 +5820,11 @@ def produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES(config,  ECONOMY_GROUPING,
             else:
                 medium_id = 'road'
             # breakpoint()
-            file_identifier = f'{economy}_{scenario}_{medium_id}_2_Energy use_Hierarchical_2060_concatenated_additive'
+            file_identifier = f'{economy}_{scenario}_{medium_id}_2_Energy use_Hierarchical_{str(FINAL_YEAR)}_concatenated_additive'
             try:
                 if economy == 'all':
                     #search in folder 'APEC' and use APEC instead of economy in file_id
-                    file_identifier = f'APEC_{scenario}_{medium_id}_2_Energy use_Hierarchical_2060_concatenated_additive'
+                    file_identifier = f'APEC_{scenario}_{medium_id}_2_Energy use_Hierarchical_{str(FINAL_YEAR)}_concatenated_additive'
                     lmdi_data_economy = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI','APEC', f'{file_identifier}.csv'))
                 else:
                     lmdi_data_economy = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'LMDI', economy, f'{file_identifier}.csv'))
@@ -5877,9 +5877,9 @@ def produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES(config,  ECONOMY_GROUPING,
         lmdi_data_melt = lmdi_data_melt.sort_values('Effect')
         
         if medium == 'road':
-            title_text = f'Drivers of changes in {medium} energy use'
+            title_text = f'Drivers of changes in {medium} energy use ({str(FINAL_YEAR)})'
         else:
-            title_text = f'Drivers of changes in energy use'
+            title_text = f'Drivers of changes in energy use ({str(FINAL_YEAR)})'
 
         fig = px.bar(lmdi_data_melt,  x="Effect", y='Value',  color='Effect', title=title_text, color_discrete_map=colors_dict, facet_col='Economy', facet_col_wrap=8)
         #save to html

@@ -237,6 +237,7 @@ def constraint_function(x, config, actual_energy_by_drive, df_transport, paramet
     difference = 0
     actual_energy_sum = 0
     # breakpoint()#wats hapenning with cng here
+    breakpoint()#what does USE_SAME_MILEAGE_ACROSS_VEHICLE_TYPES do and why arewe doing it? and what happens when mileage is differnt across different types fo vehicles.. should we be averaging them out?
     for drive in actual_energy_by_drive.keys():
         
         if parameters_dict['USE_SAME_MILEAGE_ACROSS_VEHICLE_TYPES']:
@@ -452,7 +453,7 @@ def load_in_optimisation_parameters(config, ECONOMY_ID):
     with open(os.path.join(config.root_dir, 'config', 'optimisation_parameters.yml')) as file:
         parameters_dict = yaml.load(file, Loader=yaml.FullLoader)
         #get the parameters for the economy
-        if ECONOMY_ID=='ALL' or ECONOMY_ID=='ALL2' or ECONOMY_ID=='ALL_VN':
+        if ECONOMY_ID=='ALL' or ECONOMY_ID=='ALL2' or ECONOMY_ID=='ALL_PHL':
             #this will be a ful set of different parameters to iterate over so we jsut load it in one big set
             
             parameters_dict = parameters_dict[ECONOMY_ID]
@@ -547,7 +548,7 @@ def optimise_to_find_base_year_values(config, input_data_new_road, ECONOMY_ID, m
             
         except:
             # if ECONOMY_ID == '08_JPN':
-            #     breakpoint()
+            breakpoint()
             print(f"Optimization failed with method {method}, reason: {sys.exc_info()[0]}, {sys.exc_info()[1]}")
             continue
         if result.success:
@@ -634,6 +635,8 @@ def set_mileage_to_be_the_same_for_each_vehicle_type(config, df_transport, actua
     df_transport_mileage = df_transport.loc[df_transport['Measure'] == 'Mileage'].drop(columns='Drive').drop_duplicates().copy()
     #set drive to 'all'
     df_transport_mileage['Drive'] = 'all'
+    #there may be cases where the mileage is different across drive types of the same vehicle type. in this case we will jsut take the mean of the mileage for that vehicle type
+    df_transport_mileage = df_transport_mileage.groupby(['Economy', 'Date', 'Medium', 'Scenario', 'Transport Type', 'Vehicle Type', 'Drive', 'Measure']).mean().reset_index()
     #now merge with df_transport to get the bounds and initial values for mileage
     df_transport = df_transport.merge(df_transport_mileage, on=['Economy', 'Date', 'Medium', 'Scenario', 'Transport Type', 'Vehicle Type', 'Measure'], how='left', suffixes=('_y', ''))
     #set Value, drive and bounds to the value from df_transport_mileage if it is not nan, otherwise set it to the value from df_transport
