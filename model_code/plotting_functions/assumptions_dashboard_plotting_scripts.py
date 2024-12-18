@@ -1544,13 +1544,15 @@ def produce_LMDI_additive_plot(config, ECONOMY_IDs, fig_dict, colors_dict, mediu
             #melt data
             lmdi_data_melt = lmdi_data_melt.melt(id_vars=['Date'], var_name='Effect', value_name='Value')
             #If there are any values with Effect 'Total Energy use'  or 'Total_passenger_km'  then emove them since they are totals:
-            lmdi_data_melt = lmdi_data_melt.loc[(lmdi_data_melt['Effect']!='Total Energy use') & (lmdi_data_melt['Effect']!='Total_passenger_km') & (lmdi_data_melt['Effect']!='Total_freight_tonne_km') & (lmdi_data_melt['Effect']!='Total_passenger_and_freight_km')].copy()
+            lmdi_data_melt = lmdi_data_melt.loc[(lmdi_data_melt['Effect']!='Total Energy use') & (lmdi_data_melt['Effect']!='Total_passenger_km') & (lmdi_data_melt['Effect']!='Total_freight_tonne_km') & (lmdi_data_melt['Effect']!='Total_Activity') & (lmdi_data_melt['Effect']!='Total_passenger_and_freight_km')].copy()
             #rename the effect Additive change in Energy use to Change in Energy use
             lmdi_data_melt['Effect'] = lmdi_data_melt['Effect'].apply(lambda x: 'Change in Energy use' if x == 'Additive change in Energy use' else x)
             #and rename 'Engine switching intensity effect' to 'Other intensity improvments'
             lmdi_data_melt['Effect'] = lmdi_data_melt['Effect'].apply(lambda x: 'Other intensity improvements' if x == 'Engine switching intensity effect' else x)
             #and rename passenger_and_freight_km effect to 'Activity'
             lmdi_data_melt['Effect'] = lmdi_data_melt['Effect'].apply(lambda x: 'Activity' if x == 'passenger_and_freight_km effect' else x)
+            #and rename Activity effect to 'Activity'
+            lmdi_data_melt['Effect'] = lmdi_data_melt['Effect'].apply(lambda x: 'Activity' if x == 'Activity effect' else x)
             #and Vehicle Type effect to 'Switching vehicle types'
             lmdi_data_melt['Effect'] = lmdi_data_melt['Effect'].apply(lambda x: 'Switching vehicle types' if x == 'Vehicle Type effect' else x)
             #and Engine switching effect to 'Engine type switching'
@@ -1570,6 +1572,7 @@ def produce_LMDI_additive_plot(config, ECONOMY_IDs, fig_dict, colors_dict, mediu
             order = ['Change in Energy use', 'Activity', 'Switching vehicle types', 'Drive type switching', 'Other intensity improvements']
             # Convert the 'Effect' column to a categorical type with the defined order
             lmdi_data_melt['Effect'] = pd.Categorical(lmdi_data_melt['Effect'], categories=order, ordered=True)
+            
             # Sort the DataFrame by the 'Effect' column
             lmdi_data_melt = lmdi_data_melt.sort_values('Effect')
              
@@ -5784,7 +5787,7 @@ def prodcue_LMDI_mutliplicative_plot_FOR_MULTIPLE_ECONOMIES(config,  ECONOMY_GRO
         lmdi_data_melt = lmdi_data.copy()#drop(lmdi_data.columns[[len(lmdi_data.columns)-1, len(lmdi_data.columns)-2]], axis=1)
         lmdi_data_melt = lmdi_data_melt.melt(id_vars=['Date', 'Economy'], var_name='Effect', value_name='Value')
         #If there are any values with Effect 'Total Energy use'  or 'Total_passenger_km'  then emove them since they are totals:
-        lmdi_data_melt = lmdi_data_melt.loc[(lmdi_data_melt['Effect']!='Total Energy use') & (lmdi_data_melt['Effect']!='Total_passenger_km') & (lmdi_data_melt['Effect']!='Total_freight_tonne_km')].copy()
+        lmdi_data_melt = lmdi_data_melt.loc[(lmdi_data_melt['Effect']!='Total Energy use') & (lmdi_data_melt['Effect']!='Total_passenger_km') & (lmdi_data_melt['Effect']!='Total_freight_tonne_km') & (lmdi_data_melt['Effect']!='Total_Activity') & (lmdi_data_melt['Effect']!='Total_passenger_and_freight_km')].copy()
         #if any values are > 10, create a breakpoint so we can see what they are, just in case they need to be removed like above:
         if lmdi_data_melt['Value'].max() > 10: 
             breakpoint()
@@ -5847,13 +5850,15 @@ def produce_LMDI_additive_plot_FOR_MULTIPLE_ECONOMIES(config,  ECONOMY_GROUPING,
         #melt data
         lmdi_data_melt = lmdi_data_melt.melt(id_vars=['Date', 'Economy'], var_name='Effect', value_name='Value')
         #If there are any values with Effect 'Total Energy use'  or 'Total_passenger_km'  then emove them since they are totals:
-        lmdi_data_melt = lmdi_data_melt.loc[(lmdi_data_melt['Effect']!='Total Energy use') & (lmdi_data_melt['Effect']!='Total_passenger_km') & (lmdi_data_melt['Effect']!='Total_freight_tonne_km') & (lmdi_data_melt['Effect']!='Total_passenger_and_freight_km')].copy()
+        lmdi_data_melt = lmdi_data_melt.loc[(lmdi_data_melt['Effect']!='Total Energy use') & (lmdi_data_melt['Effect']!='Total_passenger_km') & (lmdi_data_melt['Effect']!='Total_freight_tonne_km') & (lmdi_data_melt['Effect']!='Total_Activity') & (lmdi_data_melt['Effect']!='Total_passenger_and_freight_km')].copy()
         #rename the effect Additive change in Energy use to Change in Energy use
         lmdi_data_melt['Effect'] = lmdi_data_melt['Effect'].apply(lambda x: 'Change in Energy use' if x == 'Additive change in Energy use' else x)
         #and rename 'Engine switching intensity effect' to 'Other intensity improvments'
         lmdi_data_melt['Effect'] = lmdi_data_melt['Effect'].apply(lambda x: 'Other intensity improvements' if x == 'Engine switching intensity effect' else x)
         #and rename passenger_and_freight_km effect to 'Activity'
         lmdi_data_melt['Effect'] = lmdi_data_melt['Effect'].apply(lambda x: 'Activity' if x == 'passenger_and_freight_km effect' else x)
+        #and rename Activity effect to 'Activity'
+        lmdi_data_melt['Effect'] = lmdi_data_melt['Effect'].apply(lambda x: 'Activity' if x == 'Activity effect' else x)
         #and Vehicle Type effect to 'Switching vehicle types'
         lmdi_data_melt['Effect'] = lmdi_data_melt['Effect'].apply(lambda x: 'Switching vehicle types' if x == 'Vehicle Type effect' else x)
         #and Engine switching effect to 'Engine type switching'

@@ -58,7 +58,7 @@ def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', tur
     # COVID_YEARS = set([2020,2021])#PLEASE NOTE THAT THIS IS HARDCODED. WE WILL NEED TO CHANGE THIS TO A CONFIG PARAMETER OR SOMETHING MORE DETAILED LATER
     # if config.OUTLOOK_BASE_YEAR in COVID_YEARS:
     international_bunker_inputs = apply_covid_effect_to_growth_rate_by_medium(config, international_bunker_inputs)
-    breakpoint()
+    # breakpoint()
     international_supply_side_fuel_mixing = check_and_fill_missing_fuel_mixing_dates(config, international_bunker_inputs,  international_supply_side_fuel_mixing)
     #interpolate the fuel shares to get a value for every year:
     #print time

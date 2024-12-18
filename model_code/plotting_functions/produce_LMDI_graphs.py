@@ -534,7 +534,8 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
         extra_identifiers = []
         structure_variables_list = []
         activity_variables = []
-        new_activity_variable = 'passenger_and_freight_km'
+        
+        new_activity_variable = 'Activity'
         for combination_dict in combined_transport_type_waterfall_inputs[key]:
             extra_identifiers.append(combination_dict['extra_identifier'])
             structure_variables_list.append(combination_dict['structure_variables_list'])

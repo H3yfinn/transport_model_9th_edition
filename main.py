@@ -70,7 +70,7 @@ USE_SAVED_OPT_PARAMATERS=True
 
 warnings.simplefilter(action='ignore', category=pd.errors.DtypeWarning)
 #%%
-def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback):
+def setup_for_main(root_dir_param=None, script_dir_param=None, economy_to_run=None, progress_callback=None):
     #setup the root and script directories which will be passed into functions to know where to look for files. This allwos for multiple threads of this module to be run at the same time without setting the root and script directories as global variables or including them all in sys.path
     if script_dir_param is not None:
         script_dir = script_dir_param
@@ -306,7 +306,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     #     #set up archive folder:
     #     archiving_folder = archiving_scripts.create_archiving_folder_for_FILE_DATE_ID(config)
     #     archiving_scripts.archive_lots_of_files(config, archiving_folder)    
-    ARCHIVE_RESULTS=True
+    ARCHIVE_RESULTS=False
     if ARCHIVE_RESULTS:
         economies_to_archive = ['09_ROK', '18_CT']#, '21_VN', '07_INA']
         for economy in economies_to_archive:
@@ -341,7 +341,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main([ '15_PHL'])#, '03_CDA'])#"18_CT",'01_AUS',"03_CDA", '02_BD',, '19_THA''09_ROK',"06_HKC"])#, '09_ROK'])#, '19_THA',root_dir_param=root_dir_param)#'01_AUS',
+        main([ '08_JPN'])#, '03_CDA'])#"18_CT",'01_AUS',"03_CDA", '02_BD',, '19_THA''09_ROK',"06_HKC"])#, '09_ROK'])#, '19_THA',root_dir_param=root_dir_param)#'01_AUS',
         #  "02_BD", "04_CHL", "05_PRC", "06_HKC", "07_INA","08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
     # root_dir_param = #'18_CT', 01_AUS  # "02_BD", "03_CDA", "04_CHL", "05_PRC", "06_HKC", "07_INA",, "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
 #%%
@@ -389,3 +389,16 @@ if __name__ == "__main__":
 #   '19_THA': 1
 #   '20_USA': 1
 #   '21_VN': 1  n
+
+
+# %%
+
+
+# economy_to_run='all'
+# progress_callback=None
+# root_dir_param=None
+# script_dir_param=None
+# increment, progress, update_progress, config, USING_LINUX_WEB_APP = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
+
+# produce_lots_of_LMDI_charts(config, '09_ROK', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060, NOT_JUST_DASHBOARD_DATASETS=True)
+# %%
