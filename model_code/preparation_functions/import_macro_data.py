@@ -157,80 +157,85 @@ def import_macro_data(config, UPDATE_INDUSTRY_VALUES, PLOT=False):
     macro2 = pd.merge(macro2, config.measure_to_unit_concordance[['Unit', 'Measure']], on=['Measure'], how='left')
     #save to intermediate_data/model_inputs/regression_based_growth_estimates.csv 
     #slightly increase PNG growth rates.
-    macro3 = update_png_growth_rates(config, macro2, PLOT=PLOT)
+    
+    UPDATE_GROWTH_RATES_TO_BE_SAME_AS_8TH = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['UPDATE_GROWTH_RATES_TO_BE_SAME_AS_8TH']
+    #extract keys 
+    UPDATE_GROWTH_RATES_TO_BE_SAME_AS_8TH = UPDATE_GROWTH_RATES_TO_BE_SAME_AS_8TH.keys()
+    
+    macro3 = update_growth_rates_to_be_same_as_8th(config, macro2,economies_to_change=UPDATE_GROWTH_RATES_TO_BE_SAME_AS_8TH, PLOT=PLOT)#'16_RUS', 
     
     macro3.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', 'regression_based_growth_estimates.csv'), index=False)
 
+def update_growth_rates_to_be_same_as_8th(config, macro2, economies_to_change=[], PLOT=True):
+    for economy in economies_to_change:
+        #slightly increase PNG growth rates. Unfortunately its hard to tell exactly how mcuh they should increase by. Maybe enough to match the 8th edition? or enough to match economies which went through similar levels of growth in the past? for now lets jsut match activity_growth_8th
+        macro2_econ_8th = macro2.loc[(macro2['Economy']==economy) & (macro2['Measure']=='Activity_growth_8th')].copy()
+        macro2_econ = macro2.loc[(macro2['Economy']==economy) & (macro2['Measure']=='Activity_growth')].copy()
+        macro2_econ.rename(columns={'Value':'Activity_growth'}, inplace=True)
+        macro2_econ = macro2_econ.drop(columns=['Measure'])
+        macro2_econ_8th.rename(columns={'Value':'Activity_growth_8th'}, inplace=True)
+        macro2_econ_8th = macro2_econ_8th.drop(columns=['Measure'])
+        #join and start the process to match the growth rates. However, we want to copy the annual variation of Activity growth, yet use the trend and level of the 8th edition. This is also important because we dont have all the years in the 8th edition, so we cant just use the 8th edition as is.
+        econ_growth = pd.merge(macro2_econ, macro2_econ_8th, on=['Economy', 'Date', 'Transport Type', 'Scenario'], how='left')
 
-def update_png_growth_rates(config, macro2, PLOT=True):
-    #slightly increase PNG growth rates. Unfortunately its hard to tell exactly how mcuh they should increase by. Maybe enough to match the 8th edition? or enough to match economies which went through similar levels of growth in the past? for now lets jsut match activity_growth_8th
-    macro2_png_8th = macro2.loc[(macro2['Economy']=='13_PNG') & (macro2['Measure']=='Activity_growth_8th')].copy()
-    macro2_png = macro2.loc[(macro2['Economy']=='13_PNG') & (macro2['Measure']=='Activity_growth')].copy()
-    macro2_png.rename(columns={'Value':'Activity_growth'}, inplace=True)
-    macro2_png = macro2_png.drop(columns=['Measure'])
-    macro2_png_8th.rename(columns={'Value':'Activity_growth_8th'}, inplace=True)
-    macro2_png_8th = macro2_png_8th.drop(columns=['Measure'])
-    #join and start the process to match the growth rates. However, we want to copy the annual variation of Activity growth, yet use the trend and level of the 8th edition. This is also important because we dont have all the years in the 8th edition, so we cant just use the 8th edition as is.
-    png_growth = pd.merge(macro2_png, macro2_png_8th, on=['Economy', 'Date', 'Transport Type', 'Scenario'], how='left')
+        # Calculate the ratio of 'Activity_growth_8th' to 'Activity_growth'
+        econ_growth['growth_ratio'] = econ_growth['Activity_growth_8th'] / econ_growth['Activity_growth']
+        #smooth the ratio by removeing outliers and then taking the 5 year rolling avg (outliers are probably 2022)
+        growth_ratio = econ_growth[['Economy','Transport Type', 'Scenario', 'Date', 'growth_ratio']].copy()
+        #drop outliers
+        def remove_outliers(config, df, column):
+            from scipy import stats
+            #drop nas
+            df = df.dropna()
+            df = df[(np.abs(stats.zscore(df[column])) < 3)]
+            return df
 
-    # Calculate the ratio of 'Activity_growth_8th' to 'Activity_growth'
-    png_growth['growth_ratio'] = png_growth['Activity_growth_8th'] / png_growth['Activity_growth']
-    #smooth the ratio by removeing outliers and then taking the 5 year rolling avg (outliers are probably 2022)
-    growth_ratio = png_growth[['Economy','Transport Type', 'Scenario', 'Date', 'growth_ratio']].copy()
-    #drop outliers
-    def remove_outliers(config, df, column):
-        from scipy import stats
-        #drop nas
-        df = df.dropna()
-        df = df[(np.abs(stats.zscore(df[column])) < 3)]
-        return df
+        growth_ratio = remove_outliers(config, growth_ratio, 'growth_ratio')
+        #print the dates for vlaues that were removed:
+        econ_growth_no_nas = econ_growth.dropna(subset=['growth_ratio'])
+        missing_dates = econ_growth_no_nas.loc[~econ_growth_no_nas['Date'].isin(growth_ratio['Date'])]['Date'].unique()
+        # print(f'The following dates were removed from the growth_ratio calculation due to being outliers: {missing_dates}')
+        
+        growth_ratio = growth_ratio.sort_values(by=['Economy','Transport Type', 'Scenario', 'Date'])
+        #merge back to econ_growth and interpolate missing values
+        econ_growth = pd.merge(econ_growth, growth_ratio, on=['Economy','Transport Type', 'Scenario', 'Date'], how='left')
+        econ_growth['growth_ratio_y'] = econ_growth.groupby(['Economy', 'Transport Type', 'Scenario'])['growth_ratio_y'].transform(lambda x: x.interpolate())
+        #finallly take the 10 year rolling avg since its just meant to apply a step change to the growth rates
+        econ_growth['growth_ratio_y'] = econ_growth.groupby(['Economy', 'Transport Type', 'Scenario'])['growth_ratio_y'].transform(lambda x: x.rolling(10, min_periods=1).mean())
+        econ_growth['growth_ratio'] = econ_growth['growth_ratio_y']
+        econ_growth = econ_growth.drop(columns=['growth_ratio_x', 'growth_ratio_y'])
+        
+        # Apply the ratio to 'Activity_growth' to match the trend and level of 'Activity_growth_8th'
+        econ_growth['Activity_growth_new'] = econ_growth['Activity_growth'] * econ_growth['growth_ratio']
 
-    growth_ratio = remove_outliers(config, growth_ratio, 'growth_ratio')
-    #print the dates for vlaues that were removed:
-    png_growth_no_nas = png_growth.dropna(subset=['growth_ratio'])
-    missing_dates = png_growth_no_nas.loc[~png_growth_no_nas['Date'].isin(growth_ratio['Date'])]['Date'].unique()
-    # print(f'The following dates were removed from the growth_ratio calculation due to being outliers: {missing_dates}')
+        if PLOT:
+            econ_growth_melt = plot_econ_growth(config, econ_growth, economy)
+        
+        # Drop the 'Activity_growth_8th' and 'growth_ratio' columns as they are no longer needed
+        econ_growth = econ_growth.drop(columns=['Activity_growth_8th', 'growth_ratio', 'Activity_growth'])
+        #and now create measure and value cols
+        econ_growth['Measure'] = 'Activity_growth'
+        econ_growth = econ_growth.rename(columns={'Activity_growth_new':'Value'})
+        
+        #add it bavl to macro2
+        macro2 = macro2.loc[~((macro2['Economy']==economy) & (macro2['Measure']=='Activity_growth'))]
+        macro2 = pd.concat([macro2, econ_growth])
+        return macro2
     
-    growth_ratio = growth_ratio.sort_values(by=['Economy','Transport Type', 'Scenario', 'Date'])
-    #merge back to png_growth and interpolate missing values
-    png_growth = pd.merge(png_growth, growth_ratio, on=['Economy','Transport Type', 'Scenario', 'Date'], how='left')
-    png_growth['growth_ratio_y'] = png_growth.groupby(['Economy', 'Transport Type', 'Scenario'])['growth_ratio_y'].transform(lambda x: x.interpolate())
-    #finallly take the 10 year rolling avg since its just meant to apply a step change to the growth rates
-    png_growth['growth_ratio_y'] = png_growth.groupby(['Economy', 'Transport Type', 'Scenario'])['growth_ratio_y'].transform(lambda x: x.rolling(10, min_periods=1).mean())
-    png_growth['growth_ratio'] = png_growth['growth_ratio_y']
-    png_growth = png_growth.drop(columns=['growth_ratio_x', 'growth_ratio_y'])
-    
-    # Apply the ratio to 'Activity_growth' to match the trend and level of 'Activity_growth_8th'
-    png_growth['Activity_growth_new'] = png_growth['Activity_growth'] * png_growth['growth_ratio']
-
-    if PLOT:
-        png_growth_melt = plot_png_growth(config, png_growth)
-    
-    # Drop the 'Activity_growth_8th' and 'growth_ratio' columns as they are no longer needed
-    png_growth = png_growth.drop(columns=['Activity_growth_8th', 'growth_ratio', 'Activity_growth'])
-    #and now create measure and value cols
-    png_growth['Measure'] = 'Activity_growth'
-    png_growth = png_growth.rename(columns={'Activity_growth_new':'Value'})
-    
-    #add it bavl to macro2
-    macro2 = macro2.loc[~((macro2['Economy']=='13_PNG') & (macro2['Measure']=='Activity_growth'))]
-    macro2 = pd.concat([macro2, png_growth])
-    return macro2
-    
-def plot_png_growth(config, png_growth):
+def plot_econ_growth(config, econ_growth, economy):
     
     # Melt the dataframe to long format for plotting
-    png_growth_melt = png_growth.melt(id_vars=['Date', 'Transport Type'], value_vars=['Activity_growth', 'Activity_growth_new', 'Activity_growth_8th'], var_name='Measure', value_name='Growth Rate')
+    econ_growth_melt = econ_growth.melt(id_vars=['Date', 'Transport Type'], value_vars=['Activity_growth', 'Activity_growth_new', 'Activity_growth_8th'], var_name='Measure', value_name='Growth Rate')
     
     #sort data so it is in the right order
-    png_growth_melt = png_growth_melt.sort_values(by=['Date', 'Transport Type', 'Measure'])
+    econ_growth_melt = econ_growth_melt.sort_values(by=['Date', 'Transport Type', 'Measure'])
     
     # Create a facet grid plot with plotly
-    fig = px.line(png_growth_melt, x='Date', y='Growth Rate', color='Measure', facet_row='Transport Type', title='Growth Rates Over Time')
-    #write html to plotting_output/growth_analysis/png_growth_rates.html
-    fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'growth_analysis', 'png_growth_rates.html'), auto_open=True) 
+    fig = px.line(econ_growth_melt, x='Date', y='Growth Rate', color='Measure', facet_row='Transport Type', title='Growth Rates Over Time for {}'.format(economy))
+    #write html to plotting_output/growth_analysis/econ_growth_rates.html
+    fig.write_html(os.path.join(config.root_dir, 'plotting_output', 'growth_analysis', f'{economy}_growth_rates.html'), auto_open=True) 
     
-    return png_growth_melt
+    return econ_growth_melt
     
 def tie_freight_growth_to_gdp_growth(config, macro1, UPDATE_INDUSTRY_VALUES):
     #after realising that freight and stocks per cpita arent a great mix for estimaitn freight growth, i figured basing it off gdp growth  would be better. this was because i found that my growth rates were realtively similar anyway, and then research online suggested that people use elasticity of freight transport demand relative to GDP. So by setting this manully, based on what i think an economy is like, i can get a better estimate of freight growth.

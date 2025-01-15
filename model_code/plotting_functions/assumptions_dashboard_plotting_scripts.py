@@ -1448,25 +1448,27 @@ def plot_demand_side_fuel_mixing(config, ECONOMY_IDs, demand_side_fuel_mixing_df
     return fig_dict, color_preparation_list
 
 def create_charging_plot(config, ECONOMY_IDs, chargers_df, fig_dict, color_preparation_list, colors_dict, WRITE_HTML=True):
+    
     PLOTTED=True 
     chargers = chargers_df.copy()
-    chargers = chargers[['Economy', 'Scenario', 'Date', 'sum_of_fast_chargers_needed','sum_of_slow_chargers_needed']].drop_duplicates()
+    chargers = chargers[['Economy', 'Scenario', 'Date', 'fast_chargers','slow_chargers']].drop_duplicates()
     #divide chargers by a thousand so its in 1000s#actually no, otherwise its confusing
-    chargers['sum_of_fast_chargers_needed'] = chargers['sum_of_fast_chargers_needed']#/1000
-    chargers['sum_of_slow_chargers_needed'] = chargers['sum_of_slow_chargers_needed']#/1000
-    #rename sum_of_fast_chargers_needed and sum_of_slow_chargers_needed to Fast chargers and Slow chargers
-    chargers = chargers.rename(columns={'sum_of_fast_chargers_needed':'Fast chargers (200kW)', 'sum_of_slow_chargers_needed':'Slow chargers (60kW)'})
+    chargers['fast_chargers'] = chargers['fast_chargers']#/1000
+    chargers['slow_chargers'] = chargers['slow_chargers']#/1000
+    #rename fast_chargers and slow_chargers to Fast chargers and Slow chargers
+    chargers = chargers.rename(columns={'fast_chargers':'Fast chargers (200kW)', 'slow_chargers':'Slow chargers (60kW)'})
     for scenario in config.economy_scenario_concordance['Scenario'].unique():
         chargers_scenario = chargers.loc[chargers['Scenario']==scenario].copy()
         for economy in ECONOMY_IDs:
             #filter to economy
             chargers_economy = chargers_scenario.loc[chargers_scenario['Economy']==economy].copy()
-            
+            #sum up chargers
+            chargers_economy = chargers_economy.groupby(['Date']).sum(numeric_only=True).reset_index()
             title = 'Expected slow and fast public chargers needed for ' + scenario + ' scenario'
             fig = px.line(chargers_economy, x="Date", y=['Fast chargers (200kW)','Slow chargers (60kW)'], title=title, color_discrete_map=colors_dict)
 
             #add units to y col
-            title_text = 'Public chargers (thousands)'
+            title_text = 'Public chargers'
             fig.update_yaxes(title_text=title_text)#not working for some reason
 
             #add fig to dictionary for scenario and economy:
@@ -1474,9 +1476,9 @@ def create_charging_plot(config, ECONOMY_IDs, chargers_df, fig_dict, color_prepa
             
             if WRITE_HTML:
                 
-                write_graph_to_html(config, filename='charging_{}.html'.format(scenario), graph_type='bar', plot_data=chargers_economy, economy=economy, x='Date', y=['Fast chargers (200kW)', 'Slow chargers (60kW)'], title=f'Public chargers', y_axes_title='(thousands)', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
+                write_graph_to_html(config, filename='charging_{}.html'.format(scenario), graph_type='bar', plot_data=chargers_economy, economy=economy, x='Date', y=['Fast chargers (200kW)', 'Slow chargers (60kW)'], title=f'Public chargers', y_axes_title='Public chargers', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
-    color_preparation_list.append(['sum_of_fast_chargers_needed','sum_of_slow_chargers_needed'])
+    color_preparation_list.append(['fast_chargers','slow_chargers'])
     return fig_dict, color_preparation_list
 
 def prodcue_LMDI_mutliplicative_plot(config, ECONOMY_IDs, fig_dict, colors_dict, transport_type, medium, WRITE_HTML=True):

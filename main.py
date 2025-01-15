@@ -33,7 +33,7 @@ from model_code.calculation_functions import run_road_model
 from model_code.calculation_functions import run_non_road_model
 from model_code.formatting_functions import create_output_for_outlook_data_system
 from model_code.calculation_functions import estimate_kw_of_required_chargers
-from model_code.plotting_functions import plot_required_chargers
+from model_code.plotting_functions import plot_charging_dashboard
 from model_code.plotting_functions import calculate_and_plot_oil_displacement
 from model_code.calculation_functions import international_bunker_share_calculation_handler
 
@@ -120,9 +120,11 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     # To restore the original state, use:
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
     
-    
-    # international_bunker_share_calculation_handler(config)
-    
+    for ECONOMY_ID in config.ECONOMY_IDS:
+        estimate_kw_of_required_chargers(config, ECONOMY_ID)
+        # if PLOT_MINOR_OUTPUTS:
+        plot_charging_dashboard(config, ECONOMY_ID)
+    return config.FILE_DATE_ID, True, error_message
     #Things to do once a day:
     do_these_once_a_day = True
     if do_these_once_a_day:
@@ -244,9 +246,10 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             international_bunker_share_calculation_handler(config, ECONOMY_ID=ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
         ###################do bunkers calc for this economy###################
         if ANALYSE_OUTPUT: 
+            breakpoint()
             estimate_kw_of_required_chargers(config, ECONOMY_ID)
             if PLOT_MINOR_OUTPUTS:
-                plot_required_chargers(config, ECONOMY_ID)
+                plot_charging_dashboard(config, ECONOMY_ID)
             calculate_and_plot_oil_displacement(config, ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)  
             if LMDI_CHARTS:
                 produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = PLOT_MINOR_OUTPUTS, PLOTTING = PLOT_MINOR_OUTPUTS, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060, NOT_JUST_DASHBOARD_DATASETS=NOT_JUST_DASHBOARD_DATASETS)
@@ -341,64 +344,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main([ '08_JPN'])#, '03_CDA'])#"18_CT",'01_AUS',"03_CDA", '02_BD',, '19_THA''09_ROK',"06_HKC"])#, '09_ROK'])#, '19_THA',root_dir_param=root_dir_param)#'01_AUS',
+        main([ '05_PRC'])#, '05_PRC', '06_HKC', '20_USA'])#, '03_CDA'])#"18_CT",'01_AUS',"03_CDA", '02_BD',, '19_THA''09_ROK',"06_HKC"])#, '09_ROK'])#, '19_THA',root_dir_param=root_dir_param)#'01_AUS',
         #  "02_BD", "04_CHL", "05_PRC", "06_HKC", "07_INA","08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
     # root_dir_param = #'18_CT', 01_AUS  # "02_BD", "03_CDA", "04_CHL", "05_PRC", "06_HKC", "07_INA",, "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
 #%%
-# economies_to_archive = ['01_AUS', "02_BD", "03_CDA", "04_CHL", "05_PRC", "06_HKC", "07_INA", "08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"]#"01_AUS",
-# # main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
-# economy_to_run='all'
-# progress_callback=None
-# root_dir_param=None
-# script_dir_param=None
-# error_message = None
-# for economy in economies_to_archive:
-#     increment, progress, update_progress, config, USING_LINUX_WEB_APP = setup_for_main(root_dir_param, script_dir_param, economy, progress_callback)
-#     folder_name = archiving_scripts.save_economy_projections_and_all_inputs(config, economy, ARCHIVED_FILE_DATE_ID='latest')
-#%%
-# %%
-
-# def group_economies_with_dict():
-#     economy_grouping_dict_all = {'all':ECONOMY_IDs} 
-#     economy_grouping_dict_west_sea_latin_china_jk_rus = {'low_density_rich': ['01_AUS', '03_CDA', '08_NZ', '12_USA'],
-#                                                          'city_state' 
-#     'sea_latam': ['14_IDN', '15_MYS', '16_RUS', '17_SGP', '18_THA', '19_VNM'], 
-#     'china': ['20_CHN'], 
-#     'japkor': ['21_JK'],
-#     'rus': ['16_RUS'],
-#     'png': ['13_PNG']}
-    
-# #   '01_AUS': 1
-#   '02_BD': 1
-#   '03_CDA': 1 #canada return is super weird. it goes higher than it was prevoouisly. so just dropping it to 0.5 compared to 1 for everyone else
-#   '04_CHL': 1
-#   '05_PRC': 1
-#   '06_HKC': 1
-#   '07_INA': 1
-#   '08_JPN': 1
-#   '09_ROK': 1
-#   '10_MAS': 1
-#   '11_MEX': 1
-#   '12_NZ': 1
-#   '13_PNG': 1
-#   '14_PE': 1
-#   '15_PHL': 1
-#   '16_RUS': 1
-#   '17_SGP': 1
-#   '18_CT': 1
-#   '19_THA': 1
-#   '20_USA': 1
-#   '21_VN': 1  n
-
-
-# %%
-
-
-# economy_to_run='all'
-# progress_callback=None
-# root_dir_param=None
-# script_dir_param=None
-# increment, progress, update_progress, config, USING_LINUX_WEB_APP = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
-
-# produce_lots_of_LMDI_charts(config, '09_ROK', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060, NOT_JUST_DASHBOARD_DATASETS=True)
-# %%

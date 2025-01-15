@@ -38,7 +38,7 @@ from scipy.optimize import curve_fit
 #######################################################################
 
 
-def logistic_fitting_function_handler(config, ECONOMY_ID, model_data, show_plots=False, matplotlib_bool=False, plotly_bool=False, FIT_LOGISTIC_CURVE_TO_DATA=False, PROPORTION_BELOW_GAMMA= 0.4, EXTRA_YEARS_TO_REACH_GAMMA=10, APPLY_SMOOTHING_TO_GROWTH_RATE=True, INTERPOLATE_ALL_DATES=False):
+def logistic_fitting_function_handler(config, ECONOMY_ID, model_data, show_plots=False, matplotlib_bool=False, plotly_bool=False, FIT_LOGISTIC_CURVE_TO_DATA=False, PROPORTION_BELOW_GAMMA= 0.4, APPLY_SMOOTHING_TO_GROWTH_RATE=True, INTERPOLATE_ALL_DATES=False):
     """Take in output of stocks,occupancy, travel_km, activity and mileage from running road model on a gdp per cpita based growth rate. Then fit a logistic curve to the stocks data with the gamma value from each economy provided. 
     
     Then with this curve, extract the expected activity per year based on the expected stocks per year and the expected mileage per year. Then recalculate the growth rate over time based on this. We will then use this to rerun the road model with the new growth rate.
@@ -54,7 +54,7 @@ def logistic_fitting_function_handler(config, ECONOMY_ID, model_data, show_plots
         plotly_bool (bool, optional): Whether to show plotly plots. Defaults to False.
         FIT_LOGISTIC_CURVE_TO_DATA (bool, optional): Whether to fit the logistic curve to the data. Defaults to False.
         PROPORTION_BELOW_GAMMA (float, optional): The proportion of the stocks data that can be below the gamma value. Defaults to 0.05.
-        EXTRA_YEARS_TO_REACH_GAMMA (int, optional): The number of years to reach the gamma value that are added onto the previous point where it was passed. Defaults to 5.
+        EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD (int, optional): The number of years to reach the gamma value that are added onto the previous point where it was passed. Defaults to 5.
         APPLY_SMOOTHING_TO_GROWTH_RATE (bool, optional): Whether to apply smoothing to the growth rate. Defaults to False.
         INTERPOLATE_ALL_DATES: Whether to interpolate all dates below gamma. Defaults to False.
     
@@ -62,11 +62,19 @@ def logistic_fitting_function_handler(config, ECONOMY_ID, model_data, show_plots
     model_data_to_edit = model_data.copy()
         
     model_data_to_edit = model_data_to_edit.loc[(model_data_to_edit['Transport Type'] == 'passenger')] 
-    # breakpoint()#what happens when scenarios have different gammas?
+    # if 2040 in model_data_to_edit['Date'].unique():
+    #     breakpoint()#why is russia having similar pkm growth no matter what the original activity growth rate is? it is probably here that the issue is.
     new_model_data = prepare_data_for_logistic_fitting(config, model_data_to_edit,ECONOMY_ID)
-        
+    
+    EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD']
+    if ECONOMY_ID in EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD.keys():
+        EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD = EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD[ECONOMY_ID]
+    else:
+        raise ValueError('EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD not defined for {}'.format(ECONOMY_ID))
+    
     #EXTRACT PARAMETERS FOR LOGISTIC FUNCTION:
-    parameters_estimates, new_stocks_per_capita_estimates, date_where_gamma_is_reached = find_parameters_for_logistic_function(config, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA, PROPORTION_BELOW_GAMMA, EXTRA_YEARS_TO_REACH_GAMMA, INTERPOLATE_ALL_DATES)
+    parameters_estimates, new_stocks_per_capita_estimates, date_where_gamma_is_reached = find_parameters_for_logistic_function(config, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA, PROPORTION_BELOW_GAMMA, EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD, INTERPOLATE_ALL_DATES)
+    
     #some parameters will be np.nan because we dont need to fit the curve for all economies. We will drop these and not recalculate the growth rate for these economies
     parameters_estimates = parameters_estimates.dropna(subset=['Stocks_per_capita'])
     #grab only cols we need
@@ -459,7 +467,7 @@ def create_new_dataframe_with_logistic_predictions(config, new_model_data, new_s
     
     return model_data_logistic_predictions
 
-def find_parameters_for_logistic_function(config, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA, PROPORTION_BELOW_GAMMA, EXTRA_YEARS_TO_REACH_GAMMA, INTERPOLATE_ALL_DATES):
+def find_parameters_for_logistic_function(config, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA, PROPORTION_BELOW_GAMMA, EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD, INTERPOLATE_ALL_DATES):
     #load ECONOMIES_WITH_STOCKS_PER_CAPITA_REACHED from parameters.yml
     ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED =  yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['ECONOMIES_WITH_MAX_STOCKS_PER_CAPITA_REACHED']
     
@@ -527,7 +535,7 @@ def find_parameters_for_logistic_function(config, new_model_data, show_plots, ma
                         #just use the manually set stocks per cpita vlaues and calcualte resulting activity growth from them!                  
                         new_stocks_per_capita_estimates = pd.concat([new_stocks_per_capita_estimates, new_model_data_economy_scenario_ttype[['Date', 'Economy', 'Transport Type', 'Scenario', 'Stocks_per_thousand_capita']]], axis=0).reset_index(drop=True)
                     
-                    date_where_gamma_is_reached = pd.concat([date_where_gamma_is_reached, pd.DataFrame({'Date': date_where_stocks_per_capita_passes_gamma+EXTRA_YEARS_TO_REACH_GAMMA, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])], axis=0).reset_index(drop=True)
+                    date_where_gamma_is_reached = pd.concat([date_where_gamma_is_reached, pd.DataFrame({'Date': date_where_stocks_per_capita_passes_gamma+EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])], axis=0).reset_index(drop=True)
                     continue
                 
                 #we have an issue if min_date is = gamma_threshold, since we cant intepolate that as In this case we cant create data (like for max_date). So we will increase the gamma_threshold by 1 year which will make it work
@@ -551,28 +559,28 @@ def find_parameters_for_logistic_function(config, new_model_data, show_plots, ma
                 else:
                     #replot the whole stocks per cpita line so that it curves from its starating point towards gamma, and ends at gamma with a gradient of 0
                     
-                    # # #extract data after this date and set the stocks per capita to be a quadratic interpoalted line from the gamma - gamma*PROPORTION_BELOW_GAMMA to gamma over the time period EXTRA_YEARS_TO_REACH_GAMMA. then once we have reached the end of this time period, set the stocks per capita to be gamma
-                    # # #set data between gamma_threshold and gamma_threshold+ EXTRA_YEARS_TO_REACH_GAMMA to NaN, the data after this will be set to gamma, and then we will interpolate between these two points                    
-                    new_model_data_economy_scenario_ttype.loc[new_model_data_economy_scenario_ttype['Date'] >= date_where_stocks_per_capita_passes_gamma + EXTRA_YEARS_TO_REACH_GAMMA, 'Stocks_per_thousand_capita'] = gamma
-                    new_model_data_economy_scenario_ttype.loc[(new_model_data_economy_scenario_ttype['Date'] <  date_where_stocks_per_capita_passes_gamma + EXTRA_YEARS_TO_REACH_GAMMA)&(new_model_data_economy_scenario_ttype['Date'] > min_date), 'Stocks_per_thousand_capita'] = np.nan
-                    #if the last value is na, then we should create extra rows untilnew_model_data_economy_scenario_ttype['Date'] = gamma_threshold + EXTRA_YEARS_TO_REACH_GAMMA, and set the stocks per capita to gamma
+                    # # #extract data after this date and set the stocks per capita to be a quadratic interpoalted line from the gamma - gamma*PROPORTION_BELOW_GAMMA to gamma over the time period EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD. then once we have reached the end of this time period, set the stocks per capita to be gamma
+                    # # #set data between gamma_threshold and gamma_threshold+ EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD to NaN, the data after this will be set to gamma, and then we will interpolate between these two points                    
+                    new_model_data_economy_scenario_ttype.loc[new_model_data_economy_scenario_ttype['Date'] >= date_where_stocks_per_capita_passes_gamma + EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD, 'Stocks_per_thousand_capita'] = gamma
+                    new_model_data_economy_scenario_ttype.loc[(new_model_data_economy_scenario_ttype['Date'] <  date_where_stocks_per_capita_passes_gamma + EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD)&(new_model_data_economy_scenario_ttype['Date'] > min_date), 'Stocks_per_thousand_capita'] = np.nan
+                    #if the last value is na, then we should create extra rows untilnew_model_data_economy_scenario_ttype['Date'] = gamma_threshold + EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD, and set the stocks per capita to gamma
                     
                     max_date = new_model_data_economy_scenario_ttype['Date'].max()
                     
-                    if date_where_stocks_per_capita_passes_gamma + EXTRA_YEARS_TO_REACH_GAMMA > max_date:
-                        #create extra rows for each date between gamma_threshold + EXTRA_YEARS_TO_REACH_GAMMA and the last date, and set the stocks per capita to gamma at date = gamma_threshold + EXTRA_YEARS_TO_REACH_GAMMA, and na otherwise
-                        for year in range(max_date+1, date_where_stocks_per_capita_passes_gamma + EXTRA_YEARS_TO_REACH_GAMMA):
+                    if date_where_stocks_per_capita_passes_gamma + EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD > max_date:
+                        #create extra rows for each date between gamma_threshold + EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD and the last date, and set the stocks per capita to gamma at date = gamma_threshold + EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD, and na otherwise
+                        for year in range(max_date+1, date_where_stocks_per_capita_passes_gamma + EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD):
                             new_rows = pd.DataFrame({'Date': year, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario, 'Stocks_per_thousand_capita': np.nan}, index=[0])
                             new_model_data_economy_scenario_ttype = pd.concat([new_model_data_economy_scenario_ttype, new_rows], axis=0).reset_index(drop=True)
                         
                         #set final date to gamma
-                        new_row = pd.DataFrame({'Date': date_where_stocks_per_capita_passes_gamma + EXTRA_YEARS_TO_REACH_GAMMA, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario, 'Stocks_per_thousand_capita': gamma}, index=[0])
+                        new_row = pd.DataFrame({'Date': date_where_stocks_per_capita_passes_gamma + EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario, 'Stocks_per_thousand_capita': gamma}, index=[0])
                         new_model_data_economy_scenario_ttype = pd.concat([new_model_data_economy_scenario_ttype, new_row], axis=0).reset_index(drop=True)     
                         
                     cubic=False#not working yet
                     if cubic:
-                        #Now we have a gap between the starting year and the year where we reach gamma+EXTRA_YEARS_TO_REACH_GAMMA. We will fill this gap with a quadratic interpolation between the starting year and the year where we reach gamma. It will be important that the curve is smooth and constant.
-# new_model_data_economy_scenario_ttype['Stocks_per_thousand_capita'] = new_model_data_economy_scenario_ttype['Stocks_per_thousand_capita'].interpolate(method='quadratic')
+                        #Now we have a gap between the starting year and the year where we reach gamma+EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD. We will fill this gap with a quadratic interpolation between the starting year and the year where we reach gamma. It will be important that the curve is smooth and constant.
+                        # new_model_data_economy_scenario_ttype['Stocks_per_thousand_capita'] = new_model_data_economy_scenario_ttype['Stocks_per_thousand_capita'].interpolate(method='quadratic')
                         from scipy.interpolate import CubicSpline     
                         # Separate the data into known and unknown points
                         known = new_model_data_economy_scenario_ttype.dropna(subset=['Stocks_per_thousand_capita'])
@@ -615,7 +623,7 @@ def find_parameters_for_logistic_function(config, new_model_data, show_plots, ma
                     #concat to parameters_estimates
                     parameters_estimates = pd.concat([parameters_estimates, params], axis=0).reset_index(drop=True)
                     
-                    date_where_gamma_is_reached = pd.concat([date_where_gamma_is_reached, pd.DataFrame({'Date': date_where_stocks_per_capita_passes_gamma+EXTRA_YEARS_TO_REACH_GAMMA, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])], axis=0).reset_index(drop=True)
+                    date_where_gamma_is_reached = pd.concat([date_where_gamma_is_reached, pd.DataFrame({'Date': date_where_stocks_per_capita_passes_gamma+EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])], axis=0).reset_index(drop=True)
                 else:
                     #just use the manually set stocks per cpita vlaues and calcualte resulting activity growth from them!                  
                     new_stocks_per_capita_estimates = pd.concat([new_stocks_per_capita_estimates, new_model_data_economy_scenario_ttype[['Date', 'Economy', 'Transport Type', 'Scenario', 'Stocks_per_thousand_capita']]], axis=0).reset_index(drop=True)
@@ -624,7 +632,7 @@ def find_parameters_for_logistic_function(config, new_model_data, show_plots, ma
                     params = pd.DataFrame({'Gompertz_beta':np.nan, 'Gompertz_alpha':np.nan, 'Stocks_per_capita':gamma, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])
                     parameters_estimates = pd.concat([parameters_estimates, params], axis=0).reset_index(drop=True)
                     
-                    date_where_gamma_is_reached = pd.concat([date_where_gamma_is_reached, pd.DataFrame({'Date': date_where_stocks_per_capita_passes_gamma+EXTRA_YEARS_TO_REACH_GAMMA, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])], axis=0).reset_index(drop=True)
+                    date_where_gamma_is_reached = pd.concat([date_where_gamma_is_reached, pd.DataFrame({'Date': date_where_stocks_per_capita_passes_gamma+EXTRA_YEARS_TO_REACH_STOCKS_PER_CAPITA_THRESHOLD, 'Economy': economy, 'Transport Type': transport_type, 'Scenario': scenario}, index=[0])], axis=0).reset_index(drop=True)
             #FIX FOR WHERE GAMMA IS SAME IN BOTH SCENARIOS SO THE RESULT IS THE SAME:
             if ONE_SCENARIO:
                 other_scenario_entries = new_stocks_per_capita_estimates.loc[(new_stocks_per_capita_estimates['Economy']==economy) & (new_stocks_per_capita_estimates['Transport Type']==transport_type) & (new_stocks_per_capita_estimates['Scenario']==scenario)].copy()
