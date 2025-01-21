@@ -209,7 +209,7 @@ def remap_transport_type(config, df, value_col='Value', new_index_cols = ['Scena
 
 
 
-def map_fuels(config, energy_use_by_fuel_type, value_col='Energy', index_cols=['Economy', 'Scenario', 'Date', 'Dataset', 'Fuel'], mapping_type='simplified'):
+def map_fuels(config, energy_use_by_fuel_type, value_col='Energy', index_cols=['Economy', 'Scenario', 'Date', 'Dataset', 'Fuel'], mapping_type='simplified', IGNORE_ERRORS=False):
     #grab Fuel = 17_electricity, hydrogens, biofuels, oil, gas:
     #group the following into fuels with the following aggregations:    #
     # '07_01_motor_gasoline', '07_07_gas_diesel_oil', '07_08_fuel_oil',
@@ -227,10 +227,13 @@ def map_fuels(config, energy_use_by_fuel_type, value_col='Energy', index_cols=['
     if mapping_type == 'simplified':
         fuels_mapping = {'17_electricity':'17_electricity', '16_x_hydrogen': 'hydrogens_efuels', '16_x_ammonia':'hydrogens_efuels','16_x_efuel':'hydrogens_efuels', '16_05_biogasoline':'biofuels', '16_06_biodiesel':'biofuels', '16_07_bio_jet_kerosene':'biofuels', '16_01_biogas':'biofuels', '08_01_natural_gas':'gas', '07_09_lpg':'other_fossil_fuels', '07_01_motor_gasoline':'gasoline', '07_07_gas_diesel_oil':'diesel', '07_08_fuel_oil':'other_fossil_fuels', '07_02_aviation_gasoline':'jet_fuels', '07_06_kerosene':'jet_fuels','07_x_jet_fuel':'jet_fuels','07_x_other_petroleum_products':'other_fossil_fuels','7_x_other_petroleum_products':'other_fossil_fuels', 'Total':'Total', '01_x_thermal_coal':'other_fossil_fuels',
         '08_02_lng':'gas'}
-        #if any fuels missing raise the alarm:
+        #if any fuels missing raise the alarm or addd them in as temporary fuels:
         for fuel in energy_use_by_fuel_type['Fuel'].unique():
             if fuel not in fuels_mapping.keys():
-                raise ValueError('fuel {} is not in the mapping'.format(fuel))
+                if IGNORE_ERRORS:
+                    fuels_mapping[fuel] = fuel
+                else:
+                    raise ValueError('fuel {} is not in the mapping'.format(fuel))
     elif mapping_type == 'all':#keep original mapping
         fuels_mapping = {}
         #add any fuels that are not in the mapping to the mapping as themselves:
@@ -1451,12 +1454,16 @@ def create_charging_plot(config, ECONOMY_IDs, chargers_df, fig_dict, color_prepa
     
     PLOTTED=True 
     chargers = chargers_df.copy()
-    chargers = chargers[['Economy', 'Scenario', 'Date', 'fast_chargers','slow_chargers']].drop_duplicates()
+    chargers = chargers[['Economy', 'Scenario', 'Date', 'fast_chargers','slow_chargers', 'average_kw_per_slow_charger', 'average_kw_per_fast_charger']].drop_duplicates()
     #divide chargers by a thousand so its in 1000s#actually no, otherwise its confusing
     chargers['fast_chargers'] = chargers['fast_chargers']#/1000
     chargers['slow_chargers'] = chargers['slow_chargers']#/1000
-    #rename fast_chargers and slow_chargers to Fast chargers and Slow chargers
-    chargers = chargers.rename(columns={'fast_chargers':'Fast chargers (200kW)', 'slow_chargers':'Slow chargers (60kW)'})
+    #rename fast_chargers and slow_chargers to Fast chargers and Slow chargers and use the values in average_kw_per_slow_charger and average_kw_per_fast_charger to fill in the brackets
+    slow_kw = chargers['average_kw_per_slow_charger'].mean()
+    fast_kw = chargers['average_kw_per_fast_charger'].mean()
+    
+    
+    chargers = chargers.rename(columns={'fast_chargers':f'Fast chargers ({fast_kw}kW)', 'slow_chargers':f'Slow chargers ({slow_kw}kW)'})
     for scenario in config.economy_scenario_concordance['Scenario'].unique():
         chargers_scenario = chargers.loc[chargers['Scenario']==scenario].copy()
         for economy in ECONOMY_IDs:
@@ -1465,7 +1472,7 @@ def create_charging_plot(config, ECONOMY_IDs, chargers_df, fig_dict, color_prepa
             #sum up chargers
             chargers_economy = chargers_economy.groupby(['Date']).sum(numeric_only=True).reset_index()
             title = 'Expected slow and fast public chargers needed for ' + scenario + ' scenario'
-            fig = px.line(chargers_economy, x="Date", y=['Fast chargers (200kW)','Slow chargers (60kW)'], title=title, color_discrete_map=colors_dict)
+            fig = px.line(chargers_economy, x="Date", y=[f'Fast chargers ({fast_kw}kW)',f'Slow chargers ({slow_kw}kW)'], title=title, color_discrete_map=colors_dict)
 
             #add units to y col
             title_text = 'Public chargers'
@@ -1476,7 +1483,7 @@ def create_charging_plot(config, ECONOMY_IDs, chargers_df, fig_dict, color_prepa
             
             if WRITE_HTML:
                 
-                write_graph_to_html(config, filename='charging_{}.html'.format(scenario), graph_type='bar', plot_data=chargers_economy, economy=economy, x='Date', y=['Fast chargers (200kW)', 'Slow chargers (60kW)'], title=f'Public chargers', y_axes_title='Public chargers', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
+                write_graph_to_html(config, filename='charging_{}.html'.format(scenario), graph_type='bar', plot_data=chargers_economy, economy=economy, x='Date', y=[f'Fast chargers ({fast_kw}kW)',f'Slow chargers ({slow_kw}kW)'], title=f'Public chargers', y_axes_title='Public chargers', legend_title='', colors_dict=colors_dict, font_size=30, marker_line_width=2.5)
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(['fast_chargers','slow_chargers'])
     return fig_dict, color_preparation_list
@@ -2725,7 +2732,7 @@ def plot_comparison_of_energy_to_previous_9th_projection(config, ECONOMY_IDs, en
     #cocnat the total onto the main df:
     energy_use_by_fuel_type = pd.concat([energy_use_by_fuel_type, energy_use_by_fuel_type_totals])
     
-    energy_use_by_fuel_type = map_fuels(config, energy_use_by_fuel_type, value_col='Energy', index_cols=['Economy','Scenario', 'Date','Dataset', 'Fuel'], mapping_type=mapping_type)
+    energy_use_by_fuel_type = map_fuels(config, energy_use_by_fuel_type, value_col='Energy', index_cols=['Economy','Scenario', 'Date','Dataset', 'Fuel'], mapping_type=mapping_type,IGNORE_ERRORS=True)
     
     #add units (by setting measure to Energy haha)
     energy_use_by_fuel_type['Measure'] = 'Energy'

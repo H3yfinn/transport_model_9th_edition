@@ -244,7 +244,7 @@ def tie_freight_growth_to_gdp_growth(config, macro1, UPDATE_INDUSTRY_VALUES):
     # freight_to_gdp_growth_ratio = pd.read_excel(os.path.join(config.root_dir, 'input_data', 'parameters.xlsx'), sheet_name='freight_to_gdp_growth_ratio')
     #take in services and industry share of gdp from industry model:
     freight_to_gdp_growth_ratio = grab_gdp_shares_from_industry(config, UPDATE_INDUSTRY_VALUES)
-    
+    # breakpoint()#slow down chinese freight growth.
     #add a specified amount to the freight_to_gdp_growth_ratio for each economy to represent freight not connected to industry growth (eg. deliveries to homes, etc.)
     
     NON_INDUSTRY_FREIGHT_ADDITION =  yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['NON_INDUSTRY_FREIGHT_ADDITION']

@@ -1,4 +1,3 @@
-
 #%%
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
@@ -66,7 +65,7 @@ import os
 import warnings
 
 USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=True
-USE_SAVED_OPT_PARAMATERS=True   
+USE_SAVED_OPT_PARAMATERS=True
 
 warnings.simplefilter(action='ignore', category=pd.errors.DtypeWarning)
 #%%
@@ -115,16 +114,47 @@ def setup_for_main(root_dir_param=None, script_dir_param=None, economy_to_run=No
 def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
     error_message = None
     increment, progress, update_progress, config, USING_LINUX_WEB_APP = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
+    
+    # LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT = {
+    #             '01_AUS': '20241108',
+    #             '02_BD': '20241108',
+    #             '03_CDA': None,
+    #             '04_CHL': None,
+    #             '05_PRC': None,
+    #             '06_HKC': None,
+    #             '07_INA': '20241108',
+    #             '08_JPN': None,
+    #             '09_ROK': '20241108',
+    #             '10_MAS': '20241108',
+    #             '11_MEX': None,
+    #             '12_NZ': None,
+    #             '13_PNG': None,
+    #             '14_PE': None,
+    #             '15_PHL': '20241108',
+    #             '16_RUS': None,
+    #             '17_SGP': None,
+    #             '18_CT': '20241108',
+    #             '19_THA': '20241108',
+    #             '20_USA': None,
+    #             '21_VN': '20241108'
+    #         } 
+    # ARCHIVE_RESULTS=True
+    # if ARCHIVE_RESULTS:
+    #     economies_to_archive = ['01_AUS', '02_BD', '07_INA', '09_ROK', '10_MAS', '15_PHL', '18_CT', '19_THA', '21_VN']#, '21_VN', '07_INA']
+    #     for economy in economies_to_archive:
+    #         ARCHIVED_FILE_DATE_ID = LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT[economy]
+    #         folder_name = archiving_scripts.save_economy_projections_and_all_inputs(config, economy, ARCHIVED_FILE_DATE_ID=ARCHIVED_FILE_DATE_ID, transport_data_system_FILE_DATE_ID_2='DATE20240913')
+    # return config.FILE_DATE_ID, True, error_message
     # Prevent the system from going to sleep
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
     # To restore the original state, use:
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
     
-    for ECONOMY_ID in config.ECONOMY_IDS:
-        estimate_kw_of_required_chargers(config, ECONOMY_ID)
-        # if PLOT_MINOR_OUTPUTS:
-        plot_charging_dashboard(config, ECONOMY_ID)
-    return config.FILE_DATE_ID, True, error_message
+    # for ECONOMY_ID in config.ECONOMY_IDS:
+    #     estimate_kw_of_required_chargers(config, ECONOMY_ID)
+    #     # if PLOT_MINOR_OUTPUTS:
+    #     plot_charging_dashboard(config, ECONOMY_ID)
+    # return config.FILE_DATE_ID, True, error_message
     #Things to do once a day:
     do_these_once_a_day = True
     if do_these_once_a_day:
@@ -153,7 +183,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     else:
         MODEL_RUN_1  = True#set me
         MODEL_RUN_2  = True#set me
-    PREVIOUS_PROJECTION_FILE_DATE_ID =None# '20231128'
+    
     for economy in ECONOMY_BASE_YEARS_DICT.keys():
         if economy_to_run == 'all' or 'all' in economy_to_run:
             pass
@@ -177,7 +207,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         print('\nRunning model for {}\n'.format(economy))
         ECONOMY_ID = economy
         BASE_YEAR = ECONOMY_BASE_YEARS_DICT[economy]
-        
+        PREVIOUS_PROJECTION_FILE_DATE_ID = config.PREVIOUS_PROJECTION_FILE_DATE_ID_DICT[economy]#'20240327'# '20231128'
         create_and_clean_user_input(config, ECONOMY_ID)
         aggregate_data_for_model(config, ECONOMY_ID)
         progress += increment
@@ -217,7 +247,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             calculate_inputs_for_model(config, road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS)
             aggregate_data_for_model(config, ECONOMY_ID)
             run_road_model_df = run_road_model(config, ECONOMY_ID)
-            
+            breakpoint()#what is stocks per capita threshold being set to?
             run_non_road_model(config, ECONOMY_ID,USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD=ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict[ECONOMY_ID])
             
             model_output_all = concatenate_model_output(config, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR)
@@ -246,7 +276,6 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             international_bunker_share_calculation_handler(config, ECONOMY_ID=ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
         ###################do bunkers calc for this economy###################
         if ANALYSE_OUTPUT: 
-            breakpoint()
             estimate_kw_of_required_chargers(config, ECONOMY_ID)
             if PLOT_MINOR_OUTPUTS:
                 plot_charging_dashboard(config, ECONOMY_ID)
@@ -344,7 +373,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main([ '05_PRC'])#, '05_PRC', '06_HKC', '20_USA'])#, '03_CDA'])#"18_CT",'01_AUS',"03_CDA", '02_BD',, '19_THA''09_ROK',"06_HKC"])#, '09_ROK'])#, '19_THA',root_dir_param=root_dir_param)#'01_AUS',
+        main([ '05_PRC'])#, '10_MAS'])#, '05_PRC', '06_HKC', '20_USA'])#, '03_CDA'])#"18_CT",'01_AUS',"03_CDA", '02_BD',, '19_THA''09_ROK',"06_HKC"])#, '09_ROK'])#, '19_THA',root_dir_param=root_dir_param)#'01_AUS',
         #  "02_BD", "04_CHL", "05_PRC", "06_HKC", "07_INA","08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
     # root_dir_param = #'18_CT', 01_AUS  # "02_BD", "03_CDA", "04_CHL", "05_PRC", "06_HKC", "07_INA",, "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
 #%%

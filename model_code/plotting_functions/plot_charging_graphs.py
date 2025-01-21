@@ -249,14 +249,14 @@ def plot_charging_dashboard(config, ECONOMY_ID, COMPARE_TO_IEA=True):
         iea_df = pd.read_csv(iea_df_path)
         #check economy is in there, otehrwse compare to the WORLD region
         if ECONOMY_ID not in iea_df['economy'].unique():
-            ECONOMY_ID = 'World'
-        iea_df = iea_df[iea_df['economy'] == ECONOMY_ID]        
+            iea_df = iea_df[iea_df['economy'] == 'World']
+        else:
+            iea_df = iea_df[iea_df['economy'] == ECONOMY_ID]        
     else:
         iea_df = None
     
     for scenario in df['Scenario'].unique():
         df_filtered = df[(df['Economy'] == ECONOMY_ID) & (df['Scenario'] == scenario)]
-
         fig_avg_kw_per_charger, title_avg_kw_per_charger =plot_kw_per_fast_charger_kw_per_slow_charger(df_filtered)
     
         fig_ratio_of_chargers_to_stocks, fig_ratio_of_kw_of_chargers_to_stocks, title_ratio_of_chargers_to_stocks, title_ratio_of_kw_of_chargers_to_stocks = plot_ratios(df_filtered, iea_df)

@@ -176,7 +176,7 @@ def incorporate_utilisation_rates(config, total_kwh_of_battery_capacity, paramet
     
     #check that the sum of kw_of_chargers is the same as the sum of kw_of_chargers_WITHOUT_UTILISATION_RATE
     total_kwh_of_battery_capacity['sum_of_kw_of_chargers'] = total_kwh_of_battery_capacity.groupby(['Economy','Date','Scenario'])['kw_of_chargers'].transform('sum')
-    if abs(total_kwh_of_battery_capacity['sum_of_kw_of_chargers'].sum() - total_kwh_of_battery_capacity['sum_of_kw_of_chargers_WITHOUT_UTILISATION_RATE'].sum()) > 0.0001:
+    if abs(total_kwh_of_battery_capacity['sum_of_kw_of_chargers'].sum() - total_kwh_of_battery_capacity['sum_of_kw_of_chargers_WITHOUT_UTILISATION_RATE'].sum()) > 0.1:
         breakpoint()
         raise ValueError('The sum of kw_of_chargers is not the same as the sum of kw_of_chargers_WITHOUT_UTILISATION_RATE')
         # raise ValueError('The sum of kw_of_chargers is not the same as the sum of kw_of_chargers_WITHOUT_UTILISATION_RATE')

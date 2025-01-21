@@ -383,6 +383,7 @@ def format_and_prepare_inputs_for_optimisation(config, ECONOMY_ID, input_data_ne
     return df_transport, df_transport_copy, actual_values, actual_energy_by_drive, initial_values, time_start, results_dict, UPPER, sum_energy_new, input_data_new_road_non_major_drives, input_data_new_road_zeros, economy, year, scenario
 
 def calculate_and_format_stocks_per_capita_constants(config, input_data_new_road, ECONOMY_ID):
+    breakpoint()# whats happening here for 20usa?
     #these constants will remain the same thorughout the opimisation iterations. Note that we will need to calcualte stocks per cpita 
     #constants: ['Population', 'Stocks_per_capita_targets', 'spc_factors']
     stocks_per_capita_factors = pd.read_csv(os.path.join(config.root_dir, 'intermediate_data', 'road_model', '{}_vehicles_per_stock_parameters.csv'.format(ECONOMY_ID)))    
@@ -501,6 +502,7 @@ def optimise_to_find_base_year_values(config, input_data_new_road, ECONOMY_ID, m
     methods_and_params = list(product(methods, all_parameters_dicts))#ESTIMATE STOCKS PER CAPITA FOR THIS ECONOMY USING THE DATA WE HAVE RIGHT NOW. WE WILL TRY TO KEEP THIS CONSTANT THROUGHOUT THE OPTIMISATION, UNLESS THE ECONOMY IS ONE WE EXPECT TO HAVE HIGH UNCERTAINTY ABOUT ITS STOCKS PER CAPITA IN WHICH CASE WE CAN SET THE STOCKS_PER_CAPITA_PCT_DIFF_THRESHOLD VALUE TO 1 TO ALLOW ANY STOCKS PER CAPITA TO PASS THE THRESHOLD (E.G. PNG)
     
     stocks_per_capita_constants = calculate_and_format_stocks_per_capita_constants(config, input_data_new_road, ECONOMY_ID)#todo make sure no issues are cuased by having population in input_data_new_road
+    breakpoint()#whats happening here for 20usa?
     i = 0
     df_transport_copy2=df_transport.copy()
     initial_values_copy2 = initial_values.copy()
@@ -542,6 +544,7 @@ def optimise_to_find_base_year_values(config, input_data_new_road, ECONOMY_ID, m
             
             # if ECONOMY_ID == '08_JPN':
             #     breakpoint()
+            breakpoint()#why are we getting so much energy inn freight/. need to fix that
             result = objective_function_handler(config, method, initial_values, df_transport, actual_values, parameters_dict,actual_energy_by_drive, constraints, bounds, stocks_per_capita_constants)
             #################   IMPORTANT FUNCTION HERE. THIS IS WHERE THE OPTIMISATION HAPPENS #################
             ###################################################

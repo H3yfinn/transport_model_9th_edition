@@ -69,7 +69,10 @@ colors_dict = {
     'gas': '#7d2472',  # plum
     '07_09_lpg': '#E4a0dc',  # lightorchid
     '08_01_natural_gas': '#7d2472',  # plum
-    '08_02_lng' : '#800080',  # purple
+    '08_02_lng' : '#9370DB',  # medium purple
+    'cng': '#7d2472',  # plum
+    'lpg': '#E4a0dc',  # lightorchid
+    'lng': '#9370DB',  # medium purple
 
     # Oil vehicles and related items (red shades)
     'ice': '#FF0000',  # red
@@ -1215,7 +1218,7 @@ ECONOMY_ID (str or None): The ID of the economy for which the dashboard is being
     # if PREVIOUS_PROJECTION_FILE_DATE_ID != None:
     #     #since for results we drop stocks and include compare_energy_vs_previous_all, we will add stocks here instead
     #     plots.append(os.path.join(config.root_dir,  f'vehicle_type_stocks')
-    breakpoint()#look into adding specific charts into it for specific economys. e.g. we want to have a chart fir new_vehicle_emissions_intensity_timeseries_ for australia and other economys with a emisisons based policy.
+    # breakpoint()#look into adding specific charts into it for specific economys. e.g. we want to have a chart fir new_vehicle_emissions_intensity_timeseries_ for australia and other economys with a emisisons based policy.
     if ECONOMY_IDs == ['01_AUS']:
         #drop 'decrease_in_activity_from_activity_efficiency', and insert 'new_vehicle_emissions_intensity_timeseries_all'
         plots.remove('decrease_in_activity_from_activity_efficiency')

@@ -55,6 +55,7 @@ def run_road_model(config, ECONOMY_ID):
     
     #PUT RESULTS THROUGH logistic_fitting_function_handler AND FIND NEW PARAMETERS TO AVOID OVERG
     # ROWTH OF PASSENGER and perhaps freight VEHICLE STOCKS
+    # breakpoint()
     main_dataframe = main_dataframe.merge(user_inputs_df_dict['gompertz_parameters'][['Economy','Date', 'Scenario','Transport Type', 'Stocks_per_capita']].drop_duplicates(), on=['Economy','Date','Transport Type','Scenario'], how='left')
     #thinking. could i include non road in the calcualtion below so that we have a link between non road and road activity growth rates? the theoretical maximum stocsk which is really just activity, would be for the sum of all mediums for each transport type. the 'stocks per vehicle' can just be worked out like it is now. Wouuld result in lower growth rates for road, but that is ok as we can then raise the stocks per cpita later to compensate. Problem is, how can i determine the rate at which shifting between non road and road will occur. Unless they both rely on the same total activity each year this isnt possible. So it cant be done unless i can find a way to link the two.
     # breakpoint()#phl getting nans?

@@ -48,6 +48,52 @@ class Config:
         self.FILE_DATE_ID = self._set_FILE_DATE_ID(root_dir)
         self.FILE_DATE_ID_PLACEHOLDER = self.FILE_DATE_ID
         
+        self.PREVIOUS_PROJECTION_FILE_DATE_ID_DICT = {
+            '01_AUS': None,
+            '02_BD': None,
+            '03_CDA': None,
+            '04_CHL': None,
+            '05_PRC': '20240327',
+            '06_HKC': None,
+            '07_INA': None,
+            '08_JPN': None,
+            '09_ROK': None,
+            '10_MAS': None,
+            '11_MEX': None,
+            '12_NZ': None,
+            '13_PNG': None,
+            '14_PE': None,
+            '15_PHL': None,
+            '16_RUS': None,
+            '17_SGP': None,
+            '18_CT': None,
+            '19_THA': None,
+            '20_USA': '20231101',
+            '21_VN': None
+        }
+        self.LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT = {
+            '01_AUS': '20241108',
+            '02_BD': '20241108',
+            '03_CDA': None,
+            '04_CHL': None,
+            '05_PRC': None,
+            '06_HKC': None,
+            '07_INA': '20241108',
+            '08_JPN': None,
+            '09_ROK': '20241108',
+            '10_MAS': '20241108',
+            '11_MEX': None,
+            '12_NZ': None,
+            '13_PNG': None,
+            '14_PE': None,
+            '15_PHL': '20241108',
+            '16_RUS': None,
+            '17_SGP': None,
+            '18_CT': '20241108',
+            '19_THA': '20241108',
+            '20_USA': None,
+            '21_VN': '20241108'
+        }
         self.SCENARIOS_LIST_file_path = os.path.join('config', 'concordances_and_config_data', 'scenarios_list.csv')
         self.SCENARIOS_LIST = ['Reference', 'Target']
         self.SCENARIO_OF_INTEREST = 'Reference'
