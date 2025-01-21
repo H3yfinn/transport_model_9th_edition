@@ -243,10 +243,11 @@ def plot_charging_dashboard(config, ECONOMY_ID, COMPARE_TO_IEA=True):
     
     if COMPARE_TO_IEA:
         #load in IEA charging stats from their latest WEO outlook dataset, which was processed in transport datasystem: ../transport_data_system\intermediate_data\IEA/DATE20240604_evs.csv where DATEYYYYMMDD is the date the data was processed and we'll find the latest date available:
-        
         date_id = utility_functions.get_latest_date_for_data_file( os.path.abspath(os.path.join(config.root_dir, '..', 'transport_data_system',  'input_data', 'IEA','processed')), 'DATE', file_name_end='_evs_cleaned_all_regions.csv')
         iea_df_path = os.path.abspath(os.path.join(config.root_dir, '..', 'transport_data_system', 'input_data', 'IEA','processed', f'DATE{date_id}_evs_cleaned_all_regions.csv'))
         iea_df = pd.read_csv(iea_df_path)
+        #FIRST FILTER FOR ['source'] == 'Projection-STEPS' since we want to show that data #NOTE THAT THS MAY CONFUSE YOU!
+        iea_df = iea_df[iea_df['source'] == 'Projection-STEPS']
         #check economy is in there, otehrwse compare to the WORLD region
         if ECONOMY_ID not in iea_df['economy'].unique():
             iea_df = iea_df[iea_df['economy'] == 'World']

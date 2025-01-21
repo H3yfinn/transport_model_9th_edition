@@ -12,11 +12,11 @@ class Config:
         else:
             self.slash = '/'
         self.root_dir = root_dir
-        self.USE_LATEST_OUTPUT_DATE_ID = True#there are reasons why you should sometimes set this to true but i cant remember
+        self.USE_LATEST_OUTPUT_DATE_ID = False#there are reasons why you should sometimes set this to true but i cant remember
         self.NEW_SALES_SHARES = True
         self.NEW_FUEL_MIXING_DATA = True
         self.IMPORT_FROM_TRANSPORT_DATA_SYSTEM = False
-        self.transport_data_system_FILE_DATE_ID ='DATE20240913'# 'DATE20240612'
+        self.transport_data_system_FILE_DATE_ID ='DATE20250121'# 'DATE20240612'
         self.latest_esto_data_FILE_DATE_ID = '20241111'#'20241111'#'20231207
         self.PRINT_LESS_IMPORTANT_DETAILS = False
         self.PRINT_WARNINGS_FOR_FUTURE_WORK = False
