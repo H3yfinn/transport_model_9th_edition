@@ -16,8 +16,8 @@ class Config:
         self.NEW_SALES_SHARES = True
         self.NEW_FUEL_MIXING_DATA = True
         self.IMPORT_FROM_TRANSPORT_DATA_SYSTEM = False
-        self.transport_data_system_FILE_DATE_ID ='DATE20250121'# 'DATE20240612'
-        self.latest_esto_data_FILE_DATE_ID = '20241111'#'20241111'#'20231207
+        self.transport_data_system_FILE_DATE_ID ='DATE20250122'# 'DATE20240612'
+        self.latest_esto_data_FILE_DATE_ID = '20250122'#'20241111'#'20241111'#'20231207
         self.PRINT_LESS_IMPORTANT_DETAILS = False
         self.PRINT_WARNINGS_FOR_FUTURE_WORK = False
 
@@ -49,34 +49,32 @@ class Config:
         self.FILE_DATE_ID_PLACEHOLDER = self.FILE_DATE_ID
         
         self.PREVIOUS_PROJECTION_FILE_DATE_ID_DICT = {
-            '01_AUS': None,
-            '02_BD': None,
-            '03_CDA': None,
-            '04_CHL': None,
-            '05_PRC': '20240327',
-            '06_HKC': None,
-            '07_INA': None,
-            '08_JPN': None,
-            '09_ROK': None,
-            '10_MAS': None,
-            '11_MEX': None,
-            '12_NZ': None,
-            '13_PNG': None,
-            '14_PE': None,
-            '15_PHL': None,
-            '16_RUS': None,
-            '17_SGP': None,
-            '18_CT': None,
-            '19_THA': None,
-            '20_USA': '20231101',
-            '21_VN': None
-        }
-        self.LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT = {
+            # '01_AUS': None,
+            # '02_BD': None,
+            # '03_CDA': '20240315',
+            # '04_CHL': '20240709',
+            # '05_PRC': '20240327',
+            # '06_HKC': None,
+            # '07_INA': None,
+            # '08_JPN': None,
+            # '09_ROK': None,
+            # '10_MAS': None,
+            # '11_MEX': None,
+            # '12_NZ': None,
+            # '13_PNG': None,
+            # '14_PE': None,
+            # '15_PHL': None,
+            # '16_RUS': None,
+            # '17_SGP': None,
+            # '18_CT': None,
+            # '19_THA': None,
+            # '20_USA': '20231101',
+            # '21_VN': None
             '01_AUS': '20241108',
             '02_BD': '20241108',
-            '03_CDA': None,
-            '04_CHL': None,
-            '05_PRC': None,
+            '03_CDA': '20250121',
+            '04_CHL': '20250121',
+            '05_PRC': '20241108',
             '06_HKC': None,
             '07_INA': '20241108',
             '08_JPN': None,
@@ -91,7 +89,30 @@ class Config:
             '17_SGP': None,
             '18_CT': '20241108',
             '19_THA': '20241108',
-            '20_USA': None,
+            '20_USA': '20250121',
+            '21_VN': '20241108'
+        }
+        self.LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT = {
+            '01_AUS': '20241108',
+            '02_BD': '20241108',
+            '03_CDA': '20250121',
+            '04_CHL': '20250121',
+            '05_PRC': '20250121',
+            '06_HKC': None,
+            '07_INA': '20241108',
+            '08_JPN': None,
+            '09_ROK': '20241108',
+            '10_MAS': '20241108',
+            '11_MEX': None,
+            '12_NZ': None,
+            '13_PNG': None,
+            '14_PE': None,
+            '15_PHL': '20241108',
+            '16_RUS': None,
+            '17_SGP': None,
+            '18_CT': '20241108',
+            '19_THA': '20241108',
+            '20_USA': '20250121',
             '21_VN': '20241108'
         }
         self.SCENARIOS_LIST_file_path = os.path.join('config', 'concordances_and_config_data', 'scenarios_list.csv')
@@ -286,7 +307,7 @@ class Config:
             # '07_x_other_petroleum_products': '07_x_other_petroleum_products',
             '08_01_natural_gas': '08_01_natural_gas',
             '08_02_lng': '08_02_lng',
-            '08_03_gas_works_gas': '08_01_natural_gas',
+            '08_03_gas_works_gas': '08_03_gas_works_gas',
             '16_01_biogas': '16_01_biogas',
             '16_05_biogasoline': '16_05_biogasoline',
             '16_06_biodiesel': '16_06_biodiesel',

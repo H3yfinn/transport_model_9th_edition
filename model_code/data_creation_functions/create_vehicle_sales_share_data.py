@@ -41,6 +41,7 @@ def vehicle_sales_share_creation_handler(config, ECONOMY_ID, RECALCULATE_SALES_S
     Args:
     #REMEMBER THE THIS (incorporate_alternate_sales_shares()) MIGHT OVERWRITE WHAT IS SET IN VEHICLE_SALES_SHARE_INPUTS.XLSX!!
     """
+    
     if ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR:    
         CURRENT_BASE_YEAR = config.OUTLOOK_BASE_YEAR
     else:
@@ -57,6 +58,7 @@ def vehicle_sales_share_creation_handler(config, ECONOMY_ID, RECALCULATE_SALES_S
         transport_data_system_df = use_previous_projection_for_current_and_historical_sales_shares(config, ECONOMY_ID)
     transport_data_system_df['road'] = transport_data_system_df['Medium']=='road'
     new_transport_data_system_df = create_current_and_historical_shares_from_activity(config, ECONOMY_ID, transport_data_system_df, SET_YEAR_WITH_MOST_VALUES_TO_BASE_YEAR, CURRENT_BASE_YEAR)
+    
     #drop 'road' for now (it wont work with the concordances)
     new_transport_data_system_df = new_transport_data_system_df.drop(columns=['road'])
     new_sales_shares_sum, model_concordances_user_input_and_growth_rates =   format_and_check_current_and_historical_shares(config, ECONOMY_ID,new_transport_data_system_df, CURRENT_BASE_YEAR)

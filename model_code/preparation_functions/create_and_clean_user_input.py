@@ -147,17 +147,18 @@ def create_and_clean_user_input(config, ECONOMY_ID, ADVANCE_BASE_YEAR_TO_OUTLOOK
         if len(user_input[(user_input.Value.notna()) & ((user_input.Data_available == 'row_and_data_not_available') | (user_input.Data_available == 'data_not_available'))]) >0:
             #raise error if this is not the case
             raise ValueError('There are some rows where Value is not NA but Data_available is row_and_data_not_available or data_not_available. Please check this.')
-        #create new df that contains dates that are less than 2050 and the values are NA
-        user_input_missing_values_dont_change = user_input.loc[(user_input.Date <= 2050) & (user_input.Value.isna())]
+        #create new df that contains dates that are less than 2050 and the values are NA and Data_available is row_and_data_not_available or data_not_available
 
-        #create new df that contains dates that are greater than 2050 and the values are NA
-        user_input_missing_values_change = user_input.loc[~((user_input.Date <= 2050) & (user_input.Value.isna()))]
+        user_input_missing_values_dont_change = user_input.loc[(user_input.Date <= 2050) & (user_input.Value.isna()) & ((user_input.Data_available == 'row_and_data_not_available') | (user_input.Data_available == 'data_not_available'))]
 
+        #create new df that contains dates that are greater than 2050 and the values are NA and Data_available is row_and_data_not_available or data_not_available
+        user_input_missing_values_change = user_input.loc[~((user_input.Date >= 2050) & (user_input.Value.isna())) & ((user_input.Data_available == 'row_and_data_not_available') | (user_input.Data_available == 'data_not_available'))]
+ 
         # first sort by date
         user_input_missing_values_change.sort_values('Date', inplace=True)
         # now ffill na on Value col when grouping by the index cols
         
-        user_input_missing_values_change['Value'] = user_input_missing_values_change.groupby(config.INDEX_COLS_no_date)['Value'].apply(lambda group: group.ffill())
+        user_input_missing_values_change['Value'] = user_input_missing_values_change.groupby(config.INDEX_COLS_no_date)['Value'].apply(lambda group: group.ffill()).reset_index(drop=True)
 
         # reset index
         user_input_missing_values_change.reset_index(drop=True, inplace=True)
@@ -167,6 +168,7 @@ def create_and_clean_user_input(config, ECONOMY_ID, ADVANCE_BASE_YEAR_TO_OUTLOOK
         #check for nas and throw error if so. might need to utilise the commented out code below (that i didnt finish gettting working) to do this
         
         if len(user_input_new[user_input_new.Value.isna()]) >0:
+            breakpoint()
             #identify the rows where there are still nas in the Value col:
             user_input_new_nas = user_input_new[user_input_new.Value.isna()]
             #save them to csv

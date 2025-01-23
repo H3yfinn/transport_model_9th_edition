@@ -1,4 +1,3 @@
-
 #%%
 ###IMPORT GLOBAL VARIABLES FROM config.py
 import os
@@ -33,7 +32,7 @@ from model_code.calculation_functions import run_road_model
 from model_code.calculation_functions import run_non_road_model
 from model_code.formatting_functions import create_output_for_outlook_data_system
 from model_code.calculation_functions import estimate_kw_of_required_chargers
-from model_code.plotting_functions import plot_required_chargers
+from model_code.plotting_functions import plot_charging_dashboard
 from model_code.plotting_functions import calculate_and_plot_oil_displacement
 from model_code.calculation_functions import international_bunker_share_calculation_handler
 
@@ -66,11 +65,11 @@ import os
 import warnings
 
 USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=True
-USE_SAVED_OPT_PARAMATERS=True   
+USE_SAVED_OPT_PARAMATERS=True
 
 warnings.simplefilter(action='ignore', category=pd.errors.DtypeWarning)
 #%%
-def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback):
+def setup_for_main(root_dir_param=None, script_dir_param=None, economy_to_run=None, progress_callback=None):
     #setup the root and script directories which will be passed into functions to know where to look for files. This allwos for multiple threads of this module to be run at the same time without setting the root and script directories as global variables or including them all in sys.path
     if script_dir_param is not None:
         script_dir = script_dir_param
@@ -93,7 +92,6 @@ def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_ca
             USING_LINUX_WEB_APP=True
 
     config = configurations.Config(root_dir)
-    
     #make config global:
     def update_progress(progress):
         if progress_callback:
@@ -115,16 +113,53 @@ def setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_ca
 def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
     error_message = None
     increment, progress, update_progress, config, USING_LINUX_WEB_APP = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
-
+    # breakpoint()
+    # international_bunker_share_calculation_handler(config, ECONOMY_ID='19_THA', PLOT_MINOR_OUTPUTS=True)
+    # return
+    # LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT = {
+    #             '01_AUS': '20241108',
+    #             '02_BD': '20241108',
+    #             '03_CDA': None,
+    #             '04_CHL': None,
+    #             '05_PRC': None,
+    #             '06_HKC': None,
+    #             '07_INA': '20241108',
+    #             '08_JPN': None,
+    #             '09_ROK': '20241108',
+    #             '10_MAS': '20241108',
+    #             '11_MEX': None,
+    #             '12_NZ': None,
+    #             '13_PNG': None,
+    #             '14_PE': None,
+    #             '15_PHL': '20241108',
+    #             '16_RUS': None,
+    #             '17_SGP': None,
+    #             '18_CT': '20241108',
+    #             '19_THA': '20241108',
+    #             '20_USA': None,
+    #             '21_VN': '20241108'
+    #         } 
+    # ARCHIVE_RESULTS=True
+    # if ARCHIVE_RESULTS:
+    #     economies_to_archive = ['01_AUS', '02_BD', '07_INA', '09_ROK', '10_MAS', '15_PHL', '18_CT', '19_THA', '21_VN']#, '21_VN', '07_INA']
+    #     for economy in economies_to_archive:
+    #         ARCHIVED_FILE_DATE_ID = LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT[economy]
+    #         folder_name = archiving_scripts.save_economy_projections_and_all_inputs(config, economy, ARCHIVED_FILE_DATE_ID=ARCHIVED_FILE_DATE_ID, transport_data_system_FILE_DATE_ID_2='DATE20240913')
+    # return config.FILE_DATE_ID, True, error_message
     # Prevent the system from going to sleep
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
     # To restore the original state, use:
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
-
+    
+    # for ECONOMY_ID in config.ECONOMY_IDS:
+    #     estimate_kw_of_required_chargers(config, ECONOMY_ID)
+    #     # if PLOT_MINOR_OUTPUTS:
+    #     plot_charging_dashboard(config, ECONOMY_ID)
+    # return config.FILE_DATE_ID, True, error_message
     #Things to do once a day:
     do_these_once_a_day = True
     if do_these_once_a_day:
-        create_all_concordances(config, USE_LATEST_CONCORDANCES=True)
+        create_all_concordances(config, USE_LATEST_CONCORDANCES=False)
     
     PREPARE_DATA = True#only needs to be done if the macro or transport system data changes
     if PREPARE_DATA:
@@ -134,18 +169,22 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     #since we're going to find that some economies have better base years than 2017 to start with, lets start changing the Base year vlaue and run the model economy by economy:
     ECONOMY_BASE_YEARS_DICT = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['ECONOMY_BASE_YEARS_DICT']
     ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD']
+    FINALISED_PROJECTIONS_FILE_DATE_IDS = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['FINALISED_PROJECTIONS_FILE_DATE_IDS']
     #####################################################################
     progress += increment
     update_progress(progress)
     FOUND = False
     RUN_MODEL = True#set me
+    LMDI_CHARTS = True
+    CALC_INT_BUNKERS = True
+    RUN_MODEL_PLACEHOLDER = RUN_MODEL
     if not RUN_MODEL:
         MODEL_RUN_1  = False
         MODEL_RUN_2  = False
     else:
         MODEL_RUN_1  = True#set me
         MODEL_RUN_2  = True#set me
-        
+    
     for economy in ECONOMY_BASE_YEARS_DICT.keys():
         if economy_to_run == 'all' or 'all' in economy_to_run:
             pass
@@ -155,11 +194,21 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             pass
         else:
             continue
-            
+        if FINALISED_PROJECTIONS_FILE_DATE_IDS[economy] is not False:
+            RUN_MODEL = False
+            config.FILE_DATE_ID = FINALISED_PROJECTIONS_FILE_DATE_IDS[economy]
+            THROW_ERROR = False
+            if THROW_ERROR:
+                raise Exception('Finalised projections already exist for {}. If you want to run the model, please set FINALISED_PROJECTIONS_FILE_DATE_IDS[{}] to None in parameters.yml'.format(economy, economy))
+            else:
+                print('Finalised projections already exist for {}. If you want to run tPlease set FINALISED_PROJECTIONS_FILE_DATE_IDS[{}] to None in parameters.yml'.format(economy, economy))
+        else:
+            RUN_MODEL = RUN_MODEL_PLACEHOLDER
+            config.FILE_DATE_ID = config.FILE_DATE_ID_PLACEHOLDER
         print('\nRunning model for {}\n'.format(economy))
         ECONOMY_ID = economy
         BASE_YEAR = ECONOMY_BASE_YEARS_DICT[economy]
-        
+        PREVIOUS_PROJECTION_FILE_DATE_ID = config.PREVIOUS_PROJECTION_FILE_DATE_ID_DICT[economy]#'20240327'# '20231128'
         create_and_clean_user_input(config, ECONOMY_ID)
         aggregate_data_for_model(config, ECONOMY_ID)
         progress += increment
@@ -199,7 +248,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             calculate_inputs_for_model(config, road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS)
             aggregate_data_for_model(config, ECONOMY_ID)
             run_road_model_df = run_road_model(config, ECONOMY_ID)
-            
+            breakpoint()#what is stocks per capita threshold being set to?
             run_non_road_model(config, ECONOMY_ID,USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD=ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict[ECONOMY_ID])
             
             model_output_all = concatenate_model_output(config, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR)
@@ -211,32 +260,38 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             #now concatenate all the model outputs together
             create_output_for_outlook_data_system(config, ECONOMY_ID)
 
-            ANALYSE_OUTPUT = True
-            ARCHIVE_PREVIOUS_DASHBOARDS = False
-            #we'll check if we're using windows or linux. if linux this is probably on the web and we dont want to prodcue too much. But if its windows, we're probably running this locally and we want to produce all the outputs:
-            if not USING_LINUX_WEB_APP:
-                SAVE_AS_WEB_PLOTS = True
-                PLOT_MINOR_OUTPUTS = True
-                NOT_JUST_DASHBOARD_DATASETS=True
-            else:
-                SAVE_AS_WEB_PLOTS=False
-                PLOT_MINOR_OUTPUTS = False
-                NOT_JUST_DASHBOARD_DATASETS = False
-            if ANALYSE_OUTPUT: 
-                estimate_kw_of_required_chargers(config, ECONOMY_ID)
-                if PLOT_MINOR_OUTPUTS:
-                    plot_required_chargers(config, ECONOMY_ID)
-                calculate_and_plot_oil_displacement(config, ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)  
-                ###################do bunkers calc for this economy###################
-                international_bunker_share_calculation_handler(config, ECONOMY_ID=ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
-                ###################do bunkers calc for this economy###################
+        ANALYSE_OUTPUT = True
+        ARCHIVE_PREVIOUS_DASHBOARDS = False
+        #we'll check if we're using windows or linux. if linux this is probably on the web and we dont want to prodcue too much. But if its windows, we're probably running this locally and we want to produce all the outputs:
+        if not USING_LINUX_WEB_APP:
+            SAVE_AS_WEB_PLOTS = True
+            PLOT_MINOR_OUTPUTS = True
+            NOT_JUST_DASHBOARD_DATASETS=True
+        else:
+            SAVE_AS_WEB_PLOTS=False
+            PLOT_MINOR_OUTPUTS = False
+            NOT_JUST_DASHBOARD_DATASETS = False
+        
+        ###################do bunkers calc for this economy###################
+        if CALC_INT_BUNKERS:
+            international_bunker_share_calculation_handler(config, ECONOMY_ID=ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
+        ###################do bunkers calc for this economy###################
+        if ANALYSE_OUTPUT: 
+            estimate_kw_of_required_chargers(config, ECONOMY_ID)
+            if PLOT_MINOR_OUTPUTS:
+                plot_charging_dashboard(config, ECONOMY_ID)
+            calculate_and_plot_oil_displacement(config, ECONOMY_ID, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)  
+            if LMDI_CHARTS:
                 produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = PLOT_MINOR_OUTPUTS, PLOTTING = PLOT_MINOR_OUTPUTS, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060, NOT_JUST_DASHBOARD_DATASETS=NOT_JUST_DASHBOARD_DATASETS)
-                dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, SAVE_AS_WEB_PLOTS=SAVE_AS_WEB_PLOTS) 
+            
+            dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, SAVE_AS_WEB_PLOTS=SAVE_AS_WEB_PLOTS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID)
         
         progress += increment
         update_progress(progress)
         if not USING_LINUX_WEB_APP:#no need if we're on linux web app
             copy_required_output_files_to_one_folder(config, ECONOMY_ID=ECONOMY_ID, output_folder_path='output_data\\for_other_modellers')
+            
+    config.FILE_DATE_ID = config.FILE_DATE_ID_PLACEHOLDER
     
     if not USING_LINUX_WEB_APP:
         print('\nFinished running model for all economies, now doing final formatting\n')
@@ -245,12 +300,20 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
         
         progress += increment
         update_progress(progress)
+        
         SETUP_AND_RUN_MULTI_ECONOMY_PLOTS=True
         if concatenate_output_data(config):
-            international_bunker_share_calculation_handler(config)
+            
+            #setup outlook outputs for 00_APEC and other aggregations of economies
+            for aggregation in config.ECONOMY_AGGREGATIONS.keys():
+                create_output_for_outlook_data_system(config, ECONOMY_ID=aggregation,economies_in_regional_aggregation = config.ECONOMY_AGGREGATIONS[aggregation])
+            
+            if CALC_INT_BUNKERS:
+                international_bunker_share_calculation_handler(config)
             if SETUP_AND_RUN_MULTI_ECONOMY_PLOTS:
                 try:
-                    produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060)
+                    if LMDI_CHARTS:
+                        produce_lots_of_LMDI_charts(config, ECONOMY_ID='all', USE_LIST_OF_CHARTS_TO_PRODUCE = True, PLOTTING = True, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060)
                 except:
                     breakpoint()
                     print('produce_lots_of_LMDI_charts() not working for {}'.format(ECONOMY_ID))
@@ -263,11 +326,6 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                 except:
                     breakpoint()
                     print('setup_and_run_multi_economy_plots() not working for {}'.format(ECONOMY_ID)) 
-                    
-                    PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES = True
-                    setup_and_run_multi_economy_plots(config,ONLY_AGG_OF_ALL=PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES)
-                    breakpoint()
-                    setup_and_run_multi_economy_plots(config,  ECONOMY_GROUPING='passenger_transport_style')
                     raise Exception('setup_and_run_multi_economy_plots() not working for {}'.format(ECONOMY_ID))
                     # PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES = True
                     # setup_and_run_multi_economy_plots(config,ONLY_AGG_OF_ALL=PRODUCE_ONLY_AGGREGATE_OF_ALL_ECONOMIES)
@@ -283,7 +341,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     #     archiving_scripts.archive_lots_of_files(config, archiving_folder)    
     ARCHIVE_RESULTS=False
     if ARCHIVE_RESULTS:
-        economies_to_archive = ['01_AUS']#, '21_VN', '07_INA']
+        economies_to_archive = ['09_ROK', '18_CT']#, '21_VN', '07_INA']
         for economy in economies_to_archive:
             folder_name = archiving_scripts.save_economy_projections_and_all_inputs(config, economy, ARCHIVED_FILE_DATE_ID=config.FILE_DATE_ID)
     UNARCHIVE_RESULTS=False
@@ -316,39 +374,9 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        main(['21_VN'])#, root_dir_param=root_dir_param)
-    # root_dir_param = 
-#%%
-# %%
-
-# def group_economies_with_dict():
-#     economy_grouping_dict_all = {'all':ECONOMY_IDs} 
-#     economy_grouping_dict_west_sea_latin_china_jk_rus = {'low_density_rich': ['01_AUS', '03_CDA', '08_NZ', '12_USA'],
-#                                                          'city_state' 
-#     'sea_latam': ['14_IDN', '15_MYS', '16_RUS', '17_SGP', '18_THA', '19_VNM'], 
-#     'china': ['20_CHN'], 
-#     'japkor': ['21_JK'],
-#     'rus': ['16_RUS'],
-#     'png': ['13_PNG']}
-    
-# #   '01_AUS': 1
-#   '02_BD': 1
-#   '03_CDA': 1 #canada return is super weird. it goes higher than it was prevoouisly. so just dropping it to 0.5 compared to 1 for everyone else
-#   '04_CHL': 1
-#   '05_PRC': 1
-#   '06_HKC': 1
-#   '07_INA': 1
-#   '08_JPN': 1
-#   '09_ROK': 1
-#   '10_MAS': 1
-#   '11_MEX': 1
-#   '12_NZ': 1
-#   '13_PNG': 1
-#   '14_PE': 1
-#   '15_PHL': 1
-#   '16_RUS': 1
-#   '17_SGP': 1
-#   '18_CT': 1
-#   '19_THA': 1
-#   '20_USA': 1
-#   '21_VN': 1  n
+        economies_to_run = ["15_PHL"]# "18_CT" took too long with the optimisation ):,"09_ROK","19_THA",, '20_USA'
+        main(economies_to_run)
+        #'04_CHL', '03_CDA', '14_PE', '11_MEX'])#, '10_MAS'])#, '05_PRC', '06_HKC', '20_USA'])#, '03_CDA'])#"18_CT",'01_AUS',"03_CDA", '02_BD',, '19_THA''09_ROK',"06_HKC"])#, '09_ROK'])#, '19_THA',root_dir_param=root_dir_param)#'01_AUS', '20_USA',
+        #  "02_BD", "04_CHL", "05_PRC", "06_HKC", "07_INA","08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
+    # root_dir_param = #'18_CT', 01_AUS  # "02_BD", "03_CDA", "04_CHL", "05_PRC", "06_HKC", "07_INA",, "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
+#%% '04_CHL',

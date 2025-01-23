@@ -115,7 +115,10 @@ def adjust_data_to_match_esto_handler(config, BASE_YEAR, ECONOMY_ID, road_model_
     
     date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, f'intermediate_data', 'input_data_optimisations'), f'optimised_data_{ECONOMY_ID}_', file_name_end=f'_{config.transport_data_system_FILE_DATE_ID}.pkl') 
     if USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT and date_id is not None:
-        filename = os.path.join(config.root_dir, f'intermediate_data', 'input_data_optimisations', f'optimised_data_{ECONOMY_ID}_{date_id}_{config.transport_data_system_FILE_DATE_ID}.pkl')
+        if ECONOMY_ID=='18_CT':
+            filename = os.path.join(config.root_dir, f'intermediate_data', 'input_data_optimisations', f'optimised_data_18_CT_20241108_DATE20240913.pkl')
+        else:
+            filename = os.path.join(config.root_dir, f'intermediate_data', 'input_data_optimisations', f'optimised_data_{ECONOMY_ID}_{date_id}_{config.transport_data_system_FILE_DATE_ID}.pkl')
         #LOAD PREVIOUS OPT RESULTS INSTEAD OF RECALCULATING. THIS HELPS TO KEEP CONSISETNCY BETWEEN THE RESULTS AS WELL AS REDUCING RUN TIME
         optimised_data = pd.read_pickle(filename)
     else:
@@ -629,6 +632,17 @@ def format_9th_input_energy_from_esto(config, ECONOMY_ID=None, REDO_SAME_DATE_ID
     #check that that matches config.latest_esto_data_FILE_DATE_ID. if not then jsut notify user
     if date_id != config.latest_esto_data_FILE_DATE_ID:
         print('WARNING: the date_id for the 9th model inputs does not match the latest esto data date_id. This is okay for now but it should be fixed later')
+        
+    #FIX
+    #remove  values for 2022 where jet fuel is used in road and navigation in 04_CHL. These are annoying to deal with and not neccessary. This amkes sure that the problem is at least reocrded and cosnistnelty delt with in the future.
+    #     scenarios	economy	sectors	sub1sectors	sub2sectors	sub3sectors	sub4sectors	fuels	subfuels
+    #     reference	04_CHL	15_transport_sector	15_02_road	x	x	x	07_petroleum_products	07_x_jet_fuel0.003259566
+    # target	04_CHL	15_transport_sector	15_02_road	x	x	x	07_petroleum_products	07_x_jet_fuel0.003259566
+    # reference	04_CHL	15_transport_sector	15_04_domestic_navigation	x	x	x	07_petroleum_products	07_x_jet_fuel0.000357033
+    # target	04_CHL	15_transport_sector	15_04_domestic_navigation	x	x	x	07_petroleum_products	07_x_jet_fuel0.000357033
+    energy_use_esto.loc[((energy_use_esto.economy == '04_CHL') & (energy_use_esto.sub1sectors.isin(['15_02_road', '15_04_domestic_navigation'])) & (energy_use_esto.subfuels == '07_x_jet_fuel')), '2022'] = 0
+    #FIX
+    # breakpoint()
     #now check if we've already created an output for this file. if so then we dont need to do it again:energy_use_esto
     if os.path.exists(os.path.join(config.root_dir, f'intermediate_data', f'model_inputs_{date_id}.csv')) and not REDO_SAME_DATE_ID:
         energy_use_esto = pd.read_csv(os.path.join(config.root_dir, f'intermediate_data', f'model_inputs_{date_id}.csv'))

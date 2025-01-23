@@ -30,6 +30,7 @@ from plotly.subplots import make_subplots
 #%%
     
 def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', turnover_rate=0.1, PLOT_MINOR_OUTPUTS=True):
+    
     #start tuimer so we can see how long thsings take:
     # config.FILE_DATE_ID = '20230803'
     # config.model_output_file_name = 'model_output20230803.csv'
@@ -52,6 +53,7 @@ def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', tur
     
     check_for_duplicates_in_all_datasets(config, energy_use_esto_bunkers_tall, international_fuel_shares, non_road_activity_growth_rate, non_road_intensity, international_supply_side_fuel_mixing)
     #merge all data
+    
     international_bunker_inputs = merge_and_format_all_input_data(config, energy_use_esto_bunkers_tall, international_fuel_shares, non_road_activity_growth_rate, non_road_intensity)#y doies international_fuel_shares have nas in drive
     #apply covid effect to the growth rate in 2021:
     #extract years when covid effect should be applied:
@@ -357,7 +359,7 @@ def extract_bunker_data_from_esto(config):
     #load the config\\concordances_and_config_data\\international_bunkers_mapping.csv
     international_bunkers_mapping = pd.read_csv(os.path.join(config.root_dir, 'config', 'concordances_and_config_data', 'international_bunkers_mapping.csv'))#cols = Medium	Drive	Fuel	Supply_side_fuel_mixing
     #note that Supply_side_fuel_mixing is a boolean
-
+    
     #filter for only the Economys. So use config.economy_scenario_concordance.Economy.unique.to_list() to filter. this is to rmeove the regions
     energy_use_esto = energy_use_esto.loc[energy_use_esto['economy'].isin(config.economy_scenario_concordance.Economy.unique())]
     #extract only bunker data. that is data for 04_international_marine_bunkers, 05_international_aviation_bunkers where aviation is air and marine is ship mediums
@@ -365,6 +367,11 @@ def extract_bunker_data_from_esto(config):
     
     #drop where subfuels is x. tehese are aggregations.
     energy_use_esto_bunkers = energy_use_esto_bunkers.loc[energy_use_esto_bunkers['subfuels'] != 'x']
+    
+    #TEMP
+    #and drop where subfuel is 08_03_gas_works_gas. this is happening because we added in 08_02_natural_gas to the mapping but this is waht gas works gas is. so we will drop this for now and deal with ot properly later
+    # energy_use_esto_bunkers = energy_use_esto_bunkers.loc[energy_use_esto_bunkers['subfuels'] != '08_03_gas_works_gas']
+    #TEMP
 
     #map the subfuels to the fuel types. 
     energy_use_esto_bunkers['Fuel'] =energy_use_esto_bunkers['subfuels'].map(config.temp_esto_subfuels_to_new_subfuels_mapping)
@@ -607,6 +614,8 @@ def apply_covid_effect_to_growth_rate_by_medium(config, international_bunker_inp
     for economy in international_bunker_inputs['Economy'].unique():
         for medium in international_bunker_inputs.Medium.unique():
             # Construct the suffix for parameter keys based on transport type and medium
+            if economy=='19_THA':
+                breakpoint()#why does this result in weird results
             suffix = f"{medium.upper()}"
             
             # Dynamically construct parameter keys and fetch their values
@@ -641,7 +650,7 @@ def apply_covid_effect_to_growth_rate_by_medium(config, international_bunker_inp
                     mask_minus1 = (economy_medium_data['Economy'] == economy) & (economy_medium_data['Medium'] == medium) & (economy_medium_data['Date'] == year-1) & (economy_medium_data['Scenario'] == scenario)
                     
                     if year in years_after_covid:
-                        EXPECTED_ENERGY_INCREASE_FACTOR = ((((1/(1-X)) -1)* A)+1)
+                        EXPECTED_ENERGY_INCREASE_FACTOR = ((((1/(1-X)) -1)* A)+1) 
                         #this is the factor by which we need to increase the mileage to get it back to normal. its just reversing the %decrease that was applied to the mileage to get it to the current level.
                         #spread the increase over the number of years by finding its Nth root and applying it to the current mileage for this year.
                         yearly_increase = (EXPECTED_ENERGY_INCREASE_FACTOR ** (1/N))
@@ -659,6 +668,7 @@ def apply_covid_effect_to_growth_rate_by_medium(config, international_bunker_inp
             
             #now join back onto the original df
             international_bunker_inputs = pd.concat([international_bunker_inputs, economy_medium_data])
+    breakpoint()
     #insert the new growth rate back into the original df hic has drvies and fuel mixes
     international_bunker_inputs_copy = pd.merge(international_bunker_inputs_copy, international_bunker_inputs[['Economy', 'Medium','Scenario', 'Date', 'Growth Rate']], how='left', on=['Economy', 'Medium','Scenario' , 'Date'], suffixes=('', '_y'))
     #set any nas to 0 and replace the growth rate with the new growth rate
@@ -829,6 +839,16 @@ def calculate_non_road_activity_growth_rate(config, non_road_activity, PLOT_MINO
                                                (non_road_activity_growth_rate['Date'] < 2037) & 
                                                (non_road_activity_growth_rate['Economy'] == economy) & 
                                                (non_road_activity_growth_rate['Medium'] == medium)), 'Growth Rate'].mean()
+    
+    #fionally, add a adjustment for target based on the fact that 40% of international frieght is carrying fuels, which dont need to be carried if we dont use them. so we will reduce the growth rate by an increasing amount each year to account for this. we will do this for all economies in tgt. it will be based on a ramp up from 0 to X by 2070, as set in parameters.yml
+    INTERNATIONAL_MARINE_GROWTH_MAX_ADJUSTMENT_BY_2070_TGT = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['INTERNATIONAL_MARINE_GROWTH_MAX_ADJUSTMENT_BY_2070_TGT']
+    for economy in non_road_activity_growth_rate.Economy.unique():
+        adjustment_current_year = 0
+        max_adjustment = INTERNATIONAL_MARINE_GROWTH_MAX_ADJUSTMENT_BY_2070_TGT[economy]
+        yearly_adjustment = max_adjustment / (2070 - 2025)
+        for year in non_road_activity_growth_rate.loc[non_road_activity_growth_rate['Economy'] == economy, 'Date'].unique():
+            non_road_activity_growth_rate.loc[(non_road_activity_growth_rate['Economy'] == economy) & (non_road_activity_growth_rate['Date'] == year) & (non_road_activity_growth_rate['Medium'] == 'ship'), 'Growth Rate'] = non_road_activity_growth_rate.loc[(non_road_activity_growth_rate['Economy'] == economy) & (non_road_activity_growth_rate['Date'] == year) & (non_road_activity_growth_rate['Medium'] == 'ship'), 'Growth Rate'] * (1 - adjustment_current_year)
+            adjustment_current_year += yearly_adjustment
     
     #and plot the growth rate
     if PLOT_MINOR_OUTPUTS:

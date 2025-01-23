@@ -74,7 +74,6 @@ def import_transport_system_data(config):
     transport_data_system_df['Measure'] = transport_data_system_df['Measure'].str.capitalize()
     transport_data_system_df['Unit'] = transport_data_system_df['Unit'].str.capitalize()
     #TEMP
-    
     #TEMPORARY FIX, CHANGE THE MEASURE IN TRANSPORT DATA SYSTEM FOR passenger_km and freight_tonne_km to Activity so that it matches the model concordance.
     # transport_data_system_df.loc[transport_data_system_df['Measure']=='passenger_km','Measure'] = 'Activity'
     # transport_data_system_df.loc[transport_data_system_df['Measure']=='freight_tonne_km','Measure'] = 'Activity'
@@ -478,7 +477,7 @@ def adjust_non_road_TEMP(config, transport_data_system_df, model_concordances_me
             #pause briefly to allow breakpoint to be hit
             import time
             time.sleep(0.1)
-            raise ValueError('There are some missing drive types in the transport data system dataset. Please make sure they are all present for each economy and medium {}'.format(nas))
+            raise ValueError('There are some missing drive types in the transport data system dataset. Please make sure they are all present for each economy and medium. That will mean going into the concordances and adjusting drive_type_to_fuel.csv, manually_defined_transport_categories.csv and maybe some other thigns: {}'.format(nas))
             # final_df_non_road = final_df_non_road.dropna(subset=['Drive'])
         else:
             #drop the rows where the drive is na
