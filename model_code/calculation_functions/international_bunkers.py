@@ -48,6 +48,16 @@ def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', tur
     #calcualte avergae growth rate from domestic non road energy use:
     non_road_activity, non_road_intensity = extract_non_road_modelled_data(config, USE_PREVIOUS_DATA=False, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
     
+    # Temp for russia
+    if ECONOMY_ID == '16_RUS':
+        #we do this because for osme reason the itnensity for 2021is so much lower than the other years. so we will set it to the intensity in 2022
+        #driop intensity for year ==2021 then set it to the intensity in 2022
+        intensity_2022 = non_road_intensity.loc[non_road_intensity['Date'] == 2022].copy()
+        non_road_intensity = non_road_intensity.loc[non_road_intensity['Date'] != 2021]
+        intensity_2022['Date'] = 2021
+        non_road_intensity = pd.concat([non_road_intensity, intensity_2022])
+        # Temp for russia
+    
     non_road_activity_growth_rate = calculate_non_road_activity_growth_rate(config, non_road_activity, PLOT_MINOR_OUTPUTS=PLOT_MINOR_OUTPUTS)
     
     
@@ -67,6 +77,7 @@ def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', tur
     international_bunker_inputs, international_supply_side_fuel_mixing = interpolate_bunker_shares_and_mixing(config, international_bunker_inputs, international_supply_side_fuel_mixing)
     #pritn time
     #and check it all matches wat we expect (we wont bother with international_supply_side_fuel_mixing since we checked it earlier in check_and_fill_missing_fuel_mixing_dates)
+    # breakpoint()
     check_all_input_data_against_concordances(config, international_bunker_inputs)
     #print time
     
@@ -86,6 +97,7 @@ def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', tur
         plot_international_bunker_activity(config, international_bunker_outputs)
         plot_international_bunker_shares_and_mixing(config, international_fuel_shares, international_supply_side_fuel_mixing)
         plot_intensity_from_output_data(config, international_bunker_outputs, non_road_intensity)
+    
     
     #save
     save_bunkers_data(config, new_esto_data, international_bunker_outputs, ECONOMY_ID)
@@ -614,8 +626,8 @@ def apply_covid_effect_to_growth_rate_by_medium(config, international_bunker_inp
     for economy in international_bunker_inputs['Economy'].unique():
         for medium in international_bunker_inputs.Medium.unique():
             # Construct the suffix for parameter keys based on transport type and medium
-            if economy=='19_THA':
-                breakpoint()#why does this result in weird results
+            # if economy=='19_THA':
+            #     breakpoint()#why does this result in weird results
             suffix = f"{medium.upper()}"
             
             # Dynamically construct parameter keys and fetch their values
@@ -668,7 +680,7 @@ def apply_covid_effect_to_growth_rate_by_medium(config, international_bunker_inp
             
             #now join back onto the original df
             international_bunker_inputs = pd.concat([international_bunker_inputs, economy_medium_data])
-    breakpoint()
+    # breakpoint()
     #insert the new growth rate back into the original df hic has drvies and fuel mixes
     international_bunker_inputs_copy = pd.merge(international_bunker_inputs_copy, international_bunker_inputs[['Economy', 'Medium','Scenario', 'Date', 'Growth Rate']], how='left', on=['Economy', 'Medium','Scenario' , 'Date'], suffixes=('', '_y'))
     #set any nas to 0 and replace the growth rate with the new growth rate
@@ -973,6 +985,7 @@ def check_all_input_data_against_concordances(config, international_bunker_input
     
 
 def project_total_bunkers_energy_use(config, international_bunker_inputs, turnover_rate, ECONOMY_ID):
+    
     #TODO NEED TO INCREASE EFFICICNYCY OF NEW FUEL TYPES 
     if ECONOMY_ID != 'all':
         #filter for inly the economy we are interested in:
@@ -985,11 +998,10 @@ def project_total_bunkers_energy_use(config, international_bunker_inputs, turnov
     #calcaulte activity for each row using itneisty and energy:
     international_bunker_inputs['Activity'] = international_bunker_inputs['Energy'] / international_bunker_inputs['Intensity']
 
-    Extra_proportional_increases_in_activity = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['Extra_proportional_increases_in_activity']
+    Extra_proportional_increases_in_activity = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['EXTRA_PROPORTIONAL_INCREASES_IN_BUNKERS_ACTIVITY']
     for medium in international_bunker_inputs.Medium.unique():
         for scenario in international_bunker_inputs.Scenario.unique():
             for economy in international_bunker_inputs.Economy.unique():
-                    
                 international_bunker_inputs_medium = international_bunker_inputs.loc[(international_bunker_inputs['Medium'] == medium) &(international_bunker_inputs['Scenario'] == scenario)&(international_bunker_inputs['Economy'] == economy)].copy()
                 
                 new_df_medium = pd.DataFrame()

@@ -599,6 +599,9 @@ def format_esto_data_for_plotting(config, energy_use_esto_df, ECONOMY_IDs):
     esto_bunkers_data = energy_use_esto.loc[energy_use_esto['Medium'].isin(['international_aviation', 'international_shipping'])].copy()
     esto_bunkers_data = esto_bunkers_data.assign(Energy=esto_bunkers_data['Energy'] * -1)
     energy_use_esto = energy_use_esto.loc[~energy_use_esto['Medium'].isin(['international_aviation', 'international_shipping'])].copy()
+    #make sure that the Year is less or equal than the base year
+    energy_use_esto = energy_use_esto.loc[energy_use_esto['Date']<=config.OUTLOOK_BASE_YEAR].copy()
+    esto_bunkers_data = esto_bunkers_data.loc[esto_bunkers_data['Date']<=config.OUTLOOK_BASE_YEAR].copy()
     return energy_use_esto, esto_bunkers_data
 
 
@@ -1194,7 +1197,7 @@ ECONOMY_ID (str or None): The ID of the economy for which the dashboard is being
         #replce  'emissions_by_fuel_type_all_gen' with 'compare_energy_vs_previous_all_ESTO' and replace stocks with emissions_by_fuel_type_all_gen
         # plots.remove('vehicle_type_stocks')
         # plots.append(os.path.join(config.root_dir,  f'compare_energy_vs_previous_all_ESTO'))
-        plots = ['compare_energy_vs_previous_all_ESTO_simplified' if x == 'compare_energy1_all_8th' else x for x in plots]
+        plots = ['compare_energy_vs_previous_all_ESTO_all' if x == 'compare_energy1_all_8th' else x for x in plots] #simplified testing with this removed to see hw it changes thigns
         # plots = ['emissions_by_fuel_type_all_gen' if x == 'vehicle_type_stocks' else x for x in plots]
     #, 'charging']#activity_growth# 'charging',
     create_dashboard(config, ECONOMY_IDs, plots, DROP_NON_ROAD_TRANSPORT, colors_dict, dashboard_name_id = 'results',hidden_legend_names = hidden_legend_names,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID, WRITE_INDIVIDUAL_HTMLS=WRITE_INDIVIDUAL_HTMLS,SAVE_AS_WEB_PLOTS=SAVE_AS_WEB_PLOTS)

@@ -16,11 +16,16 @@ class Config:
         self.NEW_SALES_SHARES = True
         self.NEW_FUEL_MIXING_DATA = True
         self.IMPORT_FROM_TRANSPORT_DATA_SYSTEM = False
+        
+        # transport_data_system_file_date_id_equivalencies = {'DATE20250204':'DATE20250122'}#this is used to convert the file date id of the transport data system data to the same value so we dont need to redo the optimisation. im not 100% it works in all cases
         self.transport_data_system_FILE_DATE_ID ='DATE20250122'# 'DATE20240612'
-        self.latest_esto_data_FILE_DATE_ID = '20250122'#'20241111'#'20241111'#'20231207
+        # self.transport_data_system_FILE_DATE_ID_for_optimisation = transport_data_system_file_date_id_equivalencies.get(self.transport_data_system_FILE_DATE_ID, self.transport_data_system_FILE_DATE_ID) #used because sometimes the optimisation data is from a different date than the rest of the transport data system data
+        self.latest_esto_data_FILE_DATE_ID = '20250204' #122'#'20241111'#'20241111'#'20231207
         self.PRINT_LESS_IMPORTANT_DETAILS = False
         self.PRINT_WARNINGS_FOR_FUTURE_WORK = False
 
+        self.CHINESE_TAIPEI_OPTIMISED_DATA_FILE = 'optimised_data_18_CT_20241108_DATE20240913.pkl' #PLACEHOLDER. NEED TO CHANGE THIS WHEN/IF THE CT DATA IS CHANGED.
+        
         self._import_libraries()
         self.ECONOMY_IDS = ['01_AUS', '02_BD', '03_CDA', '04_CHL', '05_PRC', '06_HKC', '07_INA', '08_JPN', '09_ROK', '10_MAS', '11_MEX', '12_NZ', '13_PNG', '14_PE', '15_PHL', '16_RUS', '17_SGP', '18_CT', '19_THA', '20_USA', '21_VN']
         self.ECONOMY_AGGREGATIONS ={
@@ -35,7 +40,9 @@ class Config:
         }
 
         self.DEFAULT_BASE_YEAR = 2017
+        self.RUSSIA_BASE_YEAR = 2021
         self.OUTLOOK_BASE_YEAR = 2022
+        self.NON_RUSSIA_BASE_YEAR = 2022 #set so that the base year for russia is 2021 and for all other economies it is 2022
         self.END_YEAR = 2100
         self.GRAPHING_END_YEAR = 2070
         self.USE_LOGISTIC_FUNCTION = True

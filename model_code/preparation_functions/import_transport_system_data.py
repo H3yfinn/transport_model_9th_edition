@@ -300,7 +300,7 @@ def adjust_non_road_TEMP(config, transport_data_system_df, model_concordances_me
     transport_data_system_df_road = transport_data_system_df[transport_data_system_df['Medium'] == 'road'].copy()
     # load model concordances with fuels
     model_concordances_fuels = pd.read_csv(os.path.join(config.root_dir,  'intermediate_data', 'computer_generated_concordances', '{}'.format(config.model_concordances_file_name_fuels)))
-
+    
     energy_use_esto = adjust_data_to_match_esto.format_9th_input_energy_from_esto(config)
 
     # keep medium in rail, air and ship

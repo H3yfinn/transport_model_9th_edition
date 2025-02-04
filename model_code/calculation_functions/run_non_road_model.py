@@ -36,6 +36,53 @@ def calculate_turnover_rate(config, df, k, L, x0):
     df['Turnover_rate'].fillna(0, inplace=True)
     return df
 
+def apply_manual_adjustments_to_activity_growth_for_non_road(non_road_model_output, config):
+    #manually adjust certain medium economy combinations USING PARAMETERS MANUAL_ACTIVITY_GROWTH_SETTINGS_NON_ROAD_ALL_YEARS
+    manual_activity_growth_settings_non_road = yaml.load(open(os.path.join(config.root_dir,  'config', 'parameters.yml')), Loader=yaml.FullLoader)['MANUAL_ACTIVITY_GROWTH_SETTINGS_NON_ROAD_ALL_YEARS']
+    
+    #sort by date
+    non_road_model_output.sort_values(by=['Medium', 'Scenario', 'Economy', 'Transport Type', 'Drive', 'Date'], inplace=True)
+    
+    for medium in non_road_model_output.Medium.unique():
+        for scenario in non_road_model_output.Scenario.unique():
+            for economy in non_road_model_output.Economy.unique():
+                for transport_type in non_road_model_output['Transport Type'].unique():
+                    for drive in non_road_model_output['Drive'].unique():
+                        #check they are valid rows
+                        condition = (non_road_model_output['Medium'] == medium) & (non_road_model_output['Scenario'] == scenario) & (non_road_model_output['Economy'] == economy) & (non_road_model_output['Transport Type'] == transport_type) & (non_road_model_output['Drive'] == drive) & (non_road_model_output['Date'] >= config.OUTLOOK_BASE_YEAR)
+                        # breakpoint()
+                        if non_road_model_output.loc[condition].shape[0] < 1:
+                            continue
+                        if manual_activity_growth_settings_non_road.get('non_road', {}).get(economy, {}).get(medium):
+                            
+                            new_growth = manual_activity_growth_settings_non_road['non_road'][economy][medium]
+                            
+                            non_road_model_output.loc[(non_road_model_output['Medium'] == medium) &(non_road_model_output['Scenario'] == scenario)&(non_road_model_output['Economy'] == economy) & (non_road_model_output['Transport Type'] == transport_type) & (non_road_model_output['Drive'] == drive), 'Activity_growth'] = new_growth
+                            
+                            # Get the initial activity value
+                            initial_activity = non_road_model_output.loc[condition, 'Activity'].iloc[0]
+
+                            # Calculate the cumulative product of the activity growth
+                            cumulative_growth = non_road_model_output.loc[condition, 'Activity_growth'].cumprod()
+
+                            # Update the Activity column with the new values
+                            non_road_model_output.loc[condition, 'Activity'] = initial_activity * cumulative_growth
+                            
+                            #set Stocks to Activity
+                            non_road_model_output.loc[condition, 'Stocks'] = non_road_model_output.loc[condition, 'Activity']
+                            
+                            #set energy to activity * intensity
+                            non_road_model_output.loc[condition, 'Energy'] = non_road_model_output.loc[condition, 'Activity'] * non_road_model_output.loc[condition, 'Intensity']
+                            
+                            #set Turnover_rate	Age_distribution	Vehicle_sales_share	Activity_growth	Stock_turnover	New_stocks_needed to 0 so its obvious that they are not being used
+                            non_road_model_output.loc[condition, 'Turnover_rate'] = 0
+                            non_road_model_output.loc[condition, 'Age_distribution'] = 0
+                            non_road_model_output.loc[condition, 'Vehicle_sales_share'] = 0
+                            non_road_model_output.loc[condition, 'Stock_turnover'] = 0
+                            non_road_model_output.loc[condition, 'New_stocks_needed'] = 0
+
+    return non_road_model_output
+
 def load_non_road_model_data(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD):
     """
     Loads the non-road model data for the specified economy.
@@ -85,14 +132,14 @@ def load_non_road_model_data(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_
     
 
 def run_non_road_model(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD = True, USE_COVID_RELATED_MILEAGE_CHANGE = True):
+    BREAKPOINT = True
     output_file_name = os.path.join(config.root_dir,  'intermediate_data', 'non_road_model', '{}_{}'.format(ECONOMY_ID, config.model_output_file_name))
     
     non_road_model_input, turnover_rate_steepness, turnover_rate_midpoint_reference, turnover_rate_midpoint_target, turnover_rate_max_value = load_non_road_model_data(config, ECONOMY_ID,USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD)
     
     non_road_model_input.sort_values(by=['Economy', 'Scenario','Transport Type','Date', 'Medium', 'Vehicle Type', 'Drive'])
 
-    output_df = pd.DataFrame()
-    
+    output_df = pd.DataFrame()      
     for _, group in non_road_model_input.groupby(['Economy', 'Scenario','Transport Type']):
         #this group will contain categorical columns for Date, Medium, Vehicle Type and Drive. It will at times aggreagte them all (except for date, which will be looped through now)
         
@@ -234,8 +281,10 @@ def run_non_road_model(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NO
     if len(diff_cols) > 0:
         #drop the cols we dont want
         output_df.drop(columns=diff_cols, inplace=True)
-        # raise ValueError("The columns in the output_df are not what we expect. {} are the extra cols. Please check the config file or any changes made to run_non_road_model.py".format(diff_cols))
-    
+        # raise ValueError("The columns in the output_df are not what we expect. {} are the extra cols. Please check the config file or any changes made to run_non_road_model.py".format(diff_cols))                       
+    # breakpoint()
+    output_df = apply_manual_adjustments_to_activity_growth_for_non_road(output_df, config)
+    # breakpoint()
     # output_df.to_csv(os.path.join(config.root_dir, 'a.csv'), index=False)
     output_df.to_csv(output_file_name, index=False)
     

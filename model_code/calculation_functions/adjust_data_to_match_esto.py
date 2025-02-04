@@ -116,7 +116,8 @@ def adjust_data_to_match_esto_handler(config, BASE_YEAR, ECONOMY_ID, road_model_
     date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, f'intermediate_data', 'input_data_optimisations'), f'optimised_data_{ECONOMY_ID}_', file_name_end=f'_{config.transport_data_system_FILE_DATE_ID}.pkl') 
     if USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT and date_id is not None:
         if ECONOMY_ID=='18_CT':
-            filename = os.path.join(config.root_dir, f'intermediate_data', 'input_data_optimisations', f'optimised_data_18_CT_20241108_DATE20240913.pkl')
+            breakpoint()#remember this is here
+            filename = os.path.join(config.root_dir, f'intermediate_data', 'input_data_optimisations', config.CHINESE_TAIPEI_OPTIMISED_DATA_FILE)
         else:
             filename = os.path.join(config.root_dir, f'intermediate_data', 'input_data_optimisations', f'optimised_data_{ECONOMY_ID}_{date_id}_{config.transport_data_system_FILE_DATE_ID}.pkl')
         #LOAD PREVIOUS OPT RESULTS INSTEAD OF RECALCULATING. THIS HELPS TO KEEP CONSISETNCY BETWEEN THE RESULTS AS WELL AS REDUCING RUN TIME
@@ -631,8 +632,23 @@ def format_9th_input_energy_from_esto(config, ECONOMY_ID=None, REDO_SAME_DATE_ID
     energy_use_esto = pd.read_csv(os.path.join(config.root_dir, 'input_data', '9th_model_inputs', f'model_df_wide_{date_id}.csv'))
     #check that that matches config.latest_esto_data_FILE_DATE_ID. if not then jsut notify user
     if date_id != config.latest_esto_data_FILE_DATE_ID:
+        breakpoint()
         print('WARNING: the date_id for the 9th model inputs does not match the latest esto data date_id. This is okay for now but it should be fixed later')
-        
+
+    #check that the columns after str(config.NON_RUSSIA_BASE_YEAR) contain all nans in their data
+    BASE_YEAR_COL_INDEX = energy_use_esto.columns.get_loc(str(config.NON_RUSSIA_BASE_YEAR)) 
+    if energy_use_esto.iloc[:, BASE_YEAR_COL_INDEX+1:].dropna().shape[0] != 0:
+        breakpoint()
+        raise ValueError('The columns after the base year are not all nans. You need to set them to nans manually (i.e. by deleting their data) before running this function')
+    #also check that there is no column called is_subtotal, and if so instruct user to filter so it is all False then remove the column
+    if 'is_subtotal' in energy_use_esto.columns:
+        breakpoint()
+        raise ValueError('There is a column called is_subtotal in the esto data. You need to filter so it is all False then remove the column manually before running this function')
+    
+    #and check that the BASE YEAR for non russia is all 0's where economy is russia
+    if len(energy_use_esto.loc[(energy_use_esto['economy'] == '16_RUS') & (energy_use_esto[str(config.NON_RUSSIA_BASE_YEAR)] != 0)]) > 0:
+        breakpoint()
+        raise ValueError('The base year for russia is not all 0s. You need to set those values to 0 manually before running this function')
     #FIX
     #remove  values for 2022 where jet fuel is used in road and navigation in 04_CHL. These are annoying to deal with and not neccessary. This amkes sure that the problem is at least reocrded and cosnistnelty delt with in the future.
     #     scenarios	economy	sectors	sub1sectors	sub2sectors	sub3sectors	sub4sectors	fuels	subfuels
@@ -645,10 +661,13 @@ def format_9th_input_energy_from_esto(config, ECONOMY_ID=None, REDO_SAME_DATE_ID
     # breakpoint()
     #now check if we've already created an output for this file. if so then we dont need to do it again:energy_use_esto
     if os.path.exists(os.path.join(config.root_dir, f'intermediate_data', f'model_inputs_{date_id}.csv')) and not REDO_SAME_DATE_ID:
-        energy_use_esto = pd.read_csv(os.path.join(config.root_dir, f'intermediate_data', f'model_inputs_{date_id}.csv'))
-        if ECONOMY_ID != None:
-            energy_use_esto = energy_use_esto.loc[energy_use_esto['Economy'] == ECONOMY_ID].copy()
-        return energy_use_esto
+        energy_use_esto_temp = pd.read_csv(os.path.join(config.root_dir, f'intermediate_data', f'model_inputs_{date_id}.csv'))
+        #double check there is data for the current base year and none afterwards:
+        if config.NON_RUSSIA_BASE_YEAR not in energy_use_esto_temp.Date.unique():
+            pass
+        elif ECONOMY_ID != None and ECONOMY_ID != '16_RUS':
+            energy_use_esto_temp = energy_use_esto_temp.loc[energy_use_esto_temp['Economy'] == ECONOMY_ID].copy()
+            return energy_use_esto_temp
     
     #reverse the mappings:
     medium_mapping_reverse = {v: k for k, v in config.medium_mapping.items()}

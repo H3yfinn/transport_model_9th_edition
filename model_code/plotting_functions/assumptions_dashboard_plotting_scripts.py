@@ -2566,6 +2566,7 @@ def plot_comparison_of_energy_by_dataset(config, ECONOMY_IDs, energy_output_for_
         fig_dict (dict): dictionary with keys of economy and scenario and values of a list of figs and title texts
         color_preparation_list (list): list of lists of the labels for the color parameter in each of the plots. This is so we can match them against suitable colors.
     """
+    breakpoint()#why do we have 0s for 2022 in russia. fix it!
     PLOTTED=True
     model_output_with_fuels = energy_output_for_outlook_data_system_df.copy()
     energy_use_esto_df = energy_use_esto.copy()
@@ -2623,6 +2624,7 @@ def plot_comparison_of_energy_by_dataset(config, ECONOMY_IDs, energy_output_for_
     energy_use_by_fuel_type_totals['Fuel'] = 'Total'
     #cocnat the total onto the main df:
     energy_use_by_fuel_type = pd.concat([energy_use_by_fuel_type, energy_use_by_fuel_type_totals])
+    breakpoint()#why does map fuels reslt in different values for emisisons vs energy? - note changed to simplified for previous, maybe will work
     energy_use_by_fuel_type = map_fuels(config, energy_use_by_fuel_type, value_col=energy_col, index_cols=['Economy','Scenario', 'Date','Dataset', 'Fuel'], mapping_type=mapping_type)
     
     #add units (by setting measure to Energy haha)

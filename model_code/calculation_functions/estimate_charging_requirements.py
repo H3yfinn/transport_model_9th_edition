@@ -228,6 +228,9 @@ def estimate_kw_of_required_chargers(config, ECONOMY_ID):
     #lastly, sort by date, scenario and vehicle type
     total_kwh_of_battery_capacity = total_kwh_of_battery_capacity.sort_values(by=['Date','Scenario','Vehicle Type','Drive'])
     
+    #calcualte sum of number_of_fast_chargers and number_of_slow_chargers
+    total_kwh_of_battery_capacity['sum_of_fast_chargers'] = total_kwh_of_battery_capacity.groupby(['Economy','Date','Scenario'])['fast_chargers'].transform('sum')
+    total_kwh_of_battery_capacity['sum_of_slow_chargers'] = total_kwh_of_battery_capacity.groupby(['Economy','Date','Scenario'])['slow_chargers'].transform('sum')
     
     # #there are nas with 0 in phev col wehre vehicle type is 2w, change that:
     # total_kwh_of_battery_capacity['Stocks_phev'] = np.where((total_kwh_of_battery_capacity['Stocks_phev'].isna()) & (total_kwh_of_battery_capacity['Vehicle Type']=='2w'), 0, total_kwh_of_battery_capacity['Stocks_phev'])

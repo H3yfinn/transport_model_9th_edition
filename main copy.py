@@ -113,39 +113,36 @@ def setup_for_main(root_dir_param=None, script_dir_param=None, economy_to_run=No
 def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
     error_message = None
     increment, progress, update_progress, config, USING_LINUX_WEB_APP = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
-    # breakpoint()
-    # international_bunker_share_calculation_handler(config, ECONOMY_ID='19_THA', PLOT_MINOR_OUTPUTS=True)
-    # return
+    
     # LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT = {
-    #             '01_AUS': '20241108',
-    #             '02_BD': '20241108',
+    #             '01_AUS': '20250123',
+    #             '02_BD': '20250123',
     #             '03_CDA': None,
     #             '04_CHL': None,
-    #             '05_PRC': None,
+    #             '05_PRC': '20250123',
     #             '06_HKC': None,
-    #             '07_INA': '20241108',
+    #             '07_INA': '20250123',
     #             '08_JPN': None,
-    #             '09_ROK': '20241108',
-    #             '10_MAS': '20241108',
+    #             '09_ROK': '20250123',
+    #             '10_MAS': '20250123',
     #             '11_MEX': None,
     #             '12_NZ': None,
     #             '13_PNG': None,
     #             '14_PE': None,
-    #             '15_PHL': '20241108',
+    #             '15_PHL': '20250123',
     #             '16_RUS': None,
     #             '17_SGP': None,
-    #             '18_CT': '20241108',
-    #             '19_THA': '20241108',
-    #             '20_USA': None,
-    #             '21_VN': '20241108'
+    #             '18_CT': '20250123',
+    #             '19_THA': '20250123',
+    #             '20_USA': '20250123',
+    #             '21_VN': '20250123'
     #         } 
     # ARCHIVE_RESULTS=True
     # if ARCHIVE_RESULTS:
-    #     economies_to_archive = ['01_AUS', '02_BD', '07_INA', '09_ROK', '10_MAS', '15_PHL', '18_CT', '19_THA', '21_VN']#, '21_VN', '07_INA']
+    #     economies_to_archive = ['01_AUS', '02_BD','05_PRC', '07_INA', '09_ROK', '10_MAS', '15_PHL', '18_CT', '19_THA','20_USA', '21_VN']#, '21_VN', '07_INA']
     #     for economy in economies_to_archive:
     #         ARCHIVED_FILE_DATE_ID = LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT[economy]
-    #         folder_name = archiving_scripts.save_economy_projections_and_all_inputs(config, economy, ARCHIVED_FILE_DATE_ID=ARCHIVED_FILE_DATE_ID, transport_data_system_FILE_DATE_ID_2='DATE20240913')
-    # return config.FILE_DATE_ID, True, error_message
+    #         folder_name = archiving_scripts.save_economy_projections_and_all_inputs(config, economy, ARCHIVED_FILE_DATE_ID=ARCHIVED_FILE_DATE_ID, transport_data_system_FILE_DATE_ID_2='DATE20250122')
     # Prevent the system from going to sleep
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
     # To restore the original state, use:
@@ -206,8 +203,15 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             RUN_MODEL = RUN_MODEL_PLACEHOLDER
             config.FILE_DATE_ID = config.FILE_DATE_ID_PLACEHOLDER
         print('\nRunning model for {}\n'.format(economy))
+        #DOUBLE CHECK THAT IF THIS IS RIUSSIA, THE CONFIG.OUTLOOK_BASE_YEAR IS == CONFIG.RUSSIA_BASE_YEAR
+        if economy == '16_RUS':
+            if config.OUTLOOK_BASE_YEAR != config.RUSSIA_BASE_YEAR:
+                raise Exception('For Russia, the config.OUTLOOK_BASE_YEAR must be equal to the config.RUSSIA_BASE_YEAR')
+        else:
+            if config.OUTLOOK_BASE_YEAR == config.RUSSIA_BASE_YEAR:
+                raise Exception('For all economies except Russia, the config.OUTLOOK_BASE_YEAR should probably be different to the config.BASE_YEAR')
         ECONOMY_ID = economy
-        BASE_YEAR = ECONOMY_BASE_YEARS_DICT[economy]
+        INPUT_DATA_BEST_BASE_YEAR = ECONOMY_BASE_YEARS_DICT[economy]
         PREVIOUS_PROJECTION_FILE_DATE_ID = config.PREVIOUS_PROJECTION_FILE_DATE_ID_DICT[economy]#'20240327'# '20231128'
         create_and_clean_user_input(config, ECONOMY_ID)
         aggregate_data_for_model(config, ECONOMY_ID)
@@ -221,10 +225,10 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR = False
             
             #perform final filtering of data (eg for one economy only)
-            supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years(config, BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
-            calculate_inputs_for_model(config, road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False)
+            supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years(config, INPUT_DATA_BEST_BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
+            calculate_inputs_for_model(config, road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, INPUT_DATA_BEST_BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False)
             
-            if BASE_YEAR == config.OUTLOOK_BASE_YEAR:
+            if INPUT_DATA_BEST_BASE_YEAR == config.OUTLOOK_BASE_YEAR:
                 #since we wont run the model, just fill the input with requried output cols and put nans in them
                 fill_missing_output_cols_with_nans(config, ECONOMY_ID, road_model_input_wide, non_road_model_input_wide)
             else:
@@ -244,8 +248,8 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             print('\nDoing 2nd model run for {}\n'.format(economy))
             #MODEL RUN 1: (RUN MODEL FOR DATA BETWEEN  AND INCLUDIONG BASE YEAR AND config.OUTLOOK_BASE_YEAR)
             #perform final filtering of data (eg for one economy only)
-            supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years(config, BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
-            calculate_inputs_for_model(config, road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS)
+            supply_side_fuel_mixing, demand_side_fuel_mixing, road_model_input_wide, non_road_model_input_wide, growth_forecasts_wide = filter_for_modelling_years(config, INPUT_DATA_BEST_BASE_YEAR, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR,ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR)
+            calculate_inputs_for_model(config, road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, INPUT_DATA_BEST_BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS)
             aggregate_data_for_model(config, ECONOMY_ID)
             run_road_model_df = run_road_model(config, ECONOMY_ID)
             breakpoint()#what is stocks per capita threshold being set to?
@@ -374,7 +378,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        economies_to_run = ["15_PHL"]# "18_CT" took too long with the optimisation ):,"09_ROK","19_THA",, '20_USA'
+        economies_to_run = [ '05_PRC']#"01_AUS", "18_CT", "09_ROK", "02_BD", "21_VN", "15_PHL", "07_INA", "19_THA", "10_MAS", '05_PRC', '20_USA'
         main(economies_to_run)
         #'04_CHL', '03_CDA', '14_PE', '11_MEX'])#, '10_MAS'])#, '05_PRC', '06_HKC', '20_USA'])#, '03_CDA'])#"18_CT",'01_AUS',"03_CDA", '02_BD',, '19_THA''09_ROK',"06_HKC"])#, '09_ROK'])#, '19_THA',root_dir_param=root_dir_param)#'01_AUS', '20_USA',
         #  "02_BD", "04_CHL", "05_PRC", "06_HKC", "07_INA","08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
