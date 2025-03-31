@@ -18,9 +18,9 @@ class Config:
         self.IMPORT_FROM_TRANSPORT_DATA_SYSTEM = False
         
         # transport_data_system_file_date_id_equivalencies = {'DATE20250204':'DATE20250122'}#this is used to convert the file date id of the transport data system data to the same value so we dont need to redo the optimisation. im not 100% it works in all cases
-        self.transport_data_system_FILE_DATE_ID ='DATE20250122'# 'DATE20240612'
+        self.transport_data_system_FILE_DATE_ID ='DATE20250122'# 'DATE20240612'combined_data_DATE20250211
         # self.transport_data_system_FILE_DATE_ID_for_optimisation = transport_data_system_file_date_id_equivalencies.get(self.transport_data_system_FILE_DATE_ID, self.transport_data_system_FILE_DATE_ID) #used because sometimes the optimisation data is from a different date than the rest of the transport data system data
-        self.latest_esto_data_FILE_DATE_ID = '20250204' #122'#'20241111'#'20241111'#'20231207
+        self.latest_esto_data_FILE_DATE_ID = '20250221' #122'#'20241111'#'20241111'#'20231207
         self.PRINT_LESS_IMPORTANT_DETAILS = False
         self.PRINT_WARNINGS_FOR_FUTURE_WORK = False
 
@@ -41,7 +41,7 @@ class Config:
 
         self.DEFAULT_BASE_YEAR = 2017
         self.RUSSIA_BASE_YEAR = 2021
-        self.OUTLOOK_BASE_YEAR = 2022
+        self.OUTLOOK_BASE_YEAR = 2021
         self.NON_RUSSIA_BASE_YEAR = 2022 #set so that the base year for russia is 2021 and for all other economies it is 2022
         self.END_YEAR = 2100
         self.GRAPHING_END_YEAR = 2070
@@ -56,72 +56,52 @@ class Config:
         self.FILE_DATE_ID_PLACEHOLDER = self.FILE_DATE_ID
         
         self.PREVIOUS_PROJECTION_FILE_DATE_ID_DICT = {
-            # '01_AUS': None,
-            # '02_BD': None,
-            # '03_CDA': '20240315',
-            # '04_CHL': '20240709',
-            # '05_PRC': '20240327',
-            # '06_HKC': None,
-            # '07_INA': None,
-            # '08_JPN': None,
-            # '09_ROK': None,
-            # '10_MAS': None,
-            # '11_MEX': None,
-            # '12_NZ': None,
-            # '13_PNG': None,
-            # '14_PE': None,
-            # '15_PHL': None,
-            # '16_RUS': None,
-            # '17_SGP': None,
-            # '18_CT': None,
-            # '19_THA': None,
-            # '20_USA': '20231101',
-            # '21_VN': None
             '01_AUS': '20241108',
             '02_BD': '20241108',
-            '03_CDA': '20250121',
-            '04_CHL': '20250121',
+            '03_CDA': '20240315',#20250121
+            '04_CHL': '20240709',#20250121
             '05_PRC': '20241108',
-            '06_HKC': None,
+            '06_HKC': '20240621',
             '07_INA': '20241108',
-            '08_JPN': None,
+            '08_JPN': '20250121',
             '09_ROK': '20241108',
             '10_MAS': '20241108',
-            '11_MEX': None,
-            '12_NZ': None,
-            '13_PNG': None,
-            '14_PE': None,
+            '11_MEX': '20240619',
+            '12_NZ': '20240620',
+            '13_PNG': '20240619',
+            '14_PE': '20240709',
             '15_PHL': '20241108',
-            '16_RUS': None,
-            '17_SGP': None,
+            '16_RUS': '20250204',#latest iter was the same as latest reviewed
+            '17_SGP': '20240108',
             '18_CT': '20241108',
             '19_THA': '20241108',
-            '20_USA': '20250121',
+            '20_USA': '20230926',#20250121
             '21_VN': '20241108'
         }
-        self.LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT = {
-            '01_AUS': '20241108',
-            '02_BD': '20241108',
-            '03_CDA': '20250121',
-            '04_CHL': '20250121',
-            '05_PRC': '20250121',
-            '06_HKC': None,
-            '07_INA': '20241108',
-            '08_JPN': None,
-            '09_ROK': '20241108',
-            '10_MAS': '20241108',
-            '11_MEX': None,
-            '12_NZ': None,
-            '13_PNG': None,
-            '14_PE': None,
-            '15_PHL': '20241108',
-            '16_RUS': None,
-            '17_SGP': None,
-            '18_CT': '20241108',
-            '19_THA': '20241108',
-            '20_USA': '20250121',
-            '21_VN': '20241108'
-        }
+        
+        LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT = {
+                    '01_AUS': '20250123',
+                    '02_BD': '20250123',
+                    '03_CDA': '20250225',#also 20250226 is part of the output for interantional data and some others.
+                    '04_CHL': None,
+                    '05_PRC': '20250225',
+                    '06_HKC': None,
+                    '07_INA': '20250123',
+                    '08_JPN': None,
+                    '09_ROK': '20250123',
+                    '10_MAS': '20250123',
+                    '11_MEX': '20250219',
+                    '12_NZ': '20250226',
+                    '13_PNG': None,
+                    '14_PE': None,
+                    '15_PHL': '20250123',
+                    '16_RUS': '20250226',
+                    '17_SGP': None,
+                    '18_CT': '20250123',
+                    '19_THA': '20250123',
+                    '20_USA': '20250123',
+                    '21_VN': '20250123'
+        } 
         self.SCENARIOS_LIST_file_path = os.path.join('config', 'concordances_and_config_data', 'scenarios_list.csv')
         self.SCENARIOS_LIST = ['Reference', 'Target']
         self.SCENARIO_OF_INTEREST = 'Reference'

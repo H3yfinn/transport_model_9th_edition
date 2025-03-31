@@ -138,7 +138,7 @@ def run_non_road_model(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NO
     non_road_model_input, turnover_rate_steepness, turnover_rate_midpoint_reference, turnover_rate_midpoint_target, turnover_rate_max_value = load_non_road_model_data(config, ECONOMY_ID,USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD)
     
     non_road_model_input.sort_values(by=['Economy', 'Scenario','Transport Type','Date', 'Medium', 'Vehicle Type', 'Drive'])
-
+    # breakpoint()#why is non road activity growth different for diff scenarios and transport types?
     output_df = pd.DataFrame()      
     for _, group in non_road_model_input.groupby(['Economy', 'Scenario','Transport Type']):
         #this group will contain categorical columns for Date, Medium, Vehicle Type and Drive. It will at times aggreagte them all (except for date, which will be looped through now)
@@ -181,8 +181,11 @@ def run_non_road_model(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NO
             current_year = current_year.merge(previous_year, on=['Medium', 'Vehicle Type', 'Drive'], suffixes=('', '_previous'))
             # if transport_type == 'freight' and i ==2022 and scenario == 'Target':
             # breakpoint()#why is hsip ammonia popiing off>?
-            #set average age to the previous year's average age
-            current_year['Average_age'] = current_year['Average_age_previous']
+            #set average age to the previous year's average age plus 1
+            current_year['Average_age'] = current_year['Average_age_previous'].replace(np.nan, 1)
+            #and replace 0s too, even thoguht this technically makes it so we age new vehicles by 1 extra year (so the default age of new vehicles of new drive types is 2 - but its super minor)
+            current_year['Average_age'] = current_year['Average_age'].replace(0, 1)
+            
             current_year['Age_distribution'] = current_year['Age_distribution_previous']
             
             current_year['Activity'] = current_year['Activity_previous'] * current_year['Activity_growth']
@@ -282,7 +285,7 @@ def run_non_road_model(config, ECONOMY_ID, USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NO
         #drop the cols we dont want
         output_df.drop(columns=diff_cols, inplace=True)
         # raise ValueError("The columns in the output_df are not what we expect. {} are the extra cols. Please check the config file or any changes made to run_non_road_model.py".format(diff_cols))                       
-    # breakpoint()
+    # breakpoint()#why are we getting shifts between rail and ship?
     output_df = apply_manual_adjustments_to_activity_growth_for_non_road(output_df, config)
     # breakpoint()
     # output_df.to_csv(os.path.join(config.root_dir, 'a.csv'), index=False)

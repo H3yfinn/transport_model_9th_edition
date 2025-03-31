@@ -32,10 +32,20 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
         energy_use_by_fuels = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', f'all_economies_{config.FILE_DATE_ID}_{config.model_output_file_name}'))
         detailed_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', f'all_economies_{config.FILE_DATE_ID}_{config.model_output_file_name}'))
     else:
-        all_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output', f'{ECONOMY_ID}_{config.model_output_file_name}'))
-        energy_use_by_fuels = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', f'{ECONOMY_ID}_{config.model_output_file_name}'))
-        detailed_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', f'{ECONOMY_ID}_{config.model_output_file_name}'))
-     
+        try:
+            all_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output', f'{ECONOMY_ID}_{config.model_output_file_name}'))
+            energy_use_by_fuels = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', f'{ECONOMY_ID}_{config.model_output_file_name}'))
+            detailed_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', f'{ECONOMY_ID}_{config.model_output_file_name}'))
+        except:
+            #search for latest file date id and use that
+            date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'output_data', 'model_output_detailed'), file_name_start=f'{ECONOMY_ID}_', file_name_end='.csv')
+            #repalce 8 digits in model_output_file_name with date_id
+            model_output_file_name = re.sub(r'\d{8}', date_id, config.model_output_file_name)
+            all_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output', f'{ECONOMY_ID}_{model_output_file_name}'))
+            energy_use_by_fuels = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', f'{ECONOMY_ID}_{model_output_file_name}'))
+            detailed_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', f'{ECONOMY_ID}_{model_output_file_name}'))
+            
+            
     if SET_START_DATE_TO_AFTER_COVID:
         #TO BE SAFE WE HAVE TO SET THE START DATE TO AFTER WHEN ANY RETURN TO NORMAL AFTER COVID WAS OVER. SO WE WILL SET IT TO 2024, EVEN THOUGH THAT IS 3 YEARS AFTER OUR BASE YEAR DATA:
         all_data = all_data[all_data['Date']>=2024]
@@ -263,7 +273,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
             energy_variable = 'Energy use'
             time_variable = 'Date'
             font_size=35
-            INCLUDE_TEXT = True
+            INCLUDE_TEXT = False
             y_axis_min_percent_decrease=0
             residual_variable1=combination_dict['residual_variable1']
             emissions_divisia = combination_dict['emissions_divisia']
@@ -552,7 +562,7 @@ def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUC
         plotting_output_folder = os.path.join(config.root_dir, combination_dict['plotting_output_folder'])
         output_data_folder = os.path.join(config.root_dir, combination_dict['output_data_folder'])
         
-        graph_title = combination_dict['graph_title']#will be the same for all
+        graph_title = ''#combination_dict['graph_title']#will be the same for all
         #temp, find where things are going wrong:
         #concat the data
         # if emissions_divisia:#I THINK ITS OK NOW

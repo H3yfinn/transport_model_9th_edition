@@ -414,9 +414,8 @@ def adjust_mileage_to_account_for_covid(config, economy, dataframe, transport_ty
             
             if medium == 'air' and transport_type == 'passenger':
                 pass#breakpoint()#it seems its much lower thanm expected most of th times
-                
-            dataframe.loc[(dataframe['Economy'] == economy) & (dataframe['Transport Type'] == transport_type) & (dataframe['Medium']==medium), measure_column]  *= (1-X)
             
+            dataframe.loc[(dataframe['Economy'] == economy) & (dataframe['Transport Type'] == transport_type) & (dataframe['Medium']==medium), measure_column]  *= (1-X)        
             if medium == 'air' and transport_type == 'passenger':
                 pass#print('2.a sum of value after increase: {}'.format(dataframe.loc[(dataframe['Economy'] == economy) & (dataframe['Transport Type'] == transport_type) & (dataframe['Medium']==medium), measure_column].sum()))
     return dataframe

@@ -490,6 +490,23 @@ def load_and_format_input_data(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, E
     emissions_factors = pd.read_csv(os.path.join(config.root_dir, 'config', '9th_edition_emissions_factors.csv'))
     date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'input_data', '9th_model_inputs'), 'model_df_wide_')
     energy_use_esto = pd.read_csv(os.path.join(config.root_dir, 'input_data', '9th_model_inputs', 'model_df_wide_{}.csv'.format(date_id)))
+    
+    #also check that there is no column called is_subtotal, and if so instruct user to filter so it is all False then remove the column
+    if 'is_subtotal' in energy_use_esto.columns:
+        energy_use_esto = energy_use_esto.loc[energy_use_esto['is_subtotal'] == False].copy()
+        energy_use_esto.drop(columns=['is_subtotal'], inplace=True)
+    
+    #drop year cols after the BASE_YEAR (changed to NON_RUSSIA_BASE_YEAR) by searching for cols which have 4 digits in them 
+    year_cols = [col for col in energy_use_esto.columns if re.search(r'\d{4}', col)]
+    #then remove those that are greater than the base year
+    year_cols = [col for col in year_cols if int(col) > config.NON_RUSSIA_BASE_YEAR]
+    energy_use_esto = energy_use_esto.drop(columns=year_cols)
+    
+    #and check that the BASE YEAR for non russia is all 0's where economy is russia
+    if len(energy_use_esto.loc[(energy_use_esto['economy'] == '16_RUS') & (energy_use_esto[str(config.NON_RUSSIA_BASE_YEAR)] != 0)]) > 0:
+        breakpoint()
+        raise ValueError('The base year for russia is not all 0s. You need to set those values to 0 manually before running this function. this is done manually because otherwise it will get forgotten about and cause errors later on.')
+    
     data_8th = pd.read_csv(os.path.join(config.root_dir, 'input_data', 'from_8th', 'reformatted', 'activity_energy_road_stocks.csv'))
     energy_8th = pd.read_csv(os.path.join(config.root_dir, 'input_data', 'from_8th', 'reformatted', '8th_energy_by_fuel.csv'))
     

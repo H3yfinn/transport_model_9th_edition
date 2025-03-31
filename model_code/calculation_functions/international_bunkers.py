@@ -368,6 +368,26 @@ def extract_bunker_data_from_esto(config):
     date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'input_data', '9th_model_inputs'), 'model_df_wide_')
     energy_use_esto = pd.read_csv(os.path.join(config.root_dir, 'input_data', '9th_model_inputs', f'model_df_wide_{date_id}.csv'))#please  note that this will probably have 15_PHL and 17_SIN in it. we will need to change these to 15_PHL and 17_SGP later
     
+    #also check that there is no column called is_subtotal, and if so instruct user to filter so it is all False then remove the column
+    if 'is_subtotal' in energy_use_esto.columns:
+        energy_use_esto = energy_use_esto.loc[energy_use_esto['is_subtotal'] == False].copy()
+        energy_use_esto.drop(columns=['is_subtotal'], inplace=True)
+    
+    #drop year cols after the BASE_YEAR (changed to NON_RUSSIA_BASE_YEAR) by searching for cols which have 4 digits in them 
+    year_cols = [col for col in energy_use_esto.columns if re.search(r'\d{4}', col)]
+    #then remove those that are greater than the base year
+    year_cols = [col for col in year_cols if int(col) > config.NON_RUSSIA_BASE_YEAR]
+    energy_use_esto = energy_use_esto.drop(columns=year_cols)
+    
+    #and check that the BASE YEAR for non russia is all 0's where economy is russia
+    if len(energy_use_esto.loc[(energy_use_esto['economy'] == '16_RUS') & (energy_use_esto[str(config.NON_RUSSIA_BASE_YEAR)] != 0)]) > 0:
+        breakpoint()
+        raise ValueError('The base year for russia is not all 0s. You need to set those values to 0 manually before running this function. this is done manually because otherwise it will get forgotten about and cause errors later on.')
+    
+    #We just removed them but this is for clarity: add year cols from Base year to final year to the energy_use_esto df:
+    year_cols = [str(year) for year in range(config.NON_RUSSIA_BASE_YEAR+1, config.END_YEAR+1)]
+    energy_use_esto[year_cols] = np.nan
+    
     #load the config\\concordances_and_config_data\\international_bunkers_mapping.csv
     international_bunkers_mapping = pd.read_csv(os.path.join(config.root_dir, 'config', 'concordances_and_config_data', 'international_bunkers_mapping.csv'))#cols = Medium	Drive	Fuel	Supply_side_fuel_mixing
     #note that Supply_side_fuel_mixing is a boolean
@@ -966,7 +986,7 @@ def check_all_input_data_against_concordances(config, international_bunker_input
         check_df_errors.to_csv(os.path.join(config.root_dir, 'error_{}.csv'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))))
         breakpoint()
         time.sleep(1)
-        raise Exception(f'There are some rows in the model_concordances_user_input_and_growth_rates that are not in the international_bunker_inputs df. Please check the data and remove duplicates, {check_df_errors}')
+        raise Exception(f'There are some rows in the model_concordances_user_input_and_growth_rates that are not in the international_bunker_inputs df. Please check the data and remove these errors {check_df_errors}')
     check_df.drop(columns=['_merge'], inplace=True)
     #check for dupes:
     cols = check_df.columns.to_list()

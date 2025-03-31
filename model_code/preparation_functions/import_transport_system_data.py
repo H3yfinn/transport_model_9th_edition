@@ -486,7 +486,8 @@ def adjust_non_road_TEMP(config, transport_data_system_df, model_concordances_me
     
     #adust intensity where electi4ricty/ammonia/hydrogen is being used:
     new_drive_types = [drive for drive in final_df_non_road.Drive.dropna().unique().tolist() if 'electric' in drive]# or 'ammonia' in drive or 'hydrogen' in drive]
-
+    # if final_df_non_road.Economy.unique().tolist()[0] in ['06_HKC', '05_PRC']:
+    #     breakpoint()
     #set intensity to 0.5 for electric drive types
     final_df_non_road['Intensity'] = final_df_non_road.apply(lambda row: set_new_non_road_drives_to_half_intensity(config, row,new_drive_types), axis=1)
     

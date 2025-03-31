@@ -124,6 +124,7 @@ def import_macro_data(config, UPDATE_INDUSTRY_VALUES, PLOT=False):
     activity_growth_8th['activity_growth_8th'] = activity_growth_8th['activity_growth_8th'] + 1
     
     #join activity_growth_8th on for diagnostics so they are from same date
+    
     macro1 = pd.merge(macro1, activity_growth_8th, on=['economy', 'date'], how='left')
 
     #make all cols start with caps 
@@ -163,7 +164,14 @@ def import_macro_data(config, UPDATE_INDUSTRY_VALUES, PLOT=False):
     UPDATE_GROWTH_RATES_TO_BE_SAME_AS_8TH = UPDATE_GROWTH_RATES_TO_BE_SAME_AS_8TH.keys()
     
     macro3 = update_growth_rates_to_be_same_as_8th(config, macro2,economies_to_change=UPDATE_GROWTH_RATES_TO_BE_SAME_AS_8TH, PLOT=PLOT)#'16_RUS', 
-    
+    # breakpoint()
+    GROWTH_ADJUSTMENTS_DICT = yaml.load(open(os.path.join(config.root_dir, 'config', 'parameters.yml')), Loader=yaml.FullLoader)['GROWTH_ADJUSTMENTS']#GROWTH_ADJUSTMENTS_DICT:
+    #   '13_PNG': {'freight': 0.5} #This will reduce extra the growth above 1 (i.e. (growth -1) * amount)
+    for economy in GROWTH_ADJUSTMENTS_DICT.keys():
+        for transport_type in GROWTH_ADJUSTMENTS_DICT[economy].keys():
+            amount = GROWTH_ADJUSTMENTS_DICT[economy][transport_type]
+            macro3.loc[(macro3['Economy']==economy) & (macro3['Transport Type']==transport_type) & (macro3['Measure']=='Activity_growth'), 'Value'] = (macro3.loc[(macro3['Economy']==economy) & (macro3['Transport Type']==transport_type)& (macro3['Measure']=='Activity_growth'), 'Value'] - 1) * amount + 1
+        
     macro3.to_csv(os.path.join(config.root_dir, 'intermediate_data', 'model_inputs', 'regression_based_growth_estimates.csv'), index=False)
 
 def update_growth_rates_to_be_same_as_8th(config, macro2, economies_to_change=[], PLOT=True):
@@ -174,7 +182,7 @@ def update_growth_rates_to_be_same_as_8th(config, macro2, economies_to_change=[]
         macro2_econ.rename(columns={'Value':'Activity_growth'}, inplace=True)
         macro2_econ = macro2_econ.drop(columns=['Measure'])
         macro2_econ_8th.rename(columns={'Value':'Activity_growth_8th'}, inplace=True)
-        macro2_econ_8th = macro2_econ_8th.drop(columns=['Measure'])
+        macro2_econ_8th = macro2_econ_8th.drop(columns=['Measure', 'Unit'])
         #join and start the process to match the growth rates. However, we want to copy the annual variation of Activity growth, yet use the trend and level of the 8th edition. This is also important because we dont have all the years in the 8th edition, so we cant just use the 8th edition as is.
         econ_growth = pd.merge(macro2_econ, macro2_econ_8th, on=['Economy', 'Date', 'Transport Type', 'Scenario'], how='left')
 

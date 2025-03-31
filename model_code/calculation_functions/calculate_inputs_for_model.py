@@ -128,7 +128,7 @@ def calculate_inputs_for_model(config, road_model_input_wide, non_road_model_inp
 
 
 def set_intensity_manually(config, non_road_model_input_wide):
-    
+    # breakpoint()
     #if intensity is still na then we need to set it manually. We will use the same process done in 'import_transport_system_data.py' which is using a constant value for non new drive types, and new drive types will be set to 0.5 of that. 
     new_drive_types = [drive for drive in non_road_model_input_wide.Drive.dropna().unique().tolist() if 'electric' in drive]# or 'ammonia' in drive or 'hydrogen' in drive
     
@@ -151,6 +151,25 @@ def set_intensity_manually(config, non_road_model_input_wide):
     #drop the intensity_y column
     non_road_model_input_wide = non_road_model_input_wide.drop(columns=['Intensity_y'])
     
+    #double check that within each transport type and medium, electricity is the most efficient drive type. otherwise make it 1/2 the efficiency of the most efficient drive type:
+    for transport_type in non_road_model_input_wide['Transport Type'].unique():
+        for medium in non_road_model_input_wide['Medium'].unique():
+            for scenario in non_road_model_input_wide['Scenario'].unique():
+                #average the intensity for each drive type
+                average_intensity_for_drive_types = non_road_model_input_wide.loc[(non_road_model_input_wide['Transport Type'] == transport_type) & (non_road_model_input_wide['Medium'] == medium) & (non_road_model_input_wide['Scenario'] == scenario)].groupby(['Drive'])['Intensity'].mean().reset_index()
+                #if its na then raise an error
+                if average_intensity_for_drive_types.Intensity.isna().any():
+                    breakpoint()
+                    time.sleep(1)
+                    raise ValueError('average_intensity_for_drive_types has na values')
+                #find the most efficient drive type
+                most_efficient_drive_type = average_intensity_for_drive_types.loc[average_intensity_for_drive_types.Intensity.idxmin(), 'Drive']
+                #if electricity is not the most efficient drive type then set it to 2/3 the efficiency of the most efficient drive type. We know this is simplistic but there is so much margin of error within nonroad that it wont matter too much - its more important that electric is at least the most efficient drive type
+                # breakpoint()
+                if 'electric' not in most_efficient_drive_type:
+                    most_efficient_intensity = average_intensity_for_drive_types.loc[average_intensity_for_drive_types.Intensity.idxmin(), 'Intensity']
+                    non_road_model_input_wide.loc[(non_road_model_input_wide['Transport Type'] == transport_type) & (non_road_model_input_wide['Medium'] == medium) & (non_road_model_input_wide['Scenario'] == scenario) & (non_road_model_input_wide['Drive'].str.contains('electric')), 'Intensity'] = most_efficient_intensity * 2/3
+                
     return non_road_model_input_wide
 
 def insert_new_age_distribution_col(config, road_model_input_wide, non_road_model_input_wide, BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR):

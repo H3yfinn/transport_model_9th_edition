@@ -255,7 +255,7 @@ def identify_high_2w_economies(config, stocks_df):
     stocks_sum_economies = stocks_sum['Economy'].unique()
     return stocks_sum_economies
 
-def identify_high_gas_reliance_economies(config, stocks_df, X=.2):
+def identify_high_gas_reliance_economies(config, PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES,stocks_df, X=.2):
     #remap drive types only for econmoys where the gas drive type makes up more than X% of stocks. This way, tehre wont be too many lines on the plot that arent near 0.#we will spit the data into two dataframes, one with high gas and one without, then remap the drive types for the one with high gas, then concat them back together
     #first define gas mapping
     gas_drives = {'cng':'gas', 'lpg':'gas', 'lng':'gas'}
@@ -266,6 +266,10 @@ def identify_high_gas_reliance_economies(config, stocks_df, X=.2):
     #keep only gas where Value is greater than X
     stocks_sum = stocks_sum.loc[(stocks_sum['Drive']=='gas') & (stocks_sum['Value']>=X)].copy()
     stocks_sum_economies = stocks_sum['Economy'].unique()
+    
+    for economy in PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES:
+        if economy not in stocks_sum_economies:
+            stocks_sum_economies = np.append(stocks_sum_economies, economy)
     return stocks_sum_economies
 
 def remap_stocks_and_sales_based_on_economy(config, stocks, new_sales_shares_all_plot_drive_shares, DRIVE_OR_VEHICLE_TYPE='Vehicle Type'):
@@ -433,6 +437,8 @@ def plot_share_of_transport_type_non_road(config, ECONOMY_IDs, new_sales_shares_
 
 
 def plot_share_of_vehicle_type_by_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, INCLUDE_GENERAL_DRIVE_TYPES=False, WRITE_HTML=True):
+    
+    PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES= ['14_PE']
     PLOTTED=True
     
     #This data is in terms of transport type, so will need to normalise it to vehicle type by summing up the shares for each vehicle type and dividing individual shares by their sum
@@ -440,7 +446,7 @@ def plot_share_of_vehicle_type_by_transport_type(config, ECONOMY_IDs, new_sales_
     stocks = stocks_df.copy()
     
     stocks, new_sales_shares_all_plot_drive_shares = remap_stocks_and_sales_based_on_economy(config, stocks, new_sales_shares_all_plot_drive_shares)
-    high_gas_reliance_economies = identify_high_gas_reliance_economies(config, stocks, X=.1)
+    high_gas_reliance_economies = identify_high_gas_reliance_economies(config, PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES, stocks, X=.1)
     if INCLUDE_GENERAL_DRIVE_TYPES:
         #use categories: gasoline, diesel, ev, fcev, other
         
@@ -555,12 +561,16 @@ def plot_share_of_vehicle_type_by_transport_type(config, ECONOMY_IDs, new_sales_
 def plot_share_of_vehicle_type_by_transport_type_both_on_one_graph(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict):
     PLOTTED=True
     #This data is in terms of transport type, so will need to normalise it to vehicle type by summing up the shares for each vehicle type and dividing individual shares by their sum
+    PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES= ['14_PE']
 
     new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df.copy()
     stocks = stocks_df.copy()
     
     stocks, new_sales_shares_all_plot_drive_shares = remap_stocks_and_sales_based_on_economy(config, stocks, new_sales_shares_all_plot_drive_shares)
-    high_gas_reliance_economies = identify_high_gas_reliance_economies(config, stocks, X=.1)
+    high_gas_reliance_economies = identify_high_gas_reliance_economies(config,PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES, stocks, X=.1)
+    
+    new_sales_shares_all_plot_drive_shares['Drive'] = new_sales_shares_all_plot_drive_shares['Drive'].replace({'cng':'gas', 'lpg':'gas', 'lng':'gas'})
+    stocks['Drive'] = stocks['Drive'].replace({'cng':'gas', 'lpg':'gas', 'lng':'gas'})
     new_sales_shares_all_plot_drive_shares['Value'] = new_sales_shares_all_plot_drive_shares.groupby(['Date','Economy', 'Scenario', 'Transport Type', 'Vehicle Type'])['Value'].transform(lambda x: x/x.sum())
     
     stocks['Value'] = stocks.groupby(['Scenario', 'Economy', 'Date', 'Transport Type','Vehicle Type'])['Value'].apply(lambda x: x/x.sum())
@@ -583,7 +593,6 @@ def plot_share_of_vehicle_type_by_transport_type_both_on_one_graph(config, ECONO
             # #also plot the data like the iea does. So plot the data for 2022 and previous, then plot for the follwoign eyars: [2025, 2030, 2035, 2040, 2050, 2060]. This helps to keep the plot clean too
             # plot_data = plot_data.apply(lambda x: x if x['Date'] <= 2022 or x['Date'] in [2025, 2030, 2035, 2040, 2050, 2060, 2070, 2080,2090, 2100] else 0, axis=1)
             if economy in high_gas_reliance_economies:
-                plot_data['Drive'] = plot_data['Drive'].replace({'cng':'gas', 'lpg':'gas', 'lng':'gas'})
                 plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='fcev') | (plot_data['Drive']=='gas')].copy()
             else:
                 #drop all drives except bev and fcev
@@ -615,11 +624,15 @@ def plot_share_of_vehicle_type_by_transport_type_both_on_one_graph(config, ECONO
     return fig_dict,color_preparation_list
 
 def share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=True):
+    PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES= ['14_PE']
     PLOTTED=True
     #i think that maybe stocks % can be higher than sales % here because of turnvoer rates. hard to get it correct right now
     new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df.copy()
     stocks = stocks_df.copy()
-    high_gas_reliance_economies = identify_high_gas_reliance_economies(config, stocks, X=.1)
+    high_gas_reliance_economies = identify_high_gas_reliance_economies(config, PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES, stocks, X=.1)
+    
+    stocks['Drive'] = stocks['Drive'].replace({'cng':'gas', 'lpg':'gas', 'lng':'gas'})
+    new_sales_shares_all_plot_drive_shares['Drive'] = new_sales_shares_all_plot_drive_shares['Drive'].replace({'cng':'gas', 'lpg':'gas', 'lng':'gas'})
     #make phev_d and phev_g into phev
     new_sales_shares_all_plot_drive_shares.loc[(new_sales_shares_all_plot_drive_shares['Drive']=='phev_d') | (new_sales_shares_all_plot_drive_shares['Drive']=='phev_g'), 'Drive'] = 'phev'
     stocks.loc[(stocks['Drive']=='phev_d') | (stocks['Drive']=='phev_g'), 'Drive'] = 'phev'
@@ -646,7 +659,6 @@ def share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs, new_sal
             # #also plot the data like the iea does. So plot the data for 2022 and previous, then plot for the follwoign eyars: [2025, 2030, 2035, 2040, 2050, 2060]. This helps to keep the plot clean too
             # plot_data = plot_data.apply(lambda x: x if x['Date'] <= 2022 or x['Date'] in [2025, 2030, 2035, 2040, 2050, 2060, 2070, 2080,2090, 2100] else 0, axis=1)
             if economy in high_gas_reliance_economies:
-                plot_data['Drive'] = plot_data['Drive'].replace({'cng':'gas', 'lpg':'gas', 'lng':'gas'})
                 plot_data = plot_data.loc[(plot_data['Drive']=='bev') | (plot_data['Drive']=='phev') | (plot_data['Drive']=='fcev') | (plot_data['Drive']=='gas')].copy()
             else:
                 #drop all drives except bev and fcev
@@ -1128,7 +1140,7 @@ def macro_lines(config, ECONOMY_IDs, growth_forecasts, fig_dict, color_preparati
         for economy in ECONOMY_IDs:
             #filter to economy
             growth_forecasts_scen_economy = growth_forecasts_scen.loc[growth_forecasts_scen['Economy']==economy].copy()
-
+            #
             #extract the measure we want
             if measure == 'population':
                 growth_forecasts_scen_economy = growth_forecasts_scen_economy.loc[growth_forecasts_scen_economy['Measure']=='Population'].copy()
@@ -2566,7 +2578,7 @@ def plot_comparison_of_energy_by_dataset(config, ECONOMY_IDs, energy_output_for_
         fig_dict (dict): dictionary with keys of economy and scenario and values of a list of figs and title texts
         color_preparation_list (list): list of lists of the labels for the color parameter in each of the plots. This is so we can match them against suitable colors.
     """
-    breakpoint()#why do we have 0s for 2022 in russia. fix it!
+    # breakpoint()#why do we have 0s for 2022 in russia. fix it!
     PLOTTED=True
     model_output_with_fuels = energy_output_for_outlook_data_system_df.copy()
     energy_use_esto_df = energy_use_esto.copy()
@@ -2624,7 +2636,7 @@ def plot_comparison_of_energy_by_dataset(config, ECONOMY_IDs, energy_output_for_
     energy_use_by_fuel_type_totals['Fuel'] = 'Total'
     #cocnat the total onto the main df:
     energy_use_by_fuel_type = pd.concat([energy_use_by_fuel_type, energy_use_by_fuel_type_totals])
-    breakpoint()#why does map fuels reslt in different values for emisisons vs energy? - note changed to simplified for previous, maybe will work
+    # breakpoint()#why does map fuels reslt in different values for emisisons vs energy? - note changed to simplified for previous, maybe will work
     energy_use_by_fuel_type = map_fuels(config, energy_use_by_fuel_type, value_col=energy_col, index_cols=['Economy','Scenario', 'Date','Dataset', 'Fuel'], mapping_type=mapping_type)
     
     #add units (by setting measure to Energy haha)
@@ -3111,14 +3123,14 @@ def plot_energy_intensity_strip(config, ECONOMY_IDs, model_output_detailed_detai
             #filter to economy
             energy_int_by_scen_by_economy = energy_int_by_scen.loc[energy_int_by_scen['Economy']==economy].copy()
 
-            title='Intensity by vehicle type (Pj per Bn activity km)'
+            title='Intensity by vehicle type (Bn activity km per pj)'
             fig = px.strip(energy_int_by_scen_by_economy, x='Vehicle Type', y='Intensity', color='Drive', title=title, color_discrete_map=colors_dict)
             #add fig to dictionary for scenario and economy:
             fig_dict[economy][scenario]['energy_intensity_strip'] = [fig, title, PLOTTED]
             
             if WRITE_HTML:
                 filename = f'energy_intensity_strip_{scenario}_{economy}.html'
-                write_graph_to_html(config, filename=filename, graph_type='strip', plot_data=energy_int_by_scen_by_economy, economy=economy, x='Vehicle Type', y='Intensity', color='Drive', title=title, y_axes_title='Intensity (Pj per Bn activity km)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
+                write_graph_to_html(config, filename=filename, graph_type='strip', plot_data=energy_int_by_scen_by_economy, economy=economy, x='Vehicle Type', y='Intensity', color='Drive', title=title, y_axes_title='Intensity (Bn activity km per pj)', legend_title='Drive', font_size=30, colors_dict=colors_dict)
             
     #put labels for the color parameter in color_preparation_list so we can match them against suitable colors:
     color_preparation_list.append(energy_int_by_scen_by_economy['Drive'].unique().tolist())
@@ -4680,6 +4692,8 @@ def share_of_emissions_by_vehicle_type(config, fig_dict, ECONOMY_IDs, emissions_
     total_emissions = emissions_by_vehicle_type.groupby(['Economy', 'Scenario', 'Date']).sum().reset_index()
     #merge the two dataframes and then calcaulte the share of emissions by vehicle type
     emissions_by_vehicle_type = emissions_by_vehicle_type.merge(total_emissions, on=['Economy', 'Scenario', 'Date'], how='left', suffixes=('', '_total'))
+    if ECONOMY_IDs == '06_HKC' or '06_HKC' in ECONOMY_IDs:
+        breakpoint()
     emissions_by_vehicle_type['Share of emissions'] = emissions_by_vehicle_type['Emissions'] / emissions_by_vehicle_type['Emissions_total']
     #plot the data
     for scenario in emissions_by_vehicle_type['Scenario'].unique():

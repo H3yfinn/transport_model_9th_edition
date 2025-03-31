@@ -117,26 +117,26 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     # LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT = {
     #             '01_AUS': '20250123',
     #             '02_BD': '20250123',
-    #             '03_CDA': None,
+    #             '03_CDA': '20250225',#also 20250226 is part of the output for interantional data and some others.
     #             '04_CHL': None,
-    #             '05_PRC': '20250123',
+    #             '05_PRC': '20250225',
     #             '06_HKC': None,
     #             '07_INA': '20250123',
     #             '08_JPN': None,
     #             '09_ROK': '20250123',
     #             '10_MAS': '20250123',
-    #             '11_MEX': None,
-    #             '12_NZ': None,
+    #             '11_MEX': '20250219',
+    #             '12_NZ': '20250226',
     #             '13_PNG': None,
     #             '14_PE': None,
     #             '15_PHL': '20250123',
-    #             '16_RUS': None,
+    #             '16_RUS': '20250226',
     #             '17_SGP': None,
     #             '18_CT': '20250123',
     #             '19_THA': '20250123',
     #             '20_USA': '20250123',
     #             '21_VN': '20250123'
-    #         } 
+    # } 
     # ARCHIVE_RESULTS=True
     # if ARCHIVE_RESULTS:
     #     economies_to_archive = ['01_AUS', '02_BD','05_PRC', '07_INA', '09_ROK', '10_MAS', '15_PHL', '18_CT', '19_THA','20_USA', '21_VN']#, '21_VN', '07_INA']
@@ -252,7 +252,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
             calculate_inputs_for_model(config, road_model_input_wide,non_road_model_input_wide,growth_forecasts_wide, supply_side_fuel_mixing, demand_side_fuel_mixing, ECONOMY_ID, INPUT_DATA_BEST_BASE_YEAR, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR=ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, adjust_data_to_match_esto_TESTING=False, USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT=USE_PREVIOUS_OPTIMISATION_RESULTS_FOR_THIS_DATA_SYSTEM_INPUT, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS)
             aggregate_data_for_model(config, ECONOMY_ID)
             run_road_model_df = run_road_model(config, ECONOMY_ID)
-            breakpoint()#what is stocks per capita threshold being set to?
+            # breakpoint()#what is stocks per capita threshold being set to?
             run_non_road_model(config, ECONOMY_ID,USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD=ECONOMIES_TO_USE_ROAD_ACTIVITY_GROWTH_RATES_FOR_NON_ROAD_dict[ECONOMY_ID])
             
             model_output_all = concatenate_model_output(config, ECONOMY_ID, PROJECT_TO_JUST_OUTLOOK_BASE_YEAR=PROJECT_TO_JUST_OUTLOOK_BASE_YEAR)
@@ -378,8 +378,8 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        economies_to_run = [ '05_PRC']#"01_AUS", "18_CT", "09_ROK", "02_BD", "21_VN", "15_PHL", "07_INA", "19_THA", "10_MAS", '05_PRC', '20_USA'
-        main(economies_to_run)
+        economies_to_run = ['08_JPN', '17_SGP']#"01_AUS", "18_CT", "09_ROK", "02_BD", "21_VN", "15_PHL", "07_INA", "19_THA", "10_MAS", '05_PRC', '20_USA'
+        main(economies_to_run)# '12_NZ', '13_PNG', 
         #'04_CHL', '03_CDA', '14_PE', '11_MEX'])#, '10_MAS'])#, '05_PRC', '06_HKC', '20_USA'])#, '03_CDA'])#"18_CT",'01_AUS',"03_CDA", '02_BD',, '19_THA''09_ROK',"06_HKC"])#, '09_ROK'])#, '19_THA',root_dir_param=root_dir_param)#'01_AUS', '20_USA',
         #  "02_BD", "04_CHL", "05_PRC", "06_HKC", "07_INA","08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
     # root_dir_param = #'18_CT', 01_AUS  # "02_BD", "03_CDA", "04_CHL", "05_PRC", "06_HKC", "07_INA",, "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"

@@ -63,8 +63,14 @@ def copy_required_output_files_to_one_folder(config, ECONOMY_ID='all', output_fo
             
                 useful_file_paths.append(os.path.join(config.root_dir, f'output_data', 'for_other_modellers', 'output_for_outlook_data_system', f'{economy}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv'))
                 output_file_paths.append(os.path.join(config.root_dir,  output_folder_path, economy, f'{economy}_international_bunker_energy_use_{config.FILE_DATE_ID}.csv'))
-    
-    #go through the files output_file_paths and put them in a list but repalce the dateid with a wildcard
+                
+                #move lmdi htmls that we expect to use
+                useful_file_paths.append(os.path.join(config.root_dir, 'plotting_output', 'LMDI', f'{economy}',
+                f'{economy}_{scenario}_road_1_Energy use_2060_concatenated.html'))
+                output_file_paths.append(os.path.join(config.root_dir,  output_folder_path, economy,
+                f'{economy}_{scenario}_road_1_Energy use_2060_concatenated.html'))
+                
+    #go through the files output_file_paths and put them in a list but replace the dateid with a wildcard
     for file in output_file_paths:
         files_in_output_folder.append(re.sub(config.FILE_DATE_ID, '*', file))
     #for every file in useful file paths, copy it to its corresponding output file path
@@ -75,10 +81,15 @@ def copy_required_output_files_to_one_folder(config, ECONOMY_ID='all', output_fo
                 os.makedirs(os.path.dirname(output_file_paths[f]))
             #then if the file exists, copy it in after removing the old file
             if os.path.exists(useful_file_paths[f]):
-                # for file f (with a regex wildcard) in files_in_output_folder , find them and remove them
+                # for file f (with a regex wildcard) in files_in_output_folder, find them and remove them
                 files_to_delete = glob.glob(files_in_output_folder[f])
                 for file in files_to_delete:
                     os.unlink(file)
+                # Extract the date from the original file path if possible
+                match = re.search(r'\d{8}', useful_file_paths[f])
+                if match:
+                    original_date_id = match.group()
+                    output_file_paths[f] = re.sub(config.FILE_DATE_ID, original_date_id, output_file_paths[f])
                 shutil.copyfile(useful_file_paths[f], output_file_paths[f])
             
             # shutil.copyfile(useful_file_paths[f], output_file_paths[f])
@@ -305,6 +316,26 @@ def get_extended_length_path(config, path):
         path = "\\\\?\\" + path
     return path
 
+def compare_input_data_files(ROUND=True):
+    
+    #take in these two files: input_data/9th_model_inputs/model_df_wide_20250122.csv and input_data/9th_model_inputs/model_df_wide_20250204.csv and join on the cols:scenarios	economy	sectors	sub1sectors	sub2sectors	sub3sectors	sub4sectors	fuels	subfuels
+    #then minus the values from 2022_a and 20022_b. then where the values are different, save to a new df
+    a = pd.read_csv('input_data/macro/APEC_GDP_data_20240902.csv')
+    b = pd.read_csv('input_data/macro/APEC_GDP_data_2023_08_07.csv')
+    # APEC_GDP_data_2023_08_07
+    # APEC_GDP_data_2024_09_02
+    c = pd.merge(a, b, on=['economy_code', 'economy', 'year', 'variable'], suffixes=('_a', '_b'), how='outer', indicator=True) 
+    #round both to 2dp first
+    c['value_a_rounded'] = c['value_a'].round(2)
+    c['value_b_rounded'] = c['value_b'].round(2)
+    if ROUND:
+        c['value_diff'] = c['value_a_rounded'] - c['value_b_rounded']
+    else:
+        c['value_diff'] = c['value_a'] - c['value_b']
+    
+    c = c[c['value_diff'] != 0]
+    
+    return c
 #######################################
 #%%
 #%%

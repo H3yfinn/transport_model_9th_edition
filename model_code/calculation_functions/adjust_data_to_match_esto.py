@@ -132,9 +132,12 @@ def adjust_data_to_match_esto_handler(config, BASE_YEAR, ECONOMY_ID, road_model_
         #     optimised_data = optimise_to_calculate_base_data.
         if ECONOMY_ID == '15_PHL':
             #trying to get vn to solve so that we arent changing the stocks
-            optimised_data = optimise_to_calculate_base_data.optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=False, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='ALL_PHL')
+            optimised_data = optimise_to_calculate_base_data.optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=False, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='OPTIMISATION_PARAMETERS_SET_PHL')
+        elif ECONOMY_ID == '11_MEX':
+            #trying to get vn to solve so that we arent changing the stocks
+            optimised_data = optimise_to_calculate_base_data.optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=False, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='DEFAULT_OPTIMISATION_PARAMETERS_SET')
         else:
-            optimised_data = optimise_to_calculate_base_data.optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=False, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='ALL')
+            optimised_data = optimise_to_calculate_base_data.optimisation_handler(config, input_data_new_road, SAVE_ALL_RESULTS=True, REMOVE_NON_MAJOR_VARIABLES=False, USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO=USE_MOVE_ELECTRICITY_USE_IN_ROAD_TO_RAIL_ESTO, USE_SAVED_OPT_PARAMATERS=USE_SAVED_OPT_PARAMATERS, PARAMETERS_RANGES_KEY='DEFAULT_OPTIMISATION_PARAMETERS_SET')
         
     input_data_new_road_recalculated = reformat_optimised_results(config, optimised_data, input_data_new_road)
     input_data_new_road_recalculated = match_optimised_results_to_required_energy_use_exactly(config, input_data_new_road_recalculated, input_data_new_road)
@@ -630,25 +633,27 @@ def format_9th_input_energy_from_esto(config, ECONOMY_ID=None, REDO_SAME_DATE_ID
     #load the 9th data
     date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'input_data', '9th_model_inputs'), 'model_df_wide_')
     energy_use_esto = pd.read_csv(os.path.join(config.root_dir, 'input_data', '9th_model_inputs', f'model_df_wide_{date_id}.csv'))
+        
     #check that that matches config.latest_esto_data_FILE_DATE_ID. if not then jsut notify user
     if date_id != config.latest_esto_data_FILE_DATE_ID:
         breakpoint()
         print('WARNING: the date_id for the 9th model inputs does not match the latest esto data date_id. This is okay for now but it should be fixed later')
 
-    #check that the columns after str(config.NON_RUSSIA_BASE_YEAR) contain all nans in their data
-    BASE_YEAR_COL_INDEX = energy_use_esto.columns.get_loc(str(config.NON_RUSSIA_BASE_YEAR)) 
-    if energy_use_esto.iloc[:, BASE_YEAR_COL_INDEX+1:].dropna().shape[0] != 0:
-        breakpoint()
-        raise ValueError('The columns after the base year are not all nans. You need to set them to nans manually (i.e. by deleting their data) before running this function')
     #also check that there is no column called is_subtotal, and if so instruct user to filter so it is all False then remove the column
     if 'is_subtotal' in energy_use_esto.columns:
-        breakpoint()
-        raise ValueError('There is a column called is_subtotal in the esto data. You need to filter so it is all False then remove the column manually before running this function')
+        energy_use_esto = energy_use_esto.loc[energy_use_esto['is_subtotal'] == False].copy()
+        energy_use_esto.drop(columns=['is_subtotal'], inplace=True)
+    
+    #drop year cols after the BASE_YEAR (changed to NON_RUSSIA_BASE_YEAR) by searching for cols which have 4 digits in them 
+    year_cols = [col for col in energy_use_esto.columns if re.search(r'\d{4}', col)]
+    #then remove those that are greater than the base year
+    year_cols = [col for col in year_cols if int(col) > config.NON_RUSSIA_BASE_YEAR]
+    energy_use_esto = energy_use_esto.drop(columns=year_cols)
     
     #and check that the BASE YEAR for non russia is all 0's where economy is russia
     if len(energy_use_esto.loc[(energy_use_esto['economy'] == '16_RUS') & (energy_use_esto[str(config.NON_RUSSIA_BASE_YEAR)] != 0)]) > 0:
         breakpoint()
-        raise ValueError('The base year for russia is not all 0s. You need to set those values to 0 manually before running this function')
+        raise ValueError('The base year for russia is not all 0s. You need to set those values to 0 manually before running this function. this is done manually because otherwise it will get forgotten about and cause errors later on.')
     #FIX
     #remove  values for 2022 where jet fuel is used in road and navigation in 04_CHL. These are annoying to deal with and not neccessary. This amkes sure that the problem is at least reocrded and cosnistnelty delt with in the future.
     #     scenarios	economy	sectors	sub1sectors	sub2sectors	sub3sectors	sub4sectors	fuels	subfuels

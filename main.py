@@ -113,36 +113,37 @@ def setup_for_main(root_dir_param=None, script_dir_param=None, economy_to_run=No
 def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
     error_message = None
     increment, progress, update_progress, config, USING_LINUX_WEB_APP = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
-    
+        
     # LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT = {
     #             '01_AUS': '20250123',
     #             '02_BD': '20250123',
-    #             '03_CDA': None,
+    #             '03_CDA': '20250225',#also 20250226 is part of the output for interantional data and some others.
     #             '04_CHL': None,
-    #             '05_PRC': '20250123',
+    #             '05_PRC': '20250225',
     #             '06_HKC': None,
     #             '07_INA': '20250123',
     #             '08_JPN': None,
     #             '09_ROK': '20250123',
     #             '10_MAS': '20250123',
-    #             '11_MEX': None,
-    #             '12_NZ': None,
+    #             '11_MEX': '20250219',
+    #             '12_NZ': '20250226',
     #             '13_PNG': None,
     #             '14_PE': None,
     #             '15_PHL': '20250123',
-    #             '16_RUS': None,
+    #             '16_RUS': '20250226',
     #             '17_SGP': None,
     #             '18_CT': '20250123',
     #             '19_THA': '20250123',
     #             '20_USA': '20250123',
     #             '21_VN': '20250123'
-    #         } 
+    # } 
     # ARCHIVE_RESULTS=True
     # if ARCHIVE_RESULTS:
-    #     economies_to_archive = ['01_AUS', '02_BD','05_PRC', '07_INA', '09_ROK', '10_MAS', '15_PHL', '18_CT', '19_THA','20_USA', '21_VN']#, '21_VN', '07_INA']
+    #     economies_to_archive = ['11_MEX','16_RUS' ]#, '21_VN', '07_INA']
     #     for economy in economies_to_archive:
     #         ARCHIVED_FILE_DATE_ID = LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT[economy]
     #         folder_name = archiving_scripts.save_economy_projections_and_all_inputs(config, economy, ARCHIVED_FILE_DATE_ID=ARCHIVED_FILE_DATE_ID, transport_data_system_FILE_DATE_ID_2='DATE20250122')
+    # return
     # Prevent the system from going to sleep
     # ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
     # To restore the original state, use:
@@ -289,7 +290,8 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
                 produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = PLOT_MINOR_OUTPUTS, PLOTTING = PLOT_MINOR_OUTPUTS, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060, NOT_JUST_DASHBOARD_DATASETS=NOT_JUST_DASHBOARD_DATASETS)
             
             dashboard_creation_handler(config, ADVANCE_BASE_YEAR_TO_OUTLOOK_BASE_YEAR, ECONOMY_ID, ARCHIVE_PREVIOUS_DASHBOARDS=ARCHIVE_PREVIOUS_DASHBOARDS, SAVE_AS_WEB_PLOTS=SAVE_AS_WEB_PLOTS, PREVIOUS_PROJECTION_FILE_DATE_ID=PREVIOUS_PROJECTION_FILE_DATE_ID)
-        
+
+            raise Exception('Dashboard creation not working for {}'.format(ECONOMY_ID))
         progress += increment
         update_progress(progress)
         if not USING_LINUX_WEB_APP:#no need if we're on linux web app
@@ -378,7 +380,7 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        economies_to_run = [ '05_PRC']#, '05_PRC']#"01_AUS", "18_CT", "09_ROK", "02_BD", "21_VN", "15_PHL", "07_INA", "19_THA", "10_MAS", '05_PRC', '20_USA'
+        economies_to_run =[ '16_RUS']#, '05_PRC']#"01_AUS", "18_CT", "09_ROK", "02_BD", "21_VN", "15_PHL", "07_INA", "19_THA", "10_MAS", '05_PRC', '20_USA' ['11_MEX', '03_CDA',
         main(economies_to_run)
         #'04_CHL', '03_CDA', '14_PE', '11_MEX'])#, '10_MAS'])#, '05_PRC', '06_HKC', '20_USA'])#, '03_CDA'])#"18_CT",'01_AUS',"03_CDA", '02_BD',, '19_THA''09_ROK',"06_HKC"])#, '09_ROK'])#, '19_THA',root_dir_param=root_dir_param)#'01_AUS', '20_USA',
         #  "02_BD", "04_CHL", "05_PRC", "06_HKC", "07_INA","08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"

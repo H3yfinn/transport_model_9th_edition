@@ -62,7 +62,7 @@ def logistic_fitting_function_handler(config, ECONOMY_ID, model_data, show_plots
     model_data_to_edit = model_data_to_edit.loc[(model_data_to_edit['Transport Type'] == 'passenger')] 
     
     new_model_data = prepare_data_for_logistic_fitting(config, model_data_to_edit,ECONOMY_ID)
-        
+    
     #EXTRACT PARAMETERS FOR LOGISTIC FUNCTION:
     parameters_estimates, new_stocks_per_capita_estimates, date_where_gamma_is_reached = find_parameters_for_logistic_function(config, new_model_data, show_plots, matplotlib_bool, plotly_bool, FIT_LOGISTIC_CURVE_TO_DATA, PROPORTION_BELOW_GAMMA, EXTRA_YEARS_TO_REACH_GAMMA, INTERPOLATE_ALL_DATES)
     #some parameters will be np.nan because we dont need to fit the curve for all economies. We will drop these and not recalculate the growth rate for these economies
