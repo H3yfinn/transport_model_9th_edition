@@ -575,7 +575,8 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
             y += add_plot[cols_after_total_var].iloc[0].tolist()
             x += cols_after_total_var
             text += [str(int(add_plot[var].round(0).iloc[0])) for var in cols_after_total_var]
-            
+        
+        # breakpoint()
         #adjust x using VARIABLES_TO_LABELS_DICT:
         x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
         fig = go.Figure(go.Waterfall(
@@ -592,20 +593,38 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
 
             y = y,
 
-            decreasing = {"marker":{"color":"#377eb8"}},
-            increasing = {"marker":{"color":"#ff7f00"}},
-            totals = {"marker":{"color":"#787878"}}
+            decreasing = {"marker":{"color":"rgba(40, 130, 90, 0.5)"}},
+            increasing = {"marker":{"color":"rgba(215, 58, 49, 0.5)"}},
+            totals = {"marker":{"color":"#1e465a"}}
         ))
 
+        # breakpoint()
         fig.update_layout(
-                title = title,
-                font=dict(
-                size=font_size
-            ), waterfallgap = 0.01
+            title = title,
+            font=dict(
+            size=font_size
+            ), 
+            waterfallgap = 0.01,
+            # Set background color to transparent or white
+            paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
+            plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot area
+            # For white background, use 'white' instead of 'rgba(0,0,0,0)'
+            yaxis=dict(
+            showgrid=True,  # Enable horizontal grid lines
+            gridcolor='lightgray',  # Set grid line color
+            gridwidth=0.5,  # Set grid line width
+            zeroline=True,  # Enable zero line
+            zerolinecolor='lightgray',  # Set zero line color to match gridlines
+            zerolinewidth=0.5  # Set zero line width to match gridlines
+            ),
+            xaxis=dict(
+            showline=True,  # Enable border line for x-axis
+            linecolor='lightgray',  # Set border line color to match gridlines
+            linewidth=0.5  # Set border line width to match gridlines
+            )
         )
-        
         #create unit for y axis
-        fig.update_yaxes(title_text='PJ')
+        # fig.update_yaxes(title_text='PJ')
         #add a slight slant to the x axis labels
         fig.update_xaxes(tickangle=25)
         
@@ -666,6 +685,7 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
             x += cols_after_total_var
             # text += [str(int(add_plot[var].round(0).iloc[0])) for var in cols_after_total_var]
             
+        # breakpoint()
         #adjust x using VARIABLES_TO_LABELS_DICT:
         x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
         fig = go.Figure(go.Waterfall(
@@ -685,18 +705,36 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
             # str(int(add_plot["Energy"].round(0).iloc[0]))],
 
             y = y,
-
-            decreasing = {"marker":{"color":"#377eb8"}},
-            increasing = {"marker":{"color":"#ff7f00"}},
-            totals = {"marker":{"color":"#787878"}}
+            decreasing = {"marker":{"color":"rgba(40, 130, 90, 0.5)"}},
+            increasing = {"marker":{"color":"rgba(215, 58, 49, 0.5)"}},
+            totals = {"marker":{"color":"#1e465a"}}
         ))
 
         fig.update_layout(
                 title = title,
                 font=dict(
                 size=font_size
-            ), waterfallgap = 0.01
+            ), waterfallgap = 0.01,
+            # Set background color to transparent or white
+            paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
+            plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot area
+            # For white background, use 'white' instead of 'rgba(0,0,0,0)'
+            yaxis=dict(
+            showgrid=True,  # Enable horizontal grid lines
+            gridcolor='lightgray',  # Set grid line color
+            gridwidth=0.5,  # Set grid line width
+            zeroline=True,  # Enable zero line
+            zerolinecolor='lightgray',  # Set zero line color to match gridlines
+            zerolinewidth=0.5  # Set zero line width to match gridlines
+            ),
+            xaxis=dict(
+            showline=True,  # Enable border line for x-axis
+            linecolor='lightgray',  # Set border line color to match gridlines
+            linewidth=0.5  # Set border line width to match gridlines
+            )
         )
+        
+        
 
         #create unit for y axis
         fig.update_yaxes(title_text='MtCO2')
@@ -769,6 +807,7 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
             x += cols_after_total_var
             text += [str(int(add_plot[var].round(0).iloc[0])) for var in cols_after_total_var]
         
+        # breakpoint()
         #adjust x using VARIABLES_TO_LABELS_DICT:
         x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
         fig = go.Figure(go.Waterfall(
@@ -784,21 +823,39 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
             text = text,
 
             y = y,
-
-            decreasing = {"marker":{"color":"#377eb8"}},
-            increasing = {"marker":{"color":"#ff7f00"}},
-            totals = {"marker":{"color":"#787878"}}
+            decreasing = {"marker":{"color":"rgba(40, 130, 90, 0.5)"}},
+            increasing = {"marker":{"color":"rgba(215, 58, 49, 0.5)"}},
+            totals = {"marker":{"color":"#1e465a"}}
         ))
 
         fig.update_layout(
                 title = title,
                 font=dict(
                 size=font_size
-            ), waterfallgap = 0.01
+            ), waterfallgap = 0.01,
+            # Set background color to transparent or white
+            paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
+            plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot area
+            # For white background, use 'white' instead of 'rgba(0,0,0,0)'
+            yaxis=dict(
+            showgrid=True,  # Enable horizontal grid lines
+            gridcolor='lightgray',  # Set grid line color
+            gridwidth=0.5,  # Set grid line width
+            zeroline=True,  # Enable zero line
+            zerolinecolor='lightgray',  # Set zero line color to match gridlines
+            zerolinewidth=0.5  # Set zero line width to match gridlines
+            ),
+            xaxis=dict(
+            showline=True,  # Enable border line for x-axis
+            linecolor='lightgray',  # Set border line color to match gridlines
+            linewidth=0.5  # Set border line width to match gridlines
+            )
         )
+        
+        
 
         #create unit for y axis
-        fig.update_yaxes(title_text='PJ')
+        # fig.update_yaxes(title_text='PJ')
         #add a slight slant to the x axis labels
         fig.update_xaxes(tickangle=25)
         
@@ -878,8 +935,10 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
             x += cols_after_total_var
             text += [str(int(add_plot[var].round(0).iloc[0])) for var in cols_after_total_var]
         
+        # breakpoint()
         #adjust x using VARIABLES_TO_LABELS_DICT:
         x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
+        breakpoint()
         fig = go.Figure(go.Waterfall(
             orientation = "v",
             measure = measure_list,
@@ -893,18 +952,36 @@ def plot_additive_waterfall(config, data_title, extra_identifier, structure_vari
             text = text,
 
             y = y,
-
-            decreasing = {"marker":{"color":"#377eb8"}},
-            increasing = {"marker":{"color":"#ff7f00"}},
-            totals = {"marker":{"color":"#787878"}}
+            decreasing = {"marker":{"color":"rgba(40, 130, 90, 0.5)"}},  # Set 50% transparency using rgba
+            increasing = {"marker":{"color":"rgba(215, 58, 49, 0.5)"}},  # Set 50% transparency
+            totals = {"marker":{"color":"#1e465a"}} 
         ))
 
         fig.update_layout(
                 title = title,
                 font=dict(
                 size=font_size
-            ), waterfallgap = 0.01
+            ), waterfallgap = 0.01,
+            # Set background color to transparent or white
+            paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
+            plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot area
+            # For white background, use 'white' instead of 'rgba(0,0,0,0)'
+            yaxis=dict(
+            showgrid=True,  # Enable horizontal grid lines
+            gridcolor='lightgray',  # Set grid line color
+            gridwidth=0.5,  # Set grid line width
+            zeroline=True,  # Enable zero line
+            zerolinecolor='lightgray',  # Set zero line color to match gridlines
+            zerolinewidth=0.5  # Set zero line width to match gridlines
+            ),
+            xaxis=dict(
+            showline=True,  # Enable border line for x-axis
+            linecolor='lightgray',  # Set border line color to match gridlines
+            linewidth=0.5  # Set border line width to match gridlines
+            )
         )
+        
+        
 
         #create unit for y axis
         fig.update_yaxes(title_text='MtCO2')
@@ -1051,6 +1128,7 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
             else:
                 text = None
             
+            # breakpoint()
             #adjust x using VARIABLES_TO_LABELS_DICT:
             x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
             # Create waterfall figure
@@ -1062,9 +1140,9 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
                 textposition="outside",
                 text=text,
                 y=y,
-                decreasing={"marker": {"color": "#377eb8"}},
-                increasing={"marker": {"color": "#ff7f00"}},
-                totals={"marker": {"color": "#787878"}}
+                decreasing={"marker": {"color": "rgba(40, 130, 90, 0.5)"}},
+                increasing={"marker": {"color": "rgba(215, 58, 49, 0.5)"}},
+                totals={"marker": {"color": "#1e465a"}}
             )
 
             # Add the waterfall figures to the subplots
@@ -1076,11 +1154,29 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
             font=dict(size=font_size),
             waterfallgap=0.01,
             showlegend=False,
-            title = graph_title
+            title=graph_title,
+            # Set background color to transparent or white
+            paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
+            plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot area
+            # For white background, use 'white' instead of 'rgba(0,0,0,0)'
+            yaxis=dict(
+            showgrid=True,  # Enable horizontal grid lines
+            gridcolor='lightgray',  # Set grid line color
+            gridwidth=0.5,  # Set grid line width
+            zeroline=True,  # Enable zero line
+            zerolinecolor='lightgray',  # Set zero line color to match gridlines
+            zerolinewidth=0.5  # Set zero line width to match gridlines
+            ),
+            xaxis=dict(
+            showline=True,  # Enable border line for x-axis
+            linecolor='lightgray',  # Set border line color to match gridlines
+            linewidth=0.5  # Set border line width to match gridlines
+            )
         )
         
+        
         #create unit for y axis
-        fig.update_yaxes(title_text='PJ')
+        # fig.update_yaxes(title_text='PJ')
         #add a slight slant to the x axis labels
         fig.update_xaxes(tickangle=25)
         
@@ -1145,6 +1241,7 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
             else:
                 text = None
             
+            # breakpoint()
             #adjust x using VARIABLES_TO_LABELS_DICT:
             x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
             # Create waterfall figure
@@ -1156,9 +1253,9 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
                 textposition="outside",
                 text=text,
                 y=y,
-                decreasing={"marker": {"color": "#377eb8"}},
-                increasing={"marker": {"color": "#ff7f00"}},
-                totals={"marker": {"color": "#787878"}}
+                decreasing={"marker": {"color": "rgba(40, 130, 90, 0.5)"}},
+                increasing={"marker": {"color": "rgba(215, 58, 49, 0.5)"}},
+                totals={"marker": {"color": "#1e465a"}}
             )
 
             # Add the waterfall figures to the subplots
@@ -1170,11 +1267,30 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
             font=dict(size=font_size),
             waterfallgap=0.01,
             showlegend=False,
-            title = graph_title
+            title = graph_title,
+            # Set background color to transparent or white
+            paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
+            plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot area
+            # For white background, use 'white' instead of 'rgba(0,0,0,0)'
+            yaxis=dict(
+            showgrid=True,  # Enable horizontal grid lines
+            gridcolor='lightgray',  # Set grid line color
+            gridwidth=0.5,  # Set grid line width
+            zeroline=True,  # Enable zero line
+            zerolinecolor='lightgray',  # Set zero line color to match gridlines
+            zerolinewidth=0.5  # Set zero line width to match gridlines
+            ),
+            xaxis=dict(
+            showline=True,  # Enable border line for x-axis
+            linecolor='lightgray',  # Set border line color to match gridlines
+            linewidth=0.5  # Set border line width to match gridlines
+            )
         )
+        
+        
 
         #create unit for y axis
-        fig.update_yaxes(title_text='PJ')
+        # fig.update_yaxes(title_text='PJ')
         #add a slight slant to the x axis labels 
         fig.update_xaxes(tickangle=25)
         
@@ -1249,6 +1365,7 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
             #adjust x using VARIABLES_TO_LABELS_DICT:
             x = [VARIABLES_TO_LABELS_DICT.get(var, var) for var in x]
             # Create waterfall figure
+            # breakpoint()
             waterfall_fig = go.Waterfall(
                 orientation="v",
                 measure=measure_list,
@@ -1257,9 +1374,9 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
                 textposition="outside",
                 text=text,
                 y=y,
-                decreasing={"marker": {"color": "#377eb8"}},
-                increasing={"marker": {"color": "#ff7f00"}},
-                totals={"marker": {"color": "#787878"}}
+                decreasing={"marker": {"color": "rgba(40, 130, 90, 0.5)"}},
+                increasing={"marker": {"color": "rgba(215, 58, 49, 0.5)"}},
+                totals={"marker": {"color": "#1e465a"}}
             )
 
             # Add the waterfall figures to the subplots
@@ -1271,8 +1388,26 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
             font=dict(size=font_size),
             waterfallgap=0.01,
             showlegend=False,
-            title = graph_title
+            title = graph_title,
+            # Set background color to transparent or white
+            paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
+            plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot area
+            # For white background, use 'white' instead of 'rgba(0,0,0,0)'
+            yaxis=dict(
+            showgrid=True,  # Enable horizontal grid lines
+            gridcolor='lightgray',  # Set grid line color
+            gridwidth=0.5,  # Set grid line width
+            zeroline=True,  # Enable zero line
+            zerolinecolor='lightgray',  # Set zero line color to match gridlines
+            zerolinewidth=0.5  # Set zero line width to match gridlines
+            ),
+            xaxis=dict(
+            showline=True,  # Enable border line for x-axis
+            linecolor='lightgray',  # Set border line color to match gridlines
+            linewidth=0.5  # Set border line width to match gridlines
+            )
         )
+        
 
         #create unit for y axis
         fig.update_yaxes(title_text='MtCO2')
@@ -1343,11 +1478,11 @@ def plot_combined_waterfalls(config, data_title, graph_titles, extra_identifiers
 
 #             y = y,
 
-#             # decreasing = {"marker":{"color":"#377eb8"}},
-#             # increasing = {"marker":{"color":"#ff7f00"}},
-#             # totals = {"marker":{"color":"#787878"}}
-#             #color bars based on their x axis value. if the x axis value is 'Multiplicative change in {}'.format(energy_variable) then make it "#787878", otherwise if the y axis value is positive make it "#ff7f00" and if its negative make it "#377eb8"
-#             marker_color = ["#787878" if i == 'Multiplicative change in {}'.format(energy_variable) else "#ff7f00" if j > 1 else "#377eb8" for i,j in zip(x,y)]            
+#             # decreasing = {"marker":{"color":"rgba(40, 130, 90, 0.5)"}},
+#             # increasing = {"marker":{"color":"rgba(215, 58, 49, 0.5)"}},
+#             # totals = {"marker":{"color":"#1e465a"}}
+#             #color bars based on their x axis value. if the x axis value is 'Multiplicative change in {}'.format(energy_variable) then make it "#1e465a", otherwise if the y axis value is positive make it "#d73a31" and if its negative make it "#28825a"
+#             marker_color = ["#1e465a" if i == 'Multiplicative change in {}'.format(energy_variable) else "#d73a31" if j > 1 else "#28825a" for i,j in zip(x,y)]            
 
 #         ))
 #         dotted_line_index = len(x) - 1.5

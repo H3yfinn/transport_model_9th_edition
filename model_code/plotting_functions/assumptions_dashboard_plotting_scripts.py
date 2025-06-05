@@ -438,7 +438,7 @@ def plot_share_of_transport_type_non_road(config, ECONOMY_IDs, new_sales_shares_
 
 def plot_share_of_vehicle_type_by_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, INCLUDE_GENERAL_DRIVE_TYPES=False, WRITE_HTML=True):
     
-    PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES= ['14_PE']
+    PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES= ['14_PE','13_PNG']
     PLOTTED=True
     
     #This data is in terms of transport type, so will need to normalise it to vehicle type by summing up the shares for each vehicle type and dividing individual shares by their sum
@@ -561,7 +561,7 @@ def plot_share_of_vehicle_type_by_transport_type(config, ECONOMY_IDs, new_sales_
 def plot_share_of_vehicle_type_by_transport_type_both_on_one_graph(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict):
     PLOTTED=True
     #This data is in terms of transport type, so will need to normalise it to vehicle type by summing up the shares for each vehicle type and dividing individual shares by their sum
-    PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES= ['14_PE']
+    PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES= ['14_PE','13_PNG']
 
     new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df.copy()
     stocks = stocks_df.copy()
@@ -624,7 +624,7 @@ def plot_share_of_vehicle_type_by_transport_type_both_on_one_graph(config, ECONO
     return fig_dict,color_preparation_list
 
 def share_of_sum_of_vehicle_types_by_transport_type(config, ECONOMY_IDs, new_sales_shares_all_plot_drive_shares_df, stocks_df, fig_dict, color_preparation_list, colors_dict, share_of_transport_type_type, WRITE_HTML=True):
-    PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES= ['14_PE']
+    PREDETERMINED_HIGH_GAS_RELIANCE_ECONOMIES= ['14_PE','13_PNG']
     PLOTTED=True
     #i think that maybe stocks % can be higher than sales % here because of turnvoer rates. hard to get it correct right now
     new_sales_shares_all_plot_drive_shares = new_sales_shares_all_plot_drive_shares_df.copy()

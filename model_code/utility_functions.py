@@ -66,10 +66,15 @@ def copy_required_output_files_to_one_folder(config, ECONOMY_ID='all', output_fo
                 
                 #move lmdi htmls that we expect to use
                 useful_file_paths.append(os.path.join(config.root_dir, 'plotting_output', 'LMDI', f'{economy}',
+                f'{economy}_{scenario}_road_2_Energy use_Hierarchical_2060_concatenated_additive_hierarchical.html'))
+                output_file_paths.append(os.path.join(config.root_dir,  output_folder_path, economy,
+                f'{economy}_{scenario}_road_2_Energy use_Hierarchical_2060_concatenated_additive_hierarchical.html'))
+                
+                #move lmdi htmls that we expect to use
+                useful_file_paths.append(os.path.join(config.root_dir, 'plotting_output', 'LMDI', f'{economy}',
                 f'{economy}_{scenario}_road_1_Energy use_2060_concatenated.html'))
                 output_file_paths.append(os.path.join(config.root_dir,  output_folder_path, economy,
                 f'{economy}_{scenario}_road_1_Energy use_2060_concatenated.html'))
-                
     #go through the files output_file_paths and put them in a list but replace the dateid with a wildcard
     for file in output_file_paths:
         files_in_output_folder.append(re.sub(config.FILE_DATE_ID, '*', file))
@@ -339,3 +344,23 @@ def compare_input_data_files(ROUND=True):
 #######################################
 #%%
 #%%
+def move_files_to_output_folder(economy, scenario):
+    # #exxample use: (meant for changing easily to fit needs)
+    # for economy in ['01_AUS','02_BD', '03_CDA', '04_CHL', '05_PRC', '06_HKC', '07_INA', '08_JPN', '09_ROK', '10_MAS', '11_MEX', '12_NZ', '13_PNG', '14_PE', '15_PHL', '16_RUS', '17_SGP', '18_CT', '19_THA', '20_USA', '21_VN']:
+    #     for scenario in ['Target', 'Reference']:
+    #         move_files_to_output_folder(economy, scenario)    
+    FILE_PATTERN = f'{economy}_{scenario}_road_2_Energy use_Hierarchical_2060_concatenated_additive_hierarchical.html'
+    #move lmdi htmls that we expect to use
+    #output_folder_path=os.path.join('output_data', 'for_other_modellers')
+    local_output_folder_path=os.path.join('output_data', 'for_other_modellers', economy)
+    # remote_output_folder_path=f'C:\\Users\\finbar.maunsell\\OneDrive - APERC\\outlook 9th\\Modelling\\Sector models\\Transport - results only\\{economy}\\'
+    original_file_path =os.path.join('plotting_output', 'LMDI', f'{economy}', FILE_PATTERN)
+    try:
+        shutil.move(original_file_path, local_output_folder_path)
+        # shutil.copy(original_file_path, remote_output_folder_path)
+    except Exception as e:
+        breakpoint()
+        print(f'Error moving files for economy {economy} and scenario {scenario}: {e}')
+    print(f'Moved files for economy {economy} and scenario {scenario} to {local_output_folder_path}')# and {remote_output_folder_path}')
+
+# %%

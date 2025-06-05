@@ -25,26 +25,37 @@ from plotly.subplots import make_subplots
 ####Use this to load libraries and set variables. Feel free to edit that file as you need.
 
 #%%
-def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = False, PLOTTING = False, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060, PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR=True, INCLUDE_LIFECYCLE_EMISSIONS=True, PLOT_EMISSIONS_FACTORS=False, SET_START_DATE_TO_AFTER_COVID=True, NOT_JUST_DASHBOARD_DATASETS=True):
+def produce_lots_of_LMDI_charts(config, ECONOMY_ID, USE_LIST_OF_CHARTS_TO_PRODUCE = False, PLOTTING = False, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060, PLOT_EFFECT_OF_ELEC_EMISSIONS_FACTOR=True, INCLUDE_LIFECYCLE_EMISSIONS=True, PLOT_EMISSIONS_FACTORS=False, SET_START_DATE_TO_AFTER_COVID=True, NOT_JUST_DASHBOARD_DATASETS=True, USE_LAST_REVIEWED_FILE_DATE_ID=False):
     #take in energy and activity data 
     if ECONOMY_ID == 'all':
         all_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output', f'all_economies_{config.FILE_DATE_ID}_{config.model_output_file_name}'))
         energy_use_by_fuels = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', f'all_economies_{config.FILE_DATE_ID}_{config.model_output_file_name}'))
         detailed_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', f'all_economies_{config.FILE_DATE_ID}_{config.model_output_file_name}'))
     else:
-        try:
-            all_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output', f'{ECONOMY_ID}_{config.model_output_file_name}'))
-            energy_use_by_fuels = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', f'{ECONOMY_ID}_{config.model_output_file_name}'))
-            detailed_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', f'{ECONOMY_ID}_{config.model_output_file_name}'))
-        except:
-            #search for latest file date id and use that
-            date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'output_data', 'model_output_detailed'), file_name_start=f'{ECONOMY_ID}_', file_name_end='.csv')
-            #repalce 8 digits in model_output_file_name with date_id
-            model_output_file_name = re.sub(r'\d{8}', date_id, config.model_output_file_name)
-            all_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output', f'{ECONOMY_ID}_{model_output_file_name}'))
-            energy_use_by_fuels = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', f'{ECONOMY_ID}_{model_output_file_name}'))
-            detailed_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', f'{ECONOMY_ID}_{model_output_file_name}'))
-            
+        if USE_LAST_REVIEWED_FILE_DATE_ID:
+            #use that for these.
+            FILE_DATE_ID = config.LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT[ECONOMY_ID]
+            model_output_file_name=  'model_output{}.csv'.format(FILE_DATE_ID)
+            try:
+                all_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output', f'{ECONOMY_ID}_{model_output_file_name}'))
+                energy_use_by_fuels = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', f'{ECONOMY_ID}_{model_output_file_name}'))
+                detailed_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', f'{ECONOMY_ID}_{model_output_file_name}'))
+            except:
+                breakpoint()
+        else: 
+            try:
+                all_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output', f'{ECONOMY_ID}_{config.model_output_file_name}'))
+                energy_use_by_fuels = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', f'{ECONOMY_ID}_{config.model_output_file_name}'))
+                detailed_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', f'{ECONOMY_ID}_{config.model_output_file_name}'))
+            except:
+                #search for latest file date id and use that
+                date_id = utility_functions.get_latest_date_for_data_file(os.path.join(config.root_dir, 'output_data', 'model_output_detailed'), file_name_start=f'{ECONOMY_ID}_', file_name_end='.csv')
+                #repalce 8 digits in model_output_file_name with date_id
+                model_output_file_name = re.sub(r'\d{8}', date_id, config.model_output_file_name)
+                all_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output', f'{ECONOMY_ID}_{model_output_file_name}'))
+                energy_use_by_fuels = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_with_fuels', f'{ECONOMY_ID}_{model_output_file_name}'))
+                detailed_data = pd.read_csv(os.path.join(config.root_dir, 'output_data', 'model_output_detailed', f'{ECONOMY_ID}_{model_output_file_name}'))
+                
             
     if SET_START_DATE_TO_AFTER_COVID:
         #TO BE SAFE WE HAVE TO SET THE START DATE TO AFTER WHEN ANY RETURN TO NORMAL AFTER COVID WAS OVER. SO WE WILL SET IT TO 2024, EVEN THOUGH THAT IS 3 YEARS AFTER OUR BASE YEAR DATA:
