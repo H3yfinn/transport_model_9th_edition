@@ -113,7 +113,11 @@ def setup_for_main(root_dir_param=None, script_dir_param=None, economy_to_run=No
 def main(economy_to_run='all', progress_callback=None, root_dir_param=None, script_dir_param=None):
     error_message = None
     increment, progress, update_progress, config, USING_LINUX_WEB_APP = setup_for_main(root_dir_param, script_dir_param, economy_to_run, progress_callback)
-        
+    # PLOT_MINOR_OUTPUTS = True#False#True#False#True
+    # NOT_JUST_DASHBOARD_DATASETS = True#False#True#False#True
+    # produce_lots_of_LMDI_charts(config, '15_PHL', USE_LIST_OF_CHARTS_TO_PRODUCE = PLOT_MINOR_OUTPUTS, PLOTTING = PLOT_MINOR_OUTPUTS, USE_LIST_OF_DATASETS_TO_PRODUCE=True, END_DATE=2060, NOT_JUST_DASHBOARD_DATASETS=NOT_JUST_DASHBOARD_DATASETS)
+    # return config.FILE_DATE_ID, True, error_message
+
     # LATEST_REVIEWED_PROJECTION_FILE_DATE_ID_DICT = {
     #                 '01_AUS': '20250123',
     #                 '02_BD': '20250123',
@@ -178,7 +182,7 @@ def main(economy_to_run='all', progress_callback=None, root_dir_param=None, scri
     progress += increment
     update_progress(progress)
     FOUND = False
-    RUN_MODEL = False#set me
+    RUN_MODEL = True#set me
     LMDI_CHARTS = True
     CALC_INT_BUNKERS = True
     RUN_MODEL_PLACEHOLDER = RUN_MODEL
@@ -386,13 +390,33 @@ if __name__ == "__main__":
     else:
         # os.chdir('C:\\Users\\finbar.maunsell\\github')
         # root_dir_param = 'C:\\Users\\finbar.maunsell\\github\\transport_model_9th_edition'#intensiton is to run this in  debug moode so we can easily find bugs.
-        economies_to_run =[ '13_PNG']#, '05_PRC']#"01_AUS", "18_CT", "09_ROK", "02_BD", "21_VN", "15_PHL", "07_INA", "19_THA", "10_MAS", '05_PRC', '20_USA' ['11_MEX', '03_CDA',
+        economies_to_run =[ '20_USA']#, '05_PRC']#"01_AUS", "18_CT", "09_ROK", "02_BD", "21_VN", "15_PHL", "07_INA", "19_THA", "10_MAS", '05_PRC', '20_USA' ['11_MEX', '03_CDA',
         main(economies_to_run)
         #'04_CHL', '03_CDA', '14_PE', '11_MEX'])#, '10_MAS'])#, '05_PRC', '06_HKC', '20_USA'])#, '03_CDA'])#"18_CT",'01_AUS',"03_CDA", '02_BD',, '19_THA''09_ROK',"06_HKC"])#, '09_ROK'])#, '19_THA',root_dir_param=root_dir_param)#'01_AUS', '20_USA',
         #  "02_BD", "04_CHL", "05_PRC", "06_HKC", "07_INA","08_JPN", "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
     # root_dir_param = #'18_CT', 01_AUS  # "02_BD", "03_CDA", "04_CHL", "05_PRC", "06_HKC", "07_INA",, "09_ROK", "10_MAS", "11_MEX", "12_NZ", "13_PNG", "14_PE", "15_PHL", "16_RUS", "17_SGP", "18_CT", "19_THA", "20_USA", "21_VN"
 #%% '04_CHL',
 
+#WANTTO MOVE ALL FILES IN Transport_model_9th_edition\intermediate_data\LMDI\ECONOMY_ID\ECONOMY_ID_SCENARIO_road_2_Energy use_Hierarchical_2060_concatenated_additive
+# for eery EConommy id and SCENARIO
+# ECONOMY_IDS = ['01_AUS', '02_BD', '03_CDA', '04_CHL', '05_PRC', '06_HKC', '07_INA', '08_JPN', '09_ROK', '10_MAS', '11_MEX', '12_NZ', '13_PNG', '14_PE', '15_PHL', '16_RUS', '17_SGP', '18_CT', '19_THA', '20_USA', '21_VN']
+# SCENARIOS = ['Target', 'Reference']
+# for ECONOMY_ID in ECONOMY_IDS:
+#     for SCENARIO in SCENARIOS:
+#         #move all files in Transport_model_9th_edition\intermediate_data\LMDI\ECONOMY_ID\ECONOMY_ID_SCENARIO_road_2_Energy use_Hierarchical_2060_concatenated_additive
+#         source_folder = os.path.join('intermediate_data', 'LMDI', ECONOMY_ID)
+#         source_path = os.path.join(source_folder, f'{ECONOMY_ID}_{SCENARIO}_road_2_Energy use_Hierarchical_2060_concatenated_additive.csv')
+        
+#         destination_folder = os.path.join('output_data', 'LMDI')
+#         destination_path = os.path.join(destination_folder, f'{ECONOMY_ID}_{SCENARIO}_road_2_Energy use_Hierarchical_2060_concatenated_additive.csv')
+#         if not os.path.exists(destination_folder):
+#             os.makedirs(destination_folder)
+#         if os.path.exists(source_path):
+#             shutil.move(source_path, destination_path)
+#             print(f'Moved {source_path} to {destination_path}')
+#         else:
+#             raise Exception(f'Source path {source_path} does not exist. Please check the path and try again.')
+                
 
 
 # %%

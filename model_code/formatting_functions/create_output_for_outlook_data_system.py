@@ -64,6 +64,8 @@ def create_output_for_outlook_data_system(config, ECONOMY_ID, model_output_file_
     'activity_df': {'value_col':'Activity', 'output_file_name':'transport_activity', 'df': activity_df}}
 
     for dataset in outputs_dict.keys():
+        if dataset=='activity_df':
+            breakpoint()#why are we not getting values we expect for activity?
         value_col = outputs_dict[dataset]['value_col']
         output_file_name = outputs_dict[dataset]['output_file_name']
         df = outputs_dict[dataset]['df']

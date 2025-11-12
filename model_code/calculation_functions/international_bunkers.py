@@ -553,6 +553,7 @@ def extract_non_road_modelled_data(config, USE_PREVIOUS_DATA=False, PLOT_MINOR_O
                 ECONOMY_MISSING=True
                 break
     if ALL_ECONS_MISSING:
+        breakpoint()
         raise Exception('There is no viable data to load into the international bunkers script. perhaps all ECONOMIES_WITH_MODELLING_COMPLETE_DICT are set to False?')
     if ECONOMY_MISSING or USE_PREVIOUS_DATA:
         #load the data for all economies and reutnr that:

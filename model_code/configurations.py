@@ -52,12 +52,12 @@ class Config:
         self.INDEX_COLS_NO_MEASURE = self.INDEX_COLS.copy()
         self.INDEX_COLS_NO_MEASURE.remove('Measure')
         self.INDEX_COLS_NO_MEASURE.remove('Unit')
-        self.FILE_DATE_ID = self._set_FILE_DATE_ID(root_dir)
+        self.FILE_DATE_ID = self._set_FILE_DATE_ID(root_dir)#'20250123'#'20241108'# 
         self.FILE_DATE_ID_PLACEHOLDER = self.FILE_DATE_ID
         
         self.PREVIOUS_PROJECTION_FILE_DATE_ID_DICT = {
             '01_AUS': '20241108',
-            '02_BD': '20241108',
+            '02_BD': '20250123',
             '03_CDA': '20240315',#20250121
             '04_CHL': '20240709',#20250121
             '05_PRC': '20241108',
@@ -90,14 +90,14 @@ class Config:
                     '08_JPN': '20250415',
                     '09_ROK': '20250123',
                     '10_MAS': '20250123',
-                    '11_MEX': '20250219',
+                    '11_MEX': '20250225',#11_MEX': '20250219',
                     '12_NZ': '20250226',
                     '13_PNG': '20250421',
                     '14_PE': '20250417',
-                    '15_PHL': '20250123',
+                    '15_PHL': '20250123',#was prev 20241108
                     '16_RUS': '20250226',
                     '17_SGP': '20250227',
-                    '18_CT': '20250123',
+                    '18_CT': '20250123',#was prev 20241108
                     '19_THA': '20250123',
                     '20_USA': '20250123',
                     '21_VN': '20250123'
@@ -338,6 +338,7 @@ class Config:
         if self.USE_LATEST_OUTPUT_DATE_ID:
             data_folder_path = os.path.join(root_dir, 'output_data', 'model_output')
             file_name = 'model_output'
+            breakpoint()
             FILE_DATE_ID = utility_functions.get_latest_date_for_data_file(data_folder_path, file_name)
             if FILE_DATE_ID is None:
                 FILE_DATE_ID = datetime.datetime.now().strftime("%Y%m%d")
