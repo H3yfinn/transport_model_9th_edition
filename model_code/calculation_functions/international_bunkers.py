@@ -100,21 +100,29 @@ def international_bunker_share_calculation_handler(config, ECONOMY_ID='all', tur
     
     
     #save
-    save_bunkers_data(config, new_esto_data, international_bunker_outputs, ECONOMY_ID)
+    save_bunkers_data(config, new_esto_data, international_bunker_energy, international_bunker_outputs, ECONOMY_ID)
     
     
-def save_bunkers_data(config, new_esto_data, international_bunker_outputs, ECONOMY_ID):
+def save_bunkers_data(config, new_esto_data, international_bunker_energy, international_bunker_outputs, ECONOMY_ID):
     #decapitalise the sceanrios col:
     new_esto_data['scenarios'] = new_esto_data['scenarios'].str.lower()
     #set values to negative
     #get all 4 digit years cols.
-    cols = [cols for cols in new_esto_data.columns.to_list() if re.match(r'\d{4}', str(cols))]   
+    cols = [cols for cols in new_esto_data.columns.to_list() if re.match(r'\d{4}', str(cols))]
     new_esto_data[cols] = new_esto_data[cols].apply(lambda x: x*-1)
-    
+
+    # Join Activity back onto post-mixing energy (bio fuel rows get 0 since they have no own activity)
+    activity_df = international_bunker_outputs[['Scenario', 'Medium', 'Economy', 'Drive', 'Date', 'Fuel', 'Activity']]
+    international_bunker_energy_with_activity = pd.merge(
+        international_bunker_energy, activity_df,
+        how='left', on=['Scenario', 'Medium', 'Economy', 'Drive', 'Date', 'Fuel']
+    )
+    international_bunker_energy_with_activity['Activity'] = international_bunker_energy_with_activity['Activity'].fillna(0)
+
     #save it to csv in output
     if ECONOMY_ID=='all':
         new_esto_data.to_csv(os.path.join(config.root_dir, 'output_data', 'for_other_modellers', 'output_for_outlook_data_system', f'international_bunker_energy_use_{config.FILE_DATE_ID}.csv'), index=False)
-        international_bunker_outputs.to_csv(os.path.join(config.root_dir, 'output_data', 'international_energy_use', f'international_bunker_outputs_{config.FILE_DATE_ID}.csv'), index=False)
+        international_bunker_energy_with_activity.to_csv(os.path.join(config.root_dir, 'output_data', 'international_energy_use', f'international_bunker_outputs_{config.FILE_DATE_ID}.csv'), index=False)
     #split newesto data into ecnomies and put them all in the output folder:
     for econ in new_esto_data.economy.unique():
         # if econ == '15_PHL':
