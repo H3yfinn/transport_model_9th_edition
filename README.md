@@ -1,3 +1,10 @@
+
+[[https://drive.google.com/file/d/1sf4FX3UHRv4UEvCSiwnougJK6ZB4_SJX/view?usp=drive_link ](https://drive.google.com/file/d/1fw9is9Q_ozQXvbB9wV_sukvy32CMLs5g/view?usp=sharing) ](https://drive.google.com/file/d/1q-vd2G-s7TfTB78Ec8o7H5f1Mj4zOQ0X/view?usp=sharing) > review all the data and assumptions for the model, which has been decommissioned, here.
+
+<img width="1870" height="929" alt="image" src="https://github.com/user-attachments/assets/bf66218f-8a57-42a4-bcce-8b4794f8dab5" />
+
+
+
 Please view the Wiki here for contextual information:
 
 https://github.com/H3yfinn/transport_model_9th_edition/wiki
